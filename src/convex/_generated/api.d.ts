@@ -18,6 +18,7 @@ import type * as auth from "../auth.js";
 import type * as businesses from "../businesses.js";
 import type * as customers from "../customers.js";
 import type * as declarations from "../declarations.js";
+import type * as fiscal from "../fiscal.js";
 import type * as http from "../http.js";
 import type * as invoices from "../invoices.js";
 import type * as products from "../products.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   businesses: typeof businesses;
   customers: typeof customers;
   declarations: typeof declarations;
+  fiscal: typeof fiscal;
   http: typeof http;
   invoices: typeof invoices;
   products: typeof products;

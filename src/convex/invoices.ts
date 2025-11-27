@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { calculateStampDuty, calculateLineTotals } from "./fiscal";
 
 export const list = query({
   args: { businessId: v.id("businesses") },
@@ -76,7 +77,7 @@ export const create = mutation({
       v.literal("OTHER")
     )),
     
-    // Totals
+    // We accept these but will recalculate them server-side for security
     subtotalHt: v.number(),
     totalTva: v.number(),
     stampDutyAmount: v.optional(v.number()),
@@ -108,16 +109,63 @@ export const create = mutation({
     const business = await ctx.db.get(args.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
-    const { items, ...invoiceData } = args;
+    // Server-side calculation to ensure fiscal compliance
+    let calculatedSubtotalHt = 0;
+    let calculatedTotalTva = 0;
 
-    // Ensure totalHt is set if not provided (alias for subtotalHt)
-    if (invoiceData.totalHt === undefined) {
-      invoiceData.totalHt = invoiceData.subtotalHt;
-    }
+    const processedItems = args.items.map(item => {
+      const { lineTotalHt, lineTva, lineTotalTtc } = calculateLineTotals(
+        item.quantity,
+        item.unitPrice,
+        item.discountRate || 0,
+        item.tvaRate
+      );
+
+      calculatedSubtotalHt += lineTotalHt;
+      calculatedTotalTva += lineTva;
+
+      return {
+        ...item,
+        lineTotal: lineTotalHt, // Storing HT as lineTotal for consistency with schema comments usually
+        lineTotalHt,
+        lineTotalTtc
+      };
+    });
+
+    const totalBeforeStamp = calculatedSubtotalHt + calculatedTotalTva;
+    
+    // Calculate Stamp Duty (Droit de Timbre)
+    const stampDutyAmount = calculateStampDuty(
+      totalBeforeStamp, 
+      args.paymentMethod || "OTHER"
+    );
+
+    const finalTotalTtc = totalBeforeStamp + stampDutyAmount;
+
+    const invoiceData = {
+      businessId: args.businessId,
+      customerId: args.customerId,
+      invoiceNumber: args.invoiceNumber,
+      issueDate: args.issueDate,
+      dueDate: args.dueDate,
+      currency: args.currency,
+      status: args.status,
+      notes: args.notes,
+      paymentMethod: args.paymentMethod,
+      
+      subtotalHt: calculatedSubtotalHt,
+      totalHt: calculatedSubtotalHt, // Legacy alias
+      totalTva: calculatedTotalTva,
+      stampDutyAmount: stampDutyAmount,
+      totalTtc: finalTotalTtc,
+      
+      // Clear legacy fields if not needed or set them for compat
+      timbre: stampDutyAmount > 0,
+    };
 
     const invoiceId = await ctx.db.insert("invoices", invoiceData);
 
-    for (const item of items) {
+    for (const item of processedItems) {
       await ctx.db.insert("invoiceItems", {
         invoiceId,
         ...item,

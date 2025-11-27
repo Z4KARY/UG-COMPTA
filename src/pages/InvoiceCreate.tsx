@@ -25,6 +25,16 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
+// Simplified client-side version of the fiscal logic for preview
+// The authoritative logic is in convex/fiscal.ts
+const FISCAL_CONSTANTS = {
+  STAMP_DUTY: {
+    MIN_DUTY: 5,
+    MAX_DUTY: 10000,
+    RATE_PER_100DA: 1.0,
+  }
+};
+
 interface InvoiceItem {
   productId?: string;
   description: string;
@@ -88,26 +98,16 @@ export default function InvoiceCreate() {
     let baseTtc = subtotalHt + totalTva;
     
     // Stamp Duty (Droit de Timbre) Calculation
-    // Only applies to CASH payments
-    // 1% per 100 DA, Min 5 DA, Max 2500 DA (or 10000 DA depending on config, using 10000 as safe upper limit from prompt)
     let stampDutyAmount = 0;
 
     if (paymentMethod === "CASH") {
-      // Simplified logic based on prompt: 1% per 100 DA
-      // Min 5 DA
-      // Max 10000 DA
+      const { MIN_DUTY, MAX_DUTY, RATE_PER_100DA } = FISCAL_CONSTANTS.STAMP_DUTY;
       
-      // If amount < 500 DA (approx), it might be just 5 DA.
-      // Let's apply the 1% rule generally.
+      // 1 DA per 100 DA or fraction thereof
+      stampDutyAmount = Math.ceil(baseTtc / 100) * RATE_PER_100DA;
       
-      const calculatedDuty = Math.ceil(baseTtc / 100) * 1.0; // 1 DA per 100 DA fraction
-      
-      stampDutyAmount = calculatedDuty;
-      
-      if (stampDutyAmount < 5) stampDutyAmount = 5;
-      if (stampDutyAmount > 10000) stampDutyAmount = 10000;
-      
-      // Exemption threshold? Usually very small amounts are still taxed, but let's assume standard application.
+      if (stampDutyAmount < MIN_DUTY) stampDutyAmount = MIN_DUTY;
+      if (stampDutyAmount > MAX_DUTY) stampDutyAmount = MAX_DUTY;
     }
 
     const finalTotal = baseTtc + stampDutyAmount;
