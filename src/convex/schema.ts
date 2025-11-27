@@ -167,10 +167,11 @@ const schema = defineSchema(
 
     fiscalParameters: defineTable({
       businessId: v.optional(v.id("businesses")), // Null for global defaults
-      code: v.string(), // e.g., "STAMP_DUTY_BRACKETS"
+      code: v.string(), // e.g., "STAMP_DUTY_BRACKETS", "VAT_STANDARD_RATE"
       value: v.any(), // JSON object
       lawReference: v.optional(v.string()),
-      effectiveFrom: v.optional(v.number()),
+      effectiveFrom: v.number(), // Date timestamp
+      effectiveTo: v.optional(v.number()), // Date timestamp, nullable
     }).index("by_business_and_code", ["businessId", "code"]),
   },
   {
