@@ -27,6 +27,20 @@ export default function InvoiceDetail() {
     window.print();
   };
 
+  // Calculate derived values for display
+  // We need to reverse calculate some values if they aren't explicitly stored, 
+  // but we stored totalTtc as the final amount.
+  // The schema stores: totalHt, totalTva, totalTtc, timbre (bool), cashPenaltyPercentage (optional number)
+  
+  const timbreAmount = invoice.timbre ? 10 : 0;
+  
+  // If cash penalty exists, we can try to deduce the amount or just display the percentage.
+  // totalTtc = totalHt + totalTva + timbre + cashPenalty
+  // So cashPenalty = totalTtc - totalHt - totalTva - timbre
+  const calculatedCashPenalty = invoice.totalTtc - invoice.totalHt - invoice.totalTva - timbreAmount;
+  // Use a small epsilon for float comparison or just display if > 0.01
+  const hasCashPenalty = calculatedCashPenalty > 0.01;
+
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6 print:hidden">
@@ -40,7 +54,7 @@ export default function InvoiceDetail() {
         </Button>
       </div>
 
-      <div className="bg-white p-8 shadow-sm border rounded-lg max-w-4xl mx-auto print:shadow-none print:border-none">
+      <div className="bg-white p-8 shadow-sm border rounded-lg max-w-4xl mx-auto print:shadow-none print:border-none print:w-full print:max-w-none">
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
@@ -54,6 +68,9 @@ export default function InvoiceDetail() {
             </p>
             <p className="text-sm text-muted-foreground">
               {invoice.customer?.email}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {invoice.customer?.phone}
             </p>
           </div>
         </div>
@@ -116,7 +133,13 @@ export default function InvoiceDetail() {
             {invoice.timbre && (
               <div className="flex justify-between">
                 <span>Timbre Fiscal:</span>
-                <span>Included</span>
+                <span>10.00 {invoice.currency}</span>
+              </div>
+            )}
+            {hasCashPenalty && (
+              <div className="flex justify-between text-muted-foreground">
+                <span>Cash Penalty {invoice.cashPenaltyPercentage ? `(${invoice.cashPenaltyPercentage}%)` : ''}:</span>
+                <span>{calculatedCashPenalty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {invoice.currency}</span>
               </div>
             )}
             <div className="flex justify-between font-bold text-lg border-t pt-2">

@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Calculator } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -56,7 +56,8 @@ export default function InvoiceCreate() {
     new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
   );
   const [notes, setNotes] = useState("");
-  const [timbre, setTimbre] = useState(true);
+  const [timbre, setTimbre] = useState(false);
+  const [isCashPayment, setIsCashPayment] = useState(false);
   const [items, setItems] = useState<InvoiceItem[]>([
     {
       description: "",
@@ -83,39 +84,35 @@ export default function InvoiceCreate() {
       totalTva += lineTva;
     });
 
-    let totalTtc = totalHt + totalTva;
+    let baseTtc = totalHt + totalTva;
+    
+    // Timbre Fiscal (10 DA fixed as per requirement)
+    const timbreAmount = timbre ? 10 : 0;
 
-    if (timbre) {
-      // Timbre fiscal logic: 1% of total, min 5 DA, max 2500 DA. 
-      // Simplified to 10 DA as per user request "Timbre fiscal (10 DA)" but usually it's calculated.
-      // User spec says: "Timbre fiscal (10 DA)". I will stick to 1% logic or fixed if requested.
-      // User spec: "Timbre fiscal (10 DA)". I will add 10 DA if timbre is true for now, or implement the 1% rule if needed.
-      // Let's assume standard Algerian timbre: 1% of TTC (cash payment) or fixed.
-      // The prompt says "Timbre fiscal (10 DA)". I will use a fixed 10 DA for now as per prompt, but usually it varies.
-      // Actually, let's just add it to the final calculation if needed.
-      // Wait, prompt says "Timbre fiscal (10 DA)". I'll add 10.
-      // But usually it's calculated on payment method.
-      // Let's just add 1% max 2500 min 5 for cash.
-      // For now, I will just add a fixed amount if checked, or maybe just keep it simple.
-      // Let's follow the prompt "Timbre fiscal (10 DA)" literally for now.
-      // Actually, let's calculate it properly: 1% of total rights, min 5 DA, max 2500 DA.
-      // But for simplicity and matching the prompt "Timbre fiscal (10 DA)", I'll just add 10.
-      // Wait, the prompt says "Timbre fiscal (10 DA)" in the "Algerian Compliance Engine" section.
-      // I will add 1% logic later. For now, let's just calculate TTC.
+    // Cash Payment Penalty
+    // 0.5% under < 30,000 DA
+    // 1% between 30,000 – 120,000 DA
+    // 1.5% above 120,000 DA
+    let cashPenaltyPct = 0;
+    let cashPenaltyAmount = 0;
+
+    if (isCashPayment) {
+      if (baseTtc < 30000) {
+        cashPenaltyPct = 0.5;
+      } else if (baseTtc <= 120000) {
+        cashPenaltyPct = 1.0;
+      } else {
+        cashPenaltyPct = 1.5;
+      }
+      cashPenaltyAmount = baseTtc * (cashPenaltyPct / 100);
     }
-    
-    // Timbre is usually added to the final amount to pay.
-    // Let's calculate the timbre value.
-    const timbreAmount = timbre ? Math.min(Math.max(totalTtc * 0.01, 5), 2500) : 0;
-    // If the prompt specifically asked for 10 DA, maybe it's for small amounts?
-    // I'll stick to the standard calculation: 1% of TTC, min 5, max 2500.
-    
-    const finalTotal = totalTtc + timbreAmount;
 
-    return { totalHt, totalTva, totalTtc: finalTotal, timbreAmount };
+    const finalTotal = baseTtc + timbreAmount + cashPenaltyAmount;
+
+    return { totalHt, totalTva, totalTtc: finalTotal, timbreAmount, cashPenaltyAmount, cashPenaltyPct };
   };
 
-  const { totalHt, totalTva, totalTtc, timbreAmount } = calculateTotals();
+  const { totalHt, totalTva, totalTtc, timbreAmount, cashPenaltyAmount, cashPenaltyPct } = calculateTotals();
 
   const handleItemChange = (
     index: number,
@@ -199,9 +196,10 @@ export default function InvoiceCreate() {
         status: "draft",
         notes,
         timbre,
+        cashPenaltyPercentage: isCashPayment ? cashPenaltyPct : undefined,
         totalHt,
         totalTva,
-        totalTtc,
+        totalTtc, // This is the final total to pay
         items,
       });
       toast.success("Invoice created successfully");
@@ -381,19 +379,42 @@ export default function InvoiceCreate() {
                   {totalTva.toFixed(2)} {business.currency}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-sm">
+              
+              <div className="flex items-center justify-between text-sm pt-2 border-t">
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={timbre}
                     onCheckedChange={setTimbre}
                     id="timbre"
                   />
-                  <Label htmlFor="timbre">Timbre Fiscal</Label>
+                  <Label htmlFor="timbre">Timbre Fiscal (10 DA)</Label>
                 </div>
                 <span>
                   {timbreAmount.toFixed(2)} {business.currency}
                 </span>
               </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={isCashPayment}
+                    onCheckedChange={setIsCashPayment}
+                    id="cashPayment"
+                  />
+                  <Label htmlFor="cashPayment">Cash Payment</Label>
+                </div>
+                <div className="text-right">
+                  <span className="block">
+                    {cashPenaltyAmount.toFixed(2)} {business.currency}
+                  </span>
+                  {isCashPayment && (
+                    <span className="text-xs text-muted-foreground">
+                      Penalty: {cashPenaltyPct}%
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <div className="border-t pt-4 flex justify-between font-bold text-lg">
                 <span>Total TTC</span>
                 <span>
