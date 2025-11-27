@@ -10,6 +10,13 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 import Landing from "./pages/Landing.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
+import BusinessSettings from "./pages/BusinessSettings.tsx";
+import Customers from "./pages/Customers.tsx";
+import Products from "./pages/Products.tsx";
+import Invoices from "./pages/Invoices.tsx";
+import InvoiceCreate from "./pages/InvoiceCreate.tsx";
+import InvoiceDetail from "./pages/InvoiceDetail.tsx";
 import "./types/global.d.ts";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -49,7 +56,14 @@ createRoot(document.getElementById("root")!).render(
           <RouteSyncer />
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<AuthPage redirectAfterAuth="/" />} /> {/* TODO: change redirect after auth to correct page */}
+            <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/settings" element={<BusinessSettings />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/invoices" element={<Invoices />} />
+            <Route path="/invoices/new" element={<InvoiceCreate />} />
+            <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

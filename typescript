@@ -1,0 +1,20 @@
+export const create = mutation({
+  args: {
+    // ...
+    timbre: v.boolean(),
+    // ...
+    totalHt: v.number(),
+    totalTva: v.number(),
+    totalTtc: v.number(),
+    // ...
+  },
+  // ...
+});
+
+invoices: defineTable({
+  // ...
+  timbre: v.boolean(),
+  // ...
+})
+const finalTotal = totalTtc + timbreAmount;
+return { totalHt, totalTva, totalTtc: finalTotal, timbreAmount };
