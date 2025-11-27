@@ -116,10 +116,11 @@ export const setFiscalParameter = mutation({
             }
         }
     } else {
-        // Only admin can set global parameters (simplified check for now, assuming no global admin UI yet)
-        // In a real app, we'd check for a system admin role.
-        // For now, we'll allow it if it's a system setup script or similar, 
-        // but strictly speaking this should be restricted.
+        // Check if user is admin for global parameters
+        const user = await ctx.db.get(userId);
+        if (user?.role !== "admin") {
+            throw new Error("Unauthorized: Only Admins can set global fiscal parameters");
+        }
     }
 
     // Check for existing active parameter to update or retire? 

@@ -30,6 +30,7 @@ const schema = defineSchema(
       isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
 
       role: v.optional(roleValidator), // role of the user. do not remove
+      isSuspended: v.optional(v.boolean()), // Added for admin suspension
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
     businesses: defineTable({
@@ -48,6 +49,7 @@ const schema = defineSchema(
       fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
       bankName: v.optional(v.string()),
       bankIban: v.optional(v.string()),
+      isSuspended: v.optional(v.boolean()), // Added for admin suspension
     }).index("by_user", ["userId"]),
 
     // New table for multi-user access to businesses

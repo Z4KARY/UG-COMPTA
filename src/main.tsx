@@ -18,6 +18,7 @@ import Invoices from "./pages/Invoices.tsx";
 import InvoiceCreate from "./pages/InvoiceCreate.tsx";
 import InvoiceDetail from "./pages/InvoiceDetail.tsx";
 import Declarations from "./pages/Declarations.tsx";
+import Admin from "./pages/Admin.tsx";
 import "./types/global.d.ts";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -66,6 +67,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/invoices/new" element={<InvoiceCreate />} />
             <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="/declarations" element={<Declarations />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
