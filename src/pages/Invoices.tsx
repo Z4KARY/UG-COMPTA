@@ -16,10 +16,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
-import { Plus } from "lucide-react";
+import { useMutation, useQuery } from "convex/react";
+import { Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { Id } from "@/convex/_generated/dataModel";
 
 export default function Invoices() {
   const business = useQuery(api.businesses.getMyBusiness);
@@ -27,6 +29,18 @@ export default function Invoices() {
     api.invoices.list,
     business ? { businessId: business._id } : "skip"
   );
+  const deleteInvoice = useMutation(api.invoices.remove);
+
+  const handleDelete = async (id: Id<"invoices">) => {
+    if (confirm("Are you sure you want to delete this invoice? This action cannot be undone.")) {
+      try {
+        await deleteInvoice({ id });
+        toast.success("Invoice deleted");
+      } catch (error) {
+        toast.error("Failed to delete invoice");
+      }
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -54,29 +68,29 @@ export default function Invoices() {
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Invoices</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Invoices & Quotes</h1>
         <Button asChild>
           <Link to="/invoices/new">
-            <Plus className="mr-2 h-4 w-4" /> Create Invoice
+            <Plus className="mr-2 h-4 w-4" /> Create New
           </Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Invoice List</CardTitle>
+          <CardTitle>Documents</CardTitle>
           <CardDescription>
-            Manage your invoices and track payments.
+            Manage your invoices, quotes, and credit notes.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Type</TableHead>
                 <TableHead>Number</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Due Date</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -85,15 +99,17 @@ export default function Invoices() {
             <TableBody>
               {invoices?.map((invoice) => (
                 <TableRow key={invoice._id}>
+                  <TableCell>
+                    <Badge variant="secondary" className="capitalize">
+                      {invoice.type || "invoice"}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="font-medium">
                     {invoice.invoiceNumber}
                   </TableCell>
                   <TableCell>{invoice.customerName}</TableCell>
                   <TableCell>
                     {new Date(invoice.issueDate).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(invoice.dueDate).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     {invoice.totalTtc.toLocaleString()} {invoice.currency}
@@ -107,9 +123,19 @@ export default function Invoices() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to={`/invoices/${invoice._id}`}>View</Link>
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" asChild>
+                        <Link to={`/invoices/${invoice._id}`}>View</Link>
+                        </Button>
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => handleDelete(invoice._id)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

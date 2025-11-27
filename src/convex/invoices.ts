@@ -57,6 +57,11 @@ export const create = mutation({
     businessId: v.id("businesses"),
     customerId: v.id("customers"),
     invoiceNumber: v.string(),
+    type: v.union(
+      v.literal("invoice"),
+      v.literal("quote"),
+      v.literal("credit_note")
+    ),
     issueDate: v.number(),
     dueDate: v.number(),
     currency: v.string(),
@@ -172,6 +177,7 @@ export const create = mutation({
       businessId: args.businessId,
       customerId: args.customerId,
       invoiceNumber: args.invoiceNumber,
+      type: args.type,
       issueDate: args.issueDate,
       dueDate: args.dueDate,
       currency: args.currency,
@@ -199,6 +205,132 @@ export const create = mutation({
     }
 
     return invoiceId;
+  },
+});
+
+export const update = mutation({
+  args: {
+    id: v.id("invoices"),
+    customerId: v.optional(v.id("customers")),
+    invoiceNumber: v.optional(v.string()),
+    type: v.optional(v.union(
+      v.literal("invoice"),
+      v.literal("quote"),
+      v.literal("credit_note")
+    )),
+    issueDate: v.optional(v.number()),
+    dueDate: v.optional(v.number()),
+    currency: v.optional(v.string()),
+    status: v.optional(v.union(
+      v.literal("draft"),
+      v.literal("sent"),
+      v.literal("paid"),
+      v.literal("overdue"),
+      v.literal("cancelled")
+    )),
+    notes: v.optional(v.string()),
+    paymentMethod: v.optional(v.union(
+      v.literal("CASH"),
+      v.literal("BANK_TRANSFER"),
+      v.literal("CHEQUE"),
+      v.literal("CARD"),
+      v.literal("OTHER")
+    )),
+    subtotalHt: v.optional(v.number()),
+    totalTva: v.optional(v.number()),
+    stampDutyAmount: v.optional(v.number()),
+    totalTtc: v.optional(v.number()),
+    items: v.optional(v.array(
+      v.object({
+        productId: v.optional(v.id("products")),
+        description: v.string(),
+        quantity: v.number(),
+        unitPrice: v.number(),
+        discountRate: v.optional(v.number()),
+        tvaRate: v.number(),
+        lineTotal: v.number(),
+        lineTotalHt: v.optional(v.number()),
+        lineTotalTtc: v.optional(v.number()),
+      })
+    )),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+    const { id, items, ...fields } = args;
+
+    // Update invoice fields
+    await ctx.db.patch(id, fields);
+
+    // If items are provided, replace them
+    if (items) {
+      // Delete existing items
+      const existingItems = await ctx.db
+        .query("invoiceItems")
+        .withIndex("by_invoice", (q) => q.eq("invoiceId", id))
+        .collect();
+      
+      for (const item of existingItems) {
+        await ctx.db.delete(item._id);
+      }
+
+      // Insert new items
+      for (const item of items) {
+        // Recalculate line totals server-side for consistency if needed, 
+        // but for update we'll trust the passed values or recalculate if we want to be strict.
+        // For now, we insert as is, assuming frontend did calc or we reuse create logic.
+        // Ideally we should reuse the calculation logic from create.
+        
+        const { lineTotalHt, lineTva, lineTotalTtc } = calculateLineTotals(
+            item.quantity,
+            item.unitPrice,
+            item.discountRate || 0,
+            item.tvaRate
+        );
+
+        await ctx.db.insert("invoiceItems", {
+          invoiceId: id,
+          ...item,
+          lineTotal: lineTotalHt,
+          lineTotalHt,
+          lineTotalTtc
+        });
+      }
+    }
+  },
+});
+
+export const remove = mutation({
+  args: { id: v.id("invoices") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+    // Delete items first
+    const items = await ctx.db
+      .query("invoiceItems")
+      .withIndex("by_invoice", (q) => q.eq("invoiceId", args.id))
+      .collect();
+
+    for (const item of items) {
+      await ctx.db.delete(item._id);
+    }
+
+    // Delete invoice
+    await ctx.db.delete(args.id);
   },
 });
 

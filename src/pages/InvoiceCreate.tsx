@@ -64,6 +64,7 @@ export default function InvoiceCreate() {
 
   const createInvoice = useMutation(api.invoices.create);
 
+  const [type, setType] = useState<"invoice" | "quote" | "credit_note">("invoice");
   const [customerId, setCustomerId] = useState<string>("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [issueDate, setIssueDate] = useState(
@@ -202,7 +203,8 @@ export default function InvoiceCreate() {
       await createInvoice({
         businessId: business._id,
         customerId: customerId as Id<"customers">,
-        invoiceNumber: invoiceNumber || `INV-${Date.now()}`,
+        invoiceNumber: invoiceNumber || `${type === "quote" ? "QT" : type === "credit_note" ? "CN" : "INV"}-${Date.now()}`,
+        type,
         issueDate: new Date(issueDate).getTime(),
         dueDate: new Date(dueDate).getTime(),
         currency: business.currency,
@@ -234,7 +236,7 @@ export default function InvoiceCreate() {
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Create Invoice</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Create {type === "quote" ? "Quote" : type === "credit_note" ? "Credit Note" : "Invoice"}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -242,9 +244,22 @@ export default function InvoiceCreate() {
           {/* Customer & Invoice Details */}
           <Card>
             <CardHeader>
-              <CardTitle>Invoice Details</CardTitle>
+              <CardTitle>Document Details</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select value={type} onValueChange={(val: any) => setType(val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="invoice">Invoice (Facture)</SelectItem>
+                    <SelectItem value="quote">Quote (Pro-forma/Devis)</SelectItem>
+                    <SelectItem value="credit_note">Credit Note (Avoir)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label>Customer</Label>
                 <Select value={customerId} onValueChange={setCustomerId}>

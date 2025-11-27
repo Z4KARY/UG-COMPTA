@@ -74,6 +74,12 @@ const schema = defineSchema(
       businessId: v.id("businesses"),
       customerId: v.id("customers"),
       invoiceNumber: v.string(),
+      // Added type field
+      type: v.union(
+        v.literal("invoice"),
+        v.literal("quote"),
+        v.literal("credit_note")
+      ),
       issueDate: v.number(), // timestamp
       dueDate: v.number(), // timestamp
       currency: v.string(),

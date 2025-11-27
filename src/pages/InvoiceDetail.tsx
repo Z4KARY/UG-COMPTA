@@ -77,7 +77,7 @@ export default function InvoiceDetail() {
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-primary">INVOICE</h1>
+            <h1 className="text-2xl font-bold text-primary uppercase">{invoice.type === "quote" ? "PRO-FORMA / QUOTE" : invoice.type === "credit_note" ? "CREDIT NOTE" : "INVOICE"}</h1>
             <p className="text-muted-foreground">{invoice.invoiceNumber}</p>
             <div className="mt-2 text-sm">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
