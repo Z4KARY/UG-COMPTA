@@ -41,6 +41,23 @@ export default function Declarations() {
     } : "skip"
   );
 
+  const downloadCSV = (data: any, filename: string) => {
+    if (!data) return;
+    
+    // Flatten object to key-value pairs for simple CSV
+    const headers = Object.keys(data).join(",");
+    const values = Object.values(data).map(v => `"${v}"`).join(",");
+    
+    const csvContent = `data:text/csv;charset=utf-8,${headers}\n${values}`;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!business) {
     return (
       <DashboardLayout>
@@ -109,7 +126,11 @@ export default function Declarations() {
                         <span className="font-medium">{g50Data.stampDutyTotal.toLocaleString()} {business.currency}</span>
                     </div>
                     <div className="pt-2 border-t mt-2">
-                        <Button variant="outline" className="w-full">
+                        <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => downloadCSV(g50Data, `G50_${selectedMonth}_${selectedYear}.csv`)}
+                        >
                             <Download className="mr-2 h-4 w-4" /> Export G50 Data
                         </Button>
                     </div>
@@ -155,7 +176,11 @@ export default function Declarations() {
                         <span className="font-medium">{g12Data.turnoverHt.toLocaleString()} {business.currency}</span>
                     </div>
                     <div className="pt-2 border-t mt-2">
-                        <Button variant="outline" className="w-full">
+                        <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => downloadCSV(g12Data, `G12_${selectedYear}.csv`)}
+                        >
                             <Download className="mr-2 h-4 w-4" /> Export G12 Data
                         </Button>
                     </div>

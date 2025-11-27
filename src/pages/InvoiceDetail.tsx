@@ -3,15 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
-import { ArrowLeft, Printer } from "lucide-react";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowLeft, Printer, CheckCircle, Send, XCircle } from "lucide-react";
 import { Link, useParams } from "react-router";
+import { toast } from "sonner";
 
 export default function InvoiceDetail() {
   const { id } = useParams<{ id: string }>();
   const invoice = useQuery(api.invoices.get, {
     id: id as Id<"invoices">,
   });
+  const updateStatus = useMutation(api.invoices.updateStatus);
 
   if (!invoice) {
     return (
@@ -27,6 +29,16 @@ export default function InvoiceDetail() {
     window.print();
   };
 
+  const handleStatusChange = async (status: "sent" | "paid" | "cancelled") => {
+    try {
+      await updateStatus({ id: invoice._id, status });
+      toast.success(`Invoice marked as ${status}`);
+    } catch (error) {
+      toast.error("Failed to update status");
+      console.error(error);
+    }
+  };
+
   // Fallback for legacy invoices
   const stampDuty = invoice.stampDutyAmount ?? (invoice.timbre ? 10 : 0);
   const subtotalHt = invoice.subtotalHt ?? invoice.totalHt ?? 0;
@@ -39,9 +51,26 @@ export default function InvoiceDetail() {
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Invoices
           </Link>
         </Button>
-        <Button onClick={handlePrint}>
-          <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
-        </Button>
+        <div className="flex gap-2">
+          {invoice.status === "draft" && (
+            <Button onClick={() => handleStatusChange("sent")} variant="outline">
+              <Send className="mr-2 h-4 w-4" /> Issue Invoice
+            </Button>
+          )}
+          {invoice.status === "sent" && (
+            <Button onClick={() => handleStatusChange("paid")} variant="default">
+              <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
+            </Button>
+          )}
+          {(invoice.status === "draft" || invoice.status === "sent") && (
+            <Button onClick={() => handleStatusChange("cancelled")} variant="destructive">
+              <XCircle className="mr-2 h-4 w-4" /> Cancel
+            </Button>
+          )}
+          <Button onClick={handlePrint} variant="secondary">
+            <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white p-8 shadow-sm border rounded-lg max-w-4xl mx-auto print:shadow-none print:border-none print:w-full print:max-w-none">
@@ -50,9 +79,16 @@ export default function InvoiceDetail() {
           <div>
             <h1 className="text-2xl font-bold text-primary">INVOICE</h1>
             <p className="text-muted-foreground">{invoice.invoiceNumber}</p>
-            <div className="mt-2 text-sm text-muted-foreground">
-                <p>{invoice.status.toUpperCase()}</p>
-                {invoice.paymentMethod && <p>Method: {invoice.paymentMethod}</p>}
+            <div className="mt-2 text-sm">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    invoice.status === "paid" ? "bg-green-100 text-green-800" :
+                    invoice.status === "sent" ? "bg-blue-100 text-blue-800" :
+                    invoice.status === "cancelled" ? "bg-red-100 text-red-800" :
+                    "bg-gray-100 text-gray-800"
+                }`}>
+                    {invoice.status.toUpperCase()}
+                </span>
+                {invoice.paymentMethod && <p className="mt-1 text-muted-foreground">Method: {invoice.paymentMethod}</p>}
             </div>
           </div>
           <div className="text-right">

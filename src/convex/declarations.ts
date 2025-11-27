@@ -38,8 +38,9 @@ export const getG50Data = query({
       turnoverHt += inv.subtotalHt || inv.totalHt || 0;
       tvaCollected += inv.totalTva || 0;
       
-      // Stamp duty is collected on cash payments
-      if (inv.paymentMethod === "CASH" && (inv.status === "paid" || inv.status === "sent")) {
+      // Stamp duty is collected on cash payments (quittance)
+      // Strictly speaking, this applies when the cash is received.
+      if (inv.paymentMethod === "CASH" && inv.status === "paid") {
          stampDutyTotal += inv.stampDutyAmount || 0;
       }
     }
