@@ -26,6 +26,10 @@ export const create = mutation({
     phone: v.optional(v.string()),
     address: v.optional(v.string()),
     notes: v.optional(v.string()),
+    taxId: v.optional(v.string()),
+    rc: v.optional(v.string()),
+    ai: v.optional(v.string()),
+    nis: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -46,6 +50,10 @@ export const update = mutation({
     phone: v.optional(v.string()),
     address: v.optional(v.string()),
     notes: v.optional(v.string()),
+    taxId: v.optional(v.string()),
+    rc: v.optional(v.string()),
+    ai: v.optional(v.string()),
+    nis: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);

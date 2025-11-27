@@ -49,6 +49,10 @@ export default function Customers() {
     phone: "",
     address: "",
     notes: "",
+    taxId: "",
+    rc: "",
+    ai: "",
+    nis: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +69,10 @@ export default function Customers() {
       });
       toast.success("Customer created");
       setIsDialogOpen(false);
-      setFormData({ name: "", email: "", phone: "", address: "", notes: "" });
+      setFormData({ 
+        name: "", email: "", phone: "", address: "", notes: "",
+        taxId: "", rc: "", ai: "", nis: "" 
+      });
     } catch (error) {
       toast.error("Failed to create customer");
     }
@@ -124,6 +131,60 @@ export default function Customers() {
                     required
                   />
                 </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="taxId" className="text-right">
+                    NIF
+                  </Label>
+                  <Input
+                    id="taxId"
+                    name="taxId"
+                    value={formData.taxId}
+                    onChange={handleChange}
+                    className="col-span-3"
+                    placeholder="Numéro d'Identification Fiscale"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="rc" className="text-right">
+                    RC
+                  </Label>
+                  <Input
+                    id="rc"
+                    name="rc"
+                    value={formData.rc}
+                    onChange={handleChange}
+                    className="col-span-3"
+                    placeholder="Registre de Commerce"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="ai" className="text-right">
+                    AI
+                  </Label>
+                  <Input
+                    id="ai"
+                    name="ai"
+                    value={formData.ai}
+                    onChange={handleChange}
+                    className="col-span-3"
+                    placeholder="Article d'Imposition"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="nis" className="text-right">
+                    NIS
+                  </Label>
+                  <Input
+                    id="nis"
+                    name="nis"
+                    value={formData.nis}
+                    onChange={handleChange}
+                    className="col-span-3"
+                    placeholder="Numéro d'Identification Statistique"
+                  />
+                </div>
+
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="email" className="text-right">
                     Email
@@ -182,7 +243,7 @@ export default function Customers() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>NIF</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Address</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -191,8 +252,13 @@ export default function Customers() {
             <TableBody>
               {customers?.map((customer) => (
                 <TableRow key={customer._id}>
-                  <TableCell className="font-medium">{customer.name}</TableCell>
-                  <TableCell>{customer.email}</TableCell>
+                  <TableCell className="font-medium">
+                    <div>{customer.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                        {[customer.rc && `RC: ${customer.rc}`, customer.ai && `AI: ${customer.ai}`].filter(Boolean).join(" | ")}
+                    </div>
+                  </TableCell>
+                  <TableCell>{customer.taxId || "-"}</TableCell>
                   <TableCell>{customer.phone}</TableCell>
                   <TableCell>{customer.address}</TableCell>
                   <TableCell className="text-right">

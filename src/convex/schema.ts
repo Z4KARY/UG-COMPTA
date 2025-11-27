@@ -55,7 +55,10 @@ const schema = defineSchema(
       phone: v.optional(v.string()),
       address: v.optional(v.string()),
       notes: v.optional(v.string()),
-      taxId: v.optional(v.string()), // Added taxId (NIF)
+      taxId: v.optional(v.string()), // NIF
+      rc: v.optional(v.string()), // Registre de Commerce
+      ai: v.optional(v.string()), // Article d'Imposition
+      nis: v.optional(v.string()), // Numéro d'Identification Statistique
     }).index("by_business", ["businessId"]),
 
     products: defineTable({
