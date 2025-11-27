@@ -32,12 +32,68 @@ const schema = defineSchema(
       role: v.optional(roleValidator), // role of the user. do not remove
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
-    // add other tables here
+    businesses: defineTable({
+      userId: v.id("users"),
+      name: v.string(),
+      address: v.string(),
+      rc: v.optional(v.string()),
+      nif: v.optional(v.string()),
+      ai: v.optional(v.string()),
+      logoUrl: v.optional(v.string()),
+      currency: v.string(),
+      tvaDefault: v.number(),
+    }).index("by_user", ["userId"]),
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    customers: defineTable({
+      businessId: v.id("businesses"),
+      name: v.string(),
+      email: v.optional(v.string()),
+      phone: v.optional(v.string()),
+      address: v.optional(v.string()),
+      notes: v.optional(v.string()),
+    }).index("by_business", ["businessId"]),
+
+    products: defineTable({
+      businessId: v.id("businesses"),
+      name: v.string(),
+      unitPrice: v.number(),
+      tvaRate: v.number(),
+      defaultDiscount: v.optional(v.number()),
+    }).index("by_business", ["businessId"]),
+
+    invoices: defineTable({
+      businessId: v.id("businesses"),
+      customerId: v.id("customers"),
+      invoiceNumber: v.string(),
+      issueDate: v.number(), // timestamp
+      dueDate: v.number(), // timestamp
+      currency: v.string(),
+      status: v.union(
+        v.literal("draft"),
+        v.literal("sent"),
+        v.literal("paid"),
+        v.literal("overdue")
+      ),
+      notes: v.optional(v.string()),
+      timbre: v.boolean(),
+      cashPenaltyPercentage: v.optional(v.number()),
+      totalHt: v.number(),
+      totalTva: v.number(),
+      totalTtc: v.number(),
+      pdfUrl: v.optional(v.string()),
+    })
+      .index("by_business", ["businessId"])
+      .index("by_customer", ["customerId"]),
+
+    invoiceItems: defineTable({
+      invoiceId: v.id("invoices"),
+      description: v.string(),
+      quantity: v.number(),
+      unitPrice: v.number(),
+      discountRate: v.optional(v.number()),
+      tvaRate: v.number(),
+      lineTotal: v.number(),
+    }).index("by_invoice", ["invoiceId"]),
   },
   {
     schemaValidation: false,
