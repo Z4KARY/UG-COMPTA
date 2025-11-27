@@ -103,14 +103,24 @@ export default function InvoiceCreate() {
     let totalTva = 0;
 
     items.forEach((item) => {
-      const priceAfterDiscount =
-        item.unitPrice * (1 - (item.discountRate || 0) / 100);
-      const lineTotalHt = priceAfterDiscount * item.quantity;
-      const lineTva = lineTotalHt * (item.tvaRate / 100);
+      // Replicate backend logic for preview
+      const quantity = item.quantity;
+      const unitPrice = item.unitPrice;
+      const discountRate = item.discountRate || 0;
+      const tvaRate = item.tvaRate;
+
+      const basePrice = unitPrice * quantity;
+      const discountAmount = Math.round((basePrice * (discountRate / 100) + Number.EPSILON) * 100) / 100;
+      const lineTotalHt = Math.round((basePrice - discountAmount + Number.EPSILON) * 100) / 100;
+      const lineTva = Math.round((lineTotalHt * (tvaRate / 100) + Number.EPSILON) * 100) / 100;
 
       subtotalHt += lineTotalHt;
       totalTva += lineTva;
     });
+
+    // Round totals
+    subtotalHt = Math.round((subtotalHt + Number.EPSILON) * 100) / 100;
+    totalTva = Math.round((totalTva + Number.EPSILON) * 100) / 100;
 
     let baseTtc = subtotalHt + totalTva;
     
@@ -153,10 +163,10 @@ export default function InvoiceCreate() {
         parseFloat(value as string) || 0;
     }
 
-    // Recalculate line total
-    const priceAfterDiscount =
-      item.unitPrice * (1 - (item.discountRate || 0) / 100);
-    item.lineTotal = priceAfterDiscount * item.quantity;
+    // Recalculate line total for display (HT)
+    const basePrice = item.unitPrice * item.quantity;
+    const discountAmount = basePrice * ((item.discountRate || 0) / 100);
+    item.lineTotal = basePrice - discountAmount; // Raw calculation for immediate feedback, rounded in totals
 
     newItems[index] = item;
     setItems(newItems);
@@ -410,12 +420,14 @@ export default function InvoiceCreate() {
                       onChange={(e) =>
                         handleItemChange(index, "tvaRate", e.target.value)
                       }
+                      disabled={business?.fiscalRegime === "IFU"}
+                      className={business?.fiscalRegime === "IFU" ? "bg-gray-100 text-gray-500" : ""}
                     />
                   </div>
                   <div className="col-span-1 space-y-1">
-                    <Label className="text-xs">Total</Label>
+                    <Label className="text-xs">Total HT</Label>
                     <div className="text-sm font-medium py-2">
-                      {item.lineTotal.toFixed(2)}
+                      {item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                   </div>
                   <div className="col-span-1 flex justify-end">

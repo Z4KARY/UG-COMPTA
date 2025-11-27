@@ -3,22 +3,45 @@
 // Updated for Loi de Finances 2025 (Law n° 24-08 of 24 Nov 2024)
 
 export const FISCAL_CONSTANTS = {
-  VAT_STANDARD: 19,
-  VAT_REDUCED: 9,
-  VAT_ZERO: 0,
-  
   STAMP_DUTY: {
-    // Code du Timbre Art. 147 & 258
-    // Modified by LF 2025 (Law n° 24-08)
     MIN_DUTY: 5,
-    MAX_DUTY: 10000,
-    RATE_PER_100DA: 1.0, // 1% (1 DA per 100 DA)
-    THRESHOLD_EXEMPT: 0, 
-    // Art. 258 quinquies: Exemption for electronic payments (Cheque, Card, Transfer)
-  }
+    MAX_DUTY: 10000, // Restoring to 10000 as per previous context
+    RATE_PER_100DA: 1.0,
+  },
+  VAT_RATES: [0, 9, 19],
 };
 
-export type StampDutyConfig = typeof FISCAL_CONSTANTS.STAMP_DUTY;
+export type StampDutyConfig = {
+  MIN_DUTY: number;
+  MAX_DUTY: number;
+  RATE_PER_100DA: number;
+  THRESHOLD_EXEMPT?: number;
+};
+
+// Helper for rounding to 2 decimal places
+export function roundCurrency(amount: number): number {
+  return Math.round((amount + Number.EPSILON) * 100) / 100;
+}
+
+export function calculateLineItem(
+  quantity: number, 
+  unitPrice: number, 
+  discountRate: number, 
+  tvaRate: number
+) {
+  const basePrice = unitPrice * quantity;
+  const discountAmount = roundCurrency(basePrice * (discountRate / 100));
+  const lineTotalHt = roundCurrency(basePrice - discountAmount);
+  const tvaAmount = roundCurrency(lineTotalHt * (tvaRate / 100));
+  const lineTotalTtc = roundCurrency(lineTotalHt + tvaAmount);
+
+  return {
+    discountAmount,
+    lineTotalHt,
+    tvaAmount,
+    lineTotalTtc
+  };
+}
 
 /**
  * Calculates the Stamp Duty (Droit de Timbre) for a given amount.

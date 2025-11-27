@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { calculateStampDuty, calculateLineTotals, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
+import { calculateStampDuty, calculateLineItem, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
 
 export const list = query({
   args: { businessId: v.id("businesses") },
@@ -147,16 +147,12 @@ export const create = mutation({
     let calculatedDiscountTotal = 0;
 
     const processedItems = args.items.map(item => {
-      const quantity = item.quantity;
-      const unitPrice = item.unitPrice;
-      const discountRate = item.discountRate || 0;
-      const tvaRate = item.tvaRate;
-
-      const basePrice = unitPrice * quantity;
-      const discountAmount = basePrice * (discountRate / 100);
-      const lineTotalHt = basePrice - discountAmount;
-      const tvaAmount = lineTotalHt * (tvaRate / 100);
-      const lineTotalTtc = lineTotalHt + tvaAmount;
+      const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculateLineItem(
+        item.quantity,
+        item.unitPrice,
+        item.discountRate || 0,
+        item.tvaRate
+      );
 
       calculatedSubtotalHt += lineTotalHt;
       calculatedTotalTva += tvaAmount;
@@ -166,11 +162,21 @@ export const create = mutation({
         ...item,
         discountAmount,
         tvaAmount,
-        lineTotal: lineTotalHt, // Storing HT as lineTotal for consistency with schema comments usually
+        lineTotal: lineTotalHt, // Storing HT as lineTotal
         lineTotalHt,
         lineTotalTtc
       };
     });
+
+    // Round totals after summation (or sum rounded lines? The prompt says:
+    // subtotal_ht = Σ(line_total_ht)
+    // vat_total = Σ(vat_amount)
+    // So we sum the rounded line values.
+    
+    // Ensure totals are rounded too just in case of float errors during sum
+    calculatedSubtotalHt = Math.round((calculatedSubtotalHt + Number.EPSILON) * 100) / 100;
+    calculatedTotalTva = Math.round((calculatedTotalTva + Number.EPSILON) * 100) / 100;
+    calculatedDiscountTotal = Math.round((calculatedDiscountTotal + Number.EPSILON) * 100) / 100;
 
     const totalBeforeStamp = calculatedSubtotalHt + calculatedTotalTva;
     
@@ -297,16 +303,12 @@ export const update = mutation({
 
       // Insert new items
       for (const item of items) {
-        const quantity = item.quantity;
-        const unitPrice = item.unitPrice;
-        const discountRate = item.discountRate || 0;
-        const tvaRate = item.tvaRate;
-
-        const basePrice = unitPrice * quantity;
-        const discountAmount = basePrice * (discountRate / 100);
-        const lineTotalHt = basePrice - discountAmount;
-        const tvaAmount = lineTotalHt * (tvaRate / 100);
-        const lineTotalTtc = lineTotalHt + tvaAmount;
+        const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculateLineItem(
+            item.quantity,
+            item.unitPrice,
+            item.discountRate || 0,
+            item.tvaRate
+        );
 
         await ctx.db.insert("invoiceItems", {
           invoiceId: id,
