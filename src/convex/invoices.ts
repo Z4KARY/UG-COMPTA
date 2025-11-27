@@ -284,6 +284,11 @@ export const update = mutation({
     const business = await ctx.db.get(invoice.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
+    // Prevent editing if paid or cancelled
+    if (invoice.status === "paid" || invoice.status === "cancelled") {
+        throw new Error("Cannot edit finalized invoice");
+    }
+
     const { id, items, ...fields } = args;
 
     // Update invoice fields
@@ -374,5 +379,76 @@ export const updateStatus = mutation({
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     await ctx.db.patch(args.id, { status: args.status });
+  },
+});
+
+export const issue = mutation({
+  args: { id: v.id("invoices") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) {
+         // Check member role
+         const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
+            .first();
+         if (!member) {
+             throw new Error("Unauthorized");
+         }
+    }
+
+    if (invoice.status !== "draft") throw new Error("Invoice already issued or processed");
+
+    await ctx.db.patch(args.id, { 
+        status: "issued",
+    });
+  },
+});
+
+export const markAsPaid = mutation({
+  args: { 
+    id: v.id("invoices"),
+    amount: v.number(),
+    paymentMethod: v.union(
+        v.literal("CASH"),
+        v.literal("BANK_TRANSFER"),
+        v.literal("CHEQUE"),
+        v.literal("CARD"),
+        v.literal("OTHER")
+    ),
+    paymentDate: v.number(),
+    reference: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) {
+         const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
+            .first();
+         if (!member) throw new Error("Unauthorized");
+    }
+
+    await ctx.db.insert("payments", {
+        invoiceId: args.id,
+        amount: args.amount,
+        paymentMethod: args.paymentMethod,
+        paymentDate: args.paymentDate,
+        reference: args.reference,
+    });
+
+    await ctx.db.patch(args.id, { status: "paid" });
   },
 });

@@ -172,3 +172,57 @@ export const getTopPerformers = query({
     return { customers: topCustomers, products: topProducts };
   },
 });
+
+export const getSummary = query({
+  args: {
+    businessId: v.id("businesses"),
+    from: v.number(),
+    to: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business) return null;
+
+    if (business.userId !== userId) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", args.businessId).eq("userId", userId))
+            .first();
+        if (!member) return null;
+    }
+    
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const periodInvoices = invoices.filter(
+      (inv) =>
+        inv.issueDate >= args.from &&
+        inv.issueDate <= args.to &&
+        inv.status !== "cancelled" &&
+        inv.status !== "draft"
+    );
+
+    let turnover = 0;
+    let tva = 0;
+    let stampDuty = 0;
+
+    for (const inv of periodInvoices) {
+      turnover += inv.subtotalHt || inv.totalHt || 0;
+      tva += inv.totalTva || 0;
+      stampDuty += inv.stampDutyAmount || 0;
+    }
+
+    return {
+      turnover,
+      tva,
+      stampDuty,
+      invoiceCount: periodInvoices.length,
+      period: `${new Date(args.from).toLocaleDateString()} - ${new Date(args.to).toLocaleDateString()}`,
+    };
+  },
+});

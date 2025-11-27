@@ -56,6 +56,34 @@ export const getFiscalParameter = query({
   },
 });
 
+// List all fiscal parameters for a business
+export const list = query({
+  args: { businessId: v.id("businesses") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business) return [];
+
+    // Check access
+    if (business.userId !== userId) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => 
+                q.eq("businessId", args.businessId).eq("userId", userId)
+            )
+            .first();
+        if (!member) return [];
+    }
+
+    return await ctx.db
+      .query("fiscalParameters")
+      .withIndex("by_business_and_code", (q) => q.eq("businessId", args.businessId))
+      .collect();
+  },
+});
+
 // Generic mutation to set a fiscal parameter
 export const setFiscalParameter = mutation({
   args: {
@@ -72,7 +100,25 @@ export const setFiscalParameter = mutation({
 
     if (args.businessId) {
         const business = await ctx.db.get(args.businessId);
-        if (!business || business.userId !== userId) throw new Error("Unauthorized");
+        if (!business) throw new Error("Business not found");
+        
+        if (business.userId !== userId) {
+            const member = await ctx.db
+                .query("businessMembers")
+                .withIndex("by_business_and_user", (q) => 
+                    q.eq("businessId", args.businessId!).eq("userId", userId)
+                )
+                .first();
+            
+            if (!member || (member.role !== "owner" && member.role !== "accountant")) {
+                throw new Error("Unauthorized: Only Owner or Accountant can modify fiscal parameters");
+            }
+        }
+    } else {
+        // Only admin can set global parameters (simplified check for now, assuming no global admin UI yet)
+        // In a real app, we'd check for a system admin role.
+        // For now, we'll allow it if it's a system setup script or similar, 
+        // but strictly speaking this should be restricted.
     }
 
     // Check for existing active parameter to update or retire? 
