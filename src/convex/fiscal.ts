@@ -1,5 +1,6 @@
 // Fiscal Logic for Algerian Invoicing
-// Based on Code des Taxes sur le Chiffre d’Affaires (CTCA) and Code du Timbre
+// Based on Code des Taxes sur le Chiffre d'Affaires (CTCA) and Code du Timbre
+// Updated to reflect Loi de Finances 2025 (Law n° 24-08 of 24 Nov 2024)
 
 export const FISCAL_CONSTANTS = {
   VAT_STANDARD: 19,
@@ -7,18 +8,23 @@ export const FISCAL_CONSTANTS = {
   VAT_ZERO: 0,
   
   STAMP_DUTY: {
-    // Code du Timbre Art. 100, 258, etc.
-    // LF 2023/2025 updates
+    // Code du Timbre Art. 258: Droit de timbre de quittance (Stamp Duty on Receipts)
+    // Rate: 1 DA per 100 DA or fraction thereof (1%)
+    // LF 2025 reinforces exemptions for electronic payments (Art. 258 quinquies)
     MIN_DUTY: 5,
-    MAX_DUTY: 10000,
+    MAX_DUTY: 10000, // Capped at 10,000 DA (since LF 2022/2023)
     RATE_PER_100DA: 1.0, // 1%
-    THRESHOLD_EXEMPT: 0, // Usually all cash payments are subject
+    THRESHOLD_EXEMPT: 0, // All cash payments are subject to duty
   }
 };
 
 /**
  * Calculates the Stamp Duty (Droit de Timbre) for a given amount.
  * Applies only to CASH payments.
+ * 
+ * Legal Reference:
+ * - Code du Timbre Art. 258: 1% duty on cash payments.
+ * - Code du Timbre Art. 258 quinquies: Exemption for payments via bank, CCP, or electronic means.
  * 
  * Algorithm:
  * 1% per 100 DA or fraction thereof.
@@ -31,7 +37,7 @@ export const FISCAL_CONSTANTS = {
  */
 export function calculateStampDuty(amountTtcBeforeStamp: number, paymentMethod: string): number {
   if (paymentMethod !== "CASH") {
-    // Art. 258 quinquies: Electronic payments are exempt
+    // Art. 258 quinquies: Electronic payments (Bank, Card, Cheque) are exempt
     return 0;
   }
 

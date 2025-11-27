@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
@@ -408,7 +410,7 @@ export default function InvoiceCreate() {
               {stampDutyAmount > 0 && (
                 <div className="flex items-center justify-between text-sm pt-2 border-t text-orange-600">
                   <div className="flex items-center gap-2">
-                    <Label>Timbre Fiscal (Cash)</Label>
+                    <Label>Timbre Fiscal (1%)</Label>
                   </div>
                   <span>
                     {stampDutyAmount.toFixed(2)} {business.currency}
@@ -422,6 +424,24 @@ export default function InvoiceCreate() {
                   {totalTtc.toFixed(2)} {business.currency}
                 </span>
               </div>
+
+              {paymentMethod === "CASH" ? (
+                <Alert className="bg-orange-50 border-orange-200">
+                  <Info className="h-4 w-4 text-orange-600" />
+                  <AlertTitle className="text-orange-800">Stamp Duty Applied</AlertTitle>
+                  <AlertDescription className="text-orange-700 text-xs">
+                    Cash payments are subject to 1% stamp duty (Art. 258 Code du Timbre).
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert className="bg-green-50 border-green-200">
+                  <Info className="h-4 w-4 text-green-600" />
+                  <AlertTitle className="text-green-800">Exempt from Stamp Duty</AlertTitle>
+                  <AlertDescription className="text-green-700 text-xs">
+                    Electronic/Bank payments are exempt (Art. 258 quinquies).
+                  </AlertDescription>
+                </Alert>
+              )}
             </CardContent>
           </Card>
 
