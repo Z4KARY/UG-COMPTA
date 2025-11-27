@@ -121,7 +121,7 @@ export const getStampDutyConfig = query({
         .withIndex("by_business_and_code", (q) => 
           q.eq("businessId", args.businessId).eq("code", "STAMP_DUTY")
         )
-        .first(); // We take the first one found for now, ignoring effective dates for strict backward compat unless we want to enforce it
+        .first(); 
       
       if (businessParam) {
         return businessParam.value as StampDutyConfig;
@@ -147,10 +147,13 @@ export const setStampDutyConfig = mutation({
   args: {
     businessId: v.optional(v.id("businesses")),
     config: v.object({
+      MIN_AMOUNT_SUBJECT: v.number(),
       MIN_DUTY: v.number(),
-      MAX_DUTY: v.number(),
-      RATE_PER_100DA: v.number(),
-      THRESHOLD_EXEMPT: v.number(),
+      MAX_DUTY: v.union(v.number(), v.null()),
+      BRACKETS: v.array(v.object({
+        up_to: v.union(v.number(), v.null()),
+        rate_per_100da: v.number(),
+      })),
     }),
     lawReference: v.optional(v.string()),
   },

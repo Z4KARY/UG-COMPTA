@@ -2,20 +2,28 @@
 // Based on Code des Taxes sur le Chiffre d'Affaires (CTCA) and Code du Timbre
 // Updated for Loi de Finances 2025 (Law n° 24-08 of 24 Nov 2024)
 
-export const FISCAL_CONSTANTS = {
-  STAMP_DUTY: {
-    MIN_DUTY: 5,
-    MAX_DUTY: 10000, // Restoring to 10000 as per previous context
-    RATE_PER_100DA: 1.0,
-  },
-  VAT_RATES: [0, 9, 19],
+export type StampDutyBracket = {
+  up_to: number | null; // null means infinity/rest
+  rate_per_100da: number;
 };
 
 export type StampDutyConfig = {
+  MIN_AMOUNT_SUBJECT: number;
   MIN_DUTY: number;
-  MAX_DUTY: number;
-  RATE_PER_100DA: number;
-  THRESHOLD_EXEMPT?: number;
+  MAX_DUTY: number | null;
+  BRACKETS: StampDutyBracket[];
+};
+
+export const FISCAL_CONSTANTS = {
+  STAMP_DUTY: {
+    MIN_AMOUNT_SUBJECT: 0,
+    MIN_DUTY: 5,
+    MAX_DUTY: 10000,
+    BRACKETS: [
+      { up_to: null, rate_per_100da: 1.0 } // Default linear 1%
+    ]
+  } as StampDutyConfig,
+  VAT_RATES: [0, 9, 19],
 };
 
 // Helper for rounding to 2 decimal places
@@ -52,9 +60,7 @@ export function calculateLineItem(
  * - Loi de Finances 2025, Art. 258 quinquies (Exemption for electronic payments)
  * 
  * Algorithm:
- * 1% per 100 DA or fraction thereof.
- * Min: 5 DA
- * Max: 10,000 DA
+ * Supports bracket-based calculation per 100 DA.
  * 
  * @param amountTtcBeforeStamp The total amount (HT + TVA) before stamp duty
  * @param paymentMethod The payment method used
@@ -72,16 +78,65 @@ export function calculateStampDuty(
     return 0;
   }
 
-  const { MIN_DUTY, MAX_DUTY, RATE_PER_100DA } = config;
+  const { MIN_AMOUNT_SUBJECT, MIN_DUTY, MAX_DUTY, BRACKETS } = config;
 
-  // 1 DA per 100 DA or fraction thereof
-  // Example: 150 DA -> 2 DA duty
-  let duty = Math.ceil(amountTtcBeforeStamp / 100) * RATE_PER_100DA;
+  if (amountTtcBeforeStamp < MIN_AMOUNT_SUBJECT) {
+    return 0;
+  }
+
+  let duty = 0;
+  let remaining = amountTtcBeforeStamp;
+  let previousLimit = 0;
+
+  // If no brackets defined, fallback to simple 1% (should not happen if config is valid)
+  if (!BRACKETS || BRACKETS.length === 0) {
+     duty = Math.ceil(amountTtcBeforeStamp / 100) * 1.0;
+  } else {
+    for (const bracket of BRACKETS) {
+        // Determine the amount applicable in this bracket
+        // The bracket.up_to is the cumulative upper limit.
+        // The amount in this bracket is min(remaining, (bracket.up_to - previousLimit))
+        // But simpler: we just take the chunk that fits in this bracket.
+        
+        let bracketCap = bracket.up_to === null ? Infinity : bracket.up_to;
+        let amountInBracket = 0;
+        
+        // If we are past this bracket (shouldn't happen if we iterate correctly and subtract)
+        // Actually, let's use the logic:
+        // We need to slice the total amount into chunks defined by brackets.
+        // Example: Brackets [30k, 100k, null]
+        // Amount 150k.
+        // Chunk 1: 0 to 30k -> 30k. Rate 1.
+        // Chunk 2: 30k to 100k -> 70k. Rate 1.5.
+        // Chunk 3: 100k to 150k -> 50k. Rate 2.
+        
+        // However, the prompt algorithm says:
+        // applicable_amount = min(remaining, bracket.up_to or remaining) -- wait, bracket.up_to is usually cumulative total?
+        // "up_to": 30000.0 usually means "for the portion of amount <= 30000".
+        // If the prompt implies `up_to` is the *size* of the bracket, that's one thing.
+        // But usually tax brackets are defined by cumulative thresholds.
+        // Let's assume `up_to` is the cumulative threshold (e.g. 0-30000, 30001-100000).
+        
+        // Let's calculate the size of this bracket relative to the previous one.
+        let bracketSize = bracketCap - previousLimit;
+        
+        let applicableAmount = Math.min(remaining, bracketSize);
+        
+        if (applicableAmount > 0) {
+            let units_100da = Math.ceil(applicableAmount / 100);
+            duty += units_100da * bracket.rate_per_100da;
+            remaining -= applicableAmount;
+            previousLimit = bracketCap;
+        }
+        
+        if (remaining <= 0) break;
+    }
+  }
 
   if (duty < MIN_DUTY) duty = MIN_DUTY;
-  if (duty > MAX_DUTY) duty = MAX_DUTY;
+  if (MAX_DUTY !== null && duty > MAX_DUTY) duty = MAX_DUTY;
 
-  return duty;
+  return roundCurrency(duty);
 }
 
 /**

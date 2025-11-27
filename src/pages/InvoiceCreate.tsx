@@ -29,9 +29,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 // We will fetch these from backend now, but keep defaults for initial state
 const DEFAULT_FISCAL_CONSTANTS = {
   STAMP_DUTY: {
+    MIN_AMOUNT_SUBJECT: 0,
     MIN_DUTY: 5,
     MAX_DUTY: 10000,
-    RATE_PER_100DA: 1.0,
+    BRACKETS: [
+        { up_to: null, rate_per_100da: 1.0 }
+    ]
   }
 };
 
@@ -131,13 +134,36 @@ export default function InvoiceCreate() {
     if (paymentMethod === "CASH") {
       // Use fetched config or defaults
       const config = stampDutyConfig || DEFAULT_FISCAL_CONSTANTS.STAMP_DUTY;
-      const { MIN_DUTY, MAX_DUTY, RATE_PER_100DA } = config;
+      const { MIN_AMOUNT_SUBJECT, MIN_DUTY, MAX_DUTY, BRACKETS } = config;
       
-      // 1 DA per 100 DA or fraction thereof
-      stampDutyAmount = Math.ceil(baseTtc / 100) * RATE_PER_100DA;
-      
-      if (stampDutyAmount < MIN_DUTY) stampDutyAmount = MIN_DUTY;
-      if (stampDutyAmount > MAX_DUTY) stampDutyAmount = MAX_DUTY;
+      if (baseTtc >= MIN_AMOUNT_SUBJECT) {
+          let duty = 0;
+          let remaining = baseTtc;
+          let previousLimit = 0;
+
+          if (!BRACKETS || BRACKETS.length === 0) {
+             duty = Math.ceil(baseTtc / 100) * 1.0;
+          } else {
+            for (const bracket of BRACKETS) {
+                let bracketCap = bracket.up_to === null ? Infinity : bracket.up_to;
+                let bracketSize = bracketCap - previousLimit;
+                let applicableAmount = Math.min(remaining, bracketSize);
+                
+                if (applicableAmount > 0) {
+                    let units_100da = Math.ceil(applicableAmount / 100);
+                    duty += units_100da * bracket.rate_per_100da;
+                    remaining -= applicableAmount;
+                    previousLimit = bracketCap;
+                }
+                if (remaining <= 0) break;
+            }
+          }
+
+          if (duty < MIN_DUTY) duty = MIN_DUTY;
+          if (MAX_DUTY !== null && duty > MAX_DUTY) duty = MAX_DUTY;
+          
+          stampDutyAmount = Math.round((duty + Number.EPSILON) * 100) / 100;
+      }
     }
 
     const finalTotal = baseTtc + stampDutyAmount;
@@ -495,7 +521,7 @@ export default function InvoiceCreate() {
               <Info className="h-4 w-4 text-orange-600" />
               <AlertTitle className="text-orange-800">Stamp Duty Applied</AlertTitle>
               <AlertDescription className="text-orange-700 text-xs">
-                Cash payments are subject to stamp duty (1% per 100 DA, Min {stampDutyConfig?.MIN_DUTY || 5} DA, Max {stampDutyConfig?.MAX_DUTY || 10000} DA).
+                Cash payments are subject to stamp duty (Min {stampDutyConfig?.MIN_DUTY || 5} DA, Max {stampDutyConfig?.MAX_DUTY || 10000} DA).
                 <br />
                 Ref: Code du Timbre Art. 258.
               </AlertDescription>
