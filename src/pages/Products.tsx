@@ -33,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Switch } from "@/components/ui/switch";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { Plus, Trash2 } from "lucide-react";
@@ -52,9 +53,12 @@ export default function Products() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    description: "",
     unitPrice: 0,
     tvaRate: 19,
     defaultDiscount: 0,
+    unitLabel: "",
+    isActive: true,
     type: "service" as "goods" | "service",
   });
 
@@ -62,7 +66,7 @@ export default function Products() {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === "name" ? value : parseFloat(value) || 0,
+      [name]: name === "name" || name === "description" || name === "unitLabel" ? value : parseFloat(value) || 0,
     });
   };
 
@@ -80,7 +84,10 @@ export default function Products() {
       });
       toast.success("Product created");
       setIsDialogOpen(false);
-      setFormData({ name: "", unitPrice: 0, tvaRate: 19, defaultDiscount: 0, type: "service" });
+      setFormData({ 
+        name: "", description: "", unitPrice: 0, tvaRate: 19, defaultDiscount: 0, 
+        unitLabel: "", isActive: true, type: "service" 
+      });
     } catch (error) {
       toast.error("Failed to create product");
     }
@@ -154,6 +161,18 @@ export default function Products() {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="description" className="text-right">
+                    Description
+                  </Label>
+                  <Input
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="unitPrice" className="text-right">
                     Price
                   </Label>
@@ -165,6 +184,19 @@ export default function Products() {
                     onChange={handleChange}
                     className="col-span-3"
                     required
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="unitLabel" className="text-right">
+                    Unit Label
+                  </Label>
+                  <Input
+                    id="unitLabel"
+                    name="unitLabel"
+                    value={formData.unitLabel}
+                    onChange={handleChange}
+                    className="col-span-3"
+                    placeholder="e.g. Hour, Piece"
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -194,6 +226,18 @@ export default function Products() {
                     className="col-span-3"
                   />
                 </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="isActive" className="text-right">
+                    Active
+                  </Label>
+                  <div className="col-span-3 flex items-center space-x-2">
+                    <Switch
+                      id="isActive"
+                      checked={formData.isActive}
+                      onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                    />
+                  </div>
+                </div>
               </div>
               <DialogFooter>
                 <Button type="submit">Save Product</Button>
@@ -216,8 +260,9 @@ export default function Products() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Unit</TableHead>
                 <TableHead>TVA (%)</TableHead>
-                <TableHead>Discount (%)</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -227,10 +272,16 @@ export default function Products() {
                   <TableCell className="font-medium">
                     {product.name}
                     <div className="text-xs text-muted-foreground capitalize">{product.type || "service"}</div>
+                    {product.description && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{product.description}</div>}
                   </TableCell>
                   <TableCell>{product.unitPrice.toLocaleString()} {business.currency}</TableCell>
+                  <TableCell>{product.unitLabel || "-"}</TableCell>
                   <TableCell>{product.tvaRate}%</TableCell>
-                  <TableCell>{product.defaultDiscount || 0}%</TableCell>
+                  <TableCell>
+                    <div className={`text-xs px-2 py-1 rounded-full inline-block ${product.isActive !== false ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                        {product.isActive !== false ? "Active" : "Inactive"}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
@@ -244,7 +295,7 @@ export default function Products() {
               ))}
               {products?.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     No products found.
                   </TableCell>
                 </TableRow>

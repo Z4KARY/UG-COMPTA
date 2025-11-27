@@ -22,9 +22,12 @@ export const create = mutation({
   args: {
     businessId: v.id("businesses"),
     name: v.string(),
+    description: v.optional(v.string()),
     unitPrice: v.number(),
     tvaRate: v.number(),
     defaultDiscount: v.optional(v.number()),
+    unitLabel: v.optional(v.string()),
+    isActive: v.optional(v.boolean()),
     type: v.optional(v.union(v.literal("goods"), v.literal("service"))),
   },
   handler: async (ctx, args) => {
@@ -34,7 +37,7 @@ export const create = mutation({
     const business = await ctx.db.get(args.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
-    return await ctx.db.insert("products", args);
+    return await ctx.db.insert("products", { ...args, isActive: args.isActive ?? true });
   },
 });
 
@@ -42,9 +45,12 @@ export const update = mutation({
   args: {
     id: v.id("products"),
     name: v.optional(v.string()),
+    description: v.optional(v.string()),
     unitPrice: v.optional(v.number()),
     tvaRate: v.optional(v.number()),
     defaultDiscount: v.optional(v.number()),
+    unitLabel: v.optional(v.string()),
+    isActive: v.optional(v.boolean()),
     type: v.optional(v.union(v.literal("goods"), v.literal("service"))),
   },
   handler: async (ctx, args) => {

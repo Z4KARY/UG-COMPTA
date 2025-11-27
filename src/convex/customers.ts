@@ -22,6 +22,7 @@ export const create = mutation({
   args: {
     businessId: v.id("businesses"),
     name: v.string(),
+    contactPerson: v.optional(v.string()),
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
     address: v.optional(v.string()),
@@ -46,6 +47,7 @@ export const update = mutation({
   args: {
     id: v.id("customers"),
     name: v.optional(v.string()),
+    contactPerson: v.optional(v.string()),
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
     address: v.optional(v.string()),

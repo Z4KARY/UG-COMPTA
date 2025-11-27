@@ -64,6 +64,7 @@ const schema = defineSchema(
     customers: defineTable({
       businessId: v.id("businesses"),
       name: v.string(),
+      contactPerson: v.optional(v.string()), // Added contact person
       email: v.optional(v.string()),
       phone: v.optional(v.string()),
       address: v.optional(v.string()),
@@ -77,10 +78,12 @@ const schema = defineSchema(
     products: defineTable({
       businessId: v.id("businesses"),
       name: v.string(),
+      description: v.optional(v.string()), // Added description
       unitPrice: v.number(),
       tvaRate: v.number(),
       defaultDiscount: v.optional(v.number()),
       unitLabel: v.optional(v.string()), // Added unit label
+      isActive: v.optional(v.boolean()), // Added is_active
       type: v.optional(v.union(v.literal("goods"), v.literal("service"))), // Added product type
     }).index("by_business", ["businessId"]),
 

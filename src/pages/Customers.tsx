@@ -45,6 +45,7 @@ export default function Customers() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    contactPerson: "",
     email: "",
     phone: "",
     address: "",
@@ -70,7 +71,7 @@ export default function Customers() {
       toast.success("Customer created");
       setIsDialogOpen(false);
       setFormData({ 
-        name: "", email: "", phone: "", address: "", notes: "",
+        name: "", contactPerson: "", email: "", phone: "", address: "", notes: "",
         taxId: "", rc: "", ai: "", nis: "" 
       });
     } catch (error) {
@@ -129,6 +130,20 @@ export default function Customers() {
                     onChange={handleChange}
                     className="col-span-3"
                     required
+                  />
+                </div>
+
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="contactPerson" className="text-right">
+                    Contact Person
+                  </Label>
+                  <Input
+                    id="contactPerson"
+                    name="contactPerson"
+                    value={formData.contactPerson}
+                    onChange={handleChange}
+                    className="col-span-3"
+                    placeholder="Optional"
                   />
                 </div>
                 
