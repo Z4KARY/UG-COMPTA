@@ -48,6 +48,17 @@ const schema = defineSchema(
       bankIban: v.optional(v.string()),
     }).index("by_user", ["userId"]),
 
+    // New table for multi-user access to businesses
+    businessMembers: defineTable({
+      businessId: v.id("businesses"),
+      userId: v.id("users"),
+      role: v.union(v.literal("owner"), v.literal("accountant"), v.literal("user")),
+      joinedAt: v.number(),
+    })
+      .index("by_business", ["businessId"])
+      .index("by_user", ["userId"])
+      .index("by_business_and_user", ["businessId", "userId"]),
+
     customers: defineTable({
       businessId: v.id("businesses"),
       name: v.string(),

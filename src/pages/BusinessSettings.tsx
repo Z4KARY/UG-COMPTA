@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function BusinessSettings() {
-  const business = useQuery(api.businesses.getMyBusiness);
+  const business = useQuery(api.businesses.getMyBusiness, {});
   const createBusiness = useMutation(api.businesses.create);
   const updateBusiness = useMutation(api.businesses.update);
 

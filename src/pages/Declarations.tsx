@@ -20,7 +20,7 @@ import { FileText, Download } from "lucide-react";
 import { useState } from "react";
 
 export default function Declarations() {
-  const business = useQuery(api.businesses.getMyBusiness);
+  const business = useQuery(api.businesses.getMyBusiness, {});
   
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());

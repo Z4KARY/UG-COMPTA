@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 
 export default function Customers() {
-  const business = useQuery(api.businesses.getMyBusiness);
+  const business = useQuery(api.businesses.getMyBusiness, {});
   const customers = useQuery(
     api.customers.list,
     business ? { businessId: business._id } : "skip"

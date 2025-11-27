@@ -48,7 +48,7 @@ interface InvoiceItem {
 
 export default function InvoiceCreate() {
   const navigate = useNavigate();
-  const business = useQuery(api.businesses.getMyBusiness);
+  const business = useQuery(api.businesses.getMyBusiness, {});
   const customers = useQuery(
     api.customers.list,
     business ? { businessId: business._id } : "skip"
