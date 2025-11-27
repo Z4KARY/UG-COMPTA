@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const list = query({
   args: { businessId: v.id("businesses") },
@@ -37,7 +38,18 @@ export const create = mutation({
     const business = await ctx.db.get(args.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
-    return await ctx.db.insert("products", { ...args, isActive: args.isActive ?? true });
+    const productId = await ctx.db.insert("products", { ...args, isActive: args.isActive ?? true });
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: args.businessId,
+        userId,
+        entityType: "PRODUCT",
+        entityId: productId,
+        action: "CREATE",
+        payloadAfter: args,
+    });
+
+    return productId;
   },
 });
 
@@ -65,6 +77,16 @@ export const update = mutation({
 
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: product.businessId,
+        userId,
+        entityType: "PRODUCT",
+        entityId: id,
+        action: "UPDATE",
+        payloadBefore: product,
+        payloadAfter: updates,
+    });
   },
 });
 
@@ -81,5 +103,14 @@ export const remove = mutation({
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     await ctx.db.delete(args.id);
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: product.businessId,
+        userId,
+        entityType: "PRODUCT",
+        entityId: args.id,
+        action: "DELETE",
+        payloadBefore: product,
+    });
   },
 });

@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
+import { internal } from "./_generated/api";
 
 // Generic query to get a fiscal parameter
 export const getFiscalParameter = query({
@@ -149,6 +150,18 @@ export const setFiscalParameter = mutation({
         effectiveTo: args.effectiveTo,
       });
     }
+
+    if (args.businessId) {
+        await ctx.scheduler.runAfter(0, internal.audit.log, {
+            businessId: args.businessId,
+            userId,
+            entityType: "FISCAL_CONFIG",
+            entityId: args.code,
+            action: "CONFIG_CHANGE",
+            payloadBefore: existing,
+            payloadAfter: args,
+        });
+    }
   },
 });
 
@@ -234,6 +247,18 @@ export const setStampDutyConfig = mutation({
         lawReference: args.lawReference,
         effectiveFrom: Date.now(),
       });
+    }
+
+    if (args.businessId) {
+        await ctx.scheduler.runAfter(0, internal.audit.log, {
+            businessId: args.businessId,
+            userId,
+            entityType: "FISCAL_CONFIG",
+            entityId: "STAMP_DUTY",
+            action: "CONFIG_CHANGE",
+            payloadBefore: existing,
+            payloadAfter: args.config,
+        });
     }
   },
 });

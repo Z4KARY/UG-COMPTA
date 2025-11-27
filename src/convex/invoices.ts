@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { calculateStampDuty, calculateLineItem, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
+import { internal } from "./_generated/api";
 
 export const list = query({
   args: { businessId: v.id("businesses") },
@@ -222,6 +223,15 @@ export const create = mutation({
       });
     }
 
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: args.businessId,
+        userId,
+        entityType: "INVOICE",
+        entityId: invoiceId,
+        action: "CREATE",
+        payloadAfter: invoiceData,
+    });
+
     return invoiceId;
   },
 });
@@ -327,6 +337,16 @@ export const update = mutation({
         });
       }
     }
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: invoice.businessId,
+        userId,
+        entityType: "INVOICE",
+        entityId: id,
+        action: "UPDATE",
+        payloadBefore: invoice,
+        payloadAfter: args,
+    });
   },
 });
 
@@ -354,6 +374,15 @@ export const remove = mutation({
 
     // Delete invoice
     await ctx.db.delete(args.id);
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: invoice.businessId,
+        userId,
+        entityType: "INVOICE",
+        entityId: args.id,
+        action: "DELETE",
+        payloadBefore: invoice,
+    });
   },
 });
 
@@ -379,6 +408,16 @@ export const updateStatus = mutation({
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     await ctx.db.patch(args.id, { status: args.status });
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: invoice.businessId,
+        userId,
+        entityType: "INVOICE",
+        entityId: args.id,
+        action: "UPDATE",
+        payloadBefore: { status: invoice.status },
+        payloadAfter: { status: args.status },
+    });
   },
 });
 
@@ -407,6 +446,16 @@ export const issue = mutation({
 
     await ctx.db.patch(args.id, { 
         status: "issued",
+    });
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: invoice.businessId,
+        userId,
+        entityType: "INVOICE",
+        entityId: args.id,
+        action: "ISSUE",
+        payloadBefore: { status: invoice.status },
+        payloadAfter: { status: "issued" },
     });
   },
 });
@@ -450,5 +499,15 @@ export const markAsPaid = mutation({
     });
 
     await ctx.db.patch(args.id, { status: "paid" });
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: invoice.businessId,
+        userId,
+        entityType: "INVOICE",
+        entityId: args.id,
+        action: "MARK_PAID",
+        payloadBefore: { status: invoice.status },
+        payloadAfter: { status: "paid", payment: args },
+    });
   },
 });

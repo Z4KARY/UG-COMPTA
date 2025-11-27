@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const getMyBusiness = query({
   args: { businessId: v.optional(v.id("businesses")) },
@@ -143,5 +144,15 @@ export const update = mutation({
 
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: id,
+        userId,
+        entityType: "BUSINESS",
+        entityId: id,
+        action: "UPDATE",
+        payloadBefore: business,
+        payloadAfter: updates,
+    });
   },
 });

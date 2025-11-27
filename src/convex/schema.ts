@@ -183,6 +183,30 @@ const schema = defineSchema(
       taxDueInitial: v.number(),
       submissionDate: v.number(),
     }).index("by_business_and_year", ["businessId", "year"]),
+
+    auditLogs: defineTable({
+      businessId: v.id("businesses"),
+      userId: v.id("users"),
+      entityType: v.union(
+        v.literal("INVOICE"),
+        v.literal("CUSTOMER"),
+        v.literal("PRODUCT"),
+        v.literal("FISCAL_CONFIG"),
+        v.literal("BUSINESS")
+      ),
+      entityId: v.string(),
+      action: v.union(
+        v.literal("CREATE"),
+        v.literal("UPDATE"),
+        v.literal("DELETE"),
+        v.literal("ISSUE"),
+        v.literal("MARK_PAID"),
+        v.literal("CONFIG_CHANGE")
+      ),
+      payloadBefore: v.optional(v.any()),
+      payloadAfter: v.optional(v.any()),
+      timestamp: v.optional(v.number()), // Add timestamp for easier querying if needed, though _creationTime exists
+    }).index("by_business", ["businessId"]),
   },
   {
     schemaValidation: false,

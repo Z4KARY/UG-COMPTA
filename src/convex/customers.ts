@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const list = query({
   args: { businessId: v.id("businesses") },
@@ -39,7 +40,18 @@ export const create = mutation({
     const business = await ctx.db.get(args.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
-    return await ctx.db.insert("customers", args);
+    const customerId = await ctx.db.insert("customers", args);
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: args.businessId,
+        userId,
+        entityType: "CUSTOMER",
+        entityId: customerId,
+        action: "CREATE",
+        payloadAfter: args,
+    });
+
+    return customerId;
   },
 });
 
@@ -69,6 +81,16 @@ export const update = mutation({
 
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: customer.businessId,
+        userId,
+        entityType: "CUSTOMER",
+        entityId: id,
+        action: "UPDATE",
+        payloadBefore: customer,
+        payloadAfter: updates,
+    });
   },
 });
 
@@ -85,5 +107,14 @@ export const remove = mutation({
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     await ctx.db.delete(args.id);
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: customer.businessId,
+        userId,
+        entityType: "CUSTOMER",
+        entityId: args.id,
+        action: "DELETE",
+        payloadBefore: customer,
+    });
   },
 });
