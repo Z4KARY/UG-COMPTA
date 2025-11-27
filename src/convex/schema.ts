@@ -102,10 +102,10 @@ const schema = defineSchema(
       currency: v.string(),
       status: v.union(
         v.literal("draft"),
-        v.literal("sent"),
+        v.literal("issued"), // Changed from sent
         v.literal("paid"),
         v.literal("overdue"),
-        v.literal("cancelled") // Added cancelled
+        v.literal("cancelled")
       ),
       notes: v.optional(v.string()),
       
@@ -120,6 +120,7 @@ const schema = defineSchema(
       
       // Totals
       subtotalHt: v.number(), // Sum of line HT
+      discountTotal: v.optional(v.number()), // global discount if applied
       totalTva: v.number(),
       stampDutyAmount: v.optional(v.number()), // Droit de timbre
       totalTtc: v.number(),
@@ -141,11 +142,27 @@ const schema = defineSchema(
       quantity: v.number(),
       unitPrice: v.number(),
       discountRate: v.optional(v.number()),
+      discountAmount: v.optional(v.number()), // line_discount_amount
       tvaRate: v.number(),
+      tvaAmount: v.optional(v.number()), // vat_amount
       lineTotal: v.number(), // This is usually TTC or HT depending on implementation, we'll clarify in logic
       lineTotalHt: v.optional(v.number()),
       lineTotalTtc: v.optional(v.number()),
       productType: v.optional(v.union(v.literal("goods"), v.literal("service"))), // Added for G12 breakdown
+    }).index("by_invoice", ["invoiceId"]),
+
+    payments: defineTable({
+      invoiceId: v.id("invoices"),
+      amount: v.number(),
+      paymentDate: v.number(),
+      paymentMethod: v.union(
+        v.literal("CASH"),
+        v.literal("BANK_TRANSFER"),
+        v.literal("CHEQUE"),
+        v.literal("CARD"),
+        v.literal("OTHER")
+      ),
+      reference: v.optional(v.string()),
     }).index("by_invoice", ["invoiceId"]),
 
     fiscalParameters: defineTable({

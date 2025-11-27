@@ -29,7 +29,7 @@ export default function InvoiceDetail() {
     window.print();
   };
 
-  const handleStatusChange = async (status: "sent" | "paid" | "cancelled") => {
+  const handleStatusChange = async (status: "issued" | "paid" | "cancelled") => {
     try {
       await updateStatus({ id: invoice._id, status });
       toast.success(`Invoice marked as ${status}`);
@@ -53,16 +53,16 @@ export default function InvoiceDetail() {
         </Button>
         <div className="flex gap-2">
           {invoice.status === "draft" && (
-            <Button onClick={() => handleStatusChange("sent")} variant="outline">
+            <Button onClick={() => handleStatusChange("issued")} variant="outline">
               <Send className="mr-2 h-4 w-4" /> Issue Invoice
             </Button>
           )}
-          {invoice.status === "sent" && (
+          {invoice.status === "issued" && (
             <Button onClick={() => handleStatusChange("paid")} variant="default">
               <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
             </Button>
           )}
-          {(invoice.status === "draft" || invoice.status === "sent") && (
+          {(invoice.status === "draft" || invoice.status === "issued") && (
             <Button onClick={() => handleStatusChange("cancelled")} variant="destructive">
               <XCircle className="mr-2 h-4 w-4" /> Cancel
             </Button>
@@ -82,7 +82,7 @@ export default function InvoiceDetail() {
             <div className="mt-2 text-sm">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                     invoice.status === "paid" ? "bg-green-100 text-green-800" :
-                    invoice.status === "sent" ? "bg-blue-100 text-blue-800" :
+                    invoice.status === "issued" ? "bg-blue-100 text-blue-800" :
                     invoice.status === "cancelled" ? "bg-red-100 text-red-800" :
                     "bg-gray-100 text-gray-800"
                 }`}>

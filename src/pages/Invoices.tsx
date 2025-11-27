@@ -46,7 +46,7 @@ export default function Invoices() {
     switch (status) {
       case "paid":
         return "bg-green-500/10 text-green-500 hover:bg-green-500/20";
-      case "sent":
+      case "issued":
         return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20";
       case "overdue":
         return "bg-red-500/10 text-red-500 hover:bg-red-500/20";

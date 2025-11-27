@@ -67,7 +67,7 @@ export const create = mutation({
     currency: v.string(),
     status: v.union(
       v.literal("draft"),
-      v.literal("sent"),
+      v.literal("issued"),
       v.literal("paid"),
       v.literal("overdue"),
       v.literal("cancelled")
@@ -84,6 +84,7 @@ export const create = mutation({
     
     // We accept these but will recalculate them server-side for security
     subtotalHt: v.number(),
+    discountTotal: v.optional(v.number()),
     totalTva: v.number(),
     stampDutyAmount: v.optional(v.number()),
     totalTtc: v.number(),
@@ -143,20 +144,28 @@ export const create = mutation({
     // Server-side calculation to ensure fiscal compliance
     let calculatedSubtotalHt = 0;
     let calculatedTotalTva = 0;
+    let calculatedDiscountTotal = 0;
 
     const processedItems = args.items.map(item => {
-      const { lineTotalHt, lineTva, lineTotalTtc } = calculateLineTotals(
-        item.quantity,
-        item.unitPrice,
-        item.discountRate || 0,
-        item.tvaRate
-      );
+      const quantity = item.quantity;
+      const unitPrice = item.unitPrice;
+      const discountRate = item.discountRate || 0;
+      const tvaRate = item.tvaRate;
+
+      const basePrice = unitPrice * quantity;
+      const discountAmount = basePrice * (discountRate / 100);
+      const lineTotalHt = basePrice - discountAmount;
+      const tvaAmount = lineTotalHt * (tvaRate / 100);
+      const lineTotalTtc = lineTotalHt + tvaAmount;
 
       calculatedSubtotalHt += lineTotalHt;
-      calculatedTotalTva += lineTva;
+      calculatedTotalTva += tvaAmount;
+      calculatedDiscountTotal += discountAmount;
 
       return {
         ...item,
+        discountAmount,
+        tvaAmount,
         lineTotal: lineTotalHt, // Storing HT as lineTotal for consistency with schema comments usually
         lineTotalHt,
         lineTotalTtc
@@ -188,6 +197,7 @@ export const create = mutation({
       
       subtotalHt: calculatedSubtotalHt,
       totalHt: calculatedSubtotalHt, // Legacy alias
+      discountTotal: calculatedDiscountTotal,
       totalTva: calculatedTotalTva,
       stampDutyAmount: stampDutyAmount,
       totalTtc: finalTotalTtc,
@@ -225,7 +235,7 @@ export const update = mutation({
     currency: v.optional(v.string()),
     status: v.optional(v.union(
       v.literal("draft"),
-      v.literal("sent"),
+      v.literal("issued"),
       v.literal("paid"),
       v.literal("overdue"),
       v.literal("cancelled")
@@ -239,6 +249,7 @@ export const update = mutation({
       v.literal("OTHER")
     )),
     subtotalHt: v.optional(v.number()),
+    discountTotal: v.optional(v.number()),
     totalTva: v.optional(v.number()),
     stampDutyAmount: v.optional(v.number()),
     totalTtc: v.optional(v.number()),
@@ -286,21 +297,22 @@ export const update = mutation({
 
       // Insert new items
       for (const item of items) {
-        // Recalculate line totals server-side for consistency if needed, 
-        // but for update we'll trust the passed values or recalculate if we want to be strict.
-        // For now, we insert as is, assuming frontend did calc or we reuse create logic.
-        // Ideally we should reuse the calculation logic from create.
-        
-        const { lineTotalHt, lineTva, lineTotalTtc } = calculateLineTotals(
-            item.quantity,
-            item.unitPrice,
-            item.discountRate || 0,
-            item.tvaRate
-        );
+        const quantity = item.quantity;
+        const unitPrice = item.unitPrice;
+        const discountRate = item.discountRate || 0;
+        const tvaRate = item.tvaRate;
+
+        const basePrice = unitPrice * quantity;
+        const discountAmount = basePrice * (discountRate / 100);
+        const lineTotalHt = basePrice - discountAmount;
+        const tvaAmount = lineTotalHt * (tvaRate / 100);
+        const lineTotalTtc = lineTotalHt + tvaAmount;
 
         await ctx.db.insert("invoiceItems", {
           invoiceId: id,
           ...item,
+          discountAmount,
+          tvaAmount,
           lineTotal: lineTotalHt,
           lineTotalHt,
           lineTotalTtc,
@@ -343,7 +355,7 @@ export const updateStatus = mutation({
     id: v.id("invoices"),
     status: v.union(
       v.literal("draft"),
-      v.literal("sent"),
+      v.literal("issued"),
       v.literal("paid"),
       v.literal("overdue"),
       v.literal("cancelled")
