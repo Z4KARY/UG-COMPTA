@@ -20,6 +20,7 @@ import {
   Package,
   Settings,
   Users,
+  FileSpreadsheet,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 
@@ -43,6 +44,11 @@ const items = [
     title: "Products",
     url: "/products",
     icon: Package,
+  },
+  {
+    title: "Declarations",
+    url: "/declarations",
+    icon: FileSpreadsheet,
   },
   {
     title: "Business Settings",

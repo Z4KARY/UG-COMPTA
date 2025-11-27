@@ -26,6 +26,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 interface InvoiceItem {
+  productId?: string;
   description: string;
   quantity: number;
   unitPrice: number;
@@ -56,8 +57,8 @@ export default function InvoiceCreate() {
     new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
   );
   const [notes, setNotes] = useState("");
-  const [timbre, setTimbre] = useState(false);
-  const [isCashPayment, setIsCashPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "BANK_TRANSFER" | "CHEQUE" | "CARD" | "OTHER">("CASH");
+  
   const [items, setItems] = useState<InvoiceItem[]>([
     {
       description: "",
@@ -71,7 +72,7 @@ export default function InvoiceCreate() {
 
   // Calculations
   const calculateTotals = () => {
-    let totalHt = 0;
+    let subtotalHt = 0;
     let totalTva = 0;
 
     items.forEach((item) => {
@@ -80,39 +81,41 @@ export default function InvoiceCreate() {
       const lineTotalHt = priceAfterDiscount * item.quantity;
       const lineTva = lineTotalHt * (item.tvaRate / 100);
 
-      totalHt += lineTotalHt;
+      subtotalHt += lineTotalHt;
       totalTva += lineTva;
     });
 
-    let baseTtc = totalHt + totalTva;
+    let baseTtc = subtotalHt + totalTva;
     
-    // Timbre Fiscal (10 DA fixed as per requirement)
-    const timbreAmount = timbre ? 10 : 0;
+    // Stamp Duty (Droit de Timbre) Calculation
+    // Only applies to CASH payments
+    // 1% per 100 DA, Min 5 DA, Max 2500 DA (or 10000 DA depending on config, using 10000 as safe upper limit from prompt)
+    let stampDutyAmount = 0;
 
-    // Cash Payment Penalty
-    // 0.5% under < 30,000 DA
-    // 1% between 30,000 – 120,000 DA
-    // 1.5% above 120,000 DA
-    let cashPenaltyPct = 0;
-    let cashPenaltyAmount = 0;
-
-    if (isCashPayment) {
-      if (baseTtc < 30000) {
-        cashPenaltyPct = 0.5;
-      } else if (baseTtc <= 120000) {
-        cashPenaltyPct = 1.0;
-      } else {
-        cashPenaltyPct = 1.5;
-      }
-      cashPenaltyAmount = baseTtc * (cashPenaltyPct / 100);
+    if (paymentMethod === "CASH") {
+      // Simplified logic based on prompt: 1% per 100 DA
+      // Min 5 DA
+      // Max 10000 DA
+      
+      // If amount < 500 DA (approx), it might be just 5 DA.
+      // Let's apply the 1% rule generally.
+      
+      const calculatedDuty = Math.ceil(baseTtc / 100) * 1.0; // 1 DA per 100 DA fraction
+      
+      stampDutyAmount = calculatedDuty;
+      
+      if (stampDutyAmount < 5) stampDutyAmount = 5;
+      if (stampDutyAmount > 10000) stampDutyAmount = 10000;
+      
+      // Exemption threshold? Usually very small amounts are still taxed, but let's assume standard application.
     }
 
-    const finalTotal = baseTtc + timbreAmount + cashPenaltyAmount;
+    const finalTotal = baseTtc + stampDutyAmount;
 
-    return { totalHt, totalTva, totalTtc: finalTotal, timbreAmount, cashPenaltyAmount, cashPenaltyPct };
+    return { subtotalHt, totalTva, totalTtc: finalTotal, stampDutyAmount };
   };
 
-  const { totalHt, totalTva, totalTtc, timbreAmount, cashPenaltyAmount, cashPenaltyPct } = calculateTotals();
+  const { subtotalHt, totalTva, totalTtc, stampDutyAmount } = calculateTotals();
 
   const handleItemChange = (
     index: number,
@@ -166,6 +169,7 @@ export default function InvoiceCreate() {
       const newItems = [...items];
       newItems[index] = {
         ...newItems[index],
+        productId: product._id,
         description: product.name,
         unitPrice: product.unitPrice,
         tvaRate: product.tvaRate,
@@ -195,12 +199,18 @@ export default function InvoiceCreate() {
         currency: business.currency,
         status: "draft",
         notes,
-        timbre,
-        cashPenaltyPercentage: isCashPayment ? cashPenaltyPct : undefined,
-        totalHt,
+        paymentMethod,
+        subtotalHt,
+        totalHt: subtotalHt, // Legacy support
         totalTva,
-        totalTtc, // This is the final total to pay
-        items,
+        stampDutyAmount,
+        totalTtc,
+        items: items.map(item => ({
+            ...item,
+            productId: item.productId as Id<"products"> | undefined,
+            lineTotalHt: item.lineTotal,
+            lineTotalTtc: item.lineTotal * (1 + item.tvaRate/100)
+        })),
       });
       toast.success("Invoice created successfully");
       navigate("/invoices");
@@ -264,6 +274,21 @@ export default function InvoiceCreate() {
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label>Payment Method</Label>
+                <Select value={paymentMethod} onValueChange={(val: any) => setPaymentMethod(val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CASH">Cash (Espèces)</SelectItem>
+                    <SelectItem value="BANK_TRANSFER">Bank Transfer (Virement)</SelectItem>
+                    <SelectItem value="CHEQUE">Cheque</SelectItem>
+                    <SelectItem value="CARD">Card (CIB/Edahabia)</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
@@ -370,7 +395,7 @@ export default function InvoiceCreate() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Total HT</span>
                 <span>
-                  {totalHt.toFixed(2)} {business.currency}
+                  {subtotalHt.toFixed(2)} {business.currency}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -380,40 +405,16 @@ export default function InvoiceCreate() {
                 </span>
               </div>
               
-              <div className="flex items-center justify-between text-sm pt-2 border-t">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={timbre}
-                    onCheckedChange={setTimbre}
-                    id="timbre"
-                  />
-                  <Label htmlFor="timbre">Timbre Fiscal (10 DA)</Label>
-                </div>
-                <span>
-                  {timbreAmount.toFixed(2)} {business.currency}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={isCashPayment}
-                    onCheckedChange={setIsCashPayment}
-                    id="cashPayment"
-                  />
-                  <Label htmlFor="cashPayment">Cash Payment</Label>
-                </div>
-                <div className="text-right">
-                  <span className="block">
-                    {cashPenaltyAmount.toFixed(2)} {business.currency}
+              {stampDutyAmount > 0 && (
+                <div className="flex items-center justify-between text-sm pt-2 border-t text-orange-600">
+                  <div className="flex items-center gap-2">
+                    <Label>Timbre Fiscal (Cash)</Label>
+                  </div>
+                  <span>
+                    {stampDutyAmount.toFixed(2)} {business.currency}
                   </span>
-                  {isCashPayment && (
-                    <span className="text-xs text-muted-foreground">
-                      Penalty: {cashPenaltyPct}%
-                    </span>
-                  )}
                 </div>
-              </div>
+              )}
 
               <div className="border-t pt-4 flex justify-between font-bold text-lg">
                 <span>Total TTC</span>

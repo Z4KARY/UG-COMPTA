@@ -42,6 +42,10 @@ const schema = defineSchema(
       logoUrl: v.optional(v.string()),
       currency: v.string(),
       tvaDefault: v.number(),
+      // New fields
+      fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
+      bankName: v.optional(v.string()),
+      bankIban: v.optional(v.string()),
     }).index("by_user", ["userId"]),
 
     customers: defineTable({
@@ -51,6 +55,7 @@ const schema = defineSchema(
       phone: v.optional(v.string()),
       address: v.optional(v.string()),
       notes: v.optional(v.string()),
+      taxId: v.optional(v.string()), // Added taxId (NIF)
     }).index("by_business", ["businessId"]),
 
     products: defineTable({
@@ -59,6 +64,7 @@ const schema = defineSchema(
       unitPrice: v.number(),
       tvaRate: v.number(),
       defaultDiscount: v.optional(v.number()),
+      unitLabel: v.optional(v.string()), // Added unit label
     }).index("by_business", ["businessId"]),
 
     invoices: defineTable({
@@ -72,14 +78,31 @@ const schema = defineSchema(
         v.literal("draft"),
         v.literal("sent"),
         v.literal("paid"),
-        v.literal("overdue")
+        v.literal("overdue"),
+        v.literal("cancelled") // Added cancelled
       ),
       notes: v.optional(v.string()),
-      timbre: v.boolean(),
-      cashPenaltyPercentage: v.optional(v.number()),
-      totalHt: v.number(),
+      
+      // Payment & Fiscal
+      paymentMethod: v.optional(v.union(
+        v.literal("CASH"),
+        v.literal("BANK_TRANSFER"),
+        v.literal("CHEQUE"),
+        v.literal("CARD"),
+        v.literal("OTHER")
+      )),
+      
+      // Totals
+      subtotalHt: v.number(), // Sum of line HT
       totalTva: v.number(),
+      stampDutyAmount: v.optional(v.number()), // Droit de timbre
       totalTtc: v.number(),
+      
+      // Deprecated/Legacy fields (keeping for compatibility if needed, but logic moves to stampDutyAmount)
+      timbre: v.optional(v.boolean()), 
+      cashPenaltyPercentage: v.optional(v.number()),
+      totalHt: v.optional(v.number()), // Alias for subtotalHt
+      
       pdfUrl: v.optional(v.string()),
     })
       .index("by_business", ["businessId"])
@@ -87,13 +110,24 @@ const schema = defineSchema(
 
     invoiceItems: defineTable({
       invoiceId: v.id("invoices"),
+      productId: v.optional(v.id("products")), // Link to product
       description: v.string(),
       quantity: v.number(),
       unitPrice: v.number(),
       discountRate: v.optional(v.number()),
       tvaRate: v.number(),
-      lineTotal: v.number(),
+      lineTotal: v.number(), // This is usually TTC or HT depending on implementation, we'll clarify in logic
+      lineTotalHt: v.optional(v.number()),
+      lineTotalTtc: v.optional(v.number()),
     }).index("by_invoice", ["invoiceId"]),
+
+    fiscalParameters: defineTable({
+      businessId: v.optional(v.id("businesses")), // Null for global defaults
+      code: v.string(), // e.g., "STAMP_DUTY_BRACKETS"
+      value: v.any(), // JSON object
+      lawReference: v.optional(v.string()),
+      effectiveFrom: v.optional(v.number()),
+    }).index("by_business_and_code", ["businessId", "code"]),
   },
   {
     schemaValidation: false,

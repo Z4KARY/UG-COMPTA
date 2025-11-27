@@ -27,6 +27,9 @@ export const create = mutation({
     logoUrl: v.optional(v.string()),
     currency: v.string(),
     tvaDefault: v.number(),
+    fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
+    bankName: v.optional(v.string()),
+    bankIban: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -61,6 +64,9 @@ export const update = mutation({
     logoUrl: v.optional(v.string()),
     currency: v.optional(v.string()),
     tvaDefault: v.optional(v.number()),
+    fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
+    bankName: v.optional(v.string()),
+    bankIban: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);

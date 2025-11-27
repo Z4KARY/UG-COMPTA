@@ -17,6 +17,7 @@ import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as businesses from "../businesses.js";
 import type * as customers from "../customers.js";
+import type * as declarations from "../declarations.js";
 import type * as http from "../http.js";
 import type * as invoices from "../invoices.js";
 import type * as products from "../products.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   businesses: typeof businesses;
   customers: typeof customers;
+  declarations: typeof declarations;
   http: typeof http;
   invoices: typeof invoices;
   products: typeof products;

@@ -9,6 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
@@ -27,6 +34,9 @@ export default function BusinessSettings() {
     ai: "",
     currency: "DZD",
     tvaDefault: 19,
+    fiscalRegime: "VAT",
+    bankName: "",
+    bankIban: "",
   });
 
   useEffect(() => {
@@ -39,6 +49,9 @@ export default function BusinessSettings() {
         ai: business.ai || "",
         currency: business.currency,
         tvaDefault: business.tvaDefault,
+        fiscalRegime: business.fiscalRegime || "VAT",
+        bankName: business.bankName || "",
+        bankIban: business.bankIban || "",
       });
     }
   }, [business]);
@@ -51,6 +64,13 @@ export default function BusinessSettings() {
     }));
   };
 
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -58,10 +78,14 @@ export default function BusinessSettings() {
         await updateBusiness({
           id: business._id,
           ...formData,
+          fiscalRegime: formData.fiscalRegime as "VAT" | "IFU" | "OTHER",
         });
         toast.success("Business profile updated");
       } else {
-        await createBusiness(formData);
+        await createBusiness({
+            ...formData,
+            fiscalRegime: formData.fiscalRegime as "VAT" | "IFU" | "OTHER",
+        });
         toast.success("Business profile created");
       }
     } catch (error) {
@@ -134,6 +158,22 @@ export default function BusinessSettings() {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="fiscalRegime">Fiscal Regime</Label>
+                <Select 
+                    value={formData.fiscalRegime} 
+                    onValueChange={(val) => handleSelectChange("fiscalRegime", val)}
+                >
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select regime" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="VAT">VAT (Réel)</SelectItem>
+                        <SelectItem value="IFU">IFU (Simplifié)</SelectItem>
+                        <SelectItem value="OTHER">Other</SelectItem>
+                    </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="currency">Currency</Label>
                 <Input
                   id="currency"
@@ -152,6 +192,24 @@ export default function BusinessSettings() {
                   value={formData.tvaDefault}
                   onChange={handleChange}
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bankName">Bank Name</Label>
+                <Input
+                  id="bankName"
+                  name="bankName"
+                  value={formData.bankName}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bankIban">IBAN / RIP</Label>
+                <Input
+                  id="bankIban"
+                  name="bankIban"
+                  value={formData.bankIban}
+                  onChange={handleChange}
                 />
               </div>
             </div>

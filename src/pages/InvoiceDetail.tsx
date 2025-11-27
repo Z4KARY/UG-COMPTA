@@ -27,19 +27,9 @@ export default function InvoiceDetail() {
     window.print();
   };
 
-  // Calculate derived values for display
-  // We need to reverse calculate some values if they aren't explicitly stored, 
-  // but we stored totalTtc as the final amount.
-  // The schema stores: totalHt, totalTva, totalTtc, timbre (bool), cashPenaltyPercentage (optional number)
-  
-  const timbreAmount = invoice.timbre ? 10 : 0;
-  
-  // If cash penalty exists, we can try to deduce the amount or just display the percentage.
-  // totalTtc = totalHt + totalTva + timbre + cashPenalty
-  // So cashPenalty = totalTtc - totalHt - totalTva - timbre
-  const calculatedCashPenalty = invoice.totalTtc - invoice.totalHt - invoice.totalTva - timbreAmount;
-  // Use a small epsilon for float comparison or just display if > 0.01
-  const hasCashPenalty = calculatedCashPenalty > 0.01;
+  // Fallback for legacy invoices
+  const stampDuty = invoice.stampDutyAmount ?? (invoice.timbre ? 10 : 0);
+  const subtotalHt = invoice.subtotalHt ?? invoice.totalHt ?? 0;
 
   return (
     <DashboardLayout>
@@ -60,6 +50,10 @@ export default function InvoiceDetail() {
           <div>
             <h1 className="text-2xl font-bold text-primary">INVOICE</h1>
             <p className="text-muted-foreground">{invoice.invoiceNumber}</p>
+            <div className="mt-2 text-sm text-muted-foreground">
+                <p>{invoice.status.toUpperCase()}</p>
+                {invoice.paymentMethod && <p>Method: {invoice.paymentMethod}</p>}
+            </div>
           </div>
           <div className="text-right">
             <h2 className="font-bold text-lg">{invoice.customer?.name}</h2>
@@ -72,6 +66,11 @@ export default function InvoiceDetail() {
             <p className="text-sm text-muted-foreground">
               {invoice.customer?.phone}
             </p>
+            {invoice.customer?.taxId && (
+                <p className="text-sm text-muted-foreground">
+                    NIF: {invoice.customer.taxId}
+                </p>
+            )}
           </div>
         </div>
 
@@ -121,7 +120,7 @@ export default function InvoiceDetail() {
             <div className="flex justify-between">
               <span>Total HT:</span>
               <span>
-                {invoice.totalHt.toLocaleString()} {invoice.currency}
+                {subtotalHt.toLocaleString()} {invoice.currency}
               </span>
             </div>
             <div className="flex justify-between">
@@ -130,16 +129,10 @@ export default function InvoiceDetail() {
                 {invoice.totalTva.toLocaleString()} {invoice.currency}
               </span>
             </div>
-            {invoice.timbre && (
+            {stampDuty > 0 && (
               <div className="flex justify-between">
                 <span>Timbre Fiscal:</span>
-                <span>10.00 {invoice.currency}</span>
-              </div>
-            )}
-            {hasCashPenalty && (
-              <div className="flex justify-between text-muted-foreground">
-                <span>Cash Penalty {invoice.cashPenaltyPercentage ? `(${invoice.cashPenaltyPercentage}%)` : ''}:</span>
-                <span>{calculatedCashPenalty.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {invoice.currency}</span>
+                <span>{stampDuty.toLocaleString()} {invoice.currency}</span>
               </div>
             )}
             <div className="flex justify-between font-bold text-lg border-t pt-2">

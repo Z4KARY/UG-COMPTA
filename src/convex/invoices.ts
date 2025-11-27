@@ -63,22 +63,41 @@ export const create = mutation({
       v.literal("draft"),
       v.literal("sent"),
       v.literal("paid"),
-      v.literal("overdue")
+      v.literal("overdue"),
+      v.literal("cancelled")
     ),
     notes: v.optional(v.string()),
-    timbre: v.boolean(),
-    cashPenaltyPercentage: v.optional(v.number()),
-    totalHt: v.number(),
+    
+    paymentMethod: v.optional(v.union(
+      v.literal("CASH"),
+      v.literal("BANK_TRANSFER"),
+      v.literal("CHEQUE"),
+      v.literal("CARD"),
+      v.literal("OTHER")
+    )),
+    
+    // Totals
+    subtotalHt: v.number(),
     totalTva: v.number(),
+    stampDutyAmount: v.optional(v.number()),
     totalTtc: v.number(),
+    
+    // Legacy/Optional
+    timbre: v.optional(v.boolean()),
+    cashPenaltyPercentage: v.optional(v.number()),
+    totalHt: v.optional(v.number()),
+
     items: v.array(
       v.object({
+        productId: v.optional(v.id("products")),
         description: v.string(),
         quantity: v.number(),
         unitPrice: v.number(),
         discountRate: v.optional(v.number()),
         tvaRate: v.number(),
         lineTotal: v.number(),
+        lineTotalHt: v.optional(v.number()),
+        lineTotalTtc: v.optional(v.number()),
       })
     ),
   },
@@ -90,6 +109,11 @@ export const create = mutation({
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     const { items, ...invoiceData } = args;
+
+    // Ensure totalHt is set if not provided (alias for subtotalHt)
+    if (invoiceData.totalHt === undefined) {
+      invoiceData.totalHt = invoiceData.subtotalHt;
+    }
 
     const invoiceId = await ctx.db.insert("invoices", invoiceData);
 
@@ -111,7 +135,8 @@ export const updateStatus = mutation({
       v.literal("draft"),
       v.literal("sent"),
       v.literal("paid"),
-      v.literal("overdue")
+      v.literal("overdue"),
+      v.literal("cancelled")
     ),
   },
   handler: async (ctx, args) => {
