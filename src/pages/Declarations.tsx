@@ -15,9 +15,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
-import { FileText, Download, Printer } from "lucide-react";
+import { useQuery, useMutation } from "convex/react";
+import { FileText, Download, Printer, Save } from "lucide-react";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export default function Declarations() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -25,6 +28,10 @@ export default function Declarations() {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth().toString());
+
+  // IFU Forecast State
+  const [forecastAmount, setForecastAmount] = useState("");
+  const [ifuRate, setIfuRate] = useState("5"); // Default 5%
 
   const g50Data = useQuery(api.declarations.getG50Data, 
     business ? { 
@@ -40,6 +47,30 @@ export default function Declarations() {
         year: parseInt(selectedYear)
     } : "skip"
   );
+
+  const g12IfuData = useQuery(api.declarations.getG12IFUData,
+    business && business.fiscalRegime === "IFU" ? {
+        businessId: business._id,
+        year: parseInt(selectedYear)
+    } : "skip"
+  );
+
+  const saveForecast = useMutation(api.declarations.saveG12Forecast);
+
+  const handleSaveForecast = async () => {
+    if (!business || !forecastAmount || !ifuRate) return;
+    try {
+        await saveForecast({
+            businessId: business._id,
+            year: parseInt(selectedYear),
+            forecastTurnover: parseFloat(forecastAmount),
+            ifuRate: parseFloat(ifuRate),
+        });
+        toast.success("G12 Forecast saved successfully");
+    } catch (error) {
+        toast.error("Failed to save forecast");
+    }
+  };
 
   const downloadG50CSV = (data: any) => {
     if (!data) return;
@@ -83,6 +114,40 @@ export default function Declarations() {
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", `G12_${selectedYear}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadG12BisCSV = (data: any) => {
+    if (!data) return;
+    
+    const forecast = data.forecast?.forecastTurnover || 0;
+    const real = data.currentYearRealTurnover || 0;
+    const rate = data.forecast?.ifuRate || 0;
+    const taxInitial = data.forecast?.taxDueInitial || 0;
+    const taxFinal = real * (rate / 100);
+    const adjustment = taxFinal - taxInitial;
+
+    const headers = ["Rubrique", "Montant"];
+    const rows = [
+        ["Année", data.year],
+        ["Chiffre d'affaires Prévisionnel (G12)", forecast.toFixed(2)],
+        ["Chiffre d'affaires Réel (G12bis)", real.toFixed(2)],
+        ["Taux IFU (%)", rate.toString()],
+        ["Impôt Dû (Initial)", taxInitial.toFixed(2)],
+        ["Impôt Dû (Final)", taxFinal.toFixed(2)],
+        ["Régularisation (A payer/Avoir)", adjustment.toFixed(2)],
+    ];
+
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + headers.join(",") + "\n" 
+        + rows.map(e => e.join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `G12bis_${selectedYear}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -195,7 +260,7 @@ export default function Declarations() {
                 G12 / G12bis Annual
             </CardTitle>
             <CardDescription>
-              Annual turnover declaration for IFU or Real regime.
+              Annual turnover declaration for {business.fiscalRegime === "IFU" ? "IFU (Simplified)" : "Real"} regime.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -213,39 +278,129 @@ export default function Declarations() {
 
             <div className="hidden print:block mb-4">
                 <p className="font-bold">Year: {selectedYear}</p>
-                <p>Regime: {g12Data?.fiscalRegime}</p>
+                <p>Regime: {business.fiscalRegime || "VAT"}</p>
             </div>
 
-            {g12Data ? (
-                <div className="space-y-2 border rounded-md p-4 bg-muted/20 print:bg-white print:border-gray-300">
-                    <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Fiscal Regime:</span>
-                        <span className="font-medium">{g12Data.fiscalRegime}</span>
-                    </div>
-                    <div className="flex justify-between border-b pb-2">
-                        <span className="text-sm text-muted-foreground">Total Annual Turnover (HT):</span>
-                        <span className="font-bold">{g12Data.turnoverHt.toLocaleString()} {business.currency}</span>
-                    </div>
-                    <div className="flex justify-between pt-2">
-                        <span className="text-sm text-muted-foreground">Goods (Vente de marchandises):</span>
-                        <span className="font-medium">{g12Data.turnoverGoods.toLocaleString()} {business.currency}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Services (Prestations):</span>
-                        <span className="font-medium">{g12Data.turnoverServices.toLocaleString()} {business.currency}</span>
-                    </div>
-                    <div className="pt-4 mt-2 print:hidden">
-                        <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => downloadG12CSV(g12Data)}
-                        >
-                            <Download className="mr-2 h-4 w-4" /> Export G12 CSV
-                        </Button>
-                    </div>
+            {business.fiscalRegime === "IFU" ? (
+                // IFU Specific View
+                <div className="space-y-4">
+                    {g12IfuData ? (
+                        <>
+                            <div className="p-4 border rounded-md bg-blue-50/50 space-y-2">
+                                <h3 className="font-semibold text-sm">G12 Forecast (Prévisionnel)</h3>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Turnover N-1 (Ref):</span>
+                                    <span>{g12IfuData.previousYearTurnover.toLocaleString()} {business.currency}</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 pt-2 print:hidden">
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">Forecast N</Label>
+                                        <Input 
+                                            type="number" 
+                                            value={forecastAmount} 
+                                            onChange={(e) => setForecastAmount(e.target.value)}
+                                            placeholder={g12IfuData.forecast?.forecastTurnover.toString() || "Enter forecast"}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">IFU Rate (%)</Label>
+                                        <Input 
+                                            type="number" 
+                                            value={ifuRate} 
+                                            onChange={(e) => setIfuRate(e.target.value)}
+                                            placeholder={g12IfuData.forecast?.ifuRate.toString() || "5"}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="pt-2 print:hidden">
+                                    <Button size="sm" onClick={handleSaveForecast} className="w-full">
+                                        <Save className="mr-2 h-3 w-3" /> Save Forecast
+                                    </Button>
+                                </div>
+                                {g12IfuData.forecast && (
+                                    <div className="pt-2 border-t mt-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span>Saved Forecast:</span>
+                                            <span className="font-medium">{g12IfuData.forecast.forecastTurnover.toLocaleString()} {business.currency}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Initial Tax Due:</span>
+                                            <span className="font-medium">{g12IfuData.forecast.taxDueInitial.toLocaleString()} {business.currency}</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-4 border rounded-md bg-green-50/50 space-y-2">
+                                <h3 className="font-semibold text-sm">G12bis Definitive (Régularisation)</h3>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Real Turnover N:</span>
+                                    <span className="font-bold">{g12IfuData.currentYearRealTurnover.toLocaleString()} {business.currency}</span>
+                                </div>
+                                {g12IfuData.forecast && (
+                                    <>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">Difference:</span>
+                                            <span className={g12IfuData.currentYearRealTurnover > g12IfuData.forecast.forecastTurnover ? "text-red-600" : "text-green-600"}>
+                                                {(g12IfuData.currentYearRealTurnover - g12IfuData.forecast.forecastTurnover).toLocaleString()} {business.currency}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-sm font-medium pt-2 border-t">
+                                            <span>Adjustment (Regularisation):</span>
+                                            <span>
+                                                {((g12IfuData.currentYearRealTurnover * (g12IfuData.forecast.ifuRate/100)) - g12IfuData.forecast.taxDueInitial).toLocaleString()} {business.currency}
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            <div className="pt-2 print:hidden">
+                                <Button 
+                                    variant="outline" 
+                                    className="w-full"
+                                    onClick={() => downloadG12BisCSV(g12IfuData)}
+                                >
+                                    <Download className="mr-2 h-4 w-4" /> Export G12bis CSV
+                                </Button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="text-center text-muted-foreground">Loading IFU data...</div>
+                    )}
                 </div>
             ) : (
-                <div className="p-4 text-center text-muted-foreground">Loading data...</div>
+                // Standard Real Regime View
+                g12Data ? (
+                    <div className="space-y-2 border rounded-md p-4 bg-muted/20 print:bg-white print:border-gray-300">
+                        <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Fiscal Regime:</span>
+                            <span className="font-medium">{g12Data.fiscalRegime}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-2">
+                            <span className="text-sm text-muted-foreground">Total Annual Turnover (HT):</span>
+                            <span className="font-bold">{g12Data.turnoverHt.toLocaleString()} {business.currency}</span>
+                        </div>
+                        <div className="flex justify-between pt-2">
+                            <span className="text-sm text-muted-foreground">Goods (Vente de marchandises):</span>
+                            <span className="font-medium">{g12Data.turnoverGoods.toLocaleString()} {business.currency}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Services (Prestations):</span>
+                            <span className="font-medium">{g12Data.turnoverServices.toLocaleString()} {business.currency}</span>
+                        </div>
+                        <div className="pt-4 mt-2 print:hidden">
+                            <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={() => downloadG12CSV(g12Data)}
+                            >
+                                <Download className="mr-2 h-4 w-4" /> Export G12 CSV
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="p-4 text-center text-muted-foreground">Loading data...</div>
+                )
             )}
           </CardContent>
         </Card>

@@ -173,6 +173,16 @@ const schema = defineSchema(
       effectiveFrom: v.number(), // Date timestamp
       effectiveTo: v.optional(v.number()), // Date timestamp, nullable
     }).index("by_business_and_code", ["businessId", "code"]),
+
+    // New table for G12 Forecasts (IFU Regime)
+    g12Forecasts: defineTable({
+      businessId: v.id("businesses"),
+      year: v.number(),
+      forecastTurnover: v.number(),
+      ifuRate: v.number(), // Percentage
+      taxDueInitial: v.number(),
+      submissionDate: v.number(),
+    }).index("by_business_and_year", ["businessId", "year"]),
   },
   {
     schemaValidation: false,

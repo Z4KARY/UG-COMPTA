@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getG50Data = query({
@@ -117,5 +117,104 @@ export const getG12Data = query({
       fiscalRegime: business.fiscalRegime || "VAT",
       invoiceCount: periodInvoices.length,
     };
+  },
+});
+
+export const getG12IFUData = query({
+  args: {
+    businessId: v.id("businesses"),
+    year: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business || business.userId !== userId) return null;
+
+    // 1. Get Previous Year Real Turnover (N-1)
+    const startPrev = new Date(args.year - 1, 0, 1).getTime();
+    const endPrev = new Date(args.year - 1, 11, 31, 23, 59, 59).getTime();
+    
+    const invoicesPrev = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const turnoverPrev = invoicesPrev
+        .filter(inv => inv.issueDate >= startPrev && inv.issueDate <= endPrev && inv.status !== "cancelled" && inv.status !== "draft")
+        .reduce((sum, inv) => sum + (inv.subtotalHt || inv.totalHt || 0), 0);
+
+    // 2. Get Current Year Real Turnover (N)
+    const startCurr = new Date(args.year, 0, 1).getTime();
+    const endCurr = new Date(args.year, 11, 31, 23, 59, 59).getTime();
+
+    const invoicesCurr = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const turnoverCurr = invoicesCurr
+        .filter(inv => inv.issueDate >= startCurr && inv.issueDate <= endCurr && inv.status !== "cancelled" && inv.status !== "draft")
+        .reduce((sum, inv) => sum + (inv.subtotalHt || inv.totalHt || 0), 0);
+
+    // 3. Get Forecast for N
+    const forecast = await ctx.db
+      .query("g12Forecasts")
+      .withIndex("by_business_and_year", (q) => q.eq("businessId", args.businessId).eq("year", args.year))
+      .first();
+
+    return {
+        year: args.year,
+        previousYearTurnover: turnoverPrev,
+        currentYearRealTurnover: turnoverCurr,
+        forecast: forecast ? {
+            forecastTurnover: forecast.forecastTurnover,
+            ifuRate: forecast.ifuRate,
+            taxDueInitial: forecast.taxDueInitial,
+            submissionDate: forecast.submissionDate
+        } : null
+    };
+  },
+});
+
+export const saveG12Forecast = mutation({
+  args: {
+    businessId: v.id("businesses"),
+    year: v.number(),
+    forecastTurnover: v.number(),
+    ifuRate: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+    const taxDueInitial = args.forecastTurnover * (args.ifuRate / 100);
+
+    const existing = await ctx.db
+      .query("g12Forecasts")
+      .withIndex("by_business_and_year", (q) => q.eq("businessId", args.businessId).eq("year", args.year))
+      .first();
+
+    if (existing) {
+        await ctx.db.patch(existing._id, {
+            forecastTurnover: args.forecastTurnover,
+            ifuRate: args.ifuRate,
+            taxDueInitial,
+            submissionDate: Date.now(),
+        });
+    } else {
+        await ctx.db.insert("g12Forecasts", {
+            businessId: args.businessId,
+            year: args.year,
+            forecastTurnover: args.forecastTurnover,
+            ifuRate: args.ifuRate,
+            taxDueInitial,
+            submissionDate: Date.now(),
+        });
+    }
   },
 });
