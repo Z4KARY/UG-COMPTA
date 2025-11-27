@@ -1,20 +1,282 @@
-export const create = mutation({
-  args: {
-    // ...
-    timbre: v.boolean(),
-    // ...
-    totalHt: v.number(),
-    totalTva: v.number(),
-    totalTtc: v.number(),
-    // ...
+// src/convex/reports.ts
+// ...
+payments: defineTable({
+  invoiceId: v.id("invoices"),
+  amount: v.number(),
+  paymentDate: v.number(),
+  paymentMethod: v.union(...),
+  reference: v.optional(v.string()),
+}).index("by_invoice", ["invoiceId"]),
+export const list = query({
+  args: { 
+    businessId: v.id("businesses"),
+    status: v.optional(v.string()),
+    customerId: v.optional(v.id("customers")),
+    dateRange: v.optional(v.object({
+        from: v.number(),
+        to: v.number()
+    }))
   },
-  // ...
-});
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
 
-invoices: defineTable({
-  // ...
-  timbre: v.boolean(),
-  // ...
-})
-const finalTotal = totalTtc + timbreAmount;
-return { totalHt, totalTva, totalTtc: finalTotal, timbreAmount };
+    const business = await ctx.db.get(args.businessId);
+    if (!business || business.userId !== userId) return [];
+
+    let invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .order("desc")
+      .collect();
+
+    if (args.status) {
+        invoices = invoices.filter(i => i.status === args.status);
+    }
+    if (args.customerId) {
+        invoices = invoices.filter(i => i.customerId === args.customerId);
+    }
+    if (args.dateRange) {
+        invoices = invoices.filter(i => i.issueDate >= args.dateRange!.from && i.issueDate <= args.dateRange!.to);
+    }
+
+    // Fetch customer names for each invoice
+    const invoicesWithCustomer = await Promise.all(
+      invoices.map(async (invoice) => {
+        const customer = await ctx.db.get(invoice.customerId);
+        return { ...invoice, customerName: customer?.name || "Unknown" };
+      })
+    );
+
+    return invoicesWithCustomer;
+  },
+});
+export const get = query({
+  args: {
+    id: v.id("invoices"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) return null;
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) return null;
+
+    return invoice;
+  },
+});
+export const getTopPerformers = query({
+  args: {
+    businessId: v.id("businesses"),
+    from: v.number(),
+    to: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business || business.userId !== userId) return null;
+
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const periodInvoices = invoices.filter(
+      (inv) =>
+        inv.issueDate >= args.from &&
+        inv.issueDate <= args.to &&
+        inv.status !== "cancelled" &&
+        inv.status !== "draft"
+    );
+
+    let turnover = 0;
+    let tva = 0;
+    let stampDuty = 0;
+
+    for (const inv of periodInvoices) {
+      turnover += inv.subtotalHt || inv.totalHt || 0;
+      tva += inv.totalTva || 0;
+      stampDuty += inv.stampDutyAmount || 0;
+    }
+
+    return {
+      turnover,
+      tva,
+      stampDuty,
+      invoiceCount: periodInvoices.length,
+      from: args.from,
+      to: args.to,
+    };
+  },
+});
+export const getSummary = query({
+  args: {
+    businessId: v.id("businesses"),
+    from: v.number(),
+    to: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business || business.userId !== userId) return null;
+
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const periodInvoices = invoices.filter(
+      (inv) =>
+        inv.issueDate >= args.from &&
+        inv.issueDate <= args.to &&
+        inv.status !== "cancelled" &&
+        inv.status !== "draft"
+    );
+
+    let turnover = 0;
+    let tva = 0;
+    let stampDuty = 0;
+
+    for (const inv of periodInvoices) {
+      turnover += inv.subtotalHt || inv.totalHt || 0;
+      tva += inv.totalTva || 0;
+      stampDuty += inv.stampDutyAmount || 0;
+    }
+
+    return {
+      turnover,
+      tva,
+      stampDuty,
+      invoiceCount: periodInvoices.length,
+      from: args.from,
+      to: args.to,
+    };
+  },
+});
+export const update = mutation({
+  args: {
+    id: v.id("invoices"),
+    status: v.optional(v.union("draft", "paid", "cancelled")),
+    items: v.optional(v.array(v.object({
+      productId: v.id("products"),
+      quantity: v.number(),
+      price: v.number(),
+    }))),
+    customerId: v.optional(v.id("customers")),
+    businessId: v.id("businesses"),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+    if (invoice.status === "paid" || invoice.status === "cancelled") {
+        throw new Error("Cannot edit a finalized invoice");
+    }
+
+    const { id, items, ...fields } = args;
+    const invoiceToUpdate = await ctx.db.get(id);
+    if (!invoiceToUpdate) throw new Error("Invoice not found");
+
+    // Update invoice fields
+    const updatedInvoice = {
+      ...invoiceToUpdate,
+      ...fields,
+      status: fields.status || invoiceToUpdate.status,
+      items: items || invoiceToUpdate.items,
+    };
+
+    await ctx.db.update(id, updatedInvoice);
+    return updatedInvoice;
+  },
+});
+export const updateStatus = mutation({
+  args: {
+    id: v.id("invoices"),
+    status: v.optional(v.union("draft", "paid", "cancelled")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+    await ctx.db.patch(args.id, { status: args.status });
+  },
+});
+export const markAsPaid = mutation({
+  args: {
+    id: v.id("invoices"),
+    amount: v.number(),
+    paymentDate: v.number(),
+    paymentMethod: v.union(
+      v.literal("CASH"),
+      v.literal("BANK_TRANSFER"),
+      v.literal("CHEQUE"),
+      v.literal("CARD"),
+      v.literal("OTHER")
+    ),
+    reference: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+    await ctx.db.patch(args.id, { 
+        status: "paid",
+        paymentMethod: args.paymentMethod 
+    });
+
+    await ctx.db.insert("payments", {
+        invoiceId: args.id,
+        amount: args.amount,
+        paymentDate: args.paymentDate,
+        paymentMethod: args.paymentMethod,
+        reference: args.reference,
+    });
+  },
+});
+export const issue = mutation({
+  args: {
+    id: v.id("invoices"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+    if (invoice.status !== "draft") {
+        throw new Error("Invoice is already issued or finalized");
+    }
+
+    await ctx.db.patch(args.id, { status: "issued" });
+  },
+});
