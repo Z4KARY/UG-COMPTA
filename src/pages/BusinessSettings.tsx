@@ -28,7 +28,9 @@ export default function BusinessSettings() {
 
   const [formData, setFormData] = useState({
     name: "",
+    tradeName: "",
     address: "",
+    city: "",
     rc: "",
     nif: "",
     ai: "",
@@ -43,7 +45,9 @@ export default function BusinessSettings() {
     if (business) {
       setFormData({
         name: business.name,
+        tradeName: business.tradeName || "",
         address: business.address,
+        city: business.city || "",
         rc: business.rc || "",
         nif: business.nif || "",
         ai: business.ai || "",
@@ -111,13 +115,23 @@ export default function BusinessSettings() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Business Name</Label>
+                <Label htmlFor="name">Business Name (Raison Sociale)</Label>
                 <Input
                   id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tradeName">Trade Name (Nom Commercial)</Label>
+                <Input
+                  id="tradeName"
+                  name="tradeName"
+                  value={formData.tradeName}
+                  onChange={handleChange}
+                  placeholder="Optional"
                 />
               </div>
               <div className="space-y-2">
@@ -128,6 +142,15 @@ export default function BusinessSettings() {
                   value={formData.address}
                   onChange={handleChange}
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="city">City (Wilaya/Commune)</Label>
+                <Input
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
                 />
               </div>
               <div className="space-y-2">

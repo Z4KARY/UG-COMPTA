@@ -35,7 +35,9 @@ const schema = defineSchema(
     businesses: defineTable({
       userId: v.id("users"),
       name: v.string(),
+      tradeName: v.optional(v.string()), // Added trade_name
       address: v.string(),
+      city: v.optional(v.string()), // Added city
       rc: v.optional(v.string()),
       nif: v.optional(v.string()),
       ai: v.optional(v.string()),
@@ -52,7 +54,7 @@ const schema = defineSchema(
     businessMembers: defineTable({
       businessId: v.id("businesses"),
       userId: v.id("users"),
-      role: v.union(v.literal("owner"), v.literal("accountant"), v.literal("user")),
+      role: v.union(v.literal("owner"), v.literal("accountant"), v.literal("staff")), // Updated to match spec (STAFF)
       joinedAt: v.number(),
     })
       .index("by_business", ["businessId"])

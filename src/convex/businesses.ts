@@ -79,7 +79,9 @@ export const listMyBusinesses = query({
 export const create = mutation({
   args: {
     name: v.string(),
+    tradeName: v.optional(v.string()),
     address: v.string(),
+    city: v.optional(v.string()),
     rc: v.optional(v.string()),
     nif: v.optional(v.string()),
     ai: v.optional(v.string()),
@@ -117,7 +119,9 @@ export const update = mutation({
   args: {
     id: v.id("businesses"),
     name: v.optional(v.string()),
+    tradeName: v.optional(v.string()),
     address: v.optional(v.string()),
+    city: v.optional(v.string()),
     rc: v.optional(v.string()),
     nif: v.optional(v.string()),
     ai: v.optional(v.string()),
