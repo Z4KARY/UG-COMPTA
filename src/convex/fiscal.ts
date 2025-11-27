@@ -18,6 +18,8 @@ export const FISCAL_CONSTANTS = {
   }
 };
 
+export type StampDutyConfig = typeof FISCAL_CONSTANTS.STAMP_DUTY;
+
 /**
  * Calculates the Stamp Duty (Droit de Timbre) for a given amount.
  * Applies only to CASH payments.
@@ -33,16 +35,21 @@ export const FISCAL_CONSTANTS = {
  * 
  * @param amountTtcBeforeStamp The total amount (HT + TVA) before stamp duty
  * @param paymentMethod The payment method used
+ * @param config Optional configuration object to override defaults (from DB)
  * @returns The calculated stamp duty amount
  */
-export function calculateStampDuty(amountTtcBeforeStamp: number, paymentMethod: string): number {
+export function calculateStampDuty(
+  amountTtcBeforeStamp: number, 
+  paymentMethod: string,
+  config: StampDutyConfig = FISCAL_CONSTANTS.STAMP_DUTY
+): number {
   // Art. 258 quinquies: Electronic payments (Bank Transfer, Cheque, Card) are exempt.
   // Only CASH (Espèces) is subject to stamp duty.
   if (paymentMethod !== "CASH") {
     return 0;
   }
 
-  const { MIN_DUTY, MAX_DUTY, RATE_PER_100DA } = FISCAL_CONSTANTS.STAMP_DUTY;
+  const { MIN_DUTY, MAX_DUTY, RATE_PER_100DA } = config;
 
   // 1 DA per 100 DA or fraction thereof
   // Example: 150 DA -> 2 DA duty

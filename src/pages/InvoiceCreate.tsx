@@ -20,15 +20,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { Plus, Trash2, Calculator } from "lucide-react";
+import { Plus, Trash2, Calculator, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Simplified client-side version of the fiscal logic for preview
-// The authoritative logic is in convex/fiscal.ts
-// Updated for LF 2025 compliance
-const FISCAL_CONSTANTS = {
+// We will fetch these from backend now, but keep defaults for initial state
+const DEFAULT_FISCAL_CONSTANTS = {
   STAMP_DUTY: {
     MIN_DUTY: 5,
     MAX_DUTY: 10000,
@@ -57,6 +56,12 @@ export default function InvoiceCreate() {
     api.products.list,
     business ? { businessId: business._id } : "skip"
   );
+  
+  // Fetch fiscal parameters
+  const stampDutyConfig = useQuery(api.fiscalParameters.getStampDutyConfig, 
+    business ? { businessId: business._id } : "skip"
+  );
+
   const createInvoice = useMutation(api.invoices.create);
 
   const [customerId, setCustomerId] = useState<string>("");
@@ -103,7 +108,9 @@ export default function InvoiceCreate() {
     let stampDutyAmount = 0;
 
     if (paymentMethod === "CASH") {
-      const { MIN_DUTY, MAX_DUTY, RATE_PER_100DA } = FISCAL_CONSTANTS.STAMP_DUTY;
+      // Use fetched config or defaults
+      const config = stampDutyConfig || DEFAULT_FISCAL_CONSTANTS.STAMP_DUTY;
+      const { MIN_DUTY, MAX_DUTY, RATE_PER_100DA } = config;
       
       // 1 DA per 100 DA or fraction thereof
       stampDutyAmount = Math.ceil(baseTtc / 100) * RATE_PER_100DA;
@@ -426,6 +433,31 @@ export default function InvoiceCreate() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Fiscal Alerts */}
+          {paymentMethod === "CASH" && (
+            <Alert className="bg-orange-50 border-orange-200">
+              <Info className="h-4 w-4 text-orange-600" />
+              <AlertTitle className="text-orange-800">Stamp Duty Applied</AlertTitle>
+              <AlertDescription className="text-orange-700 text-xs">
+                Cash payments are subject to stamp duty (1% per 100 DA, Min {stampDutyConfig?.MIN_DUTY || 5} DA, Max {stampDutyConfig?.MAX_DUTY || 10000} DA).
+                <br />
+                Ref: Code du Timbre Art. 258.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {paymentMethod !== "CASH" && paymentMethod !== "OTHER" && (
+             <Alert className="bg-green-50 border-green-200">
+              <Info className="h-4 w-4 text-green-600" />
+              <AlertTitle className="text-green-800">Stamp Duty Exempt</AlertTitle>
+              <AlertDescription className="text-green-700 text-xs">
+                Electronic payments (Cheque, Transfer, Card) are exempt from stamp duty.
+                <br />
+                Ref: Loi de Finances 2025, Art. 258 quinquies.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Actions */}
           <Card>

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { calculateStampDuty, calculateLineTotals } from "./fiscal";
+import { calculateStampDuty, calculateLineTotals, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
 
 export const list = query({
   args: { businessId: v.id("businesses") },
@@ -109,6 +109,31 @@ export const create = mutation({
     const business = await ctx.db.get(args.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
+    // Fetch Fiscal Parameters (Stamp Duty)
+    // Try business specific first, then global, then default
+    let stampDutyConfig: StampDutyConfig = FISCAL_CONSTANTS.STAMP_DUTY;
+    
+    const businessParam = await ctx.db
+        .query("fiscalParameters")
+        .withIndex("by_business_and_code", (q) => 
+          q.eq("businessId", args.businessId).eq("code", "STAMP_DUTY")
+        )
+        .first();
+    
+    if (businessParam) {
+        stampDutyConfig = businessParam.value as StampDutyConfig;
+    } else {
+        const globalParam = await ctx.db
+            .query("fiscalParameters")
+            .withIndex("by_business_and_code", (q) => 
+              q.eq("businessId", undefined).eq("code", "STAMP_DUTY")
+            )
+            .first();
+        if (globalParam) {
+            stampDutyConfig = globalParam.value as StampDutyConfig;
+        }
+    }
+
     // Server-side calculation to ensure fiscal compliance
     let calculatedSubtotalHt = 0;
     let calculatedTotalTva = 0;
@@ -134,10 +159,11 @@ export const create = mutation({
 
     const totalBeforeStamp = calculatedSubtotalHt + calculatedTotalTva;
     
-    // Calculate Stamp Duty (Droit de Timbre)
+    // Calculate Stamp Duty (Droit de Timbre) using fetched config
     const stampDutyAmount = calculateStampDuty(
       totalBeforeStamp, 
-      args.paymentMethod || "OTHER"
+      args.paymentMethod || "OTHER",
+      stampDutyConfig
     );
 
     const finalTotalTtc = totalBeforeStamp + stampDutyAmount;
