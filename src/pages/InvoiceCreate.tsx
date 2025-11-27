@@ -43,6 +43,7 @@ interface InvoiceItem {
   discountRate: number;
   tvaRate: number;
   lineTotal: number;
+  productType?: "goods" | "service";
 }
 
 export default function InvoiceCreate() {
@@ -82,10 +83,19 @@ export default function InvoiceCreate() {
       quantity: 1,
       unitPrice: 0,
       discountRate: 0,
-      tvaRate: 19,
+      tvaRate: business?.fiscalRegime === "IFU" ? 0 : 19,
       lineTotal: 0,
+      productType: "service",
     },
   ]);
+
+  // Update default TVA when business loads
+  useEffect(() => {
+    if (business && items.length === 1 && items[0].description === "" && items[0].unitPrice === 0) {
+        const defaultTva = business.fiscalRegime === "IFU" ? 0 : (business.tvaDefault || 19);
+        setItems([{ ...items[0], tvaRate: defaultTva }]);
+    }
+  }, [business]);
 
   // Calculations
   const calculateTotals = () => {
@@ -135,8 +145,9 @@ export default function InvoiceCreate() {
     const newItems = [...items];
     const item = { ...newItems[index] };
 
-    if (field === "description") {
-      item.description = value as string;
+    if (field === "description" || field === "productType") {
+      // @ts-ignore
+      item[field] = value;
     } else {
       item[field as "quantity" | "unitPrice" | "discountRate" | "tvaRate"] =
         parseFloat(value as string) || 0;
@@ -159,8 +170,9 @@ export default function InvoiceCreate() {
         quantity: 1,
         unitPrice: 0,
         discountRate: 0,
-        tvaRate: business?.tvaDefault || 19,
+        tvaRate: business?.fiscalRegime === "IFU" ? 0 : (business?.tvaDefault || 19),
         lineTotal: 0,
+        productType: "service",
       },
     ]);
   };
@@ -182,8 +194,9 @@ export default function InvoiceCreate() {
         productId: product._id,
         description: product.name,
         unitPrice: product.unitPrice,
-        tvaRate: product.tvaRate,
+        tvaRate: business?.fiscalRegime === "IFU" ? 0 : product.tvaRate,
         discountRate: product.defaultDiscount || 0,
+        productType: product.type || "service",
       };
       // Recalculate line total
       const priceAfterDiscount =
@@ -355,6 +368,21 @@ export default function InvoiceCreate() {
                     </div>
                   </div>
                   <div className="col-span-2 space-y-1">
+                    <Label className="text-xs">Type</Label>
+                    <Select 
+                        value={item.productType || "service"} 
+                        onValueChange={(val) => handleItemChange(index, "productType", val)}
+                    >
+                        <SelectTrigger className="h-10">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="service">Service</SelectItem>
+                            <SelectItem value="goods">Goods</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-1 space-y-1">
                     <Label className="text-xs">Qty</Label>
                     <Input
                       type="number"
@@ -374,7 +402,7 @@ export default function InvoiceCreate() {
                       }
                     />
                   </div>
-                  <div className="col-span-2 space-y-1">
+                  <div className="col-span-1 space-y-1">
                     <Label className="text-xs">TVA %</Label>
                     <Input
                       type="number"

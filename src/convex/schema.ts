@@ -68,6 +68,7 @@ const schema = defineSchema(
       tvaRate: v.number(),
       defaultDiscount: v.optional(v.number()),
       unitLabel: v.optional(v.string()), // Added unit label
+      type: v.optional(v.union(v.literal("goods"), v.literal("service"))), // Added product type
     }).index("by_business", ["businessId"]),
 
     invoices: defineTable({
@@ -128,6 +129,7 @@ const schema = defineSchema(
       lineTotal: v.number(), // This is usually TTC or HT depending on implementation, we'll clarify in logic
       lineTotalHt: v.optional(v.number()),
       lineTotalTtc: v.optional(v.number()),
+      productType: v.optional(v.union(v.literal("goods"), v.literal("service"))), // Added for G12 breakdown
     }).index("by_invoice", ["invoiceId"]),
 
     fiscalParameters: defineTable({

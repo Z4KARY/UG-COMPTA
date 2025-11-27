@@ -81,15 +81,34 @@ export const getG12Data = query({
     );
 
     let turnoverHt = 0;
+    let turnoverGoods = 0;
+    let turnoverServices = 0;
     
     for (const inv of periodInvoices) {
       turnoverHt += inv.subtotalHt || inv.totalHt || 0;
+
+      // Fetch items to categorize turnover
+      const items = await ctx.db
+        .query("invoiceItems")
+        .withIndex("by_invoice", (q) => q.eq("invoiceId", inv._id))
+        .collect();
+
+      for (const item of items) {
+        const itemTotal = item.lineTotalHt || item.lineTotal || 0;
+        if (item.productType === "goods") {
+            turnoverGoods += itemTotal;
+        } else {
+            turnoverServices += itemTotal;
+        }
+      }
     }
 
     return {
       businessName: business.name,
       year: args.year,
       turnoverHt,
+      turnoverGoods,
+      turnoverServices,
       fiscalRegime: business.fiscalRegime || "VAT",
       invoiceCount: periodInvoices.length,
     };

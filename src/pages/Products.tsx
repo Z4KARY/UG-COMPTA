@@ -19,6 +19,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -48,6 +55,7 @@ export default function Products() {
     unitPrice: 0,
     tvaRate: 19,
     defaultDiscount: 0,
+    type: "service" as "goods" | "service",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,6 +64,10 @@ export default function Products() {
       ...formData,
       [name]: name === "name" ? value : parseFloat(value) || 0,
     });
+  };
+
+  const handleTypeChange = (value: "goods" | "service") => {
+    setFormData({ ...formData, type: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,7 +80,7 @@ export default function Products() {
       });
       toast.success("Product created");
       setIsDialogOpen(false);
-      setFormData({ name: "", unitPrice: 0, tvaRate: 19, defaultDiscount: 0 });
+      setFormData({ name: "", unitPrice: 0, tvaRate: 19, defaultDiscount: 0, type: "service" });
     } catch (error) {
       toast.error("Failed to create product");
     }
@@ -114,6 +126,20 @@ export default function Products() {
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="type" className="text-right">
+                    Type
+                  </Label>
+                  <Select value={formData.type} onValueChange={handleTypeChange}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="service">Service (Prestation)</SelectItem>
+                      <SelectItem value="goods">Goods (Marchandise)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">
                     Name
@@ -198,7 +224,10 @@ export default function Products() {
             <TableBody>
               {products?.map((product) => (
                 <TableRow key={product._id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {product.name}
+                    <div className="text-xs text-muted-foreground capitalize">{product.type || "service"}</div>
+                  </TableCell>
                   <TableCell>{product.unitPrice.toLocaleString()} {business.currency}</TableCell>
                   <TableCell>{product.tvaRate}%</TableCell>
                   <TableCell>{product.defaultDiscount || 0}%</TableCell>

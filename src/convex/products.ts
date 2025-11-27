@@ -25,6 +25,7 @@ export const create = mutation({
     unitPrice: v.number(),
     tvaRate: v.number(),
     defaultDiscount: v.optional(v.number()),
+    type: v.optional(v.union(v.literal("goods"), v.literal("service"))),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -44,6 +45,7 @@ export const update = mutation({
     unitPrice: v.optional(v.number()),
     tvaRate: v.optional(v.number()),
     defaultDiscount: v.optional(v.number()),
+    type: v.optional(v.union(v.literal("goods"), v.literal("service"))),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);

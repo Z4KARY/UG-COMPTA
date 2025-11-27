@@ -171,9 +171,17 @@ export default function Declarations() {
                         <span className="text-sm text-muted-foreground">Fiscal Regime:</span>
                         <span className="font-medium">{g12Data.fiscalRegime}</span>
                     </div>
+                    <div className="flex justify-between border-b pb-2">
+                        <span className="text-sm text-muted-foreground">Total Annual Turnover (HT):</span>
+                        <span className="font-bold">{g12Data.turnoverHt.toLocaleString()} {business.currency}</span>
+                    </div>
+                    <div className="flex justify-between pt-2">
+                        <span className="text-sm text-muted-foreground">Goods (Vente de marchandises):</span>
+                        <span className="font-medium">{g12Data.turnoverGoods.toLocaleString()} {business.currency}</span>
+                    </div>
                     <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Annual Turnover (HT):</span>
-                        <span className="font-medium">{g12Data.turnoverHt.toLocaleString()} {business.currency}</span>
+                        <span className="text-sm text-muted-foreground">Services (Prestations):</span>
+                        <span className="font-medium">{g12Data.turnoverServices.toLocaleString()} {business.currency}</span>
                     </div>
                     <div className="pt-2 border-t mt-2">
                         <Button 

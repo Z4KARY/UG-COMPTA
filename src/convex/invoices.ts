@@ -104,6 +104,7 @@ export const create = mutation({
         lineTotal: v.number(),
         lineTotalHt: v.optional(v.number()),
         lineTotalTtc: v.optional(v.number()),
+        productType: v.optional(v.union(v.literal("goods"), v.literal("service"))),
       })
     ),
   },
@@ -201,6 +202,7 @@ export const create = mutation({
       await ctx.db.insert("invoiceItems", {
         invoiceId,
         ...item,
+        productType: item.productType || "service", // Default to service if not specified
       });
     }
 
@@ -251,6 +253,7 @@ export const update = mutation({
         lineTotal: v.number(),
         lineTotalHt: v.optional(v.number()),
         lineTotalTtc: v.optional(v.number()),
+        productType: v.optional(v.union(v.literal("goods"), v.literal("service"))),
       })
     )),
   },
@@ -300,7 +303,8 @@ export const update = mutation({
           ...item,
           lineTotal: lineTotalHt,
           lineTotalHt,
-          lineTotalTtc
+          lineTotalTtc,
+          productType: item.productType || "service",
         });
       }
     }
