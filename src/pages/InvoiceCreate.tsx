@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CreateCustomerDialog } from "@/components/CreateCustomerDialog";
 
 // We will fetch these from backend now, but keep defaults for initial state
 const DEFAULT_FISCAL_CONSTANTS = {
@@ -242,7 +243,7 @@ export default function InvoiceCreate() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (status: "draft" | "issued" = "draft") => {
     if (!business || !customerId) {
       toast.error("Please select a customer");
       return;
@@ -257,7 +258,7 @@ export default function InvoiceCreate() {
         issueDate: new Date(issueDate).getTime(),
         dueDate: new Date(dueDate).getTime(),
         currency: business.currency,
-        status: "draft",
+        status: status, // Use passed status
         notes,
         paymentMethod,
         subtotalHt,
@@ -272,7 +273,7 @@ export default function InvoiceCreate() {
             lineTotalTtc: item.lineTotal * (1 + item.tvaRate/100)
         })),
       });
-      toast.success("Invoice created successfully");
+      toast.success(`Invoice ${status === "issued" ? "issued" : "saved as draft"} successfully`);
       navigate("/invoices");
     } catch (error) {
       toast.error("Failed to create invoice");
@@ -290,6 +291,27 @@ export default function InvoiceCreate() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          {/* Business Info (Read-Only) */}
+          <Card className="bg-muted/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Business Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p className="font-bold">{business.name}</p>
+                        <p>{business.address}</p>
+                        {business.city && <p>{business.city}</p>}
+                    </div>
+                    <div className="text-right">
+                        <p>NIF: {business.nif || "-"}</p>
+                        <p>RC: {business.rc || "-"}</p>
+                        <p>AI: {business.ai || "-"}</p>
+                    </div>
+                </div>
+            </CardContent>
+          </Card>
+
           {/* Customer & Invoice Details */}
           <Card>
             <CardHeader>
@@ -311,18 +333,24 @@ export default function InvoiceCreate() {
               </div>
               <div className="space-y-2">
                 <Label>Customer</Label>
-                <Select value={customerId} onValueChange={setCustomerId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select customer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {customers?.map((c) => (
-                      <SelectItem key={c._id} value={c._id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                    <Select value={customerId} onValueChange={setCustomerId}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select customer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {customers?.map((c) => (
+                        <SelectItem key={c._id} value={c._id}>
+                            {c.name}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                    <CreateCustomerDialog 
+                        businessId={business._id} 
+                        onCustomerCreated={(id) => setCustomerId(id)}
+                    />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Invoice Number</Label>
@@ -554,9 +582,14 @@ export default function InvoiceCreate() {
                   placeholder="Payment terms, notes, etc."
                 />
               </div>
-              <Button className="w-full" onClick={handleSubmit}>
-                Save Invoice
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" onClick={() => handleSubmit("draft")}>
+                    Save Draft
+                </Button>
+                <Button onClick={() => handleSubmit("issued")}>
+                    Issue Invoice
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
