@@ -24,8 +24,8 @@ export const getG50Data = query({
       .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
       .collect();
 
-    // Filter in memory for date range (since we don't have a compound index on date yet)
-    // In a real app, we should add an index on [businessId, issueDate]
+    // Filter for the period
+    // We include invoices issued in this month that are valid (not cancelled/draft)
     const periodInvoices = invoices.filter(
       (inv) => inv.issueDate >= startDate && inv.issueDate <= endDate && inv.status !== "cancelled" && inv.status !== "draft"
     );
@@ -38,15 +38,19 @@ export const getG50Data = query({
       turnoverHt += inv.subtotalHt || inv.totalHt || 0;
       tvaCollected += inv.totalTva || 0;
       
-      // Stamp duty is collected on cash payments (quittance)
-      // Strictly speaking, this applies when the cash is received.
-      if (inv.paymentMethod === "CASH" && inv.status === "paid") {
+      // Stamp duty is collected on cash payments.
+      // For G50, we sum stamp duty for invoices paid in cash.
+      // Assuming cash payments are collected in the same month as issuance for simplicity
+      // or that the invoice is marked as paid/issued with CASH method.
+      if (inv.paymentMethod === "CASH") {
          stampDutyTotal += inv.stampDutyAmount || 0;
       }
     }
 
     return {
       businessName: business.name,
+      businessAddress: business.address,
+      businessNif: business.nif,
       period: `${args.month + 1}/${args.year}`,
       turnoverHt,
       tvaCollected,
@@ -105,6 +109,7 @@ export const getG12Data = query({
 
     return {
       businessName: business.name,
+      businessNif: business.nif,
       year: args.year,
       turnoverHt,
       turnoverGoods,
