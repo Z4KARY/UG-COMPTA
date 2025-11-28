@@ -287,16 +287,25 @@ export default function BusinessSettings() {
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Business Name (Raison Sociale)</Label>
+                <Label htmlFor="name">
+                  {formData.type === "societe" 
+                    ? "Business Name (Raison Sociale)" 
+                    : "Full Name (Nom & Prénom)"}
+                </Label>
                 <Input
                   id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="e.g. SARL Tech Solutions"
+                  placeholder={formData.type === "societe" ? "e.g. SARL Tech Solutions" : "e.g. Ahmed Benali"}
                   required
                   className="bg-muted/30"
                 />
+                {formData.type !== "societe" && (
+                  <p className="text-[0.8rem] text-muted-foreground">
+                    Enter your full legal name as it appears on your documents.
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tradeName">Trade Name (Nom Commercial)</Label>
@@ -305,9 +314,14 @@ export default function BusinessSettings() {
                   name="tradeName"
                   value={formData.tradeName}
                   onChange={handleChange}
-                  placeholder="Optional"
+                  placeholder={formData.type === "societe" ? "Optional" : "e.g. My Shop"}
                   className="bg-muted/30"
                 />
+                {formData.type !== "societe" && (
+                  <p className="text-[0.8rem] text-muted-foreground">
+                    Do not include legal prefixes (EURL, SARL, etc.) in the trade name.
+                  </p>
+                )}
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="address">Address</Label>
