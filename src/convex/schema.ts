@@ -147,7 +147,8 @@ const schema = defineSchema(
       pdfHash: v.optional(v.string()), // SHA256 hash for integrity/traceability
     })
       .index("by_business", ["businessId"])
-      .index("by_customer", ["customerId"]),
+      .index("by_customer", ["customerId"])
+      .index("by_status", ["status"]), // Added index for cron jobs
 
     invoiceItems: defineTable({
       invoiceId: v.id("invoices"),
@@ -287,6 +288,18 @@ const schema = defineSchema(
       payloadAfter: v.optional(v.any()),
       timestamp: v.optional(v.number()),
     }).index("by_business", ["businessId"]),
+
+    invoiceReminders: defineTable({
+      invoiceId: v.id("invoices"),
+      status: v.union(v.literal("PENDING"), v.literal("SENT"), v.literal("FAILED")),
+      reminderType: v.union(v.literal("BEFORE_DUE"), v.literal("ON_DUE"), v.literal("AFTER_DUE")),
+      offsetDays: v.number(),
+      channel: v.union(v.literal("EMAIL"), v.literal("NONE")),
+      sentAt: v.optional(v.number()),
+      error: v.optional(v.string()),
+    })
+      .index("by_invoice", ["invoiceId"])
+      .index("by_status", ["status"]),
   },
   {
     schemaValidation: false,

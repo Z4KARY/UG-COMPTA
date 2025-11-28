@@ -505,6 +505,11 @@ export const issue = mutation({
         pdfHash: args.pdfHash,
     });
 
+    // Schedule creation of default reminders
+    await ctx.scheduler.runAfter(0, internal.reminders.createDefaults, {
+        invoiceId: args.id
+    });
+
     await ctx.scheduler.runAfter(0, internal.audit.log, {
         businessId: invoice.businessId,
         userId,
