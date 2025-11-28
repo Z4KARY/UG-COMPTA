@@ -105,6 +105,16 @@ export const create = mutation({
         vatDeductible = vatTotal;
     }
 
+    // Check for closed period
+    const closure = await ctx.db.query("periodClosures")
+        .withIndex("by_business", q => q.eq("businessId", args.businessId))
+        .filter(q => q.and(q.lte(q.field("startDate"), args.invoiceDate), q.gte(q.field("endDate"), args.invoiceDate)))
+        .first();
+    
+    if (closure) {
+        throw new Error("Cannot record purchase in a closed period");
+    }
+
     const purchaseInvoiceId = await ctx.db.insert("purchaseInvoices", {
         businessId: args.businessId,
         supplierId: args.supplierId,
@@ -148,6 +158,16 @@ export const remove = mutation({
                 .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
                 .first();
             if (!member) throw new Error("Unauthorized");
+        }
+
+        // Check for closed period
+        const closure = await ctx.db.query("periodClosures")
+            .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+            .filter(q => q.and(q.lte(q.field("startDate"), invoice.invoiceDate), q.gte(q.field("endDate"), invoice.invoiceDate)))
+            .first();
+        
+        if (closure) {
+            throw new Error("Cannot delete purchase from a closed period");
         }
 
         // Delete items

@@ -142,6 +142,16 @@ export const create = mutation({
         }
     }
 
+    // Check for closed period
+    const closure = await ctx.db.query("periodClosures")
+        .withIndex("by_business", q => q.eq("businessId", args.businessId))
+        .filter(q => q.and(q.lte(q.field("startDate"), args.issueDate), q.gte(q.field("endDate"), args.issueDate)))
+        .first();
+    
+    if (closure) {
+        throw new Error(`Cannot create invoice in a closed period (${new Date(closure.startDate).toLocaleDateString()} - ${new Date(closure.endDate).toLocaleDateString()})`);
+    }
+
     // Server-side calculation to ensure fiscal compliance
     let calculatedSubtotalHt = 0;
     let calculatedTotalTva = 0;
@@ -299,6 +309,29 @@ export const update = mutation({
         throw new Error("Cannot edit finalized invoice");
     }
 
+    // Check if existing invoice date is in closed period
+    const existingClosure = await ctx.db.query("periodClosures")
+        .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+        .filter(q => q.and(q.lte(q.field("startDate"), invoice.issueDate), q.gte(q.field("endDate"), invoice.issueDate)))
+        .first();
+    
+    if (existingClosure) {
+        throw new Error("Cannot edit invoice in a closed period");
+    }
+
+    // Check if new date is in closed period (if changing date)
+    if (args.issueDate !== undefined) {
+        const newIssueDate = args.issueDate;
+        const newClosure = await ctx.db.query("periodClosures")
+            .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+            .filter(q => q.and(q.lte(q.field("startDate"), newIssueDate), q.gte(q.field("endDate"), newIssueDate)))
+            .first();
+        
+        if (newClosure) {
+            throw new Error("Cannot move invoice to a closed period");
+        }
+    }
+
     const { id, items, ...fields } = args;
 
     // Update invoice fields
@@ -361,6 +394,16 @@ export const remove = mutation({
 
     const business = await ctx.db.get(invoice.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+    // Check for closed period
+    const closure = await ctx.db.query("periodClosures")
+        .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+        .filter(q => q.and(q.lte(q.field("startDate"), invoice.issueDate), q.gte(q.field("endDate"), invoice.issueDate)))
+        .first();
+    
+    if (closure) {
+        throw new Error("Cannot delete invoice in a closed period");
+    }
 
     // Delete items first
     const items = await ctx.db
@@ -447,6 +490,16 @@ export const issue = mutation({
 
     if (invoice.status !== "draft") throw new Error("Invoice already issued or processed");
 
+    // Check for closed period
+    const closure = await ctx.db.query("periodClosures")
+        .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+        .filter(q => q.and(q.lte(q.field("startDate"), invoice.issueDate), q.gte(q.field("endDate"), invoice.issueDate)))
+        .first();
+    
+    if (closure) {
+        throw new Error("Cannot issue invoice in a closed period");
+    }
+
     await ctx.db.patch(args.id, { 
         status: "issued",
         pdfHash: args.pdfHash,
@@ -492,6 +545,16 @@ export const markAsPaid = mutation({
             .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
             .first();
          if (!member) throw new Error("Unauthorized");
+    }
+
+    // Check for closed period (Payment Date)
+    const closure = await ctx.db.query("periodClosures")
+        .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+        .filter(q => q.and(q.lte(q.field("startDate"), args.paymentDate), q.gte(q.field("endDate"), args.paymentDate)))
+        .first();
+    
+    if (closure) {
+        throw new Error("Cannot record payment in a closed period");
     }
 
     await ctx.db.insert("payments", {

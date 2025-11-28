@@ -30,6 +30,7 @@ const schema = defineSchema(
       isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
 
       role: v.optional(roleValidator), // role of the user. do not remove
+      roleGlobal: v.optional(v.union(v.literal("NORMAL"), v.literal("ACCOUNTANT"), v.literal("ADMIN"))), // Added for accountant mode
       isSuspended: v.optional(v.boolean()), // Added for admin suspension
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
@@ -62,6 +63,16 @@ const schema = defineSchema(
       .index("by_business", ["businessId"])
       .index("by_user", ["userId"])
       .index("by_business_and_user", ["businessId", "userId"]),
+
+    periodClosures: defineTable({
+      businessId: v.id("businesses"),
+      periodType: v.union(v.literal("MONTH"), v.literal("YEAR")),
+      startDate: v.number(),
+      endDate: v.number(),
+      closedByUserId: v.id("users"),
+      closedAt: v.number(),
+      notes: v.optional(v.string()),
+    }).index("by_business", ["businessId"]),
 
     customers: defineTable({
       businessId: v.id("businesses"),

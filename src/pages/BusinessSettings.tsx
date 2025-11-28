@@ -30,15 +30,29 @@ import {
   Wallet,
   Download,
   Archive,
+  Lock,
+  Unlock,
+  Calendar,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 export default function BusinessSettings() {
   const business = useQuery(api.businesses.getMyBusiness, {});
   const createBusiness = useMutation(api.businesses.create);
   const updateBusiness = useMutation(api.businesses.update);
   
+  // Period Closures
+  const periods = useQuery(api.periods.list, business ? { businessId: business._id } : "skip");
+  const closePeriod = useMutation(api.periods.close);
+  const openPeriod = useMutation(api.periods.remove);
+  
+  const [closureData, setClosureData] = useState({
+      month: new Date().getMonth(),
+      year: new Date().getFullYear(),
+  });
+
   // For export functionality
   const exportData = useQuery(api.businesses.exportData, business ? { businessId: business._id } : "skip");
 
@@ -130,6 +144,39 @@ export default function BusinessSettings() {
     link.click();
     document.body.removeChild(link);
     toast.success("Backup downloaded successfully");
+  };
+
+  const handleClosePeriod = async () => {
+      if (!business) return;
+      
+      // Calculate start and end of month
+      const startDate = new Date(closureData.year, closureData.month, 1).getTime();
+      const endDate = new Date(closureData.year, closureData.month + 1, 0, 23, 59, 59).getTime();
+      
+      try {
+          await closePeriod({
+              businessId: business._id,
+              periodType: "MONTH",
+              startDate,
+              endDate,
+              notes: `Closed ${closureData.month + 1}/${closureData.year}`,
+          });
+          toast.success("Period closed successfully");
+      } catch (error) {
+          toast.error("Failed to close period");
+          console.error(error);
+      }
+  };
+
+  const handleReopenPeriod = async (id: any) => {
+      if (confirm("Are you sure you want to reopen this period? This will allow modifications.")) {
+          try {
+              await openPeriod({ id });
+              toast.success("Period reopened");
+          } catch (error) {
+              toast.error("Failed to reopen period");
+          }
+      }
   };
 
   return (
@@ -396,6 +443,89 @@ export default function BusinessSettings() {
                     <Download className="mr-2 h-4 w-4" />
                     Export Data
                 </Button>
+            </CardContent>
+          </Card>
+
+          {/* Accounting Periods Section */}
+          <Card className="md:col-span-2 shadow-sm">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-purple-500/10 rounded-lg">
+                  <Lock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <CardTitle>Accounting Periods</CardTitle>
+                  <CardDescription>
+                    Close fiscal periods to prevent modifications to invoices and purchases.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="flex items-end gap-4 border-b pb-6">
+                    <div className="space-y-2">
+                        <Label>Month</Label>
+                        <Select 
+                            value={closureData.month.toString()} 
+                            onValueChange={(v) => setClosureData({...closureData, month: parseInt(v)})}
+                        >
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: 12 }).map((_, i) => (
+                                    <SelectItem key={i} value={i.toString()}>
+                                        {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Year</Label>
+                        <Input 
+                            type="number" 
+                            value={closureData.year} 
+                            onChange={(e) => setClosureData({...closureData, year: parseInt(e.target.value)})}
+                            className="w-[100px]"
+                        />
+                    </div>
+                    <Button type="button" onClick={handleClosePeriod}>
+                        <Lock className="mr-2 h-4 w-4" />
+                        Close Period
+                    </Button>
+                </div>
+
+                <div className="space-y-4">
+                    <h3 className="text-sm font-medium text-muted-foreground">Closed Periods</h3>
+                    {periods?.length === 0 && (
+                        <p className="text-sm text-muted-foreground italic">No closed periods.</p>
+                    )}
+                    <div className="grid gap-2">
+                        {periods?.map((period) => (
+                            <div key={period._id} className="flex items-center justify-between p-3 bg-muted/30 rounded-md border">
+                                <div className="flex items-center gap-3">
+                                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm font-medium">
+                                        {format(period.startDate, "MMM yyyy")}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                        ({format(period.startDate, "dd/MM/yyyy")} - {format(period.endDate, "dd/MM/yyyy")})
+                                    </span>
+                                </div>
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 text-destructive hover:text-destructive"
+                                    onClick={() => handleReopenPeriod(period._id)}
+                                >
+                                    <Unlock className="mr-2 h-3 w-3" />
+                                    Reopen
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </CardContent>
           </Card>
         </form>
