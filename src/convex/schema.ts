@@ -80,7 +80,8 @@ const schema = defineSchema(
       autoEntrepreneurCardNumber: v.optional(v.string()),
       activityCodes: v.optional(v.array(v.string())),
       ssNumber: v.optional(v.string()), // CASNOS
-    }).index("by_user", ["userId"]),
+    }).index("by_user", ["userId"])
+      .index("by_ae_card", ["autoEntrepreneurCardNumber"]),
 
     // New table for multi-user access to businesses
     businessMembers: defineTable({

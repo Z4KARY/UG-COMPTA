@@ -136,6 +136,18 @@ export const create = mutation({
         finalTvaDefault = 0; // Force VAT = 0
         finalRc = undefined; // No RC for AE
         finalAi = undefined; // No AI for AE
+
+        // Check for AE Card Number Uniqueness
+        if (args.autoEntrepreneurCardNumber) {
+            const existing = await ctx.db
+                .query("businesses")
+                .withIndex("by_ae_card", (q) => q.eq("autoEntrepreneurCardNumber", args.autoEntrepreneurCardNumber))
+                .first();
+            
+            if (existing) {
+                throw new Error("This Auto-Entrepreneur Card Number is already registered.");
+            }
+        }
     } else if (args.type === "personne_physique") {
         // Can be reel or forfaitaire.
         if (args.fiscalRegime === "IFU") finalFiscalRegime = "forfaitaire"; // Map legacy
@@ -251,6 +263,18 @@ export const update = mutation({
         
         if (updates.fiscalRegime === "forfaitaire") {
             updates.tvaDefault = 0;
+        }
+    }
+
+    // Check for AE Card Number Uniqueness on Update
+    if (updates.autoEntrepreneurCardNumber) {
+        const existing = await ctx.db
+            .query("businesses")
+            .withIndex("by_ae_card", (q) => q.eq("autoEntrepreneurCardNumber", updates.autoEntrepreneurCardNumber))
+            .first();
+        
+        if (existing && existing._id !== args.id) {
+            throw new Error("This Auto-Entrepreneur Card Number is already registered by another business.");
         }
     }
 
