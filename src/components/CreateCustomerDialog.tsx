@@ -166,6 +166,27 @@ export function CreateCustomerDialog({ businessId, onCustomerCreated }: CreateCu
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="ai">AI (Article d'Imposition)</Label>
+                <Input
+                  id="ai"
+                  name="ai"
+                  value={formData.ai}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nis">NIS</Label>
+                <Input
+                  id="nis"
+                  name="nis"
+                  value={formData.nis}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button type="submit">Create Customer</Button>

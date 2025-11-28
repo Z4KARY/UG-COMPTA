@@ -43,6 +43,8 @@ const schema = defineSchema(
       rc: v.optional(v.string()),
       nif: v.optional(v.string()),
       ai: v.optional(v.string()),
+      nis: v.optional(v.string()), // Added NIS (Numéro d'Identification Statistique)
+      capital: v.optional(v.number()), // Added Capital Social
       logoUrl: v.optional(v.string()),
       currency: v.string(),
       tvaDefault: v.number(),

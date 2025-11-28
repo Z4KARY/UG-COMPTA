@@ -109,6 +109,10 @@ export default function InvoiceDetail() {
                     <p className="text-sm text-muted-foreground">NIF: {business?.nif || "N/A"}</p>
                     <p className="text-sm text-muted-foreground">RC: {business?.rc || "N/A"}</p>
                     <p className="text-sm text-muted-foreground">AI: {business?.ai || "N/A"}</p>
+                    <p className="text-sm text-muted-foreground">NIS: {business?.nis || "N/A"}</p>
+                    {business?.capital && (
+                        <p className="text-sm text-muted-foreground">Capital: {business.capital.toLocaleString()} {business.currency}</p>
+                    )}
                 </>
             )}
           </div>
@@ -129,6 +133,21 @@ export default function InvoiceDetail() {
             {invoice.customer?.taxId && (
                 <p className="text-sm text-muted-foreground">
                     NIF: {invoice.customer.taxId}
+                </p>
+            )}
+            {invoice.customer?.rc && (
+                <p className="text-sm text-muted-foreground">
+                    RC: {invoice.customer.rc}
+                </p>
+            )}
+            {invoice.customer?.ai && (
+                <p className="text-sm text-muted-foreground">
+                    AI: {invoice.customer.ai}
+                </p>
+            )}
+            {invoice.customer?.nis && (
+                <p className="text-sm text-muted-foreground">
+                    NIS: {invoice.customer.nis}
                 </p>
             )}
         </div>

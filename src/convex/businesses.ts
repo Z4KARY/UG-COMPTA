@@ -86,6 +86,8 @@ export const create = mutation({
     rc: v.optional(v.string()),
     nif: v.optional(v.string()),
     ai: v.optional(v.string()),
+    nis: v.optional(v.string()),
+    capital: v.optional(v.number()),
     logoUrl: v.optional(v.string()),
     currency: v.string(),
     tvaDefault: v.number(),
@@ -138,6 +140,7 @@ export const create = mutation({
     let finalTvaDefault = args.tvaDefault;
     let finalRc = args.rc;
     let finalAi = args.ai;
+    let finalNis = args.nis;
 
     if (args.type === "societe") {
         finalFiscalRegime = "reel";
@@ -148,6 +151,7 @@ export const create = mutation({
         finalTvaDefault = 0; // Force VAT = 0
         finalRc = undefined; // No RC for AE
         finalAi = undefined; // No AI for AE
+        finalNis = undefined; // No NIS for AE usually, or optional
 
         // Check for AE Card Number Uniqueness
         if (args.autoEntrepreneurCardNumber) {
@@ -176,6 +180,7 @@ export const create = mutation({
       ...args,
       rc: finalRc,
       ai: finalAi,
+      nis: finalNis,
       fiscalRegime: finalFiscalRegime,
       tvaDefault: finalTvaDefault,
     });
@@ -202,6 +207,8 @@ export const update = mutation({
     rc: v.optional(v.string()),
     nif: v.optional(v.string()),
     ai: v.optional(v.string()),
+    nis: v.optional(v.string()),
+    capital: v.optional(v.number()),
     logoUrl: v.optional(v.string()),
     currency: v.optional(v.string()),
     tvaDefault: v.optional(v.number()),
@@ -281,6 +288,7 @@ export const update = mutation({
         updates.tvaDefault = 0;
         updates.rc = undefined; // Clear RC
         updates.ai = undefined; // Clear AI
+        updates.nis = undefined; // Clear NIS
     } else if (updates.type === "personne_physique") {
         if (updates.fiscalRegime === "IFU") updates.fiscalRegime = "forfaitaire";
         if (updates.fiscalRegime === "VAT") updates.fiscalRegime = "reel";

@@ -72,6 +72,8 @@ export default function BusinessSettings() {
     rc: "",
     nif: "",
     ai: "",
+    nis: "",
+    capital: "",
     currency: "DZD",
     tvaDefault: 19,
     type: "societe", // Default
@@ -96,6 +98,8 @@ export default function BusinessSettings() {
         rc: business.rc || "",
         nif: business.nif || "",
         ai: business.ai || "",
+        nis: business.nis || "",
+        capital: business.capital?.toString() || "",
         currency: business.currency,
         tvaDefault: business.tvaDefault,
         type: business.type || "societe",
@@ -115,7 +119,7 @@ export default function BusinessSettings() {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "tvaDefault" ? parseFloat(value) || 0 : value,
+      [name]: name === "tvaDefault" || name === "capital" ? parseFloat(value) || (name === "capital" ? "" : 0) : value,
     }));
   };
 
@@ -136,6 +140,7 @@ export default function BusinessSettings() {
                 newData.legalForm = "AUTO_ENTREPRENEUR"; 
                 newData.rc = ""; // Clear RC
                 newData.ai = ""; // Clear AI
+                newData.nis = ""; // Clear NIS
                 newData.customLegalForm = "";
             } else if (value === "personne_physique") {
                 newData.fiscalRegime = "forfaitaire"; // Default to IFU
@@ -166,6 +171,7 @@ export default function BusinessSettings() {
           fiscalRegime: formData.fiscalRegime as "reel" | "forfaitaire" | "auto_entrepreneur",
           legalForm: formData.legalForm as any,
           activityCodes: formData.activityCodes.split(",").map(s => s.trim()).filter(s => s !== ""),
+          capital: formData.capital ? parseFloat(formData.capital.toString()) : undefined,
       };
 
       if (business) {
@@ -550,16 +556,41 @@ export default function BusinessSettings() {
                         />
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="ai">Article d'Imposition (AI)</Label>
-                        <Input
-                        id="ai"
-                        name="ai"
-                        value={formData.ai}
-                        onChange={handleChange}
-                        placeholder="Article Imposition"
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="ai">Article d'Imposition (AI)</Label>
+                            <Input
+                            id="ai"
+                            name="ai"
+                            value={formData.ai}
+                            onChange={handleChange}
+                            placeholder="Article Imposition"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="nis">NIS</Label>
+                            <Input
+                            id="nis"
+                            name="nis"
+                            value={formData.nis}
+                            onChange={handleChange}
+                            placeholder="Numéro Id. Statistique"
+                            />
+                        </div>
                     </div>
+                    {formData.type === "societe" && (
+                        <div className="space-y-2">
+                            <Label htmlFor="capital">Social Capital</Label>
+                            <Input
+                            id="capital"
+                            name="capital"
+                            type="number"
+                            value={formData.capital}
+                            onChange={handleChange}
+                            placeholder="e.g. 100000"
+                            />
+                        </div>
+                    )}
                   </>
               )}
               
