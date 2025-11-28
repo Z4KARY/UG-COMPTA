@@ -157,9 +157,11 @@ export default function Landing() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
-            <div className="bg-primary/10 p-2 rounded-lg">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
+            <img 
+              src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
+              alt="UpGrowth" 
+              className="h-8 w-auto object-contain" 
+            />
             <span>InvoiceFlow</span>
           </div>
           
@@ -494,9 +496,11 @@ export default function Landing() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center gap-2 font-bold text-xl mb-4">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
+                <img 
+                  src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
+                  alt="UpGrowth" 
+                  className="h-8 w-auto object-contain" 
+                />
                 <span>InvoiceFlow</span>
               </div>
               <p className="text-muted-foreground max-w-xs">

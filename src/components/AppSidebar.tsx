@@ -91,8 +91,12 @@ export function AppSidebar() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer transition-colors data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                      <FileText className="size-4" />
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                      <img 
+                        src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
+                        alt="Logo" 
+                        className="size-8 object-contain" 
+                      />
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">{activeBusiness?.name || "InvoiceFlow"}</span>
