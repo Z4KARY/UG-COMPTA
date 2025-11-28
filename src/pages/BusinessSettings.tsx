@@ -38,6 +38,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { WebhookSettings } from "@/components/WebhookSettings";
+import { useAction } from "convex/react";
 
 export default function BusinessSettings() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -49,6 +50,10 @@ export default function BusinessSettings() {
   const closePeriod = useMutation(api.periods.close);
   const openPeriod = useMutation(api.periods.remove);
   
+  // Export Action
+  const generateZip = useAction(api.exportActions.generateZip);
+  const [isExporting, setIsExporting] = useState(false);
+
   const [closureData, setClosureData] = useState({
       month: new Date().getMonth(),
       year: new Date().getFullYear(),
@@ -145,6 +150,34 @@ export default function BusinessSettings() {
     link.click();
     document.body.removeChild(link);
     toast.success("Backup downloaded successfully");
+  };
+
+  const handleFullExport = async () => {
+    if (!business || !business.userId) return;
+    
+    setIsExporting(true);
+    try {
+        const zipBuffer = await generateZip({
+            businessId: business._id,
+            userId: business.userId, // Pass owner ID (or current user ID if we had it in context, but action checks auth)
+            includePdfs: true
+        });
+        
+        const blob = new Blob([zipBuffer], { type: "application/zip" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `invoiceflow_full_backup_${business.name}_${new Date().toISOString().split('T')[0]}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Full archive downloaded successfully");
+    } catch (error) {
+        toast.error("Failed to generate full export");
+        console.error(error);
+    } finally {
+        setIsExporting(false);
+    }
   };
 
   const handleClosePeriod = async () => {
@@ -433,17 +466,35 @@ export default function BusinessSettings() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="flex items-center justify-between">
-                <div className="space-y-1">
-                    <p className="text-sm font-medium">Full Data Backup (JSON)</p>
-                    <p className="text-xs text-muted-foreground">
-                        Includes all invoices, customers, products, and settings.
-                    </p>
+            <CardContent className="space-y-4">
+                <div className="flex items-center justify-between border-b pb-4">
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium">Quick Data Backup (JSON)</p>
+                        <p className="text-xs text-muted-foreground">
+                            Instant download of all database records.
+                        </p>
+                    </div>
+                    <Button type="button" variant="outline" onClick={handleExport}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Export JSON
+                    </Button>
                 </div>
-                <Button type="button" variant="outline" onClick={handleExport}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export Data
-                </Button>
+                <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium">Full Archive (ZIP)</p>
+                        <p className="text-xs text-muted-foreground">
+                            Includes all data plus PDF files (Invoices & Purchases).
+                        </p>
+                    </div>
+                    <Button type="button" variant="default" onClick={handleFullExport} disabled={isExporting}>
+                        {isExporting ? (
+                            <span className="animate-spin mr-2">⏳</span>
+                        ) : (
+                            <Archive className="mr-2 h-4 w-4" />
+                        )}
+                        {isExporting ? "Generating..." : "Download Archive"}
+                    </Button>
+                </div>
             </CardContent>
           </Card>
 

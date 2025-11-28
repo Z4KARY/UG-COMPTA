@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalQuery } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
 
@@ -155,6 +155,59 @@ export const update = mutation({
         payloadAfter: updates,
     });
   },
+});
+
+// Internal query for export action
+export const exportDataInternal = internalQuery({
+  args: { businessId: v.id("businesses"), userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const { businessId, userId } = args;
+    
+    const business = await ctx.db.get(businessId);
+    if (!business) return null;
+    
+    // Authorization check
+    if (business.userId !== userId) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", businessId).eq("userId", userId))
+            .first();
+        if (!member) return null;
+    }
+
+    // Fetch all related data
+    const customers = await ctx.db.query("customers").withIndex("by_business", q => q.eq("businessId", businessId)).collect();
+    const products = await ctx.db.query("products").withIndex("by_business", q => q.eq("businessId", businessId)).collect();
+    const invoices = await ctx.db.query("invoices").withIndex("by_business", q => q.eq("businessId", businessId)).collect();
+    
+    const invoiceItems = await Promise.all(invoices.map(inv => 
+        ctx.db.query("invoiceItems").withIndex("by_invoice", q => q.eq("invoiceId", inv._id)).collect()
+    ));
+    
+    const payments = await Promise.all(invoices.map(inv => 
+        ctx.db.query("payments").withIndex("by_invoice", q => q.eq("invoiceId", inv._id)).collect()
+    ));
+
+    const suppliers = await ctx.db.query("suppliers").withIndex("by_business", q => q.eq("businessId", businessId)).collect();
+    const purchaseInvoices = await ctx.db.query("purchaseInvoices").withIndex("by_business", q => q.eq("businessId", businessId)).collect();
+    
+    const purchaseInvoiceItems = await Promise.all(purchaseInvoices.map(inv =>
+        ctx.db.query("purchaseInvoiceItems").withIndex("by_purchase_invoice", q => q.eq("purchaseInvoiceId", inv._id)).collect()
+    ));
+
+    return {
+        business,
+        customers,
+        products,
+        invoices,
+        invoiceItems: invoiceItems.flat(),
+        payments: payments.flat(),
+        suppliers,
+        purchaseInvoices,
+        purchaseInvoiceItems: purchaseInvoiceItems.flat(),
+        exportedAt: Date.now(),
+    };
+  }
 });
 
 export const exportData = query({

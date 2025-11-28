@@ -21,6 +21,7 @@ import type * as businesses from "../businesses.js";
 import type * as crons from "../crons.js";
 import type * as customers from "../customers.js";
 import type * as declarations from "../declarations.js";
+import type * as exportActions from "../exportActions.js";
 import type * as fiscal from "../fiscal.js";
 import type * as fiscalParameters from "../fiscalParameters.js";
 import type * as http from "../http.js";
@@ -54,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   customers: typeof customers;
   declarations: typeof declarations;
+  exportActions: typeof exportActions;
   fiscal: typeof fiscal;
   fiscalParameters: typeof fiscalParameters;
   http: typeof http;
