@@ -49,7 +49,7 @@ export default function Declarations() {
   );
 
   const g12IfuData = useQuery(api.declarations.getG12IFUData,
-    business && business.fiscalRegime === "IFU" ? {
+    business && (business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire") ? {
         businessId: business._id,
         year: parseInt(selectedYear)
     } : "skip"
@@ -259,7 +259,7 @@ export default function Declarations() {
                 G12 / G12bis Annual
             </CardTitle>
             <CardDescription>
-              Annual turnover declaration for {business.fiscalRegime === "IFU" ? "IFU (Simplified)" : "Real"} regime.
+              Annual turnover declaration for {(business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire") ? "IFU (Simplified)" : "Real"} regime.
               <br/>
               <span className="text-xs text-muted-foreground">Only for Personnes Physiques (Entreprises Individuelles)</span>
             </CardDescription>
@@ -282,7 +282,7 @@ export default function Declarations() {
                 <p>Regime: {business.fiscalRegime || "VAT"}</p>
             </div>
 
-            {business.fiscalRegime === "IFU" ? (
+            {(business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire") ? (
                 // IFU Specific View
                 <div className="space-y-4">
                     {g12IfuData ? (

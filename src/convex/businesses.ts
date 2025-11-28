@@ -89,7 +89,18 @@ export const create = mutation({
     logoUrl: v.optional(v.string()),
     currency: v.string(),
     tvaDefault: v.number(),
-    fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
+    
+    type: v.optional(v.union(
+        v.literal("societe"),
+        v.literal("personne_physique"),
+        v.literal("auto_entrepreneur")
+    )),
+    fiscalRegime: v.optional(v.union(
+        v.literal("reel"), 
+        v.literal("forfaitaire"), 
+        v.literal("auto_entrepreneur"),
+        v.literal("VAT"), v.literal("IFU"), v.literal("OTHER")
+    )),
     legalForm: v.optional(v.union(
       v.literal("PERSONNE_PHYSIQUE"),
       v.literal("EURL"),
@@ -105,9 +116,34 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
 
+    // Enforce Logic Binding
+    let finalFiscalRegime = args.fiscalRegime;
+    let finalTvaDefault = args.tvaDefault;
+
+    if (args.type === "societe") {
+        finalFiscalRegime = "reel";
+        // VAT is mandatory (19 or 9), usually passed in args, but ensure it's not 0 if user tries to set it? 
+        // We'll trust the input for rate value but enforce regime.
+    } else if (args.type === "auto_entrepreneur") {
+        finalFiscalRegime = "auto_entrepreneur";
+        finalTvaDefault = 0; // Force VAT = 0
+    } else if (args.type === "personne_physique") {
+        // Can be reel or forfaitaire.
+        if (args.fiscalRegime === "IFU") finalFiscalRegime = "forfaitaire"; // Map legacy
+        if (args.fiscalRegime === "VAT") finalFiscalRegime = "reel"; // Map legacy
+        
+        if (finalFiscalRegime === "forfaitaire") {
+            finalTvaDefault = 0; // IFU usually implies no VAT collection for small entities, though technically IFU includes VAT in the rate. 
+            // User instructions: "PERSONNE PHYSIQUE (FORFAITAIRE) -> VAT OFF"
+            finalTvaDefault = 0;
+        }
+    }
+
     const businessId = await ctx.db.insert("businesses", {
       userId,
       ...args,
+      fiscalRegime: finalFiscalRegime,
+      tvaDefault: finalTvaDefault,
     });
 
     // Add creator as owner
@@ -135,7 +171,18 @@ export const update = mutation({
     logoUrl: v.optional(v.string()),
     currency: v.optional(v.string()),
     tvaDefault: v.optional(v.number()),
-    fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
+    
+    type: v.optional(v.union(
+        v.literal("societe"),
+        v.literal("personne_physique"),
+        v.literal("auto_entrepreneur")
+    )),
+    fiscalRegime: v.optional(v.union(
+        v.literal("reel"), 
+        v.literal("forfaitaire"), 
+        v.literal("auto_entrepreneur"),
+        v.literal("VAT"), v.literal("IFU"), v.literal("OTHER")
+    )),
     legalForm: v.optional(v.union(
       v.literal("PERSONNE_PHYSIQUE"),
       v.literal("EURL"),
@@ -173,6 +220,22 @@ export const update = mutation({
     }
 
     const { id, ...updates } = args;
+    
+    // Enforce Logic Binding on Update
+    if (updates.type === "societe") {
+        updates.fiscalRegime = "reel";
+    } else if (updates.type === "auto_entrepreneur") {
+        updates.fiscalRegime = "auto_entrepreneur";
+        updates.tvaDefault = 0;
+    } else if (updates.type === "personne_physique") {
+        if (updates.fiscalRegime === "IFU") updates.fiscalRegime = "forfaitaire";
+        if (updates.fiscalRegime === "VAT") updates.fiscalRegime = "reel";
+        
+        if (updates.fiscalRegime === "forfaitaire") {
+            updates.tvaDefault = 0;
+        }
+    }
+
     await ctx.db.patch(id, updates);
   },
 });

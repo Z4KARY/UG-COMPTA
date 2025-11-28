@@ -46,8 +46,24 @@ const schema = defineSchema(
       logoUrl: v.optional(v.string()),
       currency: v.string(),
       tvaDefault: v.number(),
-      // New fields
-      fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
+      
+      // New fields based on strict requirements
+      type: v.optional(v.union(
+        v.literal("societe"),
+        v.literal("personne_physique"),
+        v.literal("auto_entrepreneur")
+      )),
+      
+      fiscalRegime: v.optional(v.union(
+        v.literal("reel"), // G50
+        v.literal("forfaitaire"), // G12/G12bis
+        v.literal("auto_entrepreneur"), // VAT=0, no G50
+        // Legacy support
+        v.literal("VAT"), 
+        v.literal("IFU"), 
+        v.literal("OTHER")
+      )),
+      
       legalForm: v.optional(v.union(
         v.literal("PERSONNE_PHYSIQUE"),
         v.literal("EURL"),

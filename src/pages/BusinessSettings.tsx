@@ -72,8 +72,9 @@ export default function BusinessSettings() {
     ai: "",
     currency: "DZD",
     tvaDefault: 19,
-    fiscalRegime: "VAT",
-    legalForm: "PERSONNE_PHYSIQUE",
+    type: "societe", // Default
+    fiscalRegime: "reel",
+    legalForm: "SARL",
     bankName: "",
     bankIban: "",
   });
@@ -90,8 +91,9 @@ export default function BusinessSettings() {
         ai: business.ai || "",
         currency: business.currency,
         tvaDefault: business.tvaDefault,
-        fiscalRegime: business.fiscalRegime || "VAT",
-        legalForm: business.legalForm || "PERSONNE_PHYSIQUE",
+        type: business.type || "societe",
+        fiscalRegime: business.fiscalRegime || "reel",
+        legalForm: business.legalForm || "SARL",
         bankName: business.bankName || "",
         bankIban: business.bankIban || "",
       });
@@ -107,29 +109,56 @@ export default function BusinessSettings() {
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => {
+        const newData = { ...prev, [name]: value };
+        
+        // Logic Binding
+        if (name === "type") {
+            if (value === "societe") {
+                newData.fiscalRegime = "reel";
+                newData.tvaDefault = 19;
+                newData.legalForm = "SARL"; // Default
+            } else if (value === "auto_entrepreneur") {
+                newData.fiscalRegime = "auto_entrepreneur";
+                newData.tvaDefault = 0;
+                newData.legalForm = "PERSONNE_PHYSIQUE"; // Technically AE is a PP
+            } else if (value === "personne_physique") {
+                newData.fiscalRegime = "forfaitaire"; // Default to IFU
+                newData.tvaDefault = 0;
+                newData.legalForm = "PERSONNE_PHYSIQUE";
+            }
+        }
+        
+        if (name === "fiscalRegime") {
+            if (value === "forfaitaire" || value === "auto_entrepreneur") {
+                newData.tvaDefault = 0;
+            } else if (value === "reel") {
+                newData.tvaDefault = 19;
+            }
+        }
+
+        return newData;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload = {
+          ...formData,
+          type: formData.type as "societe" | "personne_physique" | "auto_entrepreneur",
+          fiscalRegime: formData.fiscalRegime as "reel" | "forfaitaire" | "auto_entrepreneur",
+          legalForm: formData.legalForm as any,
+      };
+
       if (business) {
         await updateBusiness({
           id: business._id,
-          ...formData,
-          fiscalRegime: formData.fiscalRegime as "VAT" | "IFU" | "OTHER",
-          legalForm: formData.legalForm as "PERSONNE_PHYSIQUE" | "EURL" | "SARL" | "SPA" | "SNC" | "OTHER",
+          ...payload,
         });
         toast.success("Business profile updated");
       } else {
-        await createBusiness({
-          ...formData,
-          fiscalRegime: formData.fiscalRegime as "VAT" | "IFU" | "OTHER",
-          legalForm: formData.legalForm as "PERSONNE_PHYSIQUE" | "EURL" | "SARL" | "SPA" | "SNC" | "OTHER",
-        });
+        await createBusiness(payload);
         toast.success("Business profile created");
       }
     } catch (error) {
@@ -325,6 +354,64 @@ export default function BusinessSettings() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                  <Label htmlFor="type">Business Type</Label>
+                  <Select
+                    value={formData.type}
+                    onValueChange={(val) => handleSelectChange("type", val)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="societe">Société (SARL, EURL, SPA...)</SelectItem>
+                      <SelectItem value="personne_physique">Personne Physique (Entreprise Individuelle)</SelectItem>
+                      <SelectItem value="auto_entrepreneur">Auto-Entrepreneur</SelectItem>
+                    </SelectContent>
+                  </Select>
+              </div>
+
+              {formData.type === "personne_physique" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="fiscalRegime">Fiscal Regime</Label>
+                    <Select
+                        value={formData.fiscalRegime}
+                        onValueChange={(val) => handleSelectChange("fiscalRegime", val)}
+                    >
+                        <SelectTrigger>
+                        <SelectValue placeholder="Select regime" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        <SelectItem value="forfaitaire">Régime Forfaitaire (IFU)</SelectItem>
+                        <SelectItem value="reel">Régime Réel Simplifié</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  </div>
+              )}
+
+              {formData.type === "societe" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="legalForm">Legal Form</Label>
+                    <Select
+                        value={formData.legalForm}
+                        onValueChange={(val) => handleSelectChange("legalForm", val)}
+                    >
+                        <SelectTrigger>
+                        <SelectValue placeholder="Select form" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        <SelectItem value="SARL">SARL</SelectItem>
+                        <SelectItem value="EURL">EURL</SelectItem>
+                        <SelectItem value="SPA">SPA</SelectItem>
+                        <SelectItem value="SNC">SNC</SelectItem>
+                        <SelectItem value="OTHER">Other</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  </div>
+              )}
+
+              <Separator className="my-2" />
+              
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="rc">RC No.</Label>
@@ -357,48 +444,7 @@ export default function BusinessSettings() {
                   placeholder="Article Imposition"
                 />
               </div>
-              <Separator className="my-2" />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="legalForm">Legal Form</Label>
-                  <Select
-                    value={formData.legalForm}
-                    onValueChange={(val) =>
-                      handleSelectChange("legalForm", val)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select form" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PERSONNE_PHYSIQUE">Personne Physique</SelectItem>
-                      <SelectItem value="EURL">EURL</SelectItem>
-                      <SelectItem value="SARL">SARL</SelectItem>
-                      <SelectItem value="SPA">SPA</SelectItem>
-                      <SelectItem value="SNC">SNC</SelectItem>
-                      <SelectItem value="OTHER">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="fiscalRegime">Fiscal Regime</Label>
-                  <Select
-                    value={formData.fiscalRegime}
-                    onValueChange={(val) =>
-                      handleSelectChange("fiscalRegime", val)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select regime" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="VAT">VAT (Réel)</SelectItem>
-                      <SelectItem value="IFU">IFU (Simplifié)</SelectItem>
-                      <SelectItem value="OTHER">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="currency">Currency</Label>
@@ -419,6 +465,8 @@ export default function BusinessSettings() {
                     value={formData.tvaDefault}
                     onChange={handleChange}
                     required
+                    disabled={formData.fiscalRegime === "auto_entrepreneur" || formData.fiscalRegime === "forfaitaire"}
+                    className={formData.fiscalRegime === "auto_entrepreneur" || formData.fiscalRegime === "forfaitaire" ? "bg-muted text-muted-foreground" : ""}
                   />
                 </div>
               </div>
