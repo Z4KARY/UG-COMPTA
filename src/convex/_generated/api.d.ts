@@ -34,6 +34,8 @@ import type * as reminders from "../reminders.js";
 import type * as reports from "../reports.js";
 import type * as suppliers from "../suppliers.js";
 import type * as users from "../users.js";
+import type * as webhookActions from "../webhookActions.js";
+import type * as webhooks from "../webhooks.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -65,6 +67,8 @@ declare const fullApi: ApiFromModules<{
   reports: typeof reports;
   suppliers: typeof suppliers;
   users: typeof users;
+  webhookActions: typeof webhookActions;
+  webhooks: typeof webhooks;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

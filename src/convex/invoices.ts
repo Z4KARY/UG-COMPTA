@@ -242,6 +242,19 @@ export const create = mutation({
         payloadAfter: invoiceData,
     });
 
+    // Trigger Webhook
+    await ctx.scheduler.runAfter(0, internal.webhookActions.trigger, {
+        businessId: args.businessId,
+        event: "invoice.created",
+        payload: {
+            id: invoiceId,
+            invoiceNumber: args.invoiceNumber,
+            totalTtc: finalTotalTtc,
+            customerId: args.customerId,
+            createdAt: Date.now(),
+        }
+    });
+
     return invoiceId;
   },
 });
@@ -519,6 +532,18 @@ export const issue = mutation({
         payloadBefore: { status: invoice.status },
         payloadAfter: { status: "issued", pdfHash: args.pdfHash },
     });
+
+    // Trigger Webhook
+    await ctx.scheduler.runAfter(0, internal.webhookActions.trigger, {
+        businessId: invoice.businessId,
+        event: "invoice.issued",
+        payload: {
+            id: args.id,
+            invoiceNumber: invoice.invoiceNumber,
+            totalTtc: invoice.totalTtc,
+            issuedAt: Date.now(),
+        }
+    });
   },
 });
 
@@ -580,6 +605,18 @@ export const markAsPaid = mutation({
         action: "MARK_PAID",
         payloadBefore: { status: invoice.status },
         payloadAfter: { status: "paid", payment: args },
+    });
+
+    // Trigger Webhook
+    await ctx.scheduler.runAfter(0, internal.webhookActions.trigger, {
+        businessId: invoice.businessId,
+        event: "invoice.paid",
+        payload: {
+            id: args.id,
+            invoiceNumber: invoice.invoiceNumber,
+            amount: args.amount,
+            paymentDate: args.paymentDate,
+        }
     });
   },
 });

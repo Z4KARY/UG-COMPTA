@@ -300,6 +300,14 @@ const schema = defineSchema(
     })
       .index("by_invoice", ["invoiceId"])
       .index("by_status", ["status"]),
+
+    webhookSubscriptions: defineTable({
+      businessId: v.id("businesses"),
+      targetUrl: v.string(),
+      secret: v.string(),
+      events: v.array(v.string()),
+      isActive: v.boolean(),
+    }).index("by_business", ["businessId"]),
   },
   {
     schemaValidation: false,

@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const list = query({
   args: { businessId: v.id("businesses") },
@@ -135,6 +136,19 @@ export const create = mutation({
             ...item
         });
     }
+
+    // Trigger Webhook
+    await ctx.scheduler.runAfter(0, internal.webhookActions.trigger, {
+        businessId: args.businessId,
+        event: "purchase_invoice.created",
+        payload: {
+            id: purchaseInvoiceId,
+            invoiceNumber: args.invoiceNumber,
+            supplierId: args.supplierId,
+            totalTtc,
+            createdAt: Date.now(),
+        }
+    });
 
     return purchaseInvoiceId;
   },
