@@ -28,18 +28,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { Plus, Trash2, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Pencil } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
+import { Id } from "@/convex/_generated/dataModel";
 
 export default function Suppliers() {
   const business = useQuery(api.businesses.getMyBusiness, {});
   const suppliers = useQuery(api.suppliers.list, business ? { businessId: business._id } : "skip");
   const createSupplier = useMutation(api.suppliers.create);
+  const updateSupplier = useMutation(api.suppliers.update);
   const deleteSupplier = useMutation(api.suppliers.remove);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [editingId, setEditingId] = useState<Id<"suppliers"> | null>(null);
   const [formData, setFormData] = useState({
       name: "",
       nif: "",
@@ -50,19 +53,48 @@ export default function Suppliers() {
       notes: ""
   });
 
+  const handleEdit = (supplier: any) => {
+    setEditingId(supplier._id);
+    setFormData({
+      name: supplier.name,
+      nif: supplier.nif || "",
+      rc: supplier.rc || "",
+      address: supplier.address || "",
+      phone: supplier.phone || "",
+      email: supplier.email || "",
+      notes: supplier.notes || ""
+    });
+    setIsOpen(true);
+  };
+
+  const handleCreate = () => {
+    setEditingId(null);
+    setFormData({ name: "", nif: "", rc: "", address: "", phone: "", email: "", notes: "" });
+    setIsOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!business) return;
       try {
-          await createSupplier({
-              businessId: business._id,
+          if (editingId) {
+            await updateSupplier({
+              id: editingId,
               ...formData
-          });
-          toast.success("Supplier created");
+            });
+            toast.success("Supplier updated");
+          } else {
+            await createSupplier({
+                businessId: business._id,
+                ...formData
+            });
+            toast.success("Supplier created");
+          }
           setIsOpen(false);
           setFormData({ name: "", nif: "", rc: "", address: "", phone: "", email: "", notes: "" });
+          setEditingId(null);
       } catch (error) {
-          toast.error("Failed to create supplier");
+          toast.error(editingId ? "Failed to update supplier" : "Failed to create supplier");
       }
   };
 
@@ -97,15 +129,15 @@ export default function Suppliers() {
         <div className="flex justify-end">
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger asChild>
-                    <Button>
+                    <Button onClick={handleCreate}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add Supplier
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add New Supplier</DialogTitle>
-                        <DialogDescription>Enter supplier details for VAT tracking.</DialogDescription>
+                        <DialogTitle>{editingId ? "Edit Supplier" : "Add New Supplier"}</DialogTitle>
+                        <DialogDescription>{editingId ? "Update supplier details." : "Enter supplier details for VAT tracking."}</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
@@ -161,7 +193,7 @@ export default function Suppliers() {
                                 />
                             </div>
                         </div>
-                        <Button type="submit" className="w-full">Create Supplier</Button>
+                        <Button type="submit" className="w-full">{editingId ? "Save Changes" : "Create Supplier"}</Button>
                     </form>
                 </DialogContent>
             </Dialog>
@@ -176,7 +208,7 @@ export default function Suppliers() {
                             <TableHead>NIF</TableHead>
                             <TableHead>RC</TableHead>
                             <TableHead>Contact</TableHead>
-                            <TableHead className="w-[50px]"></TableHead>
+                            <TableHead className="w-[100px] text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -188,7 +220,7 @@ export default function Suppliers() {
                             </TableRow>
                         )}
                         {suppliers?.map((supplier) => (
-                            <TableRow key={supplier._id}>
+                            <TableRow key={supplier._id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEdit(supplier)}>
                                 <TableCell className="font-medium">{supplier.name}</TableCell>
                                 <TableCell>{supplier.nif || "-"}</TableCell>
                                 <TableCell>{supplier.rc || "-"}</TableCell>
@@ -199,9 +231,14 @@ export default function Suppliers() {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(supplier._id)}>
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
+                                    <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                        <Button variant="ghost" size="icon" onClick={() => handleEdit(supplier)}>
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(supplier._id)}>
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

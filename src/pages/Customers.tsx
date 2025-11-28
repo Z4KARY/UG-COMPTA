@@ -16,12 +16,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ImportDialog } from "@/components/ImportDialog";
-import { CreateCustomerDialog } from "@/components/CreateCustomerDialog";
+import { CustomerDialog } from "@/components/CustomerDialog";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
+import { useState } from "react";
 
 export default function Customers() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -30,6 +31,9 @@ export default function Customers() {
     business ? { businessId: business._id } : "skip"
   );
   const deleteCustomer = useMutation(api.customers.remove);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
 
   const handleDelete = async (id: Id<"customers">) => {
     if (confirm("Are you sure you want to delete this customer?")) {
@@ -40,6 +44,16 @@ export default function Customers() {
         toast.error("Failed to delete customer");
       }
     }
+  };
+
+  const handleEdit = (customer: any) => {
+    setSelectedCustomer(customer);
+    setIsDialogOpen(true);
+  };
+
+  const handleCreate = () => {
+    setSelectedCustomer(null);
+    setIsDialogOpen(true);
   };
 
   if (!business) {
@@ -64,9 +78,19 @@ export default function Customers() {
           </div>
           <div className="flex gap-2">
             <ImportDialog businessId={business._id} type="CUSTOMERS" />
-            <CreateCustomerDialog businessId={business._id} />
+            <Button onClick={handleCreate}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Customer
+            </Button>
           </div>
         </div>
+
+        <CustomerDialog 
+          businessId={business._id} 
+          open={isDialogOpen} 
+          onOpenChange={setIsDialogOpen}
+          customer={selectedCustomer}
+        />
 
         <Card>
           <CardHeader>
@@ -88,7 +112,7 @@ export default function Customers() {
               </TableHeader>
               <TableBody>
                 {customers?.map((customer) => (
-                  <TableRow key={customer._id}>
+                  <TableRow key={customer._id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEdit(customer)}>
                     <TableCell className="font-medium">
                       <div>{customer.name}</div>
                       <div className="text-xs text-muted-foreground">
@@ -99,13 +123,22 @@ export default function Customers() {
                     <TableCell>{customer.phone}</TableCell>
                     <TableCell>{customer.address}</TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(customer._id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(customer)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(customer._id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

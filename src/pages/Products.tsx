@@ -36,7 +36,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
@@ -49,9 +49,11 @@ export default function Products() {
     business ? { businessId: business._id } : "skip"
   );
   const createProduct = useMutation(api.products.create);
+  const updateProduct = useMutation(api.products.update);
   const deleteProduct = useMutation(api.products.remove);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<Id<"products"> | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -75,22 +77,55 @@ export default function Products() {
     setFormData({ ...formData, type: value });
   };
 
+  const handleEdit = (product: any) => {
+    setEditingId(product._id);
+    setFormData({
+      name: product.name,
+      description: product.description || "",
+      unitPrice: product.unitPrice,
+      tvaRate: product.tvaRate,
+      defaultDiscount: product.defaultDiscount || 0,
+      unitLabel: product.unitLabel || "",
+      isActive: product.isActive !== false,
+      type: product.type || "service",
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleCreate = () => {
+    setEditingId(null);
+    setFormData({ 
+      name: "", description: "", unitPrice: 0, tvaRate: 19, defaultDiscount: 0, 
+      unitLabel: "", isActive: true, type: "service" 
+    });
+    setIsDialogOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!business) return;
     try {
-      await createProduct({
-        businessId: business._id,
-        ...formData,
-      });
-      toast.success("Product created");
+      if (editingId) {
+        await updateProduct({
+          id: editingId,
+          ...formData,
+        });
+        toast.success("Product updated");
+      } else {
+        await createProduct({
+          businessId: business._id,
+          ...formData,
+        });
+        toast.success("Product created");
+      }
       setIsDialogOpen(false);
       setFormData({ 
         name: "", description: "", unitPrice: 0, tvaRate: 19, defaultDiscount: 0, 
         unitLabel: "", isActive: true, type: "service" 
       });
+      setEditingId(null);
     } catch (error) {
-      toast.error("Failed to create product");
+      toast.error(editingId ? "Failed to update product" : "Failed to create product");
     }
   };
 
@@ -129,15 +164,15 @@ export default function Products() {
             {business && <ImportDialog businessId={business._id} type="PRODUCTS" />}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button onClick={handleCreate}>
                   <Plus className="mr-2 h-4 w-4" /> Add Product
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Add New Product</DialogTitle>
+                  <DialogTitle>{editingId ? "Edit Product" : "Add New Product"}</DialogTitle>
                   <DialogDescription>
-                    Enter the product details below.
+                    {editingId ? "Update product details." : "Enter the product details below."}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
@@ -249,7 +284,7 @@ export default function Products() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button type="submit">Save Product</Button>
+                    <Button type="submit">{editingId ? "Save Changes" : "Create Product"}</Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -278,7 +313,7 @@ export default function Products() {
               </TableHeader>
               <TableBody>
                 {products?.map((product) => (
-                  <TableRow key={product._id}>
+                  <TableRow key={product._id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEdit(product)}>
                     <TableCell className="font-medium">
                       {product.name}
                       <div className="text-xs text-muted-foreground capitalize">{product.type || "service"}</div>
@@ -293,13 +328,22 @@ export default function Products() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(product._id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(product)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(product._id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
