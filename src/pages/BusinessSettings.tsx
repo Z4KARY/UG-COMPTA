@@ -28,6 +28,8 @@ import {
   MapPin,
   Save,
   Wallet,
+  Download,
+  Archive,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -36,6 +38,9 @@ export default function BusinessSettings() {
   const business = useQuery(api.businesses.getMyBusiness, {});
   const createBusiness = useMutation(api.businesses.create);
   const updateBusiness = useMutation(api.businesses.update);
+  
+  // For export functionality
+  const exportData = useQuery(api.businesses.exportData, business ? { businessId: business._id } : "skip");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -107,6 +112,24 @@ export default function BusinessSettings() {
       toast.error("Failed to save business profile");
       console.error(error);
     }
+  };
+
+  const handleExport = () => {
+    if (!exportData) {
+        toast.error("Data not ready for export yet");
+        return;
+    }
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `invoiceflow_backup_${business?.name || "data"}_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Backup downloaded successfully");
   };
 
   return (
@@ -344,6 +367,35 @@ export default function BusinessSettings() {
                   make payments directly to your account.
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Data Management / Archiving Section */}
+          <Card className="md:col-span-2 shadow-sm border-dashed">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-amber-500/10 rounded-lg">
+                  <Archive className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <CardTitle>Legal Archiving & Data Export</CardTitle>
+                  <CardDescription>
+                    Download a full backup of your business data for legal retention (10 years).
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="flex items-center justify-between">
+                <div className="space-y-1">
+                    <p className="text-sm font-medium">Full Data Backup (JSON)</p>
+                    <p className="text-xs text-muted-foreground">
+                        Includes all invoices, customers, products, and settings.
+                    </p>
+                </div>
+                <Button type="button" variant="outline" onClick={handleExport}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export Data
+                </Button>
             </CardContent>
           </Card>
         </form>

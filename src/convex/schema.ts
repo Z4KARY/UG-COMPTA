@@ -133,6 +133,7 @@ const schema = defineSchema(
       totalHt: v.optional(v.number()), // Alias for subtotalHt
       
       pdfUrl: v.optional(v.string()),
+      pdfHash: v.optional(v.string()), // SHA256 hash for integrity/traceability
     })
       .index("by_business", ["businessId"])
       .index("by_customer", ["customerId"]),

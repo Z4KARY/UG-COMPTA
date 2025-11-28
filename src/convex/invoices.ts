@@ -422,7 +422,10 @@ export const updateStatus = mutation({
 });
 
 export const issue = mutation({
-  args: { id: v.id("invoices") },
+  args: { 
+    id: v.id("invoices"),
+    pdfHash: v.optional(v.string()), // Optional hash of the generated PDF
+  },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
@@ -446,6 +449,7 @@ export const issue = mutation({
 
     await ctx.db.patch(args.id, { 
         status: "issued",
+        pdfHash: args.pdfHash,
     });
 
     await ctx.scheduler.runAfter(0, internal.audit.log, {
@@ -455,7 +459,7 @@ export const issue = mutation({
         entityId: args.id,
         action: "ISSUE",
         payloadBefore: { status: invoice.status },
-        payloadAfter: { status: "issued" },
+        payloadAfter: { status: "issued", pdfHash: args.pdfHash },
     });
   },
 });
