@@ -1,17 +1,177 @@
-importJobs: defineTable({
-  businessId: v.id("businesses"),
-  userId: v.id("users"),
-  type: v.union(v.literal("CUSTOMERS"), v.literal("PRODUCTS"), v.literal("INVOICES")),
-  status: v.union(
-    v.literal("PENDING"),
-    v.literal("PROCESSING"),
-    v.literal("DONE"),
-    v.literal("FAILED"),
-    v.literal("PARTIAL")
+// src/convex/schema.ts
+// ... existing imports (assumed present)
+
+// G50 Data (Monthly) - For Sociétés & Personne Physique (Réel)
+export const getG50Data = query({
+  args: {
+    businessId: v.id("businesses"),
+    month: v.number(), // 0-11
+    year: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const business = await ctx.db.get(args.businessId);
+    if (
+      !business ||
+      (business.userId !== userId &&
+        !(await isMember(ctx, args.businessId, userId)))
+    )
+      return null;
+
+    // Logic Check: G50 is for Réel only
+    if (business.fiscalRegime !== "reel" && business.fiscalRegime !== "VAT") {
+      // If not reel, they shouldn't be here, but we return null or empty
+      return null;
+    }
+
+    // Start and end of the month
+    const startDate = new Date(args.year, args.month, 1).getTime();
+    const endDate = new Date(args.year, args.month + 1, 0, 23, 59, 59).getTime();
+
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const periodInvoices = invoices.filter(
+      (inv) =>
+        inv.issueDate >= startDate &&
+        inv.issueDate <= endDate &&
+        inv.status !== "cancelled" &&
+        inv.status !== "draft"
+    );
+
+    let turnoverHt = 0;
+    let tvaCollected = 0;
+    let stampDutyTotal = 0;
+
+    for (const inv of periodInvoices) {
+      turnoverHt += inv.subtotalHt || inv.totalHt || 0;
+      tvaCollected += inv.totalTva || 0;
+      if (inv.paymentMethod === "CASH") {
+        stampDutyTotal += inv.stampDutyAmount || 0;
+      }
+    }
+
+    // Purchases
+    const purchaseInvoices = await ctx.db
+      .query("purchaseInvoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const periodPurchases = purchaseInvoices.filter(
+      (inv) => inv.invoiceDate >= startDate && inv.invoiceDate <= endDate
+    );
+
+    let vatDeductibleTotal = 0;
+    for (const inv of periodPurchases) {
+      vatDeductibleTotal += inv.vatDeductible || 0;
+    }
+
+    const netVat = Math.max(0, tvaCollected - vatDeductibleTotal);
+
+    // Return camelCase to match frontend expectations
+    return {
+      month: args.month + 1,
+      year: args.year,
+      turnoverHt: turnoverHt,
+      tvaCollected: tvaCollected,
+      vatDeductible: vatDeductibleTotal,
+      vatNet: netVat,
+      stampDutyTotal: stampDutyTotal,
+      totalInvoicesCount: periodInvoices.length,
+      totalPurchasesCount: periodPurchases.length,
+      createdAt: Date.now(),
+      // Extra for UI
+      businessName: business.name,
+      businessNif: business.nif,
+    };
+  },
+});
+
+// --- Additional code based on the edit snippet ---
+
+// src/convex/invoices.ts
+// ... keep existing code
+// Added new fields to invoice schema
+// (assuming existing code is before the addition)
+
+// The following additions are based on the snippet comments
+
+// 1. Extend the invoice schema with new fields (type, fiscalType, issueDate)
+export const invoiceSchema = {
+  // ... existing fields
+  type: v.union(
+    v.literal("invoice"),
+    v.literal("quote"),
+    v.literal("credit_note")
   ),
-  storageId: v.id("_storage"),
-  mapping: v.string(),
-  report: v.optional(v.string()),
-  startedAt: v.optional(v.number()),
-  finishedAt: v.optional(v.number()),
-}).index("by_business", ["businessId"]),
+  fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))),
+  issueDate: v.number(),
+  // ... other existing fields
+};
+
+// 2. Extend the create mutation with optional fields
+export const createInvoice = mutation({
+  args: {
+    businessId: v.id("businesses"),
+    customerId: v.id("customers"),
+    invoiceNumber: v.string(),
+    type: v.union(
+      v.literal("invoice"),
+      v.literal("quote"),
+      v.literal("credit_note")
+    ),
+    fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))),
+    issueDate: v.optional(v.number()), // optional as per comment
+    // ... other args
+  },
+  handler: async (ctx, args) => {
+    const invoiceData = {
+      businessId: args.businessId,
+      customerId: args.customerId,
+      invoiceNumber: args.invoiceNumber,
+      type: args.type,
+      fiscalType: args.fiscalType,
+      issueDate: args.issueDate,
+      // ... other data fields
+    };
+    // Save invoiceData
+    // ... existing creation logic
+  },
+});
+
+// 3. Extend the update mutation with optional fields
+export const updateInvoice = mutation({
+  args: {
+    id: v.id("invoices"),
+    customerId: v.optional(v.id("customers")),
+    invoiceNumber: v.optional(v.string()),
+    type: v.optional(
+      v.union(
+        v.literal("invoice"),
+        v.literal("quote"),
+        v.literal("credit_note")
+      )
+    ),
+    fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))),
+    issueDate: v.optional(v.number()),
+    // ... other optional args
+  },
+  handler: async (ctx, args) => {
+    const updates: any = {};
+    if (args.customerId !== undefined) updates.customerId = args.customerId;
+    if (args.invoiceNumber !== undefined) updates.invoiceNumber = args.invoiceNumber;
+    if (args.type !== undefined) updates.type = args.type;
+    if (args.fiscalType !== undefined) updates.fiscalType = args.fiscalType;
+    if (args.issueDate !== undefined) updates.issueDate = args.issueDate;
+    // Save updates
+    await ctx.db.setField("invoices", args.id, updates);
+  },
+});
+
+// Note: Actual implementations of create and update handlers should include appropriate validation and database logic.
+
+// End of code modifications based on the provided snippets and instructions.

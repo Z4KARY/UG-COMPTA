@@ -80,6 +80,9 @@ const schema = defineSchema(
       autoEntrepreneurCardNumber: v.optional(v.string()),
       activityCodes: v.optional(v.array(v.string())),
       ssNumber: v.optional(v.string()), // CASNOS
+
+      // G50 Specific
+      vatCreditCarriedForward: v.optional(v.number()),
     }).index("by_user", ["userId"])
       .index("by_ae_card", ["autoEntrepreneurCardNumber"]),
 
@@ -150,6 +153,7 @@ const schema = defineSchema(
         v.literal("quote"),
         v.literal("credit_note")
       ),
+      fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))), // Added for G50
       issueDate: v.number(), // timestamp
       dueDate: v.number(), // timestamp
       currency: v.string(),
@@ -238,6 +242,50 @@ const schema = defineSchema(
       taxDueInitial: v.number(),
       submissionDate: v.number(),
     }).index("by_business_and_year", ["businessId", "year"]),
+
+    // G50 Declarations
+    g50Declarations: defineTable({
+      businessId: v.id("businesses"),
+      month: v.number(),
+      year: v.number(),
+      
+      // Sales
+      turnover19: v.number(),
+      vatCollected19: v.number(),
+      turnover9: v.number(),
+      vatCollected9: v.number(),
+      turnoverExport: v.number(),
+      turnoverExempt: v.number(),
+      
+      // Purchases
+      purchaseVat19: v.number(),
+      purchaseVat9: v.number(),
+      importVat: v.number(),
+      regularizationVat: v.number(),
+      
+      // Totals
+      vatCollectedTotal: v.number(),
+      vatDeductibleTotal: v.number(),
+      vatNetBeforeCredit: v.number(),
+      previousCredit: v.number(),
+      vatNetAfterCredit: v.number(),
+      newCredit: v.number(),
+      vatPayable: v.number(),
+      
+      stampDutyTotal: v.number(),
+      
+      status: v.union(v.literal("DRAFT"), v.literal("FINALIZED")),
+      finalizedAt: v.optional(v.number()),
+    }).index("by_business_and_period", ["businessId", "year", "month"]),
+
+    g50Imports: defineTable({
+      businessId: v.id("businesses"),
+      month: v.number(),
+      year: v.number(),
+      customsValue: v.number(),
+      vatPaid: v.number(),
+      description: v.optional(v.string()),
+    }).index("by_business_and_period", ["businessId", "year", "month"]),
 
     suppliers: defineTable({
       businessId: v.id("businesses"),

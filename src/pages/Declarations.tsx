@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Link } from "react-router";
+import { G50Declaration } from "@/components/G50Declaration";
 
 export default function Declarations() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -78,51 +79,6 @@ export default function Declarations() {
     } catch (error) {
         toast.error("Failed to save forecast");
     }
-  };
-
-  const downloadG50CSV = (data: any) => {
-    if (!data) return;
-    
-    // G50 CSV EXPORT FORMAT (For sociétés + personne physique réel)
-    // month,year,turnover_ht,vat_collected,vat_deductible,vat_net,stamp_duty,total_invoices_count,total_purchases_count,created_at
-    
-    const headers = [
-        "month",
-        "year",
-        "turnover_ht",
-        "vat_collected",
-        "vat_deductible",
-        "vat_net",
-        "stamp_duty",
-        "total_invoices_count",
-        "total_purchases_count",
-        "created_at"
-    ];
-
-    const row = [
-        data.month,
-        data.year,
-        data.turnoverHt.toFixed(2),
-        data.tvaCollected.toFixed(2),
-        data.vatDeductible.toFixed(2),
-        data.vatNet.toFixed(2),
-        data.stampDutyTotal.toFixed(2),
-        data.totalInvoicesCount,
-        data.totalPurchasesCount,
-        new Date(data.createdAt).toISOString()
-    ];
-
-    const csvContent = "data:text/csv;charset=utf-8," 
-        + headers.join(",") + "\n" 
-        + row.join(",");
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `G50_${data.month}_${data.year}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const downloadG12CSV = (data: any) => {
@@ -368,33 +324,12 @@ export default function Declarations() {
             </div>
 
             {g50Data ? (
-                <div className="space-y-2 border rounded-md p-4 bg-muted/20 print:bg-white print:border-gray-300">
-                    <div className="flex justify-between items-center border-b pb-2 mb-2">
-                        <span className="font-semibold">Designation</span>
-                        <span className="font-semibold">Amount</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Turnover (HT):</span>
-                        <span className="font-medium">{g50Data.turnoverHt.toLocaleString()} {business.currency}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">TVA Collected:</span>
-                        <span className="font-medium">{g50Data.tvaCollected.toLocaleString()} {business.currency}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Stamp Duty (Cash):</span>
-                        <span className="font-medium">{g50Data.stampDutyTotal.toLocaleString()} {business.currency}</span>
-                    </div>
-                    <div className="pt-4 mt-2 print:hidden">
-                        <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => downloadG50CSV(g50Data)}
-                        >
-                            <Download className="mr-2 h-4 w-4" /> Export G50 CSV
-                        </Button>
-                    </div>
-                </div>
+                <G50Declaration 
+                    business={business} 
+                    month={selectedMonth} 
+                    year={selectedYear} 
+                    data={g50Data} 
+                />
             ) : (
                 <div className="p-4 text-center text-muted-foreground">Loading data...</div>
             )}

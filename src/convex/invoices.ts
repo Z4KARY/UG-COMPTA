@@ -63,6 +63,7 @@ export const create = mutation({
       v.literal("quote"),
       v.literal("credit_note")
     ),
+    fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))), // Added
     issueDate: v.number(),
     dueDate: v.number(),
     currency: v.string(),
@@ -213,6 +214,7 @@ export const create = mutation({
       customerId: args.customerId,
       invoiceNumber: args.invoiceNumber,
       type: args.type,
+      fiscalType: args.fiscalType, // Added
       issueDate: args.issueDate,
       dueDate: args.dueDate,
       currency: args.currency,
@@ -277,6 +279,7 @@ export const update = mutation({
       v.literal("quote"),
       v.literal("credit_note")
     )),
+    fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))), // Added
     issueDate: v.optional(v.number()),
     dueDate: v.optional(v.number()),
     currency: v.optional(v.string()),
