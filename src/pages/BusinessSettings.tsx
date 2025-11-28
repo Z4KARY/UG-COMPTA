@@ -12,7 +12,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -75,6 +77,7 @@ export default function BusinessSettings() {
     type: "societe", // Default
     fiscalRegime: "reel",
     legalForm: "SARL",
+    customLegalForm: "",
     bankName: "",
     bankIban: "",
     // AE Fields
@@ -98,6 +101,7 @@ export default function BusinessSettings() {
         type: business.type || "societe",
         fiscalRegime: business.fiscalRegime || "reel",
         legalForm: business.legalForm || "SARL",
+        customLegalForm: business.customLegalForm || "",
         bankName: business.bankName || "",
         bankIban: business.bankIban || "",
         autoEntrepreneurCardNumber: business.autoEntrepreneurCardNumber || "",
@@ -125,16 +129,19 @@ export default function BusinessSettings() {
                 newData.fiscalRegime = "reel";
                 newData.tvaDefault = 19;
                 newData.legalForm = "SARL"; // Default
+                newData.customLegalForm = "";
             } else if (value === "auto_entrepreneur") {
                 newData.fiscalRegime = "auto_entrepreneur";
                 newData.tvaDefault = 0;
-                newData.legalForm = "PERSONNE_PHYSIQUE"; // Technically AE is a PP
+                newData.legalForm = "AUTO_ENTREPRENEUR"; 
                 newData.rc = ""; // Clear RC
                 newData.ai = ""; // Clear AI
+                newData.customLegalForm = "";
             } else if (value === "personne_physique") {
                 newData.fiscalRegime = "forfaitaire"; // Default to IFU
                 newData.tvaDefault = 0;
                 newData.legalForm = "PERSONNE_PHYSIQUE";
+                newData.customLegalForm = "";
             }
         }
         
@@ -424,13 +431,49 @@ export default function BusinessSettings() {
                         <SelectValue placeholder="Select form" />
                         </SelectTrigger>
                         <SelectContent>
-                        <SelectItem value="SARL">SARL</SelectItem>
-                        <SelectItem value="EURL">EURL</SelectItem>
-                        <SelectItem value="SPA">SPA</SelectItem>
-                        <SelectItem value="SNC">SNC</SelectItem>
-                        <SelectItem value="OTHER">Other</SelectItem>
+                          <SelectGroup>
+                            <SelectLabel>Sociétés Commerciales</SelectLabel>
+                            <SelectItem value="EURL">EURL</SelectItem>
+                            <SelectItem value="SARL">SARL</SelectItem>
+                            <SelectItem value="SPA">SPA</SelectItem>
+                            <SelectItem value="SPAS">SPAS (Startup)</SelectItem>
+                            <SelectItem value="SPASU">SPASU (Startup)</SelectItem>
+                            <SelectItem value="SNC">SNC</SelectItem>
+                            <SelectItem value="SCS">SCS</SelectItem>
+                            <SelectItem value="SCA">SCA</SelectItem>
+                            <SelectItem value="SOCIETE_PARTICIPATION">Société de participation</SelectItem>
+                          </SelectGroup>
+                          <SelectGroup>
+                            <SelectLabel>Entreprises Publiques</SelectLabel>
+                            <SelectItem value="EPE">EPE</SelectItem>
+                            <SelectItem value="EPIC">EPIC</SelectItem>
+                          </SelectGroup>
+                          <SelectGroup>
+                            <SelectLabel>Autres</SelectLabel>
+                            <SelectItem value="ASSOCIATION">Association</SelectItem>
+                            <SelectItem value="COOPERATIVE">Coopérative</SelectItem>
+                            <SelectItem value="ONG">ONG</SelectItem>
+                            <SelectItem value="OTHER">Other (specify)</SelectItem>
+                          </SelectGroup>
                         </SelectContent>
                     </Select>
+                  </div>
+              )}
+
+              {formData.legalForm === "OTHER" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="customLegalForm">Specify Legal Form</Label>
+                    <Input
+                        id="customLegalForm"
+                        name="customLegalForm"
+                        value={formData.customLegalForm}
+                        onChange={handleChange}
+                        placeholder="e.g. Fondation, EPA..."
+                        required
+                    />
+                    <p className="text-[0.8rem] text-muted-foreground">
+                        This entity will behave fiscally as a <strong>Société</strong> (G50, VAT).
+                    </p>
                   </div>
               )}
 

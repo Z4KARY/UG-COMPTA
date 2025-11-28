@@ -66,12 +66,24 @@ const schema = defineSchema(
       
       legalForm: v.optional(v.union(
         v.literal("PERSONNE_PHYSIQUE"),
+        v.literal("AUTO_ENTREPRENEUR"),
         v.literal("EURL"),
         v.literal("SARL"),
         v.literal("SPA"),
+        v.literal("SPAS"),
+        v.literal("SPASU"),
+        v.literal("SCA"),
         v.literal("SNC"),
+        v.literal("SCS"),
+        v.literal("SOCIETE_PARTICIPATION"),
+        v.literal("EPE"),
+        v.literal("EPIC"),
+        v.literal("ASSOCIATION"),
+        v.literal("COOPERATIVE"),
+        v.literal("ONG"),
         v.literal("OTHER")
       )), // Added legal form
+      customLegalForm: v.optional(v.string()), // Added for Other (specify)
       bankName: v.optional(v.string()),
       bankIban: v.optional(v.string()),
       isSuspended: v.optional(v.boolean()), // Added for admin suspension
