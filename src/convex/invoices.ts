@@ -4,6 +4,57 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { calculateStampDuty, calculateLineItem, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
 import { internal } from "./_generated/api";
 
+// Helper to generate next invoice number
+async function generateInvoiceNumber(
+  ctx: any, 
+  businessId: any, 
+  type: "invoice" | "quote" | "credit_note", 
+  dateTimestamp: number
+) {
+  const date = new Date(dateTimestamp);
+  const year = date.getFullYear();
+  
+  // Get business settings for prefixes
+  const business = await ctx.db.get(businessId);
+  let prefix = "";
+  if (type === "invoice") prefix = business?.invoicePrefix || "INV-";
+  if (type === "quote") prefix = business?.quotePrefix || "DEV-";
+  if (type === "credit_note") prefix = business?.creditNotePrefix || "AV-";
+
+  // Get current counter
+  const counter = await ctx.db
+    .query("invoiceCounters")
+    .withIndex("by_business_type_year", (q: any) => 
+      q.eq("businessId", businessId).eq("type", type).eq("year", year)
+    )
+    .first();
+
+  let nextCount = 1;
+  if (counter) {
+    nextCount = counter.count + 1;
+    await ctx.db.patch(counter._id, { count: nextCount });
+  } else {
+    await ctx.db.insert("invoiceCounters", {
+      businessId,
+      type,
+      year,
+      count: nextCount,
+    });
+  }
+
+  // Format: PREFIX-YEAR-001
+  // Or just PREFIX-001 if year is not desired in string, but usually it is good practice.
+  // Let's stick to a simple sequential format: PREFIX-YEAR-NUMBER (padded)
+  // Or if the user didn't provide a prefix with year, we might just append number.
+  // For simplicity and standard compliance: {Prefix}{Year}-{Number}
+  
+  // However, to be flexible, if the prefix ends with a separator, we append.
+  // Let's do: PREFIX + YEAR + "-" + PaddedNumber
+  
+  const paddedNumber = nextCount.toString().padStart(3, "0");
+  return `${prefix}${year}-${paddedNumber}`;
+}
+
 export const list = query({
   args: { businessId: v.id("businesses") },
   handler: async (ctx, args) => {
@@ -57,7 +108,7 @@ export const create = mutation({
   args: {
     businessId: v.id("businesses"),
     customerId: v.id("customers"),
-    invoiceNumber: v.string(),
+    invoiceNumber: v.optional(v.string()), // Made optional
     type: v.union(
       v.literal("invoice"),
       v.literal("quote"),
@@ -117,6 +168,12 @@ export const create = mutation({
 
     const business = await ctx.db.get(args.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+    // Generate Invoice Number if not provided
+    let finalInvoiceNumber = args.invoiceNumber;
+    if (!finalInvoiceNumber || finalInvoiceNumber === "AUTO") {
+        finalInvoiceNumber = await generateInvoiceNumber(ctx, args.businessId, args.type, args.issueDate);
+    }
 
     // Auto-Entrepreneur Logic Enforcement: NO VAT
     const isAE = business.type === "auto_entrepreneur";
@@ -212,7 +269,7 @@ export const create = mutation({
     const invoiceData = {
       businessId: args.businessId,
       customerId: args.customerId,
-      invoiceNumber: args.invoiceNumber,
+      invoiceNumber: finalInvoiceNumber!,
       type: args.type,
       fiscalType: args.fiscalType, // Added
       issueDate: args.issueDate,

@@ -77,16 +77,19 @@ export default function BusinessSettings() {
     capital: "",
     currency: "DZD",
     tvaDefault: 19,
-    type: "societe", // Default
+    type: "societe",
     fiscalRegime: "reel",
     legalForm: "SARL",
     customLegalForm: "",
     bankName: "",
     bankIban: "",
-    // AE Fields
     autoEntrepreneurCardNumber: "",
     ssNumber: "",
-    activityCodes: "", // We'll handle as comma separated string in UI
+    activityCodes: "",
+    // Sequencing
+    invoicePrefix: "INV-",
+    quotePrefix: "DEV-",
+    creditNotePrefix: "AV-",
   });
 
   useEffect(() => {
@@ -112,6 +115,9 @@ export default function BusinessSettings() {
         autoEntrepreneurCardNumber: business.autoEntrepreneurCardNumber || "",
         ssNumber: business.ssNumber || "",
         activityCodes: business.activityCodes?.join(", ") || "",
+        invoicePrefix: business.invoicePrefix || "INV-",
+        quotePrefix: business.quotePrefix || "DEV-",
+        creditNotePrefix: business.creditNotePrefix || "AV-",
       });
     }
   }, [business]);
@@ -672,6 +678,58 @@ export default function BusinessSettings() {
                   These details will appear on your invoices to help customers
                   make payments directly to your account.
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Sequencing Section */}
+          <Card className="shadow-sm h-full">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-indigo-500/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <CardTitle>Numbering & Sequencing</CardTitle>
+                  <CardDescription>
+                    Customize how your document numbers are generated.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="invoicePrefix">Invoice Prefix</Label>
+                <Input
+                  id="invoicePrefix"
+                  name="invoicePrefix"
+                  value={formData.invoicePrefix}
+                  onChange={handleChange}
+                  placeholder="e.g. INV-"
+                />
+                <p className="text-xs text-muted-foreground">Format: {formData.invoicePrefix}YYYY-001</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="quotePrefix">Quote Prefix</Label>
+                <Input
+                  id="quotePrefix"
+                  name="quotePrefix"
+                  value={formData.quotePrefix}
+                  onChange={handleChange}
+                  placeholder="e.g. DEV-"
+                />
+                <p className="text-xs text-muted-foreground">Format: {formData.quotePrefix}YYYY-001</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="creditNotePrefix">Credit Note Prefix</Label>
+                <Input
+                  id="creditNotePrefix"
+                  name="creditNotePrefix"
+                  value={formData.creditNotePrefix}
+                  onChange={handleChange}
+                  placeholder="e.g. AV-"
+                />
+                <p className="text-xs text-muted-foreground">Format: {formData.creditNotePrefix}YYYY-001</p>
               </div>
             </CardContent>
           </Card>

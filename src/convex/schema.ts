@@ -54,6 +54,11 @@ const schema = defineSchema(
       font: v.optional(v.string()), // Font family name
       template: v.optional(v.string()), // Template identifier
 
+      // Invoice Sequencing Preferences
+      invoicePrefix: v.optional(v.string()),
+      quotePrefix: v.optional(v.string()),
+      creditNotePrefix: v.optional(v.string()),
+
       currency: v.string(),
       tvaDefault: v.number(),
       
@@ -165,6 +170,17 @@ const schema = defineSchema(
         filterFields: ["businessId"],
       }),
 
+    invoiceCounters: defineTable({
+      businessId: v.id("businesses"),
+      type: v.union(
+        v.literal("invoice"),
+        v.literal("quote"),
+        v.literal("credit_note")
+      ),
+      year: v.number(),
+      count: v.number(),
+    }).index("by_business_type_year", ["businessId", "type", "year"]),
+
     invoices: defineTable({
       businessId: v.id("businesses"),
       customerId: v.id("customers"),
@@ -214,7 +230,8 @@ const schema = defineSchema(
     })
       .index("by_business", ["businessId"])
       .index("by_customer", ["customerId"])
-      .index("by_status", ["status"]), // Added index for cron jobs
+      .index("by_status", ["status"])
+      .index("by_business_type_number", ["businessId", "type", "invoiceNumber"]), // Added index for uniqueness check if needed
 
     invoiceItems: defineTable({
       invoiceId: v.id("invoices"),

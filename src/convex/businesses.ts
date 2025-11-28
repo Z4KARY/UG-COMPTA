@@ -227,50 +227,57 @@ export const update = mutation({
     ai: v.optional(v.string()),
     nis: v.optional(v.string()),
     capital: v.optional(v.number()),
-    logoUrl: v.optional(v.string()),
     logoStorageId: v.optional(v.id("_storage")),
+    
     primaryColor: v.optional(v.string()),
     secondaryColor: v.optional(v.string()),
     font: v.optional(v.string()),
     template: v.optional(v.string()),
+
+    // Sequencing
+    invoicePrefix: v.optional(v.string()),
+    quotePrefix: v.optional(v.string()),
+    creditNotePrefix: v.optional(v.string()),
+
     currency: v.optional(v.string()),
     tvaDefault: v.optional(v.number()),
     
     type: v.optional(v.union(
-        v.literal("societe"),
-        v.literal("personne_physique"),
-        v.literal("auto_entrepreneur")
+      v.literal("societe"),
+      v.literal("personne_physique"),
+      v.literal("auto_entrepreneur")
     )),
     fiscalRegime: v.optional(v.union(
-        v.literal("reel"), 
-        v.literal("forfaitaire"), 
-        v.literal("auto_entrepreneur"),
-        v.literal("VAT"), v.literal("IFU"), v.literal("OTHER")
+      v.literal("reel"),
+      v.literal("forfaitaire"),
+      v.literal("auto_entrepreneur"),
+      v.literal("VAT"),
+      v.literal("IFU"),
+      v.literal("OTHER")
     )),
     legalForm: v.optional(v.union(
-      v.literal("PERSONNE_PHYSIQUE"),
-      v.literal("AUTO_ENTREPRENEUR"),
-      v.literal("EURL"),
-      v.literal("SARL"),
-      v.literal("SPA"),
-      v.literal("SPAS"),
-      v.literal("SPASU"),
-      v.literal("SCA"),
-      v.literal("SNC"),
-      v.literal("SCS"),
-      v.literal("SOCIETE_PARTICIPATION"),
-      v.literal("EPE"),
-      v.literal("EPIC"),
-      v.literal("ASSOCIATION"),
-      v.literal("COOPERATIVE"),
-      v.literal("ONG"),
-      v.literal("OTHER")
+        v.literal("PERSONNE_PHYSIQUE"),
+        v.literal("AUTO_ENTREPRENEUR"),
+        v.literal("EURL"),
+        v.literal("SARL"),
+        v.literal("SPA"),
+        v.literal("SPAS"),
+        v.literal("SPASU"),
+        v.literal("SCA"),
+        v.literal("SNC"),
+        v.literal("SCS"),
+        v.literal("SOCIETE_PARTICIPATION"),
+        v.literal("EPE"),
+        v.literal("EPIC"),
+        v.literal("ASSOCIATION"),
+        v.literal("COOPERATIVE"),
+        v.literal("ONG"),
+        v.literal("OTHER")
     )),
     customLegalForm: v.optional(v.string()),
     bankName: v.optional(v.string()),
     bankIban: v.optional(v.string()),
-
-    // AE fields
+    
     autoEntrepreneurCardNumber: v.optional(v.string()),
     activityCodes: v.optional(v.array(v.string())),
     ssNumber: v.optional(v.string()),
@@ -280,59 +287,9 @@ export const update = mutation({
     if (!userId) throw new Error("Unauthorized");
 
     const business = await ctx.db.get(args.id);
-    if (!business) throw new Error("Business not found");
-
-    // Check if user is a member with sufficient permissions (owner or admin)
-    // For simplicity, checking if user is the creator (userId on business) or has owner role in members
-    // In a real app, we'd check the members table.
-    // Let's check members table for permission
-    const member = await ctx.db
-      .query("businessMembers")
-      .withIndex("by_business_and_user", (q) => 
-        q.eq("businessId", args.id).eq("userId", userId)
-      )
-      .first();
-
-    if (!member || (member.role !== "owner" && member.role !== "accountant")) {
-       // Fallback to checking if they are the creator (legacy support)
-       if (business.userId !== userId) {
-         throw new Error("Unauthorized");
-       }
-    }
+    if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     const { id, ...updates } = args;
-    
-    // Enforce Logic Binding on Update
-    if (updates.type === "societe") {
-        updates.fiscalRegime = "reel";
-        if (updates.tvaDefault === 0) updates.tvaDefault = 19;
-    } else if (updates.type === "auto_entrepreneur") {
-        updates.fiscalRegime = "auto_entrepreneur";
-        updates.tvaDefault = 0;
-        updates.rc = undefined; // Clear RC
-        updates.ai = undefined; // Clear AI
-        updates.nis = undefined; // Clear NIS
-    } else if (updates.type === "personne_physique") {
-        if (updates.fiscalRegime === "IFU") updates.fiscalRegime = "forfaitaire";
-        if (updates.fiscalRegime === "VAT") updates.fiscalRegime = "reel";
-        
-        if (updates.fiscalRegime === "forfaitaire") {
-            updates.tvaDefault = 0;
-        }
-    }
-
-    // Check for AE Card Number Uniqueness on Update
-    if (updates.autoEntrepreneurCardNumber) {
-        const existing = await ctx.db
-            .query("businesses")
-            .withIndex("by_ae_card", (q) => q.eq("autoEntrepreneurCardNumber", updates.autoEntrepreneurCardNumber))
-            .first();
-        
-        if (existing && existing._id !== args.id) {
-            throw new Error("This Auto-Entrepreneur Card Number is already registered by another business.");
-        }
-    }
-
     await ctx.db.patch(id, updates);
   },
 });

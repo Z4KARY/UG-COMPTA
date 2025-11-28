@@ -26,6 +26,9 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CreateCustomerDialog } from "@/components/CreateCustomerDialog";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 
 // We will fetch these from backend now, but keep defaults for initial state
 const DEFAULT_FISCAL_CONSTANTS = {
@@ -50,6 +53,24 @@ interface InvoiceItem {
   productType?: "goods" | "service";
 }
 
+const formSchema = z.object({
+  invoiceNumber: z.string().default("AUTO"),
+  issueDate: z.date(),
+  dueDate: z.date(),
+  items: z.array(z.object({
+    description: z.string(),
+    quantity: z.number().default(1),
+    unitPrice: z.number().default(0),
+    tvaRate: z.number().default(19),
+    lineTotal: z.number().default(0),
+  })),
+  notes: z.string().default(""),
+  currency: z.string().default("DZD"),
+  type: z.enum(["invoice", "quote", "credit_note"]),
+  fiscalType: z.enum(["LOCAL", "INTERNATIONAL"]),
+  paymentMethod: z.enum(["CASH", "BANK_TRANSFER", "CHEQUE", "CARD", "OTHER"]),
+});
+
 export default function InvoiceCreate() {
   const navigate = useNavigate();
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -68,6 +89,20 @@ export default function InvoiceCreate() {
   );
 
   const createInvoice = useMutation(api.invoices.create);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      invoiceNumber: "AUTO", // Default to AUTO
+      issueDate: new Date(),
+      dueDate: new Date(new Date().setDate(new Date().getDate() + 30)),
+      items: [{ description: "", quantity: 1, unitPrice: 0, tvaRate: 19, lineTotal: 0 }],
+      notes: "",
+      currency: "DZD",
+      type: "invoice",
+      fiscalType: "LOCAL",
+    },
+  });
 
   const [type, setType] = useState<"invoice" | "quote" | "credit_note">("invoice");
   const [customerId, setCustomerId] = useState<string>("");
@@ -244,24 +279,24 @@ export default function InvoiceCreate() {
     }
   };
 
-  const handleSubmit = async (status: "draft" | "issued" = "draft") => {
-    if (!business || !customerId) {
-      toast.error("Please select a customer");
-      return;
-    }
-
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!business) return;
+    
     try {
+      // ... keep existing code (calculations)
+
       await createInvoice({
         businessId: business._id,
-        customerId: customerId as Id<"customers">,
-        invoiceNumber: invoiceNumber || `${type === "quote" ? "QT" : type === "credit_note" ? "CN" : "INV"}-${Date.now()}`,
-        type,
-        issueDate: new Date(issueDate).getTime(),
-        dueDate: new Date(dueDate).getTime(),
-        currency: business.currency,
-        status: status, // Use passed status
-        notes,
-        paymentMethod,
+        customerId: values.customerId as Id<"customers">,
+        invoiceNumber: values.invoiceNumber === "AUTO" ? undefined : values.invoiceNumber, // Send undefined if AUTO
+        type: values.type,
+        fiscalType: values.fiscalType,
+        issueDate: values.issueDate.getTime(),
+        dueDate: values.dueDate.getTime(),
+        currency: values.currency,
+        status: "draft",
+        notes: values.notes,
+        paymentMethod: values.paymentMethod,
         subtotalHt,
         totalHt: subtotalHt, // Legacy support
         totalTva,
@@ -274,13 +309,13 @@ export default function InvoiceCreate() {
             lineTotalTtc: item.lineTotal * (1 + item.tvaRate/100)
         })),
       });
-      toast.success(`Invoice ${status === "issued" ? "issued" : "saved as draft"} successfully`);
+
+      toast.success("Invoice created successfully");
       navigate("/invoices");
     } catch (error) {
-      toast.error("Failed to create invoice");
-      console.error(error);
+      // ... keep existing code (error handling)
     }
-  };
+  }
 
   if (!business) return null;
 
@@ -290,51 +325,175 @@ export default function InvoiceCreate() {
         <h1 className="text-3xl font-bold tracking-tight">Create {type === "quote" ? "Quote" : type === "credit_note" ? "Credit Note" : "Invoice"}</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Business Info (Read-Only) */}
-          <Card className="bg-muted/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Business Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <p className="font-bold">{business.name}</p>
-                        <p>{business.address}</p>
-                        {business.city && <p>{business.city}</p>}
-                    </div>
-                    <div className="text-right">
-                        <p>NIF: {business.nif || "-"}</p>
-                        <p>RC: {business.rc || "-"}</p>
-                        <p>AI: {business.ai || "-"}</p>
-                    </div>
-                </div>
-            </CardContent>
-          </Card>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Invoice Details</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-6 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="invoiceNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Invoice Number</FormLabel>
+                      <FormControl>
+                        <div className="flex gap-2">
+                            <Input {...field} placeholder="Leave as AUTO for automatic generation" />
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        Set to "AUTO" to automatically generate the next number (e.g. INV-2024-001).
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="issueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Issue Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The date when the invoice is issued.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The date by which the invoice must be paid.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="invoice">Invoice (Facture)</SelectItem>
+                          <SelectItem value="quote">Quote (Pro-forma/Devis)</SelectItem>
+                          <SelectItem value="credit_note">Credit Note (Avoir)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        The type of document being created.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="fiscalType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fiscal Type</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="LOCAL">Local (TVA 19%)</SelectItem>
+                          <SelectItem value="INTERNATIONAL">International (No TVA)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        The fiscal regime for this invoice.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="currency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Currency</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="DZD">Algerian Dinar (DZD)</SelectItem>
+                          <SelectItem value="USD">US Dollar (USD)</SelectItem>
+                          <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        The currency in which the invoice is issued.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="paymentMethod"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Payment Method</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select method" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CASH">Cash (Espèces)</SelectItem>
+                          <SelectItem value="BANK_TRANSFER">Bank Transfer (Virement)</SelectItem>
+                          <SelectItem value="CHEQUE">Cheque</SelectItem>
+                          <SelectItem value="CARD">Card (CIB/Edahabia)</SelectItem>
+                          <SelectItem value="OTHER">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        The method by which the customer will pay.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
 
-          {/* Customer & Invoice Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Document Details</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Type</Label>
-                <Select value={type} onValueChange={(val: any) => setType(val)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="invoice">Invoice (Facture)</SelectItem>
-                    <SelectItem value="quote">Quote (Pro-forma/Devis)</SelectItem>
-                    <SelectItem value="credit_note">Credit Note (Avoir)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Customer</Label>
-                <div className="flex gap-2">
+            {/* Customer Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Customer</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Customer</Label>
+                  <div className="flex gap-2">
                     <Select value={customerId} onValueChange={setCustomerId}>
                     <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select customer" />
@@ -353,47 +512,8 @@ export default function InvoiceCreate() {
                     />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Invoice Number</Label>
-                <Input
-                  value={invoiceNumber}
-                  onChange={(e) => setInvoiceNumber(e.target.value)}
-                  placeholder="Auto-generated if empty"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Issue Date</Label>
-                <Input
-                  type="date"
-                  value={issueDate}
-                  onChange={(e) => setIssueDate(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Due Date</Label>
-                <Input
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Payment Method</Label>
-                <Select value={paymentMethod} onValueChange={(val: any) => setPaymentMethod(val)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CASH">Cash (Espèces)</SelectItem>
-                    <SelectItem value="BANK_TRANSFER">Bank Transfer (Virement)</SelectItem>
-                    <SelectItem value="CHEQUE">Cheque</SelectItem>
-                    <SelectItem value="CARD">Card (CIB/Edahabia)</SelectItem>
-                    <SelectItem value="OTHER">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
+            </Card>
+          </div>
 
           {/* Items */}
           <Card>
@@ -502,6 +622,113 @@ export default function InvoiceCreate() {
               <Button variant="outline" onClick={addItem} className="w-full">
                 <Plus className="mr-2 h-4 w-4" /> Add Item
               </Button>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Business Info (Read-Only) */}
+          <Card className="bg-muted/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Business Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p className="font-bold">{business.name}</p>
+                        <p>{business.address}</p>
+                        {business.city && <p>{business.city}</p>}
+                    </div>
+                    <div className="text-right">
+                        <p>NIF: {business.nif || "-"}</p>
+                        <p>RC: {business.rc || "-"}</p>
+                        <p>AI: {business.ai || "-"}</p>
+                    </div>
+                </div>
+            </CardContent>
+          </Card>
+
+          {/* Customer & Invoice Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Document Details</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select value={type} onValueChange={(val: any) => setType(val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="invoice">Invoice (Facture)</SelectItem>
+                    <SelectItem value="quote">Quote (Pro-forma/Devis)</SelectItem>
+                    <SelectItem value="credit_note">Credit Note (Avoir)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Customer</Label>
+                <div className="flex gap-2">
+                    <Select value={customerId} onValueChange={setCustomerId}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select customer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {customers?.map((c) => (
+                        <SelectItem key={c._id} value={c._id}>
+                            {c.name}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                    <CreateCustomerDialog 
+                        businessId={business._id} 
+                        onCustomerCreated={(id) => setCustomerId(id)}
+                    />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Invoice Number</Label>
+                <Input
+                  value={invoiceNumber}
+                  onChange={(e) => setInvoiceNumber(e.target.value)}
+                  placeholder="Auto-generated if empty"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Issue Date</Label>
+                <Input
+                  type="date"
+                  value={issueDate}
+                  onChange={(e) => setIssueDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Due Date</Label>
+                <Input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Payment Method</Label>
+                <Select value={paymentMethod} onValueChange={(val: any) => setPaymentMethod(val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CASH">Cash (Espèces)</SelectItem>
+                    <SelectItem value="BANK_TRANSFER">Bank Transfer (Virement)</SelectItem>
+                    <SelectItem value="CHEQUE">Cheque</SelectItem>
+                    <SelectItem value="CARD">Card (CIB/Edahabia)</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardContent>
           </Card>
         </div>
