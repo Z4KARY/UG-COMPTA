@@ -195,6 +195,7 @@ export const getG12IFUData = query({
         year: args.year,
         businessName: business.name,
         nif: business.nif || "",
+        activityLabel: business.activityCodes?.join(", ") || "N/A", // Added for CSV
         previousYearTurnover: prevTurnover,
         currentYearRealTurnover: currTurnover,
         forecast: forecast ? {

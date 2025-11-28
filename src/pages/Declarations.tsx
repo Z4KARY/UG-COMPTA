@@ -75,22 +75,43 @@ export default function Declarations() {
   const downloadG50CSV = (data: any) => {
     if (!data) return;
     
-    // G50 Format Mapping
-    const headers = ["Rubrique", "Base Imposable (HT)", "Taux", "Montant Droits/Taxes"];
-    const rows = [
-        ["Chiffre d'affaires Global (HT)", data.turnoverHt.toFixed(2), "-", "-"],
-        ["TVA Collectée", data.turnoverHt.toFixed(2), "Variable", data.tvaCollected.toFixed(2)],
-        ["Droits de Timbre (Sur paiement espèces)", "-", "-", data.stampDutyTotal.toFixed(2)],
+    // G50 CSV EXPORT FORMAT (For sociétés + personne physique réel)
+    // month,year,turnover_ht,vat_collected,vat_deductible,vat_net,stamp_duty,total_invoices_count,total_purchases_count,created_at
+    
+    const headers = [
+        "month",
+        "year",
+        "turnover_ht",
+        "vat_collected",
+        "vat_deductible",
+        "vat_net",
+        "stamp_duty",
+        "total_invoices_count",
+        "total_purchases_count",
+        "created_at"
+    ];
+
+    const row = [
+        data.month,
+        data.year,
+        data.turnoverHt.toFixed(2),
+        data.tvaCollected.toFixed(2),
+        data.vatDeductible.toFixed(2),
+        data.vatNet.toFixed(2),
+        data.stampDutyTotal.toFixed(2),
+        data.totalInvoicesCount,
+        data.totalPurchasesCount,
+        new Date(data.createdAt).toISOString()
     ];
 
     const csvContent = "data:text/csv;charset=utf-8," 
         + headers.join(",") + "\n" 
-        + rows.map(e => e.join(",")).join("\n");
+        + row.join(",");
     
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `G50_${parseInt(selectedMonth)+1}_${selectedYear}.csv`);
+    link.setAttribute("download", `G50_${data.month}_${data.year}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -99,20 +120,42 @@ export default function Declarations() {
   const downloadG12CSV = (data: any) => {
     if (!data) return;
 
-    const headers = ["Rubrique", "Montant Annuel (HT)"];
-    const rows = [
-        ["Chiffre d'affaires Global", data.turnoverHt.toFixed(2)],
-        ["Vente de marchandises (Biens)", data.turnoverGoods.toFixed(2)],
-        ["Prestations de services", data.turnoverServices.toFixed(2)],
+    // G12 CSV EXPORT FORMAT (Forecast Declaration)
+    // year,business_name,nif,activity_label,forecast_turnover,ifu_rate,estimated_tax_due,created_at
+
+    const forecast = data.forecast?.forecastTurnover || 0;
+    const rate = data.forecast?.ifuRate || 0;
+    const taxDue = data.forecast?.taxDueInitial || 0;
+
+    const headers = [
+        "year",
+        "business_name",
+        "nif",
+        "activity_label",
+        "forecast_turnover",
+        "ifu_rate",
+        "estimated_tax_due",
+        "created_at"
+    ];
+
+    const row = [
+        data.year,
+        `"${data.businessName}"`, // Quote to handle commas
+        `"${data.nif}"`,
+        `"${data.activityLabel || ""}"`,
+        forecast.toFixed(2),
+        rate.toString(),
+        taxDue.toFixed(2),
+        new Date(data.createdAt).toISOString()
     ];
 
     const csvContent = "\uFEFF" + headers.join(",") + "\n" 
-        + rows.map(e => e.join(",")).join("\n");
+        + row.join(",");
 
     const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `G12_${selectedYear}.csv`);
+    link.setAttribute("download", `G12_${data.year}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -121,31 +164,52 @@ export default function Declarations() {
   const downloadG12BisCSV = (data: any) => {
     if (!data) return;
     
+    // G12bis CSV EXPORT FORMAT (Final Declaration)
+    // year,business_name,nif,forecast_turnover,real_turnover,difference,ifu_rate,tax_forecast,tax_real,tax_difference,created_at
+    
     const forecast = data.forecast?.forecastTurnover || 0;
     const real = data.currentYearRealTurnover || 0;
+    const diff = real - forecast;
     const rate = data.forecast?.ifuRate || 0;
-    const taxInitial = data.forecast?.taxDueInitial || 0;
-    const taxFinal = real * (rate / 100);
-    const adjustment = taxFinal - taxInitial;
+    const taxForecast = data.forecast?.taxDueInitial || 0;
+    const taxReal = real * (rate / 100);
+    const taxDiff = taxReal - taxForecast;
 
-    const headers = ["Rubrique", "Montant"];
-    const rows = [
-        ["Année", data.year],
-        ["Chiffre d'affaires Prévisionnel (G12)", forecast.toFixed(2)],
-        ["Chiffre d'affaires Réel (G12bis)", real.toFixed(2)],
-        ["Taux IFU (%)", rate.toString()],
-        ["Impôt Dû (Initial)", taxInitial.toFixed(2)],
-        ["Impôt Dû (Final)", taxFinal.toFixed(2)],
-        ["Régularisation (A payer/Avoir)", adjustment.toFixed(2)],
+    const headers = [
+        "year",
+        "business_name",
+        "nif",
+        "forecast_turnover",
+        "real_turnover",
+        "difference",
+        "ifu_rate",
+        "tax_forecast",
+        "tax_real",
+        "tax_difference",
+        "created_at"
+    ];
+
+    const row = [
+        data.year,
+        `"${data.businessName}"`,
+        `"${data.nif}"`,
+        forecast.toFixed(2),
+        real.toFixed(2),
+        diff.toFixed(2),
+        rate.toString(),
+        taxForecast.toFixed(2),
+        taxReal.toFixed(2),
+        taxDiff.toFixed(2),
+        new Date(data.createdAt).toISOString()
     ];
 
     const csvContent = "\uFEFF" + headers.join(",") + "\n" 
-        + rows.map(e => e.join(",")).join("\n");
+        + row.join(",");
 
     const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `G12bis_${selectedYear}.csv`);
+    link.setAttribute("download", `G12bis_${data.year}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -165,6 +229,15 @@ export default function Declarations() {
     );
   }
 
+  // Logic Implementation Summary Check
+  // SOCIÉTÉ: G50 ON, G12 OFF
+  // PERSONNE PHYSIQUE (FORFAITAIRE): G50 OFF, G12 ON
+  // PERSONNE PHYSIQUE (RÉEL SIMPLIFIÉ): G50 ON, G12 OPTIONAL (We show both)
+  // AUTO-ENTREPRENEUR: G50 OFF, G12 ON
+
+  const showG50 = business.type === "societe" || (business.type === "personne_physique" && business.fiscalRegime === "reel");
+  const showG12 = business.type === "auto_entrepreneur" || (business.type === "personne_physique" && business.fiscalRegime === "forfaitaire") || (business.type === "personne_physique" && business.fiscalRegime === "reel");
+
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6 print:hidden">
@@ -176,7 +249,7 @@ export default function Declarations() {
 
       <div className="grid gap-6 md:grid-cols-2 print:block print:space-y-6">
         {/* G50 Monthly Declaration */}
-        {business.fiscalRegime !== "auto_entrepreneur" && (
+        {showG50 && (
         <Card className="print:shadow-none print:border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -253,7 +326,7 @@ export default function Declarations() {
         )}
 
         {/* G12 Annual Declaration */}
-        {business.legalForm === "PERSONNE_PHYSIQUE" || business.type === "auto_entrepreneur" ? (
+        {showG12 ? (
         <Card className="print:shadow-none print:border print:break-before-page">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -332,6 +405,16 @@ export default function Declarations() {
                                             <span>Initial Tax Due:</span>
                                             <span className="font-medium">{g12IfuData.forecast.taxDueInitial.toLocaleString()} {business.currency}</span>
                                         </div>
+                                        <div className="pt-2 print:hidden">
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm"
+                                                className="w-full"
+                                                onClick={() => downloadG12CSV(g12IfuData)}
+                                            >
+                                                <Download className="mr-2 h-4 w-4" /> Export G12 CSV
+                                            </Button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -374,7 +457,7 @@ export default function Declarations() {
                     )}
                 </div>
             ) : (
-                // Standard Real Regime View
+                // Standard Real Regime View (Personne Physique Réel Simplifié)
                 g12Data ? (
                     <div className="space-y-2 border rounded-md p-4 bg-muted/20 print:bg-white print:border-gray-300">
                         <div className="flex justify-between">
@@ -393,15 +476,7 @@ export default function Declarations() {
                             <span className="text-sm text-muted-foreground">Services (Prestations):</span>
                             <span className="font-medium">{g12Data.turnoverServices.toLocaleString()} {business.currency}</span>
                         </div>
-                        <div className="pt-4 mt-2 print:hidden">
-                            <Button 
-                                variant="outline" 
-                                className="w-full"
-                                onClick={() => downloadG12CSV(g12Data)}
-                            >
-                                <Download className="mr-2 h-4 w-4" /> Export G12 CSV
-                            </Button>
-                        </div>
+                        {/* Note: G12/G12bis CSVs for Réel Simplifié might differ or be less relevant if they don't do forecast, but we leave the option if needed or just show summary */}
                     </div>
                 ) : (
                     <div className="p-4 text-center text-muted-foreground">Loading data...</div>
@@ -414,9 +489,7 @@ export default function Declarations() {
                 <CardHeader>
                     <CardTitle className="text-muted-foreground text-lg">G12 / G12bis Not Applicable</CardTitle>
                     <CardDescription>
-                        These declarations are only for "Personnes Physiques" (Entreprises Individuelles).
-                        <br />
-                        Your business is registered as: <span className="font-semibold text-foreground">{business.legalForm || "Unknown"}</span>.
+                        These declarations are not applicable for your business type ({business.type}).
                     </CardDescription>
                 </CardHeader>
             </Card>

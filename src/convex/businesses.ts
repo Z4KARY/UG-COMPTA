@@ -129,8 +129,8 @@ export const create = mutation({
 
     if (args.type === "societe") {
         finalFiscalRegime = "reel";
-        // VAT is mandatory (19 or 9), usually passed in args, but ensure it's not 0 if user tries to set it? 
-        // We'll trust the input for rate value but enforce regime.
+        // VAT is mandatory (19 or 9)
+        if (finalTvaDefault === 0) finalTvaDefault = 19; // Default to 19 if 0 passed
     } else if (args.type === "auto_entrepreneur") {
         finalFiscalRegime = "auto_entrepreneur";
         finalTvaDefault = 0; // Force VAT = 0
@@ -142,10 +142,9 @@ export const create = mutation({
         if (args.fiscalRegime === "VAT") finalFiscalRegime = "reel"; // Map legacy
         
         if (finalFiscalRegime === "forfaitaire") {
-            finalTvaDefault = 0; // IFU usually implies no VAT collection for small entities, though technically IFU includes VAT in the rate. 
-            // User instructions: "PERSONNE PHYSIQUE (FORFAITAIRE) -> VAT OFF"
-            finalTvaDefault = 0;
+            finalTvaDefault = 0; // IFU -> VAT OFF
         }
+        // If reel, we keep the passed tvaDefault (usually 19)
     }
 
     const businessId = await ctx.db.insert("businesses", {
@@ -240,6 +239,7 @@ export const update = mutation({
     // Enforce Logic Binding on Update
     if (updates.type === "societe") {
         updates.fiscalRegime = "reel";
+        if (updates.tvaDefault === 0) updates.tvaDefault = 19;
     } else if (updates.type === "auto_entrepreneur") {
         updates.fiscalRegime = "auto_entrepreneur";
         updates.tvaDefault = 0;
