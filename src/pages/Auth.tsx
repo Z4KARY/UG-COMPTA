@@ -109,7 +109,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               <CardHeader className="text-center">
               <div className="flex justify-center">
                     <img
-                      src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e"
+                      src="https://harmless-tapir-303.convex.cloud/api/storage/cd920389-f399-4cbc-87e9-aa7031824d01"
                       alt="Logo"
                       width={64}
                       height={64}

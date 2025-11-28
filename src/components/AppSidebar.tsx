@@ -93,7 +93,7 @@ export function AppSidebar() {
                 <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer transition-colors data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                       <img 
-                        src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
+                        src="https://harmless-tapir-303.convex.cloud/api/storage/cd920389-f399-4cbc-87e9-aa7031824d01" 
                         alt="Logo" 
                         className="size-8 object-contain" 
                       />

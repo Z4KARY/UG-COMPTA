@@ -158,7 +158,7 @@ export default function Landing() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
             <img 
-              src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
+              src="https://harmless-tapir-303.convex.cloud/api/storage/cd920389-f399-4cbc-87e9-aa7031824d01" 
               alt="UpGrowth" 
               className="h-8 w-auto object-contain" 
             />
@@ -497,7 +497,7 @@ export default function Landing() {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center gap-2 font-bold text-xl mb-4">
                 <img 
-                  src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
+                  src="https://harmless-tapir-303.convex.cloud/api/storage/cd920389-f399-4cbc-87e9-aa7031824d01" 
                   alt="UpGrowth" 
                   className="h-8 w-auto object-contain" 
                 />
