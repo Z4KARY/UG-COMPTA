@@ -48,6 +48,14 @@ const schema = defineSchema(
       tvaDefault: v.number(),
       // New fields
       fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
+      legalForm: v.optional(v.union(
+        v.literal("PERSONNE_PHYSIQUE"),
+        v.literal("EURL"),
+        v.literal("SARL"),
+        v.literal("SPA"),
+        v.literal("SNC"),
+        v.literal("OTHER")
+      )), // Added legal form
       bankName: v.optional(v.string()),
       bankIban: v.optional(v.string()),
       isSuspended: v.optional(v.boolean()), // Added for admin suspension

@@ -73,6 +73,7 @@ export default function BusinessSettings() {
     currency: "DZD",
     tvaDefault: 19,
     fiscalRegime: "VAT",
+    legalForm: "PERSONNE_PHYSIQUE",
     bankName: "",
     bankIban: "",
   });
@@ -90,6 +91,7 @@ export default function BusinessSettings() {
         currency: business.currency,
         tvaDefault: business.tvaDefault,
         fiscalRegime: business.fiscalRegime || "VAT",
+        legalForm: business.legalForm || "PERSONNE_PHYSIQUE",
         bankName: business.bankName || "",
         bankIban: business.bankIban || "",
       });
@@ -119,12 +121,14 @@ export default function BusinessSettings() {
           id: business._id,
           ...formData,
           fiscalRegime: formData.fiscalRegime as "VAT" | "IFU" | "OTHER",
+          legalForm: formData.legalForm as "PERSONNE_PHYSIQUE" | "EURL" | "SARL" | "SPA" | "SNC" | "OTHER",
         });
         toast.success("Business profile updated");
       } else {
         await createBusiness({
           ...formData,
           fiscalRegime: formData.fiscalRegime as "VAT" | "IFU" | "OTHER",
+          legalForm: formData.legalForm as "PERSONNE_PHYSIQUE" | "EURL" | "SARL" | "SPA" | "SNC" | "OTHER",
         });
         toast.success("Business profile created");
       }
@@ -354,23 +358,46 @@ export default function BusinessSettings() {
                 />
               </div>
               <Separator className="my-2" />
-              <div className="space-y-2">
-                <Label htmlFor="fiscalRegime">Fiscal Regime</Label>
-                <Select
-                  value={formData.fiscalRegime}
-                  onValueChange={(val) =>
-                    handleSelectChange("fiscalRegime", val)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select regime" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="VAT">VAT (Réel)</SelectItem>
-                    <SelectItem value="IFU">IFU (Simplifié)</SelectItem>
-                    <SelectItem value="OTHER">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="legalForm">Legal Form</Label>
+                  <Select
+                    value={formData.legalForm}
+                    onValueChange={(val) =>
+                      handleSelectChange("legalForm", val)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select form" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PERSONNE_PHYSIQUE">Personne Physique</SelectItem>
+                      <SelectItem value="EURL">EURL</SelectItem>
+                      <SelectItem value="SARL">SARL</SelectItem>
+                      <SelectItem value="SPA">SPA</SelectItem>
+                      <SelectItem value="SNC">SNC</SelectItem>
+                      <SelectItem value="OTHER">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="fiscalRegime">Fiscal Regime</Label>
+                  <Select
+                    value={formData.fiscalRegime}
+                    onValueChange={(val) =>
+                      handleSelectChange("fiscalRegime", val)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select regime" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="VAT">VAT (Réel)</SelectItem>
+                      <SelectItem value="IFU">IFU (Simplifié)</SelectItem>
+                      <SelectItem value="OTHER">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

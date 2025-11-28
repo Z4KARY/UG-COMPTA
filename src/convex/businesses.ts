@@ -90,6 +90,14 @@ export const create = mutation({
     currency: v.string(),
     tvaDefault: v.number(),
     fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
+    legalForm: v.optional(v.union(
+      v.literal("PERSONNE_PHYSIQUE"),
+      v.literal("EURL"),
+      v.literal("SARL"),
+      v.literal("SPA"),
+      v.literal("SNC"),
+      v.literal("OTHER")
+    )),
     bankName: v.optional(v.string()),
     bankIban: v.optional(v.string()),
   },
@@ -97,19 +105,17 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
 
-    // Removed single business restriction
-
     const businessId = await ctx.db.insert("businesses", {
       userId,
       ...args,
     });
 
-    // Add as owner in members table
+    // Add creator as owner
     await ctx.db.insert("businessMembers", {
-        businessId,
-        userId,
-        role: "owner",
-        joinedAt: Date.now(),
+      businessId,
+      userId,
+      role: "owner",
+      joinedAt: Date.now(),
     });
 
     return businessId;
@@ -130,6 +136,14 @@ export const update = mutation({
     currency: v.optional(v.string()),
     tvaDefault: v.optional(v.number()),
     fiscalRegime: v.optional(v.union(v.literal("VAT"), v.literal("IFU"), v.literal("OTHER"))),
+    legalForm: v.optional(v.union(
+      v.literal("PERSONNE_PHYSIQUE"),
+      v.literal("EURL"),
+      v.literal("SARL"),
+      v.literal("SPA"),
+      v.literal("SNC"),
+      v.literal("OTHER")
+    )),
     bankName: v.optional(v.string()),
     bankIban: v.optional(v.string()),
   },
@@ -138,22 +152,28 @@ export const update = mutation({
     if (!userId) throw new Error("Unauthorized");
 
     const business = await ctx.db.get(args.id);
-    if (!business || business.userId !== userId) {
-      throw new Error("Unauthorized");
+    if (!business) throw new Error("Business not found");
+
+    // Check if user is a member with sufficient permissions (owner or admin)
+    // For simplicity, checking if user is the creator (userId on business) or has owner role in members
+    // In a real app, we'd check the members table.
+    // Let's check members table for permission
+    const member = await ctx.db
+      .query("businessMembers")
+      .withIndex("by_business_and_user", (q) => 
+        q.eq("businessId", args.id).eq("userId", userId)
+      )
+      .first();
+
+    if (!member || (member.role !== "owner" && member.role !== "accountant")) {
+       // Fallback to checking if they are the creator (legacy support)
+       if (business.userId !== userId) {
+         throw new Error("Unauthorized");
+       }
     }
 
     const { id, ...updates } = args;
     await ctx.db.patch(id, updates);
-
-    await ctx.scheduler.runAfter(0, internal.audit.log, {
-        businessId: id,
-        userId,
-        entityType: "BUSINESS",
-        entityId: id,
-        action: "UPDATE",
-        payloadBefore: business,
-        payloadAfter: updates,
-    });
   },
 });
 

@@ -106,11 +106,10 @@ export default function Declarations() {
         ["Prestations de services", data.turnoverServices.toFixed(2)],
     ];
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-        + headers.join(",") + "\n" 
+    const csvContent = "\uFEFF" + headers.join(",") + "\n" 
         + rows.map(e => e.join(",")).join("\n");
 
-    const encodedUri = encodeURI(csvContent);
+    const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", `G12_${selectedYear}.csv`);
@@ -140,11 +139,10 @@ export default function Declarations() {
         ["Régularisation (A payer/Avoir)", adjustment.toFixed(2)],
     ];
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-        + headers.join(",") + "\n" 
+    const csvContent = "\uFEFF" + headers.join(",") + "\n" 
         + rows.map(e => e.join(",")).join("\n");
 
-    const encodedUri = encodeURI(csvContent);
+    const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", `G12bis_${selectedYear}.csv`);
@@ -253,6 +251,7 @@ export default function Declarations() {
         </Card>
 
         {/* G12 Annual Declaration */}
+        {business.legalForm === "PERSONNE_PHYSIQUE" ? (
         <Card className="print:shadow-none print:border print:break-before-page">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -261,6 +260,8 @@ export default function Declarations() {
             </CardTitle>
             <CardDescription>
               Annual turnover declaration for {business.fiscalRegime === "IFU" ? "IFU (Simplified)" : "Real"} regime.
+              <br/>
+              <span className="text-xs text-muted-foreground">Only for Personnes Physiques (Entreprises Individuelles)</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -404,6 +405,18 @@ export default function Declarations() {
             )}
           </CardContent>
         </Card>
+        ) : (
+            <Card className="print:hidden bg-muted/10 border-dashed">
+                <CardHeader>
+                    <CardTitle className="text-muted-foreground text-lg">G12 / G12bis Not Applicable</CardTitle>
+                    <CardDescription>
+                        These declarations are only for "Personnes Physiques" (Entreprises Individuelles).
+                        <br />
+                        Your business is registered as: <span className="font-semibold text-foreground">{business.legalForm || "Unknown"}</span>.
+                    </CardDescription>
+                </CardHeader>
+            </Card>
+        )}
       </div>
     </DashboardLayout>
   );
