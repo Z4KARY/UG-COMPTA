@@ -256,7 +256,7 @@ export default function InvoiceDetail() {
         </div>
 
         <div className="bg-gray-50 p-4 rounded-lg border mb-8">
-            <p className="font-bold text-sm mb-2">Total amount in words:</p>
+            <p className="font-bold text-sm mb-2">This invoice is fixed at the sum of:</p>
             <p className="italic text-gray-700 font-medium">
                 "{numberToWords(invoice.totalTtc)}"
             </p>
