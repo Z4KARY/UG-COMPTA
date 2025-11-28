@@ -25,7 +25,9 @@ import type * as fiscalParameters from "../fiscalParameters.js";
 import type * as http from "../http.js";
 import type * as invoices from "../invoices.js";
 import type * as products from "../products.js";
+import type * as purchaseInvoices from "../purchaseInvoices.js";
 import type * as reports from "../reports.js";
+import type * as suppliers from "../suppliers.js";
 import type * as users from "../users.js";
 
 /**
@@ -49,7 +51,9 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   invoices: typeof invoices;
   products: typeof products;
+  purchaseInvoices: typeof purchaseInvoices;
   reports: typeof reports;
+  suppliers: typeof suppliers;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

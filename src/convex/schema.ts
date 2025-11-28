@@ -186,6 +186,52 @@ const schema = defineSchema(
       submissionDate: v.number(),
     }).index("by_business_and_year", ["businessId", "year"]),
 
+    suppliers: defineTable({
+      businessId: v.id("businesses"),
+      name: v.string(),
+      nif: v.optional(v.string()),
+      rc: v.optional(v.string()),
+      address: v.optional(v.string()),
+      phone: v.optional(v.string()),
+      email: v.optional(v.string()),
+      notes: v.optional(v.string()),
+    }).index("by_business", ["businessId"]),
+
+    purchaseInvoices: defineTable({
+      businessId: v.id("businesses"),
+      supplierId: v.id("suppliers"),
+      invoiceNumber: v.string(),
+      invoiceDate: v.number(),
+      paymentDate: v.optional(v.number()),
+      paymentMethod: v.optional(v.union(
+        v.literal("CASH"),
+        v.literal("BANK_TRANSFER"),
+        v.literal("CHEQUE"),
+        v.literal("CARD"),
+        v.literal("OTHER")
+      )),
+      description: v.optional(v.string()),
+      subtotalHt: v.number(),
+      vatTotal: v.number(),
+      totalTtc: v.number(),
+      vatDeductible: v.number(), // Actual amount claimed
+      pdfUrl: v.optional(v.string()),
+    })
+      .index("by_business", ["businessId"])
+      .index("by_supplier", ["supplierId"])
+      .index("by_business_and_date", ["businessId", "invoiceDate"]),
+
+    purchaseInvoiceItems: defineTable({
+      purchaseInvoiceId: v.id("purchaseInvoices"),
+      description: v.string(),
+      quantity: v.number(),
+      unitPrice: v.number(),
+      vatRate: v.number(),
+      vatAmount: v.number(),
+      lineTotalHt: v.number(),
+      lineTotalTtc: v.number(),
+    }).index("by_purchase_invoice", ["purchaseInvoiceId"]),
+
     auditLogs: defineTable({
       businessId: v.id("businesses"),
       userId: v.id("users"),

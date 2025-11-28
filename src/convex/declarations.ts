@@ -39,12 +39,40 @@ export const getG50Data = query({
       tvaCollected += inv.totalTva || 0;
       
       // Stamp duty is collected on cash payments.
-      // For G50, we sum stamp duty for invoices paid in cash.
-      // Assuming cash payments are collected in the same month as issuance for simplicity
-      // or that the invoice is marked as paid/issued with CASH method.
       if (inv.paymentMethod === "CASH") {
          stampDutyTotal += inv.stampDutyAmount || 0;
       }
+    }
+
+    // --- Purchases & VAT Deductible ---
+    const purchaseInvoices = await ctx.db
+      .query("purchaseInvoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+      
+    const periodPurchases = purchaseInvoices.filter(
+      (inv) => inv.invoiceDate >= startDate && inv.invoiceDate <= endDate
+    );
+
+    let vatDeductibleTotal = 0;
+    const supplierList = [];
+
+    for (const inv of periodPurchases) {
+        vatDeductibleTotal += inv.vatDeductible || 0;
+        
+        const supplier = await ctx.db.get(inv.supplierId);
+        if (supplier) {
+            supplierList.push({
+                supplierName: supplier.name,
+                supplierNif: supplier.nif,
+                supplierRc: supplier.rc,
+                supplierAddress: supplier.address,
+                invoiceNumber: inv.invoiceNumber,
+                invoiceDate: inv.invoiceDate,
+                amountTtc: inv.totalTtc,
+                vatDeducted: inv.vatDeductible
+            });
+        }
     }
 
     return {
@@ -56,6 +84,11 @@ export const getG50Data = query({
       tvaCollected,
       stampDutyTotal,
       invoiceCount: periodInvoices.length,
+      // New fields
+      vatDeductible: vatDeductibleTotal,
+      netVatPayable: Math.max(0, tvaCollected - vatDeductibleTotal),
+      vatCredit: Math.max(0, vatDeductibleTotal - tvaCollected),
+      supplierList,
     };
   },
 });
