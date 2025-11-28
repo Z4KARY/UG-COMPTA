@@ -91,8 +91,16 @@ export const get = query({
     const invoice = await ctx.db.get(args.id);
     if (!invoice) return null;
 
-    const business = await ctx.db.get(invoice.businessId);
-    if (!business || business.userId !== userId) return null;
+    const businessDoc = await ctx.db.get(invoice.businessId);
+    if (!businessDoc || businessDoc.userId !== userId) return null;
+
+    let business = businessDoc;
+    if (business.logoStorageId) {
+        const url = await ctx.storage.getUrl(business.logoStorageId);
+        if (url) {
+            business = { ...business, logoUrl: url };
+        }
+    }
 
     const customer = await ctx.db.get(invoice.customerId);
     const items = await ctx.db

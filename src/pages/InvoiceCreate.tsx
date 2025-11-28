@@ -29,7 +29,7 @@ const DEFAULT_FISCAL_CONSTANTS = {
 };
 
 const formSchema = z.object({
-  invoiceNumber: z.string().default("AUTO"),
+  invoiceNumber: z.string().optional(),
   issueDate: z.date(),
   dueDate: z.date(),
   items: z.array(z.object({
@@ -37,13 +37,13 @@ const formSchema = z.object({
     description: z.string(),
     quantity: z.number(),
     unitPrice: z.number(),
-    discountRate: z.number().optional().default(0),
+    discountRate: z.number().optional(),
     tvaRate: z.number(),
     lineTotal: z.number(),
     productType: z.enum(["goods", "service"]).optional(),
   })),
-  notes: z.string().default(""),
-  currency: z.string().default("DZD"),
+  notes: z.string().optional(),
+  currency: z.string().optional(),
   type: z.enum(["invoice", "quote", "credit_note"]),
   fiscalType: z.enum(["LOCAL", "EXPORT", "EXEMPT"]).optional(),
   paymentMethod: z.enum(["CASH", "BANK_TRANSFER", "CHEQUE", "CARD", "OTHER"]),
@@ -209,14 +209,14 @@ export default function InvoiceCreate() {
       await createInvoice({
         businessId: business._id,
         customerId: values.customerId as Id<"customers">,
-        invoiceNumber: values.invoiceNumber === "AUTO" ? undefined : values.invoiceNumber, // Send undefined if AUTO
+        invoiceNumber: values.invoiceNumber === "AUTO" || !values.invoiceNumber ? undefined : values.invoiceNumber, // Send undefined if AUTO
         type: values.type,
         fiscalType: values.fiscalType as "LOCAL" | "EXPORT" | "EXEMPT" | undefined,
         issueDate: values.issueDate.getTime(),
         dueDate: values.dueDate.getTime(),
-        currency: values.currency,
+        currency: values.currency || "DZD",
         status: submitStatus,
-        notes: values.notes,
+        notes: values.notes || "",
         paymentMethod: values.paymentMethod,
         subtotalHt,
         totalHt: subtotalHt, // Legacy support
