@@ -9,40 +9,53 @@ export const getMyBusiness = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
 
+    let business;
     if (args.businessId) {
-        const business = await ctx.db.get(args.businessId);
+        business = await ctx.db.get(args.businessId);
         // Check ownership or membership
-        if (business?.userId === userId) return business;
-        
-        const member = await ctx.db
-            .query("businessMembers")
-            .withIndex("by_business_and_user", (q) => q.eq("businessId", args.businessId!).eq("userId", userId))
-            .first();
+        if (business?.userId === userId) {
+            // authorized
+        } else {
+            const member = await ctx.db
+                .query("businessMembers")
+                .withIndex("by_business_and_user", (q) => q.eq("businessId", args.businessId!).eq("userId", userId))
+                .first();
             
-        if (member) return business;
-        return null;
-    }
-
-    // Default: return first owned business
-    const business = await ctx.db
-      .query("businesses")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .first();
-
-    if (business) return business;
-
-    // Or first member business
-    const member = await ctx.db
-        .query("businessMembers")
+            if (!member) business = null;
+        }
+    } else {
+        // Default: return first owned business
+        business = await ctx.db
+        .query("businesses")
         .withIndex("by_user", (q) => q.eq("userId", userId))
         .first();
-    
-    if (member) {
-        return await ctx.db.get(member.businessId);
+
+        if (!business) {
+            // Or first member business
+            const member = await ctx.db
+                .query("businessMembers")
+                .withIndex("by_user", (q) => q.eq("userId", userId))
+                .first();
+            
+            if (member) {
+                business = await ctx.db.get(member.businessId);
+            }
+        }
     }
 
-    return null;
+    if (business && business.logoStorageId) {
+        const url = await ctx.storage.getUrl(business.logoStorageId);
+        if (url) {
+            business = { ...business, logoUrl: url };
+        }
+    }
+
+    return business;
   },
+});
+
+export const generateUploadUrl = mutation(async (ctx) => {
+  return await ctx.storage.generateUploadUrl();
 });
 
 export const listMyBusinesses = query({
@@ -89,6 +102,11 @@ export const create = mutation({
     nis: v.optional(v.string()),
     capital: v.optional(v.number()),
     logoUrl: v.optional(v.string()),
+    logoStorageId: v.optional(v.id("_storage")),
+    primaryColor: v.optional(v.string()),
+    secondaryColor: v.optional(v.string()),
+    font: v.optional(v.string()),
+    template: v.optional(v.string()),
     currency: v.string(),
     tvaDefault: v.number(),
     
@@ -210,6 +228,11 @@ export const update = mutation({
     nis: v.optional(v.string()),
     capital: v.optional(v.number()),
     logoUrl: v.optional(v.string()),
+    logoStorageId: v.optional(v.id("_storage")),
+    primaryColor: v.optional(v.string()),
+    secondaryColor: v.optional(v.string()),
+    font: v.optional(v.string()),
+    template: v.optional(v.string()),
     currency: v.optional(v.string()),
     tvaDefault: v.optional(v.number()),
     

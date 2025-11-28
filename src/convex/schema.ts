@@ -46,6 +46,14 @@ const schema = defineSchema(
       nis: v.optional(v.string()), // Added NIS (Numéro d'Identification Statistique)
       capital: v.optional(v.number()), // Added Capital Social
       logoUrl: v.optional(v.string()),
+      logoStorageId: v.optional(v.id("_storage")), // Added for uploaded logos
+      
+      // Invoice Design Preferences
+      primaryColor: v.optional(v.string()), // Hex code
+      secondaryColor: v.optional(v.string()), // Hex code
+      font: v.optional(v.string()), // Font family name
+      template: v.optional(v.string()), // Template identifier
+
       currency: v.string(),
       tvaDefault: v.number(),
       

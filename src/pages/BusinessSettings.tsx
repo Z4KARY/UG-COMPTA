@@ -40,6 +40,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { WebhookSettings } from "@/components/WebhookSettings";
+import { BusinessDesignSettings } from "@/components/BusinessDesignSettings";
 import { useAction } from "convex/react";
 
 export default function BusinessSettings() {
@@ -808,6 +809,23 @@ export default function BusinessSettings() {
           {/* Webhooks Section */}
           <div className="md:col-span-2">
             {business && <WebhookSettings businessId={business._id} />}
+          </div>
+
+          {/* Design Settings Section */}
+          <div className="md:col-span-2">
+            {business && (
+              <BusinessDesignSettings 
+                businessId={business._id} 
+                initialData={{
+                  primaryColor: business.primaryColor,
+                  secondaryColor: business.secondaryColor,
+                  font: business.font,
+                  template: business.template,
+                  logoUrl: business.logoUrl,
+                  logoStorageId: business.logoStorageId,
+                }} 
+              />
+            )}
           </div>
 
         </form>

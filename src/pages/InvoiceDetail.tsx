@@ -32,6 +32,12 @@ export default function InvoiceDetail() {
   const business = invoice.business;
   const isAE = business?.type === "auto_entrepreneur";
 
+  // Design settings
+  const primaryColor = business?.primaryColor || "#000000";
+  const secondaryColor = business?.secondaryColor || "#ffffff";
+  const font = business?.font || "Inter";
+  const logoUrl = business?.logoUrl;
+
   const handleStatusChange = async (status: "issued" | "paid" | "cancelled") => {
     try {
       await updateStatus({ id: invoice._id, status });
@@ -76,11 +82,17 @@ export default function InvoiceDetail() {
         </div>
       </div>
 
-      <div className="bg-white p-8 shadow-sm border rounded-lg max-w-4xl mx-auto print:shadow-none print:border-none print:w-full print:max-w-none">
+      <div className="bg-white p-8 shadow-sm border rounded-lg max-w-4xl mx-auto print:shadow-none print:border-none print:w-full print:max-w-none"
+           style={{ fontFamily: font }}>
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-primary uppercase">{invoice.type === "quote" ? "PRO-FORMA / QUOTE" : invoice.type === "credit_note" ? "CREDIT NOTE" : "INVOICE"}</h1>
+            {logoUrl && (
+              <img src={logoUrl} alt="Business Logo" className="h-16 object-contain mb-4" />
+            )}
+            <h1 className="text-2xl font-bold uppercase" style={{ color: primaryColor }}>
+              {invoice.type === "quote" ? "PRO-FORMA / QUOTE" : invoice.type === "credit_note" ? "CREDIT NOTE" : "INVOICE"}
+            </h1>
             <p className="text-muted-foreground">{invoice.invoiceNumber}</p>
             <div className="mt-2 text-sm">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -167,12 +179,12 @@ export default function InvoiceDetail() {
         {/* Items */}
         <table className="w-full mb-8 text-sm">
           <thead>
-            <tr className="border-b-2 border-gray-200">
-              <th className="text-left py-2">Description</th>
-              <th className="text-right py-2">Qty</th>
-              <th className="text-right py-2">Price</th>
-              {!isAE && <th className="text-right py-2">TVA</th>}
-              <th className="text-right py-2">Total</th>
+            <tr className="border-b-2" style={{ borderColor: primaryColor }}>
+              <th className="text-left py-2" style={{ color: primaryColor }}>Description</th>
+              <th className="text-right py-2" style={{ color: primaryColor }}>Qty</th>
+              <th className="text-right py-2" style={{ color: primaryColor }}>Price</th>
+              {!isAE && <th className="text-right py-2" style={{ color: primaryColor }}>TVA</th>}
+              <th className="text-right py-2" style={{ color: primaryColor }}>Total</th>
             </tr>
           </thead>
           <tbody>
