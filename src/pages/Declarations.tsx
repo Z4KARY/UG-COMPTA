@@ -16,11 +16,12 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { FileText, Download, Printer, Save } from "lucide-react";
+import { FileText, Download, Printer, Save, Settings } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Link } from "react-router";
 
 export default function Declarations() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -284,14 +285,35 @@ export default function Declarations() {
     );
   }
 
+  if (!business.type) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center h-[60vh] space-y-6">
+            <div className="p-4 rounded-full bg-muted/30">
+                <Settings className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <div className="text-center space-y-2 max-w-md">
+                <h2 className="text-2xl font-bold tracking-tight">Business Configuration Required</h2>
+                <p className="text-muted-foreground">
+                    We need to know your business type (Société, Personne Physique, or Auto-Entrepreneur) to show the correct tax declarations.
+                </p>
+            </div>
+            <Button asChild size="lg">
+                <Link to="/settings">Configure Business Type</Link>
+            </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   // Logic Implementation Summary Check
   // SOCIÉTÉ: G50 ON, G12 OFF
   // PERSONNE PHYSIQUE (FORFAITAIRE): G50 OFF, G12 ON
   // PERSONNE PHYSIQUE (RÉEL SIMPLIFIÉ): G50 ON, G12 OPTIONAL (We show both)
   // AUTO-ENTREPRENEUR: G50 OFF, G12 ON
 
-  const showG50 = business.type === "societe" || (business.type === "personne_physique" && business.fiscalRegime === "reel");
-  const showG12 = business.type === "auto_entrepreneur" || (business.type === "personne_physique" && business.fiscalRegime === "forfaitaire") || (business.type === "personne_physique" && business.fiscalRegime === "reel");
+  const showG50 = business.type === "societe" || (business.type === "personne_physique" && (business.fiscalRegime === "reel" || business.fiscalRegime === "VAT"));
+  const showG12 = business.type === "auto_entrepreneur" || (business.type === "personne_physique" && (business.fiscalRegime === "forfaitaire" || business.fiscalRegime === "IFU")) || (business.type === "personne_physique" && (business.fiscalRegime === "reel" || business.fiscalRegime === "VAT"));
 
   return (
     <DashboardLayout>
