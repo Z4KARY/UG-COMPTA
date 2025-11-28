@@ -268,13 +268,23 @@ export default function Landing() {
         {/* Trusted By Section */}
         <section className="py-12 border-y bg-muted/20">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-sm font-semibold text-muted-foreground mb-8 uppercase tracking-wider">Trusted by forward-thinking Algerian companies</p>
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale">
-              {/* Placeholders for logos - using text for now but styled to look like logos */}
-              <div className="flex items-center gap-2 font-bold text-xl"><Building2 className="h-6 w-6" /> TechCorp DZ</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><Globe className="h-6 w-6" /> GlobalTrade</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><Zap className="h-6 w-6" /> EnergyPlus</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><Shield className="h-6 w-6" /> SecureNet</div>
+            <p className="text-sm font-semibold text-muted-foreground mb-8 uppercase tracking-wider">Trusted by forward-thinking companies</p>
+            <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+              <img 
+                src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
+                alt="UpGrowth" 
+                className="h-12 md:h-16 w-auto object-contain"
+              />
+              <img 
+                src="https://harmless-tapir-303.convex.cloud/api/storage/360ad36b-e195-467f-80b4-05af3785761f" 
+                alt="UpGrowth Connect" 
+                className="h-12 md:h-16 w-auto object-contain"
+              />
+              <img 
+                src="https://harmless-tapir-303.convex.cloud/api/storage/ef75208c-7736-4b74-b7f4-a8a8aa9cc483" 
+                alt="FA Management Solutions" 
+                className="h-16 md:h-20 w-auto object-contain"
+              />
             </div>
           </div>
         </section>
