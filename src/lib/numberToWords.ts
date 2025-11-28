@@ -1,10 +1,9 @@
-const UNITS = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"];
-const TEENS = ["dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"];
-const TENS = ["", "", "vingt", "trente", "quarante", "cinquante", "soixante", "soixante-dix", "quatre-vingt", "quatre-vingt-dix"];
+const UNITS = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+const TEENS = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
 
 function convertGroup(n: number): string {
   if (n === 0) return "";
-  if (n === 100) return "cent";
   
   let str = "";
   
@@ -12,12 +11,7 @@ function convertGroup(n: number): string {
   if (n >= 100) {
     const hundreds = Math.floor(n / 100);
     const remainder = n % 100;
-    if (hundreds > 1) {
-      str += UNITS[hundreds] + " cent";
-      if (remainder === 0) str += "s";
-    } else {
-      str += "cent";
-    }
+    str += UNITS[hundreds] + " hundred";
     if (remainder > 0) str += " ";
     n = remainder;
   }
@@ -32,20 +26,10 @@ function convertGroup(n: number): string {
       const tens = Math.floor(n / 10);
       const units = n % 10;
       
-      if (tens === 7 || tens === 9) {
-        str += TENS[tens - 1]; // soixante or quatre-vingt
-        str += "-";
-        str += TEENS[units]; // dix, onze, etc.
-      } else {
-        str += TENS[tens];
-        if (units > 0) {
-          if (units === 1 && tens !== 8) str += "-et-un";
-          else str += "-" + UNITS[units];
-        }
+      str += TENS[tens];
+      if (units > 0) {
+        str += "-" + UNITS[units];
       }
-      
-      // Fix for quatre-vingts (80)
-      if (tens === 8 && units === 0) str += "s";
     }
   }
   
@@ -53,7 +37,7 @@ function convertGroup(n: number): string {
 }
 
 export function numberToWords(amount: number): string {
-  if (amount === 0) return "zéro dinars algériens";
+  if (amount === 0) return "zero Algerian Dinars";
   
   const integerPart = Math.floor(amount);
   const decimalPart = Math.round((amount - integerPart) * 100);
@@ -61,7 +45,7 @@ export function numberToWords(amount: number): string {
   let words = "";
   
   if (integerPart === 0) {
-    words = "zéro";
+    words = "zero";
   } else {
     const billions = Math.floor(integerPart / 1000000000);
     const millions = Math.floor((integerPart % 1000000000) / 1000000);
@@ -69,25 +53,24 @@ export function numberToWords(amount: number): string {
     const remainder = integerPart % 1000;
     
     if (billions > 0) {
-      words += convertGroup(billions) + " milliard" + (billions > 1 ? "s" : "") + " ";
+      words += convertGroup(billions) + " billion" + (billions > 1 ? "s" : "") + " ";
     }
     if (millions > 0) {
       words += convertGroup(millions) + " million" + (millions > 1 ? "s" : "") + " ";
     }
     if (thousands > 0) {
-      if (thousands === 1) words += "mille ";
-      else words += convertGroup(thousands) + " mille ";
+      words += convertGroup(thousands) + " thousand ";
     }
     if (remainder > 0) {
       words += convertGroup(remainder);
     }
   }
   
-  words = words.trim() + " dinars algériens";
+  words = words.trim() + " Algerian Dinars";
   
   if (decimalPart > 0) {
-    words += " et " + convertGroup(decimalPart) + " centimes";
+    words += " and " + convertGroup(decimalPart) + " centimes";
   }
   
-  return words + " TTC";
+  return words + " (Incl. Tax)";
 }
