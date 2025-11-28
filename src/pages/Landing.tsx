@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight, 
   CheckCircle2, 
@@ -13,23 +13,18 @@ import {
   Users,
   CreditCard,
   Menu,
-  X
+  X,
+  ChevronDown
 } from "lucide-react";
 import { Link } from "react-router";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
@@ -405,10 +400,13 @@ export default function Landing() {
                       </div>
                       <p className="text-muted-foreground mb-6 italic">"{testimonial.content}"</p>
                       <div className="flex items-center gap-4">
-                        <Avatar>
-                          <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${testimonial.avatar}`} />
-                          <AvatarFallback>{testimonial.avatar}</AvatarFallback>
-                        </Avatar>
+                        <div className="h-10 w-10 rounded-full overflow-hidden bg-muted relative shrink-0 border">
+                          <img 
+                            src={`https://api.dicebear.com/7.x/initials/svg?seed=${testimonial.avatar}`} 
+                            alt={testimonial.name}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
                         <div>
                           <p className="font-semibold text-sm">{testimonial.name}</p>
                           <p className="text-xs text-muted-foreground">{testimonial.role}</p>
@@ -432,16 +430,33 @@ export default function Landing() {
               </p>
             </div>
 
-            <Accordion type="single" collapsible className="w-full">
+            <div className="w-full max-w-3xl mx-auto space-y-4">
               {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
+                <div key={index} className="border-b border-border">
+                  <button
+                    className="flex flex-1 items-center justify-between py-4 font-medium transition-all hover:text-primary w-full text-left"
+                    onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                  >
+                    {faq.question}
+                    <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-200 ${openFaqIndex === index ? "rotate-180" : ""}`} />
+                  </button>
+                  <AnimatePresence>
+                    {openFaqIndex === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pb-4 pt-0 text-muted-foreground">
+                          {faq.answer}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ))}
-            </Accordion>
+            </div>
           </div>
         </section>
 
