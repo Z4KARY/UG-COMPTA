@@ -3,15 +3,36 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   const pathSegments = location.pathname.split("/").filter(Boolean);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate("/auth");
+    }
+  }, [isLoading, isAuthenticated, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-muted/30">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) return null;
 
   return (
     <SidebarProvider>

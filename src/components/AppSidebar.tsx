@@ -85,6 +85,11 @@ export function AppSidebar() {
   const businesses = useQuery(api.businesses.listMyBusinesses);
   const activeBusiness = useQuery(api.businesses.getMyBusiness, {});
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
@@ -184,11 +189,16 @@ export function AppSidebar() {
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">{user?.name || "User"}</span>
                       <span className="truncate text-xs">{user?.email}</span>
+                      {user?.roleGlobal && (
+                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mt-0.5">
+                          {user.roleGlobal}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer text-destructive focus:text-destructive">
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
