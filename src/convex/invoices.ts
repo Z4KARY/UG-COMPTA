@@ -49,7 +49,7 @@ export const get = query({
       .withIndex("by_invoice", (q) => q.eq("invoiceId", invoice._id))
       .collect();
 
-    return { ...invoice, customer, items };
+    return { ...invoice, customer, items, business };
   },
 });
 
@@ -117,6 +117,9 @@ export const create = mutation({
     const business = await ctx.db.get(args.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
+    // Auto-Entrepreneur Logic Enforcement: NO VAT
+    const isAE = business.type === "auto_entrepreneur";
+
     // Fetch Fiscal Parameters (Stamp Duty)
     // Try business specific first, then global, then default
     let stampDutyConfig: StampDutyConfig = FISCAL_CONSTANTS.STAMP_DUTY;
@@ -158,11 +161,14 @@ export const create = mutation({
     let calculatedDiscountTotal = 0;
 
     const processedItems = args.items.map(item => {
+      // Force TVA to 0 for Auto-Entrepreneur
+      const effectiveTvaRate = isAE ? 0 : item.tvaRate;
+
       const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculateLineItem(
         item.quantity,
         item.unitPrice,
         item.discountRate || 0,
-        item.tvaRate
+        effectiveTvaRate
       );
 
       calculatedSubtotalHt += lineTotalHt;
@@ -171,6 +177,7 @@ export const create = mutation({
 
       return {
         ...item,
+        tvaRate: effectiveTvaRate, // Enforce 0 in storage
         discountAmount,
         tvaAmount,
         lineTotal: lineTotalHt, // Storing HT as lineTotal
@@ -192,6 +199,7 @@ export const create = mutation({
     const totalBeforeStamp = calculatedSubtotalHt + calculatedTotalTva;
     
     // Calculate Stamp Duty (Droit de Timbre) using fetched config
+    // AE is subject to stamp duty on CASH payments (general rule for all payments > threshold)
     const stampDutyAmount = calculateStampDuty(
       totalBeforeStamp, 
       args.paymentMethod || "OTHER",

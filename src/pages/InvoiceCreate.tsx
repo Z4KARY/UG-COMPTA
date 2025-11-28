@@ -87,7 +87,7 @@ export default function InvoiceCreate() {
       quantity: 1,
       unitPrice: 0,
       discountRate: 0,
-      tvaRate: business?.fiscalRegime === "IFU" ? 0 : 19,
+      tvaRate: business?.fiscalRegime === "IFU" || business?.type === "auto_entrepreneur" ? 0 : 19,
       lineTotal: 0,
       productType: "service",
     },
@@ -96,7 +96,7 @@ export default function InvoiceCreate() {
   // Update default TVA when business loads
   useEffect(() => {
     if (business && items.length === 1 && items[0].description === "" && items[0].unitPrice === 0) {
-        const defaultTva = business.fiscalRegime === "IFU" ? 0 : (business.tvaDefault || 19);
+        const defaultTva = (business.fiscalRegime === "IFU" || business.type === "auto_entrepreneur") ? 0 : (business.tvaDefault || 19);
         setItems([{ ...items[0], tvaRate: defaultTva }]);
     }
   }, [business]);
@@ -111,7 +111,8 @@ export default function InvoiceCreate() {
       const quantity = item.quantity;
       const unitPrice = item.unitPrice;
       const discountRate = item.discountRate || 0;
-      const tvaRate = item.tvaRate;
+      // Force 0 TVA for AE in preview
+      const tvaRate = business?.type === "auto_entrepreneur" ? 0 : item.tvaRate;
 
       const basePrice = unitPrice * quantity;
       const discountAmount = Math.round((basePrice * (discountRate / 100) + Number.EPSILON) * 100) / 100;
@@ -207,7 +208,7 @@ export default function InvoiceCreate() {
         quantity: 1,
         unitPrice: 0,
         discountRate: 0,
-        tvaRate: business?.fiscalRegime === "IFU" ? 0 : (business?.tvaDefault || 19),
+        tvaRate: business?.fiscalRegime === "IFU" || business?.type === "auto_entrepreneur" ? 0 : (business?.tvaDefault || 19),
         lineTotal: 0,
         productType: "service",
       },
@@ -466,6 +467,7 @@ export default function InvoiceCreate() {
                       }
                     />
                   </div>
+                  {business?.type !== "auto_entrepreneur" && (
                   <div className="col-span-1 space-y-1">
                     <Label className="text-xs">TVA %</Label>
                     <Input
@@ -478,8 +480,9 @@ export default function InvoiceCreate() {
                       className={business?.fiscalRegime === "IFU" ? "bg-gray-100 text-gray-500" : ""}
                     />
                   </div>
+                  )}
                   <div className="col-span-1 space-y-1">
-                    <Label className="text-xs">Total HT</Label>
+                    <Label className="text-xs">Total {business?.type === "auto_entrepreneur" ? "" : "HT"}</Label>
                     <div className="text-sm font-medium py-2">
                       {item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
@@ -511,17 +514,19 @@ export default function InvoiceCreate() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total HT</span>
+                <span className="text-muted-foreground">Total {business?.type === "auto_entrepreneur" ? "" : "HT"}</span>
                 <span>
                   {subtotalHt.toFixed(2)} {business.currency}
                 </span>
               </div>
+              {business?.type !== "auto_entrepreneur" && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Total TVA</span>
                 <span>
                   {totalTva.toFixed(2)} {business.currency}
                 </span>
               </div>
+              )}
               
               {stampDutyAmount > 0 && (
                 <div className="flex items-center justify-between text-sm pt-2 border-t text-orange-600">

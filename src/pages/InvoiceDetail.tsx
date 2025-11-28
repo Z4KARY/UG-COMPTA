@@ -29,6 +29,9 @@ export default function InvoiceDetail() {
     window.print();
   };
 
+  const business = invoice.business;
+  const isAE = business?.type === "auto_entrepreneur";
+
   const handleStatusChange = async (status: "issued" | "paid" | "cancelled") => {
     try {
       await updateStatus({ id: invoice._id, status });
@@ -92,6 +95,27 @@ export default function InvoiceDetail() {
             </div>
           </div>
           <div className="text-right">
+            <h2 className="font-bold text-lg">{business?.name}</h2>
+            <p className="text-sm text-muted-foreground">{business?.address}</p>
+            <p className="text-sm text-muted-foreground">{business?.city}</p>
+            
+            {isAE ? (
+                <>
+                    <p className="text-sm font-medium mt-1">Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</p>
+                    <p className="text-sm text-muted-foreground">NIF: {business?.nif || "N/A"}</p>
+                </>
+            ) : (
+                <>
+                    <p className="text-sm text-muted-foreground">NIF: {business?.nif || "N/A"}</p>
+                    <p className="text-sm text-muted-foreground">RC: {business?.rc || "N/A"}</p>
+                    <p className="text-sm text-muted-foreground">AI: {business?.ai || "N/A"}</p>
+                </>
+            )}
+          </div>
+        </div>
+
+        <div className="border-b pb-8 mb-8">
+            <h3 className="text-sm font-bold text-muted-foreground mb-2">BILL TO</h3>
             <h2 className="font-bold text-lg">{invoice.customer?.name}</h2>
             <p className="text-sm text-muted-foreground">
               {invoice.customer?.address}
@@ -107,7 +131,6 @@ export default function InvoiceDetail() {
                     NIF: {invoice.customer.taxId}
                 </p>
             )}
-          </div>
         </div>
 
         {/* Dates */}
@@ -129,7 +152,7 @@ export default function InvoiceDetail() {
               <th className="text-left py-2">Description</th>
               <th className="text-right py-2">Qty</th>
               <th className="text-right py-2">Price</th>
-              <th className="text-right py-2">TVA</th>
+              {!isAE && <th className="text-right py-2">TVA</th>}
               <th className="text-right py-2">Total</th>
             </tr>
           </thead>
@@ -141,7 +164,7 @@ export default function InvoiceDetail() {
                 <td className="text-right py-2">
                   {item.unitPrice.toLocaleString()}
                 </td>
-                <td className="text-right py-2">{item.tvaRate}%</td>
+                {!isAE && <td className="text-right py-2">{item.tvaRate}%</td>}
                 <td className="text-right py-2">
                   {item.lineTotal.toLocaleString()}
                 </td>
@@ -154,17 +177,19 @@ export default function InvoiceDetail() {
         <div className="flex justify-end">
           <div className="w-64 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span>Total HT:</span>
+              <span>Total {isAE ? "" : "HT"}:</span>
               <span>
                 {subtotalHt.toLocaleString()} {invoice.currency}
               </span>
             </div>
+            {!isAE && (
             <div className="flex justify-between">
               <span>Total TVA:</span>
               <span>
                 {invoice.totalTva.toLocaleString()} {invoice.currency}
               </span>
             </div>
+            )}
             {stampDuty > 0 && (
               <div className="flex justify-between">
                 <span>Timbre Fiscal:</span>

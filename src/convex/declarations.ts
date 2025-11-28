@@ -195,7 +195,8 @@ export const getG12IFUData = query({
         year: args.year,
         businessName: business.name,
         nif: business.nif || "",
-        activityLabel: business.activityCodes?.join(", ") || "N/A", // Added for CSV
+        autoEntrepreneurCardNumber: business.autoEntrepreneurCardNumber, // Added for AE
+        activityLabel: business.activityCodes?.join(", ") || "N/A",
         previousYearTurnover: prevTurnover,
         currentYearRealTurnover: currTurnover,
         forecast: forecast ? {
@@ -206,6 +207,55 @@ export const getG12IFUData = query({
         createdAt: Date.now(),
     };
   },
+});
+
+// AE Invoice Export Data
+export const getAEInvoicesExportData = query({
+  args: {
+    businessId: v.id("businesses"),
+    year: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business || (business.userId !== userId && !(await isMember(ctx, args.businessId, userId)))) return null;
+
+    if (business.type !== "auto_entrepreneur") return null;
+
+    const startDate = new Date(args.year, 0, 1).getTime();
+    const endDate = new Date(args.year, 11, 31, 23, 59, 59).getTime();
+
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const periodInvoices = invoices.filter(
+      (inv) => inv.issueDate >= startDate && inv.issueDate <= endDate && inv.status !== "cancelled" && inv.status !== "draft"
+    );
+
+    // Fetch customer names
+    const exportData = await Promise.all(periodInvoices.map(async (inv) => {
+        const customer = await ctx.db.get(inv.customerId);
+        return {
+            invoiceNumber: inv.invoiceNumber,
+            invoiceDate: inv.issueDate,
+            customerName: customer?.name || "Unknown",
+            customerAddress: customer?.address || "",
+            description: inv.notes || "Services", // Simplified, ideally join items
+            amountTtc: inv.totalTtc,
+            paymentStatus: inv.status,
+            paymentMethod: inv.paymentMethod || "",
+            autoEntrepreneurCardNumber: business.autoEntrepreneurCardNumber,
+            nif: business.nif,
+            businessActivityCode: business.activityCodes?.[0] || ""
+        };
+    }));
+
+    return exportData;
+  }
 });
 
 // Helper
