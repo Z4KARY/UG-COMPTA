@@ -1,0 +1,16 @@
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #invoice-container, #invoice-container * {
+    visibility: visible;
+  }
+  #invoice-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+}
