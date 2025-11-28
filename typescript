@@ -1,65 +1,17 @@
-import {
-  Building2,
-  CreditCard,
-  FileText,
-  Landmark,
-  MapPin,
-  Save,
-  Wallet,
-  Download,
-  Archive,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-
-// Server-side calculation to ensure fiscal compliance
-let calculatedSubtotalHt = 0;
-
-// Prevent editing if paid or cancelled
-if (invoice.status === "paid" || invoice.status === "cancelled") {
-    throw new Error("Cannot edit finalized invoice");
-}
-
-if (invoice.status !== "draft") throw new Error("Invoice already issued or processed");
-
-const business = await ctx.db.get(invoice.businessId);
-if (!business || business.userId !== userId) throw new Error("Unauthorized");
-
-if (business.fiscalRegime === "VAT") {
-    vatDeductible = vatTotal;
-}
-
-if (!member) throw new Error("Unauthorized");
-
-businessMembers: defineTable({
+importJobs: defineTable({
   businessId: v.id("businesses"),
   userId: v.id("users"),
-  role: v.union(v.literal("owner"), v.literal("accountant"), v.literal("staff")), // Updated to match spec (STAFF)
-  joinedAt: v.number(),
-})
-  .index("by_business", ["businessId"])
-  .index("by_user", ["userId"])
-  .index("by_business_and_user", ["businessId", "userId"]),
-
-periodClosures: defineTable({
-  businessId: v.id("businesses"),
-  periodType: v.union(v.literal("MONTH"), v.literal("YEAR")),
-  startDate: v.number(),
-  endDate: v.number(),
-  closedByUserId: v.id("users"),
-  closedAt: v.number(),
-  notes: v.optional(v.string()),
-})
-  .index("by_business", ["businessId"]),
-
-users: defineTable({
-  name: v.optional(v.string()), // name of the user. do not remove
-  image: v.optional(v.string()), // image of the user. do not remove
-  email: v.optional(v.string()), // email of the user. do not remove
-  emailVerificationTime: v.optional(v.number()), // email verification time. do not remove
-  isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
-
-  role: v.optional(roleValidator), // role of the user. do not remove
-  roleGlobal: v.optional(v.union(v.literal("NORMAL"), v.literal("ACCOUNTANT"), v.literal("ADMIN"))), // Added for accountant mode
-  isSuspended: v.optional(v.boolean()), // Added for admin suspension
-}).index("email", ["email"]), // index for the email. do not remove or modify
+  type: v.union(v.literal("CUSTOMERS"), v.literal("PRODUCTS"), v.literal("INVOICES")),
+  status: v.union(
+    v.literal("PENDING"),
+    v.literal("PROCESSING"),
+    v.literal("DONE"),
+    v.literal("FAILED"),
+    v.literal("PARTIAL")
+  ),
+  storageId: v.id("_storage"),
+  mapping: v.string(),
+  report: v.optional(v.string()),
+  startedAt: v.optional(v.number()),
+  finishedAt: v.optional(v.number()),
+}).index("by_business", ["businessId"]),

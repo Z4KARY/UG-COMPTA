@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
+import { internalMutation } from "./_generated/server";
 
 export const list = query({
   args: { businessId: v.id("businesses") },
@@ -116,5 +117,50 @@ export const remove = mutation({
         action: "DELETE",
         payloadBefore: customer,
     });
+  },
+});
+
+export const createBatch = internalMutation({
+  args: {
+    businessId: v.id("businesses"),
+    userId: v.id("users"),
+    customers: v.array(v.object({
+      name: v.string(),
+      contactPerson: v.optional(v.string()),
+      email: v.optional(v.string()),
+      phone: v.optional(v.string()),
+      address: v.optional(v.string()),
+      notes: v.optional(v.string()),
+      taxId: v.optional(v.string()),
+      rc: v.optional(v.string()),
+      ai: v.optional(v.string()),
+      nis: v.optional(v.string()),
+    })),
+  },
+  handler: async (ctx, args) => {
+    const results = [];
+    for (const customer of args.customers) {
+      try {
+        const id = await ctx.db.insert("customers", {
+          businessId: args.businessId,
+          ...customer,
+        });
+        results.push({ success: true, id, name: customer.name });
+      } catch (error: any) {
+        results.push({ success: false, name: customer.name, error: error.message });
+      }
+    }
+    
+    // Log audit for the batch (simplified)
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: args.businessId,
+        userId: args.userId,
+        entityType: "CUSTOMER",
+        entityId: "BATCH",
+        action: "CREATE",
+        payloadAfter: { count: results.filter(r => r.success).length },
+    });
+
+    return results;
   },
 });

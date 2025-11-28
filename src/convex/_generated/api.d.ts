@@ -23,6 +23,8 @@ import type * as declarations from "../declarations.js";
 import type * as fiscal from "../fiscal.js";
 import type * as fiscalParameters from "../fiscalParameters.js";
 import type * as http from "../http.js";
+import type * as importActions from "../importActions.js";
+import type * as imports from "../imports.js";
 import type * as invoices from "../invoices.js";
 import type * as periods from "../periods.js";
 import type * as products from "../products.js";
@@ -50,6 +52,8 @@ declare const fullApi: ApiFromModules<{
   fiscal: typeof fiscal;
   fiscalParameters: typeof fiscalParameters;
   http: typeof http;
+  importActions: typeof importActions;
+  imports: typeof imports;
   invoices: typeof invoices;
   periods: typeof periods;
   products: typeof products;

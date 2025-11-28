@@ -244,6 +244,24 @@ const schema = defineSchema(
       lineTotalTtc: v.number(),
     }).index("by_purchase_invoice", ["purchaseInvoiceId"]),
 
+    importJobs: defineTable({
+      businessId: v.id("businesses"),
+      userId: v.id("users"),
+      type: v.union(v.literal("CUSTOMERS"), v.literal("PRODUCTS"), v.literal("INVOICES")),
+      status: v.union(
+        v.literal("PENDING"),
+        v.literal("PROCESSING"),
+        v.literal("DONE"),
+        v.literal("FAILED"),
+        v.literal("PARTIAL")
+      ),
+      storageId: v.id("_storage"),
+      mapping: v.string(), // JSON string of column mapping { "csvHeader": "dbField" }
+      report: v.optional(v.string()), // JSON string of errors/results
+      startedAt: v.optional(v.number()),
+      finishedAt: v.optional(v.number()),
+    }).index("by_business", ["businessId"]),
+
     auditLogs: defineTable({
       businessId: v.id("businesses"),
       userId: v.id("users"),
@@ -252,7 +270,8 @@ const schema = defineSchema(
         v.literal("CUSTOMER"),
         v.literal("PRODUCT"),
         v.literal("FISCAL_CONFIG"),
-        v.literal("BUSINESS")
+        v.literal("BUSINESS"),
+        v.literal("IMPORT_JOB") // Added IMPORT_JOB
       ),
       entityId: v.string(),
       action: v.union(
@@ -261,11 +280,12 @@ const schema = defineSchema(
         v.literal("DELETE"),
         v.literal("ISSUE"),
         v.literal("MARK_PAID"),
-        v.literal("CONFIG_CHANGE")
+        v.literal("CONFIG_CHANGE"),
+        v.literal("IMPORT") // Added IMPORT
       ),
       payloadBefore: v.optional(v.any()),
       payloadAfter: v.optional(v.any()),
-      timestamp: v.optional(v.number()), // Add timestamp for easier querying if needed, though _creationTime exists
+      timestamp: v.optional(v.number()),
     }).index("by_business", ["businessId"]),
   },
   {

@@ -40,6 +40,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
+import { ImportDialog } from "@/components/ImportDialog";
 
 export default function Products() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -116,194 +117,204 @@ export default function Products() {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Add Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
-              <DialogDescription>
-                Enter the product details below.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="type" className="text-right">
-                    Type
-                  </Label>
-                  <Select value={formData.type} onValueChange={handleTypeChange}>
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="service">Service (Prestation)</SelectItem>
-                      <SelectItem value="goods">Goods (Marchandise)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Name
-                  </Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">
-                    Description
-                  </Label>
-                  <Input
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="unitPrice" className="text-right">
-                    Price
-                  </Label>
-                  <Input
-                    id="unitPrice"
-                    name="unitPrice"
-                    type="number"
-                    value={formData.unitPrice}
-                    onChange={handleChange}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="unitLabel" className="text-right">
-                    Unit Label
-                  </Label>
-                  <Input
-                    id="unitLabel"
-                    name="unitLabel"
-                    value={formData.unitLabel}
-                    onChange={handleChange}
-                    className="col-span-3"
-                    placeholder="e.g. Hour, Piece"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="tvaRate" className="text-right">
-                    TVA (%)
-                  </Label>
-                  <Input
-                    id="tvaRate"
-                    name="tvaRate"
-                    type="number"
-                    value={formData.tvaRate}
-                    onChange={handleChange}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="defaultDiscount" className="text-right">
-                    Discount (%)
-                  </Label>
-                  <Input
-                    id="defaultDiscount"
-                    name="defaultDiscount"
-                    type="number"
-                    value={formData.defaultDiscount}
-                    onChange={handleChange}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="isActive" className="text-right">
-                    Active
-                  </Label>
-                  <div className="col-span-3 flex items-center space-x-2">
-                    <Switch
-                      id="isActive"
-                      checked={formData.isActive}
-                      onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Save Product</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Product List</CardTitle>
-          <CardDescription>
-            Manage your products and services.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>TVA (%)</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products?.map((product) => (
-                <TableRow key={product._id}>
-                  <TableCell className="font-medium">
-                    {product.name}
-                    <div className="text-xs text-muted-foreground capitalize">{product.type || "service"}</div>
-                    {product.description && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{product.description}</div>}
-                  </TableCell>
-                  <TableCell>{product.unitPrice.toLocaleString()} {business.currency}</TableCell>
-                  <TableCell>{product.unitLabel || "-"}</TableCell>
-                  <TableCell>{product.tvaRate}%</TableCell>
-                  <TableCell>
-                    <div className={`text-xs px-2 py-1 rounded-full inline-block ${product.isActive !== false ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
-                        {product.isActive !== false ? "Active" : "Inactive"}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Products & Services</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your catalog of goods and services.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {business && <ImportDialog businessId={business._id} type="PRODUCTS" />}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" /> Add Product
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Product</DialogTitle>
+                  <DialogDescription>
+                    Enter the product details below.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit}>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="type" className="text-right">
+                        Type
+                      </Label>
+                      <Select value={formData.type} onValueChange={handleTypeChange}>
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="service">Service (Prestation)</SelectItem>
+                          <SelectItem value="goods">Goods (Marchandise)</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(product._id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {products?.length === 0 && (
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="name" className="text-right">
+                        Name
+                      </Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="col-span-3"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="description" className="text-right">
+                        Description
+                      </Label>
+                      <Input
+                        id="description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="unitPrice" className="text-right">
+                        Price
+                      </Label>
+                      <Input
+                        id="unitPrice"
+                        name="unitPrice"
+                        type="number"
+                        value={formData.unitPrice}
+                        onChange={handleChange}
+                        className="col-span-3"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="unitLabel" className="text-right">
+                        Unit Label
+                      </Label>
+                      <Input
+                        id="unitLabel"
+                        name="unitLabel"
+                        value={formData.unitLabel}
+                        onChange={handleChange}
+                        className="col-span-3"
+                        placeholder="e.g. Hour, Piece"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="tvaRate" className="text-right">
+                        TVA (%)
+                      </Label>
+                      <Input
+                        id="tvaRate"
+                        name="tvaRate"
+                        type="number"
+                        value={formData.tvaRate}
+                        onChange={handleChange}
+                        className="col-span-3"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="defaultDiscount" className="text-right">
+                        Discount (%)
+                      </Label>
+                      <Input
+                        id="defaultDiscount"
+                        name="defaultDiscount"
+                        type="number"
+                        value={formData.defaultDiscount}
+                        onChange={handleChange}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="isActive" className="text-right">
+                        Active
+                      </Label>
+                      <div className="col-span-3 flex items-center space-x-2">
+                        <Switch
+                          id="isActive"
+                          checked={formData.isActive}
+                          onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit">Save Product</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Product List</CardTitle>
+            <CardDescription>
+              Manage your products and services.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center">
-                    No products found.
-                  </TableCell>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Unit</TableHead>
+                  <TableHead>TVA (%)</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {products?.map((product) => (
+                  <TableRow key={product._id}>
+                    <TableCell className="font-medium">
+                      {product.name}
+                      <div className="text-xs text-muted-foreground capitalize">{product.type || "service"}</div>
+                      {product.description && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{product.description}</div>}
+                    </TableCell>
+                    <TableCell>{product.unitPrice.toLocaleString()} {business.currency}</TableCell>
+                    <TableCell>{product.unitLabel || "-"}</TableCell>
+                    <TableCell>{product.tvaRate}%</TableCell>
+                    <TableCell>
+                      <div className={`text-xs px-2 py-1 rounded-full inline-block ${product.isActive !== false ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                          {product.isActive !== false ? "Active" : "Inactive"}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(product._id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {products?.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center">
+                      No products found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </DashboardLayout>
   );
 }
