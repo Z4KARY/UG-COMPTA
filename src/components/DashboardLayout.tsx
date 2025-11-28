@@ -1,23 +1,50 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { Separator } from "@/components/ui/separator";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { useLocation } from "react-router";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const location = useLocation();
+  const pathSegments = location.pathname.split("/").filter(Boolean);
+
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full bg-muted/30">
         <AppSidebar />
-        <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
-            <div className="flex items-center p-4 border-b">
-                <SidebarTrigger />
-                <div className="ml-4 font-semibold">InvoiceFlow</div>
-            </div>
-            <div className="flex-1 overflow-auto p-6">
-                <div className="mx-auto max-w-7xl w-full">
+        <main className="flex-1 flex flex-col min-h-screen overflow-hidden transition-all duration-300 ease-in-out">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background/50 backdrop-blur-sm px-4 sticky top-0 z-10">
+                <SidebarTrigger className="-ml-1" />
+                <Separator orientation="vertical" className="mr-2 h-4" />
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem className="hidden md:block">
+                      <BreadcrumbLink href="/dashboard">InvoiceFlow</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    {pathSegments.map((segment, index) => (
+                      <div key={segment} className="flex items-center">
+                        <BreadcrumbSeparator className="hidden md:block" />
+                        <BreadcrumbItem>
+                          {index === pathSegments.length - 1 ? (
+                            <BreadcrumbPage className="capitalize">{segment}</BreadcrumbPage>
+                          ) : (
+                            <BreadcrumbLink href={`/${pathSegments.slice(0, index + 1).join("/")}`} className="capitalize">
+                              {segment}
+                            </BreadcrumbLink>
+                          )}
+                        </BreadcrumbItem>
+                      </div>
+                    ))}
+                  </BreadcrumbList>
+                </Breadcrumb>
+            </header>
+            <div className="flex-1 overflow-auto p-4 md:p-8 pt-6">
+                <div className="mx-auto max-w-7xl w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {children}
                 </div>
             </div>

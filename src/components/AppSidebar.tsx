@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -22,6 +23,7 @@ import {
   Users,
   FileSpreadsheet,
   ShoppingCart,
+  ChevronRight,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { useQuery } from "convex/react";
@@ -35,6 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const items = [
   {
@@ -83,36 +86,45 @@ export function AppSidebar() {
   const activeBusiness = useQuery(api.businesses.getMyBusiness, {});
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4 border-b">
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="p-4">
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-2 font-bold text-xl text-primary cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors">
-                    <FileText className="h-6 w-6" />
-                    <span className="truncate flex-1">{activeBusiness?.name || "InvoiceFlow"}</span>
-                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer transition-colors data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                      <FileText className="size-4" />
+                    </div>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">{activeBusiness?.name || "InvoiceFlow"}</span>
+                      <span className="truncate text-xs text-muted-foreground">Business</span>
+                    </div>
+                    <ChevronsUpDown className="ml-auto size-4" />
                 </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-                <DropdownMenuLabel>My Businesses</DropdownMenuLabel>
+            <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" align="start" side="bottom" sideOffset={4}>
+                <DropdownMenuLabel className="text-xs text-muted-foreground">My Businesses</DropdownMenuLabel>
                 {businesses?.map((b) => (
-                    <DropdownMenuItem key={b._id} className="cursor-pointer">
-                        <Building2 className="mr-2 h-4 w-4" />
-                        <span>{b.name}</span>
+                    <DropdownMenuItem key={b._id} className="cursor-pointer gap-2 p-2" onClick={() => { /* Logic to switch business would go here if implemented */ }}>
+                        <div className="flex size-6 items-center justify-center rounded-sm border">
+                          <Building2 className="size-4 shrink-0" />
+                        </div>
+                        {b.name}
                         {activeBusiness?._id === b._id && <span className="ml-auto text-xs text-muted-foreground">Active</span>}
                     </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    <span>Add Business</span>
+                <DropdownMenuItem className="cursor-pointer gap-2 p-2" onClick={() => navigate("/settings")}>
+                    <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                      <Plus className="size-4" />
+                    </div>
+                    <div className="font-medium text-muted-foreground">Add Business</div>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -121,6 +133,7 @@ export function AppSidebar() {
                     asChild
                     isActive={location.pathname === item.url}
                     onClick={() => navigate(item.url)}
+                    tooltip={item.title}
                     className="cursor-pointer"
                   >
                     <a>
@@ -134,29 +147,53 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t p-4">
-        <div className="flex items-center gap-2 mb-4 px-2">
-          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-            {user?.name?.[0] || "U"}
-          </div>
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-medium truncate">
-              {user?.name || "User"}
-            </span>
-            <span className="text-xs text-muted-foreground truncate">
-              {user?.email}
-            </span>
-          </div>
-        </div>
+      <SidebarFooter className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => signOut()} className="cursor-pointer text-destructive hover:text-destructive">
-              <LogOut />
-              <span>Sign Out</span>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarFallback className="rounded-lg">{user?.name?.[0] || "U"}</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{user?.name || "User"}</span>
+                    <span className="truncate text-xs">{user?.email}</span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarFallback className="rounded-lg">{user?.name?.[0] || "U"}</AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">{user?.name || "User"}</span>
+                      <span className="truncate text-xs">{user?.email}</span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer text-destructive focus:text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }

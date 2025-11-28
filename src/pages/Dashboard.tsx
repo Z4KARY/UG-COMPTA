@@ -10,10 +10,15 @@ import {
   Activity,
   TrendingUp,
   Package,
+  Plus,
+  FileText,
+  ArrowRight
 } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { motion } from "framer-motion";
+import { Separator } from "@/components/ui/separator";
 
 export default function Dashboard() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -30,180 +35,287 @@ export default function Dashboard() {
     business ? { businessId: business._id } : "skip"
   );
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   if (!business) {
     return (
       <DashboardLayout>
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome to InvoiceFlow</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4">
-              Please set up your business profile to get started.
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center justify-center h-[60vh] text-center space-y-6"
+        >
+          <div className="bg-primary/10 p-6 rounded-full">
+            <Building2Icon className="h-12 w-12 text-primary" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight">Welcome to InvoiceFlow</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              You're just one step away. Set up your business profile to start managing your invoices and finances.
             </p>
-            <Button asChild>
-              <Link to="/settings">Setup Business</Link>
-            </Button>
-          </CardContent>
-        </Card>
+          </div>
+          <Button asChild size="lg" className="rounded-full px-8">
+            <Link to="/settings">Setup Business <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          </Button>
+        </motion.div>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <div className="flex items-center gap-2">
-          <Button asChild>
-            <Link to="/invoices/new">Create Invoice</Link>
-          </Button>
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="space-y-8"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Overview of your financial performance.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button asChild className="shadow-lg shadow-primary/20">
+              <Link to="/invoices/new">
+                <Plus className="mr-2 h-4 w-4" /> Create Invoice
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Monthly Turnover
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats?.turnover.toLocaleString()} {business.currency}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              For {stats?.period}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              TVA Collected
-            </CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats?.tva.toLocaleString()} {business.currency}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              To be declared
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Stamp Duty</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats?.stampDuty.toLocaleString()} {business.currency}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Cash payments only
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Invoices
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats?.invoiceCount || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Issued this month
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Key Metrics */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <motion.div variants={item}>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-l-primary">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Monthly Turnover
+                </CardTitle>
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {stats?.turnover.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{business.currency}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  For {stats?.period}
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        {/* Revenue Chart */}
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Revenue Trend</CardTitle>
-            <CardDescription>Monthly revenue for the last 6 months</CardDescription>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={revenueTrend || []}>
-                        <XAxis 
-                            dataKey="month" 
-                            stroke="#888888" 
-                            fontSize={12} 
-                            tickLine={false} 
-                            axisLine={false} 
-                        />
-                        <YAxis
-                            stroke="#888888"
-                            fontSize={12}
-                            tickLine={false}
-                            axisLine={false}
-                            tickFormatter={(value) => `${value}`}
-                        />
-                        <Tooltip 
-                            cursor={{ fill: 'transparent' }}
-                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                        />
-                        <Bar dataKey="revenue" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+          <motion.div variants={item}>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  TVA Collected
+                </CardTitle>
+                <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <Activity className="h-4 w-4 text-blue-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {stats?.tva.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{business.currency}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  To be declared
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-        {/* Top Performers */}
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Top Performers</CardTitle>
-            <CardDescription>Top customers and products by revenue</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-                <div>
-                    <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                        <Users className="h-4 w-4" /> Top Customers
-                    </h4>
-                    <div className="space-y-3">
-                        {topPerformers?.customers.map((c, i) => (
-                            <div key={i} className="flex items-center justify-between text-sm">
-                                <span className="truncate max-w-[150px]">{c.name}</span>
-                                <span className="font-medium">{c.amount.toLocaleString()} {business.currency}</span>
-                            </div>
-                        ))}
-                        {(!topPerformers?.customers.length) && <p className="text-xs text-muted-foreground">No data available</p>}
+          <motion.div variants={item}>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-l-orange-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Stamp Duty</CardTitle>
+                <div className="h-8 w-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+                  <CreditCard className="h-4 w-4 text-orange-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {stats?.stampDuty.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{business.currency}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Cash payments only
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-l-green-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Invoices Issued
+                </CardTitle>
+                <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-green-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {stats?.invoiceCount || 0}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  This month
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          {/* Revenue Chart */}
+          <motion.div variants={item} className="col-span-4">
+            <Card className="h-full hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Revenue Trend
+                </CardTitle>
+                <CardDescription>Monthly revenue for the last 6 months</CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <div className="h-[350px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={revenueTrend || []} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                            <XAxis 
+                                dataKey="month" 
+                                stroke="#888888" 
+                                fontSize={12} 
+                                tickLine={false} 
+                                axisLine={false}
+                                dy={10}
+                            />
+                            <YAxis
+                                stroke="#888888"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                                tickFormatter={(value) => `${value}`}
+                            />
+                            <Tooltip 
+                                cursor={{ fill: 'var(--muted)' }}
+                                contentStyle={{ 
+                                  borderRadius: '8px', 
+                                  border: '1px solid var(--border)', 
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                  backgroundColor: 'var(--background)'
+                                }}
+                            />
+                            <Bar 
+                              dataKey="revenue" 
+                              fill="var(--primary)" 
+                              radius={[4, 4, 0, 0]} 
+                              maxBarSize={50}
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Top Performers */}
+          <motion.div variants={item} className="col-span-3">
+            <Card className="h-full hover:shadow-md transition-shadow flex flex-col">
+              <CardHeader>
+                <CardTitle>Top Performers</CardTitle>
+                <CardDescription>Highest revenue generators</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <div className="space-y-8">
+                    <div>
+                        <h4 className="text-sm font-semibold mb-4 flex items-center gap-2 text-muted-foreground uppercase tracking-wider text-xs">
+                            <Users className="h-3 w-3" /> Top Customers
+                        </h4>
+                        <div className="space-y-4">
+                            {topPerformers?.customers.map((c, i) => (
+                                <div key={i} className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-3">
+                                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                                        {i + 1}
+                                      </div>
+                                      <span className="font-medium truncate max-w-[120px] group-hover:text-primary transition-colors">{c.name}</span>
+                                    </div>
+                                    <span className="font-bold text-sm">{c.amount.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{business.currency}</span></span>
+                                </div>
+                            ))}
+                            {(!topPerformers?.customers.length) && <div className="text-center py-4 text-muted-foreground text-sm">No customer data available</div>}
+                        </div>
+                    </div>
+                    
+                    <Separator />
+
+                    <div>
+                        <h4 className="text-sm font-semibold mb-4 flex items-center gap-2 text-muted-foreground uppercase tracking-wider text-xs">
+                            <Package className="h-3 w-3" /> Top Products
+                        </h4>
+                        <div className="space-y-4">
+                            {topPerformers?.products.map((p, i) => (
+                                <div key={i} className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-3">
+                                      <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-xs font-bold text-blue-500">
+                                        {i + 1}
+                                      </div>
+                                      <span className="font-medium truncate max-w-[120px] group-hover:text-blue-500 transition-colors">{p.name}</span>
+                                    </div>
+                                    <span className="font-bold text-sm">{p.amount.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{business.currency}</span></span>
+                                </div>
+                            ))}
+                            {(!topPerformers?.products.length) && <div className="text-center py-4 text-muted-foreground text-sm">No product data available</div>}
+                        </div>
                     </div>
                 </div>
-                
-                <div className="border-t pt-4">
-                    <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                        <Package className="h-4 w-4" /> Top Products
-                    </h4>
-                    <div className="space-y-3">
-                        {topPerformers?.products.map((p, i) => (
-                            <div key={i} className="flex items-center justify-between text-sm">
-                                <span className="truncate max-w-[150px]">{p.name}</span>
-                                <span className="font-medium">{p.amount.toLocaleString()} {business.currency}</span>
-                            </div>
-                        ))}
-                        {(!topPerformers?.products.length) && <p className="text-xs text-muted-foreground">No data available</p>}
-                    </div>
-                </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </motion.div>
     </DashboardLayout>
   );
+}
+
+function Building2Icon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+      <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+      <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+      <path d="M10 6h4" />
+      <path d="M10 10h4" />
+      <path d="M10 14h4" />
+      <path d="M10 18h4" />
+    </svg>
+  )
 }
