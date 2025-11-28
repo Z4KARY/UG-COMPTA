@@ -111,6 +111,11 @@ export const create = mutation({
     )),
     bankName: v.optional(v.string()),
     bankIban: v.optional(v.string()),
+    
+    // AE fields
+    autoEntrepreneurCardNumber: v.optional(v.string()),
+    activityCodes: v.optional(v.array(v.string())),
+    ssNumber: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -119,6 +124,8 @@ export const create = mutation({
     // Enforce Logic Binding
     let finalFiscalRegime = args.fiscalRegime;
     let finalTvaDefault = args.tvaDefault;
+    let finalRc = args.rc;
+    let finalAi = args.ai;
 
     if (args.type === "societe") {
         finalFiscalRegime = "reel";
@@ -127,6 +134,8 @@ export const create = mutation({
     } else if (args.type === "auto_entrepreneur") {
         finalFiscalRegime = "auto_entrepreneur";
         finalTvaDefault = 0; // Force VAT = 0
+        finalRc = undefined; // No RC for AE
+        finalAi = undefined; // No AI for AE
     } else if (args.type === "personne_physique") {
         // Can be reel or forfaitaire.
         if (args.fiscalRegime === "IFU") finalFiscalRegime = "forfaitaire"; // Map legacy
@@ -142,6 +151,8 @@ export const create = mutation({
     const businessId = await ctx.db.insert("businesses", {
       userId,
       ...args,
+      rc: finalRc,
+      ai: finalAi,
       fiscalRegime: finalFiscalRegime,
       tvaDefault: finalTvaDefault,
     });
@@ -193,6 +204,11 @@ export const update = mutation({
     )),
     bankName: v.optional(v.string()),
     bankIban: v.optional(v.string()),
+
+    // AE fields
+    autoEntrepreneurCardNumber: v.optional(v.string()),
+    activityCodes: v.optional(v.array(v.string())),
+    ssNumber: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -227,6 +243,8 @@ export const update = mutation({
     } else if (updates.type === "auto_entrepreneur") {
         updates.fiscalRegime = "auto_entrepreneur";
         updates.tvaDefault = 0;
+        updates.rc = undefined; // Clear RC
+        updates.ai = undefined; // Clear AI
     } else if (updates.type === "personne_physique") {
         if (updates.fiscalRegime === "IFU") updates.fiscalRegime = "forfaitaire";
         if (updates.fiscalRegime === "VAT") updates.fiscalRegime = "reel";

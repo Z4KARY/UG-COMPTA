@@ -176,6 +176,7 @@ export default function Declarations() {
 
       <div className="grid gap-6 md:grid-cols-2 print:block print:space-y-6">
         {/* G50 Monthly Declaration */}
+        {business.fiscalRegime !== "auto_entrepreneur" && (
         <Card className="print:shadow-none print:border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -249,9 +250,10 @@ export default function Declarations() {
             )}
           </CardContent>
         </Card>
+        )}
 
         {/* G12 Annual Declaration */}
-        {business.legalForm === "PERSONNE_PHYSIQUE" ? (
+        {business.legalForm === "PERSONNE_PHYSIQUE" || business.type === "auto_entrepreneur" ? (
         <Card className="print:shadow-none print:border print:break-before-page">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -259,9 +261,11 @@ export default function Declarations() {
                 G12 / G12bis Annual
             </CardTitle>
             <CardDescription>
-              Annual turnover declaration for {(business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire") ? "IFU (Simplified)" : "Real"} regime.
+              Annual turnover declaration for {(business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire" || business.fiscalRegime === "auto_entrepreneur") ? "IFU (Simplified)" : "Real"} regime.
               <br/>
-              <span className="text-xs text-muted-foreground">Only for Personnes Physiques (Entreprises Individuelles)</span>
+              <span className="text-xs text-muted-foreground">
+                  {business.type === "auto_entrepreneur" ? "Auto-Entrepreneur" : "Personne Physique (Entreprise Individuelle)"}
+              </span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -282,7 +286,7 @@ export default function Declarations() {
                 <p>Regime: {business.fiscalRegime || "VAT"}</p>
             </div>
 
-            {(business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire") ? (
+            {(business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire" || business.fiscalRegime === "auto_entrepreneur") ? (
                 // IFU Specific View
                 <div className="space-y-4">
                     {g12IfuData ? (

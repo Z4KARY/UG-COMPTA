@@ -77,6 +77,10 @@ export default function BusinessSettings() {
     legalForm: "SARL",
     bankName: "",
     bankIban: "",
+    // AE Fields
+    autoEntrepreneurCardNumber: "",
+    ssNumber: "",
+    activityCodes: "", // We'll handle as comma separated string in UI
   });
 
   useEffect(() => {
@@ -96,6 +100,9 @@ export default function BusinessSettings() {
         legalForm: business.legalForm || "SARL",
         bankName: business.bankName || "",
         bankIban: business.bankIban || "",
+        autoEntrepreneurCardNumber: business.autoEntrepreneurCardNumber || "",
+        ssNumber: business.ssNumber || "",
+        activityCodes: business.activityCodes?.join(", ") || "",
       });
     }
   }, [business]);
@@ -122,6 +129,8 @@ export default function BusinessSettings() {
                 newData.fiscalRegime = "auto_entrepreneur";
                 newData.tvaDefault = 0;
                 newData.legalForm = "PERSONNE_PHYSIQUE"; // Technically AE is a PP
+                newData.rc = ""; // Clear RC
+                newData.ai = ""; // Clear AI
             } else if (value === "personne_physique") {
                 newData.fiscalRegime = "forfaitaire"; // Default to IFU
                 newData.tvaDefault = 0;
@@ -149,6 +158,7 @@ export default function BusinessSettings() {
           type: formData.type as "societe" | "personne_physique" | "auto_entrepreneur",
           fiscalRegime: formData.fiscalRegime as "reel" | "forfaitaire" | "auto_entrepreneur",
           legalForm: formData.legalForm as any,
+          activityCodes: formData.activityCodes.split(",").map(s => s.trim()).filter(s => s !== ""),
       };
 
       if (business) {
@@ -426,38 +436,89 @@ export default function BusinessSettings() {
 
               <Separator className="my-2" />
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="rc">RC No.</Label>
-                  <Input
-                    id="rc"
-                    name="rc"
-                    value={formData.rc}
-                    onChange={handleChange}
-                    placeholder="Registre Commerce"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="nif">NIF</Label>
-                  <Input
-                    id="nif"
-                    name="nif"
-                    value={formData.nif}
-                    onChange={handleChange}
-                    placeholder="Numéro Id. Fiscale"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="ai">Article d'Imposition (AI)</Label>
-                <Input
-                  id="ai"
-                  name="ai"
-                  value={formData.ai}
-                  onChange={handleChange}
-                  placeholder="Article Imposition"
-                />
-              </div>
+              {formData.type === "auto_entrepreneur" ? (
+                  <div className="space-y-4 bg-blue-50/50 p-4 rounded-md border border-blue-100">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="autoEntrepreneurCardNumber">AE Card Number</Label>
+                            <Input
+                                id="autoEntrepreneurCardNumber"
+                                name="autoEntrepreneurCardNumber"
+                                value={formData.autoEntrepreneurCardNumber}
+                                onChange={handleChange}
+                                placeholder="National Registration Number"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="nif">NIF</Label>
+                            <Input
+                                id="nif"
+                                name="nif"
+                                value={formData.nif}
+                                onChange={handleChange}
+                                placeholder="Numéro Id. Fiscale"
+                                required
+                            />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="activityCodes">Activity Codes (ANAE)</Label>
+                        <Input
+                            id="activityCodes"
+                            name="activityCodes"
+                            value={formData.activityCodes}
+                            onChange={handleChange}
+                            placeholder="e.g. 072100, 072300 (Comma separated)"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="ssNumber">CASNOS Number (Optional)</Label>
+                        <Input
+                            id="ssNumber"
+                            name="ssNumber"
+                            value={formData.ssNumber}
+                            onChange={handleChange}
+                            placeholder="Social Security Number"
+                        />
+                      </div>
+                  </div>
+              ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                        <Label htmlFor="rc">RC No.</Label>
+                        <Input
+                            id="rc"
+                            name="rc"
+                            value={formData.rc}
+                            onChange={handleChange}
+                            placeholder="Registre Commerce"
+                        />
+                        </div>
+                        <div className="space-y-2">
+                        <Label htmlFor="nif">NIF</Label>
+                        <Input
+                            id="nif"
+                            name="nif"
+                            value={formData.nif}
+                            onChange={handleChange}
+                            placeholder="Numéro Id. Fiscale"
+                        />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="ai">Article d'Imposition (AI)</Label>
+                        <Input
+                        id="ai"
+                        name="ai"
+                        value={formData.ai}
+                        onChange={handleChange}
+                        placeholder="Article Imposition"
+                        />
+                    </div>
+                  </>
+              )}
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

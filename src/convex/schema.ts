@@ -75,6 +75,11 @@ const schema = defineSchema(
       bankName: v.optional(v.string()),
       bankIban: v.optional(v.string()),
       isSuspended: v.optional(v.boolean()), // Added for admin suspension
+
+      // Auto-Entrepreneur specific fields
+      autoEntrepreneurCardNumber: v.optional(v.string()),
+      activityCodes: v.optional(v.array(v.string())),
+      ssNumber: v.optional(v.string()), // CASNOS
     }).index("by_user", ["userId"]),
 
     // New table for multi-user access to businesses
