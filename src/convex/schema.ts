@@ -86,7 +86,12 @@ const schema = defineSchema(
       rc: v.optional(v.string()), // Registre de Commerce
       ai: v.optional(v.string()), // Article d'Imposition
       nis: v.optional(v.string()), // Numéro d'Identification Statistique
-    }).index("by_business", ["businessId"]),
+    })
+      .index("by_business", ["businessId"])
+      .searchIndex("search_name", {
+        searchField: "name",
+        filterFields: ["businessId"],
+      }),
 
     products: defineTable({
       businessId: v.id("businesses"),
@@ -98,7 +103,12 @@ const schema = defineSchema(
       unitLabel: v.optional(v.string()), // Added unit label
       isActive: v.optional(v.boolean()), // Added is_active
       type: v.optional(v.union(v.literal("goods"), v.literal("service"))), // Added product type
-    }).index("by_business", ["businessId"]),
+    })
+      .index("by_business", ["businessId"])
+      .searchIndex("search_name", {
+        searchField: "name",
+        filterFields: ["businessId"],
+      }),
 
     invoices: defineTable({
       businessId: v.id("businesses"),
@@ -208,7 +218,12 @@ const schema = defineSchema(
       phone: v.optional(v.string()),
       email: v.optional(v.string()),
       notes: v.optional(v.string()),
-    }).index("by_business", ["businessId"]),
+    })
+      .index("by_business", ["businessId"])
+      .searchIndex("search_name", {
+        searchField: "name",
+        filterFields: ["businessId"],
+      }),
 
     purchaseInvoices: defineTable({
       businessId: v.id("businesses"),
