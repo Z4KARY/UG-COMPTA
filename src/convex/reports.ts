@@ -82,8 +82,13 @@ export const getDashboardStats = query({
     // Calculate global stats (Outstanding & Overdue)
     let outstandingAmount = 0;
     let overdueCount = 0;
+    let totalTurnover = 0;
 
     for (const inv of invoices) {
+      if (inv.status !== "cancelled" && inv.status !== "draft") {
+        totalTurnover += inv.subtotalHt || inv.totalHt || 0;
+      }
+
       if (inv.status === "issued" || inv.status === "overdue") {
         outstandingAmount += inv.totalTtc;
       }
@@ -99,6 +104,7 @@ export const getDashboardStats = query({
 
     return {
       turnover,
+      totalTurnover,
       tva,
       tvaDeductible,
       tvaPayable,

@@ -24,9 +24,9 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
               <DollarSign className="h-3 w-3" /> Global Revenue
             </span>
             <div className="text-3xl font-bold tracking-tight">
-              {stats.turnover.toLocaleString()} <span className="text-lg font-normal opacity-70">{currency}</span>
+              {stats.totalTurnover?.toLocaleString() || stats.turnover.toLocaleString()} <span className="text-lg font-normal opacity-70">{currency}</span>
             </div>
-            <p className="text-xs opacity-70">Total revenue this month</p>
+            <p className="text-xs opacity-70">Total revenue all time</p>
           </CardContent>
         </Card>
       </motion.div>
