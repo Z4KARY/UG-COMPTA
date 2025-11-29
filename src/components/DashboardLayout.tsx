@@ -47,20 +47,27 @@ export default function DashboardLayout({
                     <BreadcrumbItem className="hidden md:block">
                       <BreadcrumbLink href="/dashboard">InvoiceFlow</BreadcrumbLink>
                     </BreadcrumbItem>
-                    {pathSegments.map((segment, index) => (
-                      <div key={segment} className="flex items-center">
-                        <BreadcrumbSeparator className="hidden md:block" />
-                        <BreadcrumbItem>
-                          {index === pathSegments.length - 1 ? (
-                            <BreadcrumbPage className="capitalize">{segment}</BreadcrumbPage>
-                          ) : (
-                            <BreadcrumbLink href={`/${pathSegments.slice(0, index + 1).join("/")}`} className="capitalize">
-                              {segment}
-                            </BreadcrumbLink>
-                          )}
-                        </BreadcrumbItem>
-                      </div>
-                    ))}
+                    {pathSegments.map((segment, index) => {
+                      const isLast = index === pathSegments.length - 1;
+                      // Check if segment is likely an ID (long alphanumeric)
+                      const isId = segment.length > 20 && /^[a-zA-Z0-9]+$/.test(segment);
+                      const displayName = isId ? "Details" : segment.replace(/-/g, " ");
+
+                      return (
+                        <div key={segment} className="flex items-center">
+                          <BreadcrumbSeparator className="hidden md:block" />
+                          <BreadcrumbItem>
+                            {isLast ? (
+                              <BreadcrumbPage className="capitalize">{displayName}</BreadcrumbPage>
+                            ) : (
+                              <BreadcrumbLink href={`/${pathSegments.slice(0, index + 1).join("/")}`} className="capitalize">
+                                {displayName}
+                              </BreadcrumbLink>
+                            )}
+                          </BreadcrumbItem>
+                        </div>
+                      );
+                    })}
                   </BreadcrumbList>
                 </Breadcrumb>
             </header>
