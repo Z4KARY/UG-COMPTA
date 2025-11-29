@@ -65,6 +65,16 @@ export default function InvoiceDetail() {
 
   return (
     <DashboardLayout>
+      <style type="text/css" media="print">
+        {`
+          @page { size: A4; margin: 20mm; }
+          body { -webkit-print-color-adjust: exact; }
+          @media print {
+            .no-print { display: none !important; }
+            .print-break-inside-avoid { break-inside: avoid; }
+          }
+        `}
+      </style>
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 print:hidden gap-4">
         <Button variant="ghost" asChild className="-ml-2 md:ml-0">
           <Link to="/invoices">
@@ -93,12 +103,12 @@ export default function InvoiceDetail() {
         </div>
       </div>
 
-      <div className="overflow-x-auto -mx-4 md:mx-0 pb-4 md:pb-0">
-        <div className="bg-white p-6 md:p-8 shadow-sm border rounded-lg min-w-[800px] md:min-w-0 md:w-full max-w-4xl mx-auto print:shadow-none print:border-none print:w-full print:max-w-none print:p-0 print:m-0"
+      <div className="w-full mx-auto print:w-full print:max-w-none">
+        <div className="bg-white p-4 sm:p-6 md:p-8 shadow-sm border rounded-lg w-full max-w-4xl mx-auto print:shadow-none print:border-none print:w-full print:max-w-none print:p-0 print:m-0"
              style={{ fontFamily: font }}>
           {/* Header */}
-          <div className="flex justify-between items-start mb-6 print:mb-4">
-            <div className="w-1/2">
+          <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-6 print:flex-row print:mb-4 print:gap-0">
+            <div className="w-full md:w-1/2 print:w-1/2">
               <h2 className="font-bold text-lg uppercase mb-1">{business?.name}</h2>
               {business?.tradeName && <p className="font-medium text-gray-700">{business.tradeName}</p>}
               <p className="text-sm text-muted-foreground whitespace-pre-line">{business?.address}</p>
@@ -125,33 +135,33 @@ export default function InvoiceDetail() {
                   )}
               </div>
             </div>
-            <div className="text-right w-1/2">
+            <div className="w-full md:w-1/2 text-left md:text-right print:w-1/2 print:text-right">
               {logoUrl && (
-                <img src={logoUrl} alt="Business Logo" className="h-16 md:h-20 object-contain mb-2 ml-auto" />
+                <img src={logoUrl} alt="Business Logo" className="h-16 md:h-20 object-contain mb-2 md:ml-auto print:ml-auto" />
               )}
               <h1 className="text-2xl md:text-3xl font-bold uppercase" style={{ color: primaryColor }}>
                 {invoice.type === "quote" ? "QUOTE" : invoice.type === "credit_note" ? "CREDIT NOTE" : "INVOICE"}
               </h1>
               <p className="text-lg md:text-xl font-medium text-gray-600">No. {invoice.invoiceNumber}</p>
               
-              <div className="mt-3 text-sm text-right space-y-0.5">
-                  <div className="flex justify-end gap-2">
+              <div className="mt-3 text-sm md:text-right space-y-0.5 print:text-right">
+                  <div className="flex md:justify-end gap-2 print:justify-end">
                       <span className="font-bold">Issue Date:</span>
                       <span>{new Date(invoice.issueDate).toLocaleDateString('en-GB')}</span>
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex md:justify-end gap-2 print:justify-end">
                       <span className="font-bold">Due Date:</span>
                       <span>{new Date(invoice.dueDate).toLocaleDateString('en-GB')}</span>
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex md:justify-end gap-2 print:justify-end">
                       <span className="font-bold">Place of Issue:</span>
                       <span>{business?.city || "Algeria"}</span>
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex md:justify-end gap-2 print:justify-end">
                       <span className="font-bold">Payment Method:</span>
                       <span>{invoice.paymentMethod || "Not specified"}</span>
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex md:justify-end gap-2 print:justify-end">
                       <span className="font-bold">Terms:</span>
                       <span>{paymentTerms}</span>
                   </div>
@@ -188,7 +198,7 @@ export default function InvoiceDetail() {
           </div>
 
           {/* Items */}
-          <div className="min-h-[100px]">
+          <div className="min-h-[100px] overflow-x-auto">
           <table className="w-full mb-6 text-sm print:mb-4">
             <thead>
               <tr className="border-b-2" style={{ borderColor: primaryColor }}>
@@ -202,13 +212,13 @@ export default function InvoiceDetail() {
             <tbody>
               {invoice.items?.map((item, index) => (
                 <tr key={index} className="border-b border-gray-100">
-                  <td className="py-2 pl-2">{item.description}</td>
-                  <td className="text-right py-2">{item.quantity}</td>
-                  <td className="text-right py-2">
+                  <td className="py-2 pl-2 min-w-[150px]">{item.description}</td>
+                  <td className="text-right py-2 whitespace-nowrap">{item.quantity}</td>
+                  <td className="text-right py-2 whitespace-nowrap">
                     {item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                   </td>
-                  {!isAE && <td className="text-right py-2">{item.tvaRate}%</td>}
-                  <td className="text-right py-2 pr-2">
+                  {!isAE && <td className="text-right py-2 whitespace-nowrap">{item.tvaRate}%</td>}
+                  <td className="text-right py-2 pr-2 whitespace-nowrap">
                     {item.lineTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                   </td>
                 </tr>
@@ -218,7 +228,7 @@ export default function InvoiceDetail() {
           </div>
 
           {/* Totals */}
-          <div className="flex flex-col md:flex-row justify-between gap-8 mb-6 print:mb-4 print:break-inside-avoid">
+          <div className="flex flex-col md:flex-row justify-between gap-8 mb-6 print:mb-4 print:break-inside-avoid print:flex-row">
               <div className="flex-1">
                   {invoice.notes && (
                     <div className="text-sm text-muted-foreground">
@@ -228,7 +238,7 @@ export default function InvoiceDetail() {
                   )}
               </div>
 
-              <div className="w-full md:w-80 space-y-1 text-sm">
+              <div className="w-full md:w-80 space-y-1 text-sm print:w-80">
                   <div className="flex justify-between py-1">
                   <span>Subtotal:</span>
                   <span className="font-medium">
