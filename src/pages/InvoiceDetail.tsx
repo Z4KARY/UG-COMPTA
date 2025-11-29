@@ -8,6 +8,8 @@ import { ArrowLeft, Printer, CheckCircle, Send, XCircle } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { toast } from "sonner";
 import { numberToWords } from "@/lib/numberToWords";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 export default function InvoiceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -20,7 +22,10 @@ export default function InvoiceDetail() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <p>Loading...</p>
+          <div className="animate-pulse flex flex-col items-center gap-4">
+            <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
+            <div className="h-4 w-48 bg-gray-200 rounded"></div>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -44,7 +49,7 @@ export default function InvoiceDetail() {
   else if (diffDays > 0) paymentTerms = `${diffDays} days`;
 
   // Design settings
-  const primaryColor = business?.primaryColor || "#000000";
+  const primaryColor = business?.primaryColor || "#0f172a"; // Default to slate-900
   const secondaryColor = business?.secondaryColor || "#ffffff";
   const font = business?.font || "Inter";
   const logoUrl = business?.logoUrl;
@@ -63,6 +68,16 @@ export default function InvoiceDetail() {
   const stampDuty = invoice.stampDutyAmount ?? (invoice.timbre ? 10 : 0);
   const subtotalHt = invoice.subtotalHt ?? invoice.totalHt ?? 0;
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "paid": return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "issued": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "overdue": return "bg-red-100 text-red-700 border-red-200";
+      case "cancelled": return "bg-gray-100 text-gray-700 border-gray-200";
+      default: return "bg-slate-100 text-slate-700 border-slate-200";
+    }
+  };
+
   return (
     <DashboardLayout breadcrumbOverrides={{ [invoice._id]: invoice.invoiceNumber || "Draft" }}>
       <style type="text/css" media="print">
@@ -73,217 +88,237 @@ export default function InvoiceDetail() {
             .no-print { display: none !important; }
             .print-break-inside-avoid { break-inside: avoid; }
             html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: visible; }
+            .print-container { 
+                box-shadow: none !important; 
+                border: none !important; 
+                margin: 0 !important; 
+                width: 100% !important; 
+                max-width: none !important;
+                padding: 20mm !important;
+            }
           }
         `}
       </style>
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 print:hidden gap-4">
-        <Button variant="ghost" asChild className="-ml-2 md:ml-0">
-          <Link to="/invoices">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Invoices
-          </Link>
-        </Button>
+      
+      {/* Action Bar */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 print:hidden gap-4">
+        <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" asChild className="h-9">
+            <Link to="/invoices">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            </Link>
+            </Button>
+            <div className={`px-3 py-1 rounded-full text-xs font-medium border capitalize ${getStatusColor(invoice.status)}`}>
+                {invoice.status}
+            </div>
+        </div>
+
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
           {invoice.status === "draft" && (
-            <Button onClick={() => handleStatusChange("issued")} variant="outline" className="flex-1 md:flex-none">
-              <Send className="mr-2 h-4 w-4" /> Issue
+            <Button onClick={() => handleStatusChange("issued")} className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700">
+              <Send className="mr-2 h-4 w-4" /> Issue Invoice
             </Button>
           )}
           {invoice.status === "issued" && (
-            <Button onClick={() => handleStatusChange("paid")} variant="default" className="flex-1 md:flex-none">
-              <CheckCircle className="mr-2 h-4 w-4" /> Paid
+            <Button onClick={() => handleStatusChange("paid")} className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700">
+              <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
             </Button>
           )}
           {(invoice.status === "draft" || invoice.status === "issued") && (
-            <Button onClick={() => handleStatusChange("cancelled")} variant="destructive" className="flex-1 md:flex-none">
+            <Button onClick={() => handleStatusChange("cancelled")} variant="outline" className="flex-1 md:flex-none text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
               <XCircle className="mr-2 h-4 w-4" /> Cancel
             </Button>
           )}
           <Button onClick={handlePrint} variant="secondary" className="flex-1 md:flex-none">
-            <Printer className="mr-2 h-4 w-4" /> Print
+            <Printer className="mr-2 h-4 w-4" /> Print / PDF
           </Button>
         </div>
       </div>
 
-      <div className="w-full mx-auto print:w-full print:max-w-none print:absolute print:top-0 print:left-0 print:m-0">
-        <div className="bg-white p-4 sm:p-6 md:p-8 shadow-sm border rounded-lg w-full max-w-4xl mx-auto print:shadow-none print:border-none print:w-full print:max-w-none print:p-[15mm] print:m-0 print:min-h-screen"
+      {/* Invoice Document */}
+      <div className="w-full mx-auto print:w-full print:max-w-none">
+        <div className="print-container bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] relative flex flex-col"
              style={{ fontFamily: font }}>
-          {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-6 print:flex-row print:mb-4 print:gap-0">
-            <div className="w-full md:w-1/2 print:w-1/2">
-              <h2 className="font-bold text-lg uppercase mb-1">{business?.name}</h2>
-              {business?.tradeName && <p className="font-medium text-gray-700">{business.tradeName}</p>}
-              <p className="text-sm text-muted-foreground whitespace-pre-line">{business?.address}</p>
-              <p className="text-sm text-muted-foreground">{business?.city}, Algeria</p>
-              
-              <div className="mt-3 space-y-0.5 text-xs print:text-xs">
-                  {isAE ? (
-                      <>
-                          <p className="font-medium">Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</p>
-                          <p className="text-muted-foreground">NIF: {business?.nif || "N/A"}</p>
-                          <p className="text-muted-foreground">NIS: {business?.nis || "N/A"}</p>
-                          <p className="text-muted-foreground">CASNOS: {business?.ssNumber || "N/A"}</p>
-                      </>
-                  ) : (
-                      <>
-                          <p className="text-muted-foreground"><span className="font-semibold">RC:</span> {business?.rc || "N/A"}</p>
-                          <p className="text-muted-foreground"><span className="font-semibold">NIF:</span> {business?.nif || "N/A"}</p>
-                          <p className="text-muted-foreground"><span className="font-semibold">NIS:</span> {business?.nis || "N/A"}</p>
-                          <p className="text-muted-foreground"><span className="font-semibold">AI:</span> {business?.ai || "N/A"}</p>
-                          {business?.capital && (
-                              <p className="text-muted-foreground"><span className="font-semibold">Social Capital:</span> {business.capital.toLocaleString()} {business.currency}</p>
-                          )}
-                      </>
-                  )}
-              </div>
-            </div>
-            <div className="w-full md:w-1/2 text-left md:text-right print:w-1/2 print:text-right">
-              {logoUrl && (
-                <img src={logoUrl} alt="Business Logo" className="h-16 md:h-20 object-contain mb-2 md:ml-auto print:ml-auto" />
-              )}
-              <h1 className="text-2xl md:text-3xl font-bold uppercase" style={{ color: primaryColor }}>
-                {invoice.type === "quote" ? "QUOTE" : invoice.type === "credit_note" ? "CREDIT NOTE" : "INVOICE"}
-              </h1>
-              <p className="text-lg md:text-xl font-medium text-gray-600">No. {invoice.invoiceNumber}</p>
-              
-              <div className="mt-3 text-sm md:text-right space-y-0.5 print:text-right">
-                  <div className="flex md:justify-end gap-2 print:justify-end">
-                      <span className="font-bold">Issue Date:</span>
-                      <span>{new Date(invoice.issueDate).toLocaleDateString('en-GB')}</span>
-                  </div>
-                  <div className="flex md:justify-end gap-2 print:justify-end">
-                      <span className="font-bold">Due Date:</span>
-                      <span>{new Date(invoice.dueDate).toLocaleDateString('en-GB')}</span>
-                  </div>
-                  <div className="flex md:justify-end gap-2 print:justify-end">
-                      <span className="font-bold">Place of Issue:</span>
-                      <span>{business?.city || "Algeria"}</span>
-                  </div>
-                  <div className="flex md:justify-end gap-2 print:justify-end">
-                      <span className="font-bold">Payment Method:</span>
-                      <span>{invoice.paymentMethod || "Not specified"}</span>
-                  </div>
-                  <div className="flex md:justify-end gap-2 print:justify-end">
-                      <span className="font-bold">Terms:</span>
-                      <span>{paymentTerms}</span>
-                  </div>
-              </div>
-            </div>
-          </div>
+          
+          {/* Top Accent Line */}
+          <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
-          <div className="border rounded-lg p-4 mb-6 bg-gray-50/50 print:mb-4 print:p-3">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Billed To (Client)</h3>
-              <h2 className="font-bold text-lg mb-1">{invoice.customer?.name}</h2>
-              {invoice.customer?.contactPerson && <p className="text-sm text-gray-600 mb-1">Attn: {invoice.customer.contactPerson}</p>}
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                  <div className="space-y-0.5">
-                      <p className="text-muted-foreground whitespace-pre-line">{invoice.customer?.address}</p>
-                      {invoice.customer?.phone && <p className="text-muted-foreground"><span className="font-semibold">Tel:</span> {invoice.customer.phone}</p>}
-                      {invoice.customer?.email && <p className="text-muted-foreground"><span className="font-semibold">Email:</span> {invoice.customer.email}</p>}
-                  </div>
-                  <div className="space-y-0.5">
-                      {invoice.customer?.taxId && (
-                          <p className="text-muted-foreground"><span className="font-semibold">NIF:</span> {invoice.customer.taxId}</p>
-                      )}
-                      {invoice.customer?.rc && (
-                          <p className="text-muted-foreground"><span className="font-semibold">RC:</span> {invoice.customer.rc}</p>
-                      )}
-                      {invoice.customer?.ai && (
-                          <p className="text-muted-foreground"><span className="font-semibold">AI:</span> {invoice.customer.ai}</p>
-                      )}
-                      {invoice.customer?.nis && (
-                          <p className="text-muted-foreground"><span className="font-semibold">NIS:</span> {invoice.customer.nis}</p>
-                      )}
-                  </div>
-              </div>
-          </div>
-
-          {/* Items */}
-          <div className="min-h-[100px] overflow-x-auto">
-          <table className="w-full mb-6 text-sm print:mb-4">
-            <thead>
-              <tr className="border-b-2" style={{ borderColor: primaryColor }}>
-                <th className="text-left py-2 pl-2" style={{ color: primaryColor }}>Description</th>
-                <th className="text-right py-2" style={{ color: primaryColor }}>Qty</th>
-                <th className="text-right py-2" style={{ color: primaryColor }}>Unit Price</th>
-                {!isAE && <th className="text-right py-2" style={{ color: primaryColor }}>VAT</th>}
-                <th className="text-right py-2 pr-2" style={{ color: primaryColor }}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.items?.map((item, index) => (
-                <tr key={index} className="border-b border-gray-100">
-                  <td className="py-2 pl-2 min-w-[150px]">{item.description}</td>
-                  <td className="text-right py-2 whitespace-nowrap">{item.quantity}</td>
-                  <td className="text-right py-2 whitespace-nowrap">
-                    {item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                  </td>
-                  {!isAE && <td className="text-right py-2 whitespace-nowrap">{item.tvaRate}%</td>}
-                  <td className="text-right py-2 pr-2 whitespace-nowrap">
-                    {item.lineTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-
-          {/* Totals */}
-          <div className="flex flex-col md:flex-row justify-between gap-8 mb-6 print:mb-4 print:break-inside-avoid print:flex-row">
-              <div className="flex-1">
-                  {invoice.notes && (
-                    <div className="text-sm text-muted-foreground">
-                      <p className="font-bold mb-1">Notes:</p>
-                      <p>{invoice.notes}</p>
+          <div className="p-8 md:p-12 flex-grow flex flex-col">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
+                <div className="w-full md:w-1/2">
+                    {logoUrl ? (
+                        <img src={logoUrl} alt="Business Logo" className="h-20 object-contain mb-6" />
+                    ) : (
+                        <div className="h-20 flex items-center mb-6">
+                            <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>{business?.name}</h2>
+                        </div>
+                    )}
+                    
+                    <div className="text-sm text-gray-600 space-y-1">
+                        <p className="font-semibold text-gray-900 text-base mb-1">{business?.name}</p>
+                        {business?.tradeName && <p>{business.tradeName}</p>}
+                        <p className="whitespace-pre-line">{business?.address}</p>
+                        <p>{business?.city}, Algeria</p>
+                        {business?.phone && <p>Tel: {business.phone}</p>}
+                        {business?.email && <p>Email: {business.email}</p>}
                     </div>
-                  )}
-              </div>
+                </div>
 
-              <div className="w-full md:w-80 space-y-1 text-sm print:w-80">
-                  <div className="flex justify-between py-1">
-                  <span>Subtotal:</span>
-                  <span className="font-medium">
-                      {subtotalHt.toLocaleString('en-US', { minimumFractionDigits: 2 })} {invoice.currency}
-                  </span>
-                  </div>
-                  {!isAE && (
-                  <div className="flex justify-between py-1">
-                  <span>Total VAT:</span>
-                  <span className="font-medium">
-                      {invoice.totalTva.toLocaleString('en-US', { minimumFractionDigits: 2 })} {invoice.currency}
-                  </span>
-                  </div>
-                  )}
-                  {stampDuty > 0 && (
-                  <div className="flex justify-between py-1">
-                      <span>Stamp Duty:</span>
-                      <span className="font-medium">{stampDuty.toLocaleString('en-US', { minimumFractionDigits: 2 })} {invoice.currency}</span>
-                  </div>
-                  )}
-                  <div className="flex justify-between font-bold text-lg border-t border-gray-300 pt-2 mt-1" style={{ color: primaryColor }}>
-                  <span>Total:</span>
-                  <span>
-                      {invoice.totalTtc.toLocaleString('en-US', { minimumFractionDigits: 2 })} {invoice.currency}
-                  </span>
-                  </div>
-              </div>
-          </div>
+                <div className="w-full md:w-1/2 text-left md:text-right">
+                    <div className="inline-block text-left md:text-right">
+                        <h1 className="text-4xl font-light tracking-tight mb-2 uppercase text-gray-900">
+                            {invoice.type === "quote" ? "Quote" : invoice.type === "credit_note" ? "Credit Note" : "Invoice"}
+                        </h1>
+                        <p className="text-lg font-medium text-gray-500 mb-6">#{invoice.invoiceNumber}</p>
+                        
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-gray-600 text-left">
+                            <div className="text-gray-400">Issue Date</div>
+                            <div className="font-medium text-gray-900 text-right">{new Date(invoice.issueDate).toLocaleDateString('en-GB')}</div>
+                            
+                            <div className="text-gray-400">Due Date</div>
+                            <div className="font-medium text-gray-900 text-right">{new Date(invoice.dueDate).toLocaleDateString('en-GB')}</div>
+                            
+                            {invoice.paymentMethod && (
+                                <>
+                                    <div className="text-gray-400">Payment</div>
+                                    <div className="font-medium text-gray-900 text-right capitalize">{invoice.paymentMethod.replace('_', ' ').toLowerCase()}</div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-          <div className="bg-gray-50 p-3 rounded-lg border mb-6 print:mb-4 print:break-inside-avoid">
-              <p className="font-bold text-sm mb-1">This invoice is fixed at the sum of:</p>
-              <p className="italic text-gray-700 font-medium">
-                  "{numberToWords(invoice.totalTtc)}"
-              </p>
-          </div>
+            {/* Bill To Section */}
+            <div className="flex flex-col md:flex-row gap-8 mb-12">
+                <div className="w-full md:w-1/2">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Bill To</h3>
+                    <div className="bg-gray-50/50 rounded-lg p-4 border border-gray-100">
+                        <h2 className="font-bold text-lg text-gray-900 mb-1">{invoice.customer?.name}</h2>
+                        {invoice.customer?.contactPerson && <p className="text-sm text-gray-600 mb-2">Attn: {invoice.customer.contactPerson}</p>}
+                        
+                        <div className="text-sm text-gray-600 space-y-1">
+                            <p className="whitespace-pre-line">{invoice.customer?.address}</p>
+                            <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                                {invoice.customer?.taxId && <span>NIF: {invoice.customer.taxId}</span>}
+                                {invoice.customer?.rc && <span>RC: {invoice.customer.rc}</span>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Business Legal IDs (Compact) */}
+                <div className="w-full md:w-1/2 md:text-right flex flex-col justify-end">
+                     <div className="text-xs text-gray-400 space-y-1">
+                        {isAE ? (
+                            <>
+                                <p>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</p>
+                                <p>NIF: {business?.nif || "N/A"} | NIS: {business?.nis || "N/A"}</p>
+                                <p>CASNOS: {business?.ssNumber || "N/A"}</p>
+                            </>
+                        ) : (
+                            <>
+                                <p>RC: {business?.rc || "N/A"}</p>
+                                <p>NIF: {business?.nif || "N/A"} | NIS: {business?.nis || "N/A"}</p>
+                                <p>AI: {business?.ai || "N/A"}</p>
+                                {business?.capital && (
+                                    <p>Capital: {business.capital.toLocaleString()} {business.currency}</p>
+                                )}
+                            </>
+                        )}
+                     </div>
+                </div>
+            </div>
 
-          {/* Legal Footer */}
-          <div className="mt-8 pt-4 border-t text-center text-xs text-muted-foreground print:mt-6 print:break-inside-avoid">
-              <p className="mb-1">Invoice issued in accordance with Law 04-02 and Executive Decree 05-468 regarding commercial practices in Algeria.</p>
-              {isAE ? (
-                  <p>VAT not applicable – Auto-Entrepreneur (IFU).</p>
-              ) : business?.fiscalRegime === "IFU" || business?.fiscalRegime === "forfaitaire" ? (
-                  <p>VAT not applicable – Flat rate regime (IFU).</p>
-              ) : null}
+            {/* Items Table */}
+            <div className="mb-8">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="border-b-2 border-gray-100">
+                            <th className="text-left py-3 pl-4 font-semibold text-gray-900 bg-gray-50/50 rounded-l-lg">Description</th>
+                            <th className="text-right py-3 font-semibold text-gray-900 bg-gray-50/50 w-24">Qty</th>
+                            <th className="text-right py-3 font-semibold text-gray-900 bg-gray-50/50 w-32">Price</th>
+                            {!isAE && <th className="text-right py-3 font-semibold text-gray-900 bg-gray-50/50 w-24">VAT</th>}
+                            <th className="text-right py-3 pr-4 font-semibold text-gray-900 bg-gray-50/50 rounded-r-lg w-32">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                        {invoice.items?.map((item, index) => (
+                            <tr key={index}>
+                                <td className="py-4 pl-4 text-gray-900 font-medium">{item.description}</td>
+                                <td className="py-4 text-right text-gray-600">{item.quantity}</td>
+                                <td className="py-4 text-right text-gray-600">{item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                                {!isAE && <td className="py-4 text-right text-gray-600">{item.tvaRate}%</td>}
+                                <td className="py-4 pr-4 text-right text-gray-900 font-medium">{item.lineTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Totals & Notes */}
+            <div className="flex flex-col md:flex-row gap-12 mb-12 print:break-inside-avoid">
+                <div className="flex-1">
+                    {invoice.notes && (
+                        <div className="bg-yellow-50/50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-800">
+                            <p className="font-semibold mb-1 text-yellow-900">Notes</p>
+                            <p>{invoice.notes}</p>
+                        </div>
+                    )}
+                </div>
+
+                <div className="w-full md:w-80">
+                    <div className="space-y-3">
+                        <div className="flex justify-between text-sm text-gray-600">
+                            <span>Subtotal</span>
+                            <span className="font-medium text-gray-900">{subtotalHt.toLocaleString('en-US', { minimumFractionDigits: 2 })} {invoice.currency}</span>
+                        </div>
+                        {!isAE && (
+                            <div className="flex justify-between text-sm text-gray-600">
+                                <span>VAT Total</span>
+                                <span className="font-medium text-gray-900">{invoice.totalTva.toLocaleString('en-US', { minimumFractionDigits: 2 })} {invoice.currency}</span>
+                            </div>
+                        )}
+                        {stampDuty > 0 && (
+                            <div className="flex justify-between text-sm text-gray-600">
+                                <span>Stamp Duty</span>
+                                <span className="font-medium text-gray-900">{stampDuty.toLocaleString('en-US', { minimumFractionDigits: 2 })} {invoice.currency}</span>
+                            </div>
+                        )}
+                        
+                        <Separator className="my-2" />
+                        
+                        <div className="flex justify-between items-end">
+                            <span className="font-bold text-lg text-gray-900">Total</span>
+                            <div className="text-right">
+                                <span className="block font-bold text-2xl text-gray-900" style={{ color: primaryColor }}>
+                                    {invoice.totalTtc.toLocaleString('en-US', { minimumFractionDigits: 2 })} <span className="text-sm font-medium text-gray-500">{invoice.currency}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Amount in Words */}
+            <div className="mb-12 print:break-inside-avoid">
+                <p className="text-sm text-gray-500 mb-1">Amount in words:</p>
+                <p className="text-gray-900 font-medium italic border-l-4 pl-4 py-1" style={{ borderColor: primaryColor }}>
+                    "{numberToWords(invoice.totalTtc)}"
+                </p>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
+                <p className="mb-1">Invoice issued in accordance with Law 04-02 and Executive Decree 05-468 regarding commercial practices in Algeria.</p>
+                {isAE ? (
+                    <p>VAT not applicable – Auto-Entrepreneur (IFU).</p>
+                ) : business?.fiscalRegime === "IFU" || business?.fiscalRegime === "forfaitaire" ? (
+                    <p>VAT not applicable – Flat rate regime (IFU).</p>
+                ) : null}
+                <p className="mt-2">Thank you for your business.</p>
+            </div>
           </div>
         </div>
       </div>

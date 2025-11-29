@@ -84,6 +84,8 @@ export default function BusinessSettings() {
     tradeName: "",
     address: "",
     city: "",
+    phone: "",
+    email: "",
     rc: "",
     nif: "",
     ai: "",
@@ -109,10 +111,12 @@ export default function BusinessSettings() {
   useEffect(() => {
     if (business) {
       setFormData({
-        name: business.name,
+        name: business.name || "",
         tradeName: business.tradeName || "",
-        address: business.address,
+        address: business.address || "",
         city: business.city || "",
+        phone: business.phone || "",
+        email: business.email || "",
         rc: business.rc || "",
         nif: business.nif || "",
         ai: business.ai || "",
@@ -403,15 +407,52 @@ export default function BusinessSettings() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="city">City (Wilaya/Commune)</Label>
+                    <Label htmlFor="city">City</Label>
                     <Input
                       id="city"
-                      name="city"
                       value={formData.city}
-                      onChange={handleChange}
-                      placeholder="e.g. Algiers"
-                      className="bg-muted/30"
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Contact Information Section */}
+              <Card className="md:col-span-2 shadow-sm">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-blue-500/10 rounded-lg">
+                      <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <CardTitle>Contact Information</CardTitle>
+                      <CardDescription>
+                        Business contact details for communication.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+213 ..."
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Business Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="contact@business.com"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -577,7 +618,7 @@ export default function BusinessSettings() {
                       <>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                            <Label htmlFor="rc">RC No.</Label>
+                            <Label htmlFor="rc">RC (Registre de Commerce)</Label>
                             <Input
                                 id="rc"
                                 name="rc"

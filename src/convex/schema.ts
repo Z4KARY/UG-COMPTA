@@ -40,6 +40,8 @@ const schema = defineSchema(
       tradeName: v.optional(v.string()), // Added trade_name
       address: v.string(),
       city: v.optional(v.string()), // Added city
+      phone: v.optional(v.string()), // Added phone
+      email: v.optional(v.string()), // Added email
       rc: v.optional(v.string()),
       nif: v.optional(v.string()),
       ai: v.optional(v.string()),
