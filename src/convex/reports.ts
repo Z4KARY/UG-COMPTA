@@ -209,14 +209,20 @@ export const getRevenueTrend = query({
       .order("desc")
       .take(500); // Limit for performance
 
-    const monthlyData = new Map<string, number>();
+    const purchases = await ctx.db
+      .query("purchaseInvoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .order("desc")
+      .take(500);
+
+    const monthlyData = new Map<string, { revenue: number; expenses: number }>();
     const now = new Date();
     
     // Initialize last 6 months
     for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        monthlyData.set(key, 0);
+        monthlyData.set(key, { revenue: 0, expenses: 0 });
     }
 
     for (const inv of invoices) {
@@ -226,13 +232,26 @@ export const getRevenueTrend = query({
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         
         if (monthlyData.has(key)) {
-            monthlyData.set(key, (monthlyData.get(key) || 0) + (inv.totalTtc || 0));
+            const current = monthlyData.get(key)!;
+            current.revenue += (inv.totalTtc || 0);
         }
     }
 
-    return Array.from(monthlyData.entries()).map(([month, revenue]) => ({
+    for (const pur of purchases) {
+        const d = new Date(pur.invoiceDate);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        
+        if (monthlyData.has(key)) {
+            const current = monthlyData.get(key)!;
+            current.expenses += (pur.totalTtc || 0);
+        }
+    }
+
+    return Array.from(monthlyData.entries()).map(([month, data]) => ({
         month,
-        revenue
+        revenue: data.revenue,
+        expenses: data.expenses,
+        balance: data.revenue - data.expenses
     }));
   },
 });

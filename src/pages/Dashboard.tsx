@@ -16,14 +16,16 @@ import {
   TrendingDown,
   Wallet,
   AlertCircle,
-  AlertTriangle
+  AlertTriangle,
+  Percent
 } from "lucide-react";
 import { Link } from "react-router";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import { motion } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
-import { PieChart, Pie, Cell, Legend } from "recharts";
+import { PieChart, Pie, Cell, Legend as PieLegend } from "recharts";
 
 export default function Dashboard() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -60,6 +62,14 @@ export default function Dashboard() {
   };
 
   const COLORS = ['#10b981', '#3b82f6']; // Emerald (Cash), Blue (Credit)
+
+  // Calculate Receivables to Profit Ratio
+  // Using Monthly Credit Sales (from balanceStats) vs Monthly Net Profit (from stats)
+  const receivablesRatio = React.useMemo(() => {
+    if (!stats?.netProfit || !balanceStats?.distribution.credit) return 0;
+    if (stats.netProfit <= 0) return 0; // Avoid negative or division by zero issues
+    return Math.round((balanceStats.distribution.credit / stats.netProfit) * 100);
+  }, [stats, balanceStats]);
 
   if (!business) {
     return (
@@ -343,6 +353,27 @@ export default function Dashboard() {
               </Card>
             </Link>
           </motion.div>
+
+          <motion.div variants={item}>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-l-purple-500 h-full">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Receivables Impact
+                </CardTitle>
+                <div className="h-8 w-8 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <Percent className="h-4 w-4 text-purple-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {receivablesRatio}%
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  of Profit is in Credit
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
@@ -352,9 +383,9 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
-                  Revenue Trend
+                  Cash Flow Trend
                 </CardTitle>
-                <CardDescription>Monthly revenue for the last 6 months</CardDescription>
+                <CardDescription>Revenue vs Expenses (Last 6 Months)</CardDescription>
               </CardHeader>
               <CardContent className="pl-2">
                 <div className="h-[300px] sm:h-[350px] w-full">
@@ -385,9 +416,18 @@ export default function Dashboard() {
                                   backgroundColor: 'var(--background)'
                                 }}
                             />
+                            <Legend />
                             <Bar 
                               dataKey="revenue" 
+                              name="Revenue"
                               fill="var(--primary)" 
+                              radius={[4, 4, 0, 0]} 
+                              maxBarSize={50}
+                            />
+                            <Bar 
+                              dataKey="expenses" 
+                              name="Expenses"
+                              fill="#ef4444" 
                               radius={[4, 4, 0, 0]} 
                               maxBarSize={50}
                             />
@@ -434,7 +474,7 @@ export default function Dashboard() {
                                             backgroundColor: 'var(--background)'
                                         }}
                                     />
-                                    <Legend verticalAlign="bottom" height={36}/>
+                                    <PieLegend verticalAlign="bottom" height={36}/>
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
