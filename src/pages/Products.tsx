@@ -153,18 +153,22 @@ export default function Products() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Products & Services</h1>
             <p className="text-muted-foreground mt-1">
               Manage your catalog of goods and services.
             </p>
           </div>
-          <div className="flex gap-2">
-            {business && <ImportDialog businessId={business._id} type="PRODUCTS" />}
+          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            {business && (
+              <div className="w-full sm:w-auto">
+                <ImportDialog businessId={business._id} type="PRODUCTS" />
+              </div>
+            )}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={handleCreate}>
+                <Button onClick={handleCreate} className="w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" /> Add Product
                 </Button>
               </DialogTrigger>
@@ -300,62 +304,64 @@ export default function Products() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Unit</TableHead>
-                  <TableHead>TVA (%)</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products?.map((product) => (
-                  <TableRow key={product._id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEdit(product)}>
-                    <TableCell className="font-medium">
-                      {product.name}
-                      <div className="text-xs text-muted-foreground capitalize">{product.type || "service"}</div>
-                      {product.description && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{product.description}</div>}
-                    </TableCell>
-                    <TableCell>{product.unitPrice.toLocaleString()} {business.currency}</TableCell>
-                    <TableCell>{product.unitLabel || "-"}</TableCell>
-                    <TableCell>{product.tvaRate}%</TableCell>
-                    <TableCell>
-                      <div className={`text-xs px-2 py-1 rounded-full inline-block ${product.isActive !== false ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
-                          {product.isActive !== false ? "Active" : "Inactive"}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(product)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(product._id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {products?.length === 0 && (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center">
-                      No products found.
-                    </TableCell>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Unit</TableHead>
+                    <TableHead>TVA (%)</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {products?.map((product) => (
+                    <TableRow key={product._id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEdit(product)}>
+                      <TableCell className="font-medium min-w-[150px]">
+                        {product.name}
+                        <div className="text-xs text-muted-foreground capitalize">{product.type || "service"}</div>
+                        {product.description && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{product.description}</div>}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">{product.unitPrice.toLocaleString()} {business.currency}</TableCell>
+                      <TableCell>{product.unitLabel || "-"}</TableCell>
+                      <TableCell>{product.tvaRate}%</TableCell>
+                      <TableCell>
+                        <div className={`text-xs px-2 py-1 rounded-full inline-block ${product.isActive !== false ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                            {product.isActive !== false ? "Active" : "Inactive"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(product)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(product._id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {products?.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center">
+                        No products found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
