@@ -37,8 +37,8 @@ export default function DashboardBalanceCards({ balanceStats, currency }: Dashbo
           <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${balanceColor}`}>
-            {data?.balance.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
+          <div className="text-2xl font-bold">
+            <span className={balanceColor}>{data?.balance.toLocaleString()}</span> <span className="text-sm font-normal text-muted-foreground">{currency}</span>
           </div>
           <div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
             <div className="flex items-center justify-between">

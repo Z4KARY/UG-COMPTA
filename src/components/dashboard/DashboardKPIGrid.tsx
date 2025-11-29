@@ -43,6 +43,8 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
 
   const rStyles = getReceivablesStyles(receivablesRatio);
 
+  const getProfitColor = (amount: number) => amount >= 0 ? "text-emerald-500" : "text-red-500";
+
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       <motion.div variants={item}>
@@ -55,7 +57,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold text-emerald-500">
                 {stats?.turnover.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">For {stats?.period}</p>
@@ -74,7 +76,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold text-red-500">
                 {stats?.expenses?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">For {stats?.period}</p>
@@ -93,7 +95,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className={`text-2xl font-bold ${getProfitColor(stats?.netProfit || 0)}`}>
                 {stats?.netProfit?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">Margin: {stats?.netMargin.toFixed(1)}%</p>
@@ -112,7 +114,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold text-red-500">
                 {stats?.tvaPayable.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -133,7 +135,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold text-blue-500">
                 {Math.round(stats?.averageInvoiceValue || 0).toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -154,7 +156,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold text-red-500">
                 {stats?.stampDuty.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">Cash payments only</p>
@@ -173,7 +175,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold text-yellow-500">
                 {stats?.outstandingAmount?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">Unpaid invoices</p>
@@ -192,7 +194,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.overdueCount || 0}</div>
+              <div className="text-2xl font-bold text-red-500">{stats?.overdueCount || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">Action required</p>
             </CardContent>
           </Card>
@@ -209,7 +211,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.invoiceCount || 0}</div>
+              <div className="text-2xl font-bold text-blue-500">{stats?.invoiceCount || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">This month</p>
             </CardContent>
           </Card>

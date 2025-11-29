@@ -1,3 +1,5 @@
-<div className="min-h-screen ...">
+const revenueTrend = useQuery(api.reports.getRevenueTrend,
+  business ? { businessId: business._id } : "skip"
+);
 
-</div>
+<div className={`text-2xl font-bold ${rStyles.color}`}>{receivablesRatio}%</div>

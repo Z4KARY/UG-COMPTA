@@ -217,7 +217,7 @@ export const getFinancialBalance = query({
 });
 
 export const getRevenueTrend = query({
-  args: { businessId: v.id("businesses") },
+  args: { businessId: v.id("businesses"), year: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
@@ -241,11 +241,11 @@ export const getRevenueTrend = query({
 
     const monthlyData = new Map<string, { revenue: number; revenueCash: number; revenueCredit: number; expenses: number }>();
     const now = new Date();
+    const year = args.year ?? now.getFullYear();
     
-    // Initialize last 6 months
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    // Initialize for the requested year (Jan - Dec)
+    for (let i = 0; i < 12; i++) {
+        const key = `${year}-${String(i + 1).padStart(2, '0')}`;
         monthlyData.set(key, { revenue: 0, revenueCash: 0, revenueCredit: 0, expenses: 0 });
     }
 
@@ -276,14 +276,17 @@ export const getRevenueTrend = query({
         }
     }
 
-    return Array.from(monthlyData.entries()).map(([month, data]) => ({
-        month,
-        revenue: data.revenue,
-        revenueCash: data.revenueCash,
-        revenueCredit: data.revenueCredit,
-        expenses: data.expenses,
-        balance: data.revenue - data.expenses
-    }));
+    // Sort by month
+    return Array.from(monthlyData.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([month, data]) => ({
+            month,
+            revenue: data.revenue,
+            revenueCash: data.revenueCash,
+            revenueCredit: data.revenueCredit,
+            expenses: data.expenses,
+            balance: data.revenue - data.expenses
+        }));
   },
 });
 
