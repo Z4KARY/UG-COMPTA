@@ -122,7 +122,7 @@ export default function Suppliers() {
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Suppliers</h1>
                     <p className="text-muted-foreground mt-1">
-                    Manage your suppliers for purchase tracking.
+                    Manage your suppliers and track amounts owed.
                     </p>
                 </div>
             </div>
@@ -208,30 +208,45 @@ export default function Suppliers() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
-                            <TableHead>NIF</TableHead>
-                            <TableHead>RC</TableHead>
                             <TableHead>Contact</TableHead>
+                            <TableHead className="text-right">Total Purchases</TableHead>
+                            <TableHead className="text-right">Paid</TableHead>
+                            <TableHead className="text-right">Balance Due</TableHead>
                             <TableHead className="w-[100px] text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {suppliers?.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                                     No suppliers found.
                                 </TableCell>
                             </TableRow>
                         )}
                         {suppliers?.map((supplier) => (
                             <TableRow key={supplier._id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEdit(supplier)}>
-                                <TableCell className="font-medium">{supplier.name}</TableCell>
-                                <TableCell>{supplier.nif || "-"}</TableCell>
-                                <TableCell>{supplier.rc || "-"}</TableCell>
+                                <TableCell className="font-medium">
+                                    <div>{supplier.name}</div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {[supplier.nif && `NIF: ${supplier.nif}`, supplier.rc && `RC: ${supplier.rc}`].filter(Boolean).join(" | ")}
+                                    </div>
+                                </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col text-xs">
                                         <span>{supplier.phone}</span>
                                         <span className="text-muted-foreground">{supplier.email}</span>
                                     </div>
+                                </TableCell>
+                                <TableCell className="text-right font-medium">
+                                    {supplier.financials?.totalPurchases.toLocaleString()} <span className="text-xs text-muted-foreground">{business?.currency}</span>
+                                </TableCell>
+                                <TableCell className="text-right text-emerald-600">
+                                    {supplier.financials?.totalPaid.toLocaleString()} <span className="text-xs text-muted-foreground">{business?.currency}</span>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <span className={supplier.financials?.balanceDue > 0 ? "text-red-600 font-bold" : "text-muted-foreground"}>
+                                        {supplier.financials?.balanceDue.toLocaleString()} <span className="text-xs font-normal">{business?.currency}</span>
+                                    </span>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>

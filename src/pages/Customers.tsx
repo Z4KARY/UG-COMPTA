@@ -73,7 +73,7 @@ export default function Customers() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
             <p className="text-muted-foreground mt-1">
-              Manage your client base and their details.
+              Manage your client base and view their financial situation.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
@@ -98,7 +98,7 @@ export default function Customers() {
           <CardHeader>
             <CardTitle>Customer List</CardTitle>
             <CardDescription>
-              Manage your customers and their contact information.
+              Overview of customers and their account balance.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -106,9 +106,10 @@ export default function Customers() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>NIF</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Address</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead className="text-right">Total Sales</TableHead>
+                  <TableHead className="text-right">Paid</TableHead>
+                  <TableHead className="text-right">Balance Due</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -118,12 +119,26 @@ export default function Customers() {
                     <TableCell className="font-medium">
                       <div>{customer.name}</div>
                       <div className="text-xs text-muted-foreground">
-                          {[customer.rc && `RC: ${customer.rc}`, customer.ai && `AI: ${customer.ai}`].filter(Boolean).join(" | ")}
+                          {[customer.taxId && `NIF: ${customer.taxId}`, customer.rc && `RC: ${customer.rc}`].filter(Boolean).join(" | ")}
                       </div>
                     </TableCell>
-                    <TableCell>{customer.taxId || "-"}</TableCell>
-                    <TableCell>{customer.phone}</TableCell>
-                    <TableCell>{customer.address}</TableCell>
+                    <TableCell>
+                        <div className="flex flex-col text-xs">
+                            <span>{customer.phone}</span>
+                            <span className="text-muted-foreground">{customer.email}</span>
+                        </div>
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                        {customer.financials?.totalSales.toLocaleString()} <span className="text-xs text-muted-foreground">{business.currency}</span>
+                    </TableCell>
+                    <TableCell className="text-right text-emerald-600">
+                        {customer.financials?.totalPaid.toLocaleString()} <span className="text-xs text-muted-foreground">{business.currency}</span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                        <span className={customer.financials?.balanceDue > 0 ? "text-red-600 font-bold" : "text-muted-foreground"}>
+                            {customer.financials?.balanceDue.toLocaleString()} <span className="text-xs font-normal">{business.currency}</span>
+                        </span>
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         <Button
@@ -146,7 +161,7 @@ export default function Customers() {
                 ))}
                 {customers?.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center">
+                    <TableCell colSpan={6} className="text-center">
                       No customers found.
                     </TableCell>
                   </TableRow>

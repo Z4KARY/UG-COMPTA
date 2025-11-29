@@ -22,10 +22,38 @@ export const list = query({
         if (!member) return [];
     }
 
-    return await ctx.db
+    const customers = await ctx.db
       .query("customers")
       .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
       .collect();
+
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const customerStats = new Map<string, { totalSales: number; totalPaid: number; balanceDue: number }>();
+
+    for (const inv of invoices) {
+        if (inv.status === "cancelled" || inv.status === "draft") continue;
+        
+        const stats = customerStats.get(inv.customerId) || { totalSales: 0, totalPaid: 0, balanceDue: 0 };
+        
+        stats.totalSales += inv.totalTtc;
+        
+        if (inv.status === "paid") {
+            stats.totalPaid += inv.totalTtc;
+        } else {
+            stats.balanceDue += inv.totalTtc;
+        }
+        
+        customerStats.set(inv.customerId, stats);
+    }
+
+    return customers.map(c => ({
+        ...c,
+        financials: customerStats.get(c._id) || { totalSales: 0, totalPaid: 0, balanceDue: 0 }
+    }));
   },
 });
 

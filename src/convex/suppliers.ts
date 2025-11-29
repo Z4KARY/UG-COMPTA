@@ -19,10 +19,36 @@ export const list = query({
         if (!member) return [];
     }
 
-    return await ctx.db
+    const suppliers = await ctx.db
       .query("suppliers")
       .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
       .collect();
+
+    const purchases = await ctx.db
+      .query("purchaseInvoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const supplierStats = new Map<string, { totalPurchases: number; totalPaid: number; balanceDue: number }>();
+
+    for (const pur of purchases) {
+        const stats = supplierStats.get(pur.supplierId) || { totalPurchases: 0, totalPaid: 0, balanceDue: 0 };
+        
+        stats.totalPurchases += pur.totalTtc;
+        
+        if (pur.paymentDate) {
+            stats.totalPaid += pur.totalTtc;
+        } else {
+            stats.balanceDue += pur.totalTtc;
+        }
+        
+        supplierStats.set(pur.supplierId, stats);
+    }
+
+    return suppliers.map(s => ({
+        ...s,
+        financials: supplierStats.get(s._id) || { totalPurchases: 0, totalPaid: 0, balanceDue: 0 }
+    }));
   },
 });
 
