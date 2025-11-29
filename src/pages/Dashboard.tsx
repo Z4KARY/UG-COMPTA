@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import DashboardBalanceCards from "@/components/dashboard/DashboardBalanceCards";
 import DashboardKPIGrid from "@/components/dashboard/DashboardKPIGrid";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
+import DashboardRecap from "@/components/dashboard/DashboardRecap";
 
 export default function Dashboard() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -92,6 +93,9 @@ export default function Dashboard() {
             </Button>
           </div>
         </div>
+
+        {/* Quick Recap Section */}
+        <DashboardRecap stats={stats} currency={business.currency} />
 
         {/* Balance Overview Section */}
         <DashboardBalanceCards balanceStats={balanceStats} currency={business.currency} />
