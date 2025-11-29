@@ -44,6 +44,8 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
   const rStyles = getReceivablesStyles(receivablesRatio);
 
   const getProfitColor = (amount: number) => amount >= 0 ? "text-emerald-500" : "text-red-500";
+  const getTvaColor = (amount: number) => amount <= 0 ? "text-emerald-500" : "text-red-500";
+  const isTvaCredit = (stats?.tvaPayable || 0) < 0;
 
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -106,16 +108,16 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
 
       <motion.div variants={item}>
         <Link to="/declarations">
-          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-red-500 cursor-pointer h-full">
+          <Card className={`hover:shadow-md transition-shadow border-l-4 ${isTvaCredit ? 'border-l-emerald-500' : 'border-l-red-500'} cursor-pointer h-full`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">TVA Payable</CardTitle>
-              <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-red-500" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">{isTvaCredit ? "VAT Credit" : "TVA Payable"}</CardTitle>
+              <div className={`h-8 w-8 rounded-full ${isTvaCredit ? 'bg-emerald-500/10' : 'bg-red-500/10'} flex items-center justify-center`}>
+                <Activity className={`h-4 w-4 ${isTvaCredit ? 'text-emerald-500' : 'text-red-500'}`} />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-500">
-                {stats?.tvaPayable.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
+              <div className={`text-2xl font-bold ${isTvaCredit ? 'text-emerald-500' : 'text-red-500'}`}>
+                {Math.abs(stats?.tvaPayable || 0).toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 Collected: {stats?.tva.toLocaleString()} | Ded: {stats?.tvaDeductible.toLocaleString()}
@@ -159,7 +161,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               <div className="text-2xl font-bold text-red-500">
                 {stats?.stampDuty.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Cash payments only</p>
+              <p className="text-xs text-muted-foreground mt-1">Total calculated stamp duty</p>
             </CardContent>
           </Card>
         </Link>

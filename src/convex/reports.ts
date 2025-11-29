@@ -108,7 +108,7 @@ export const getDashboardStats = query({
     
     const netMargin = turnover > 0 ? (netProfit / turnover) * 100 : 0;
     const averageInvoiceValue = periodInvoices.length > 0 ? turnover / periodInvoices.length : 0;
-    const tvaPayable = Math.max(0, tva - tvaDeductible);
+    const tvaPayable = tva - tvaDeductible;
 
     return {
       turnover,
@@ -116,7 +116,7 @@ export const getDashboardStats = query({
       tva,
       tvaDeductible,
       tvaPayable,
-      stampDuty,
+      stampDuty: totalStampDuty,
       invoiceCount: periodInvoices.length,
       period: `${month + 1}/${year}`,
       expenses,
