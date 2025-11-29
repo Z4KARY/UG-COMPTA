@@ -40,6 +40,12 @@ export const getDashboardStats = query({
       .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
       .collect();
 
+    // Fetch purchases for expenses calculation
+    const purchases = await ctx.db
+      .query("purchaseInvoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
     const periodInvoices = invoices.filter(
       (inv) =>
         inv.issueDate >= startDate &&
@@ -48,9 +54,16 @@ export const getDashboardStats = query({
         inv.status !== "draft"
     );
 
+    const periodPurchases = purchases.filter(
+      (pur) =>
+        pur.invoiceDate >= startDate &&
+        pur.invoiceDate <= endDate
+    );
+
     let turnover = 0;
     let tva = 0;
     let stampDuty = 0;
+    let expenses = 0;
 
     for (const inv of periodInvoices) {
       turnover += inv.subtotalHt || inv.totalHt || 0;
@@ -60,12 +73,33 @@ export const getDashboardStats = query({
       }
     }
 
+    for (const pur of periodPurchases) {
+      expenses += pur.subtotalHt || 0;
+    }
+
+    // Calculate global stats (Outstanding & Overdue)
+    let outstandingAmount = 0;
+    let overdueCount = 0;
+
+    for (const inv of invoices) {
+      if (inv.status === "issued" || inv.status === "overdue") {
+        outstandingAmount += inv.totalTtc;
+      }
+      if (inv.status === "overdue") {
+        overdueCount++;
+      }
+    }
+
     return {
       turnover,
       tva,
       stampDuty,
       invoiceCount: periodInvoices.length,
       period: `${month + 1}/${year}`,
+      expenses,
+      netProfit: turnover - expenses,
+      outstandingAmount,
+      overdueCount,
     };
   },
 });

@@ -12,7 +12,11 @@ import {
   Package,
   Plus,
   FileText,
-  ArrowRight
+  ArrowRight,
+  TrendingDown,
+  Wallet,
+  AlertCircle,
+  AlertTriangle
 } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -121,6 +125,48 @@ export default function Dashboard() {
           </motion.div>
 
           <motion.div variants={item}>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-l-red-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Monthly Expenses
+                </CardTitle>
+                <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                  <TrendingDown className="h-4 w-4 text-red-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {stats?.expenses?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{business.currency}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  For {stats?.period}
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-l-emerald-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Net Profit
+                </CardTitle>
+                <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                  <Wallet className="h-4 w-4 text-emerald-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {stats?.netProfit?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{business.currency}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Turnover - Expenses
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={item}>
             <Card className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -155,6 +201,48 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Cash payments only
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-l-yellow-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Outstanding
+                </CardTitle>
+                <div className="h-8 w-8 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                  <AlertCircle className="h-4 w-4 text-yellow-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {stats?.outstandingAmount?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{business.currency}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Unpaid invoices
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-l-rose-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Overdue Invoices
+                </CardTitle>
+                <div className="h-8 w-8 rounded-full bg-rose-500/10 flex items-center justify-center">
+                  <AlertTriangle className="h-4 w-4 text-rose-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {stats?.overdueCount || 0}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Action required
                 </p>
               </CardContent>
             </Card>
