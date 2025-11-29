@@ -135,14 +135,14 @@ export default function Invoices() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Type</TableHead>
+                  <TableHead className="hidden md:table-cell">Type</TableHead>
                   <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("invoiceNumber")}>
                       Number <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
                   <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("customerName")}>
                       Customer <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
-                  <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("issueDate")}>
+                  <TableHead className="cursor-pointer whitespace-nowrap hidden md:table-cell" onClick={() => handleSort("issueDate")}>
                       Date <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
                   <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("totalTtc")}>
@@ -155,38 +155,40 @@ export default function Invoices() {
               <TableBody>
                 {paginatedInvoices.map((invoice) => (
                   <TableRow key={invoice._id}>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <Badge variant="secondary" className="capitalize whitespace-nowrap">
                         {invoice.type || "invoice"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-medium whitespace-nowrap">
+                    <TableCell className="font-medium whitespace-nowrap text-xs sm:text-sm">
                       {invoice.invoiceNumber}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">{invoice.customerName}</TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap text-xs sm:text-sm max-w-[100px] truncate sm:max-w-none" title={invoice.customerName}>
+                      {invoice.customerName}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap hidden md:table-cell">
                       {new Date(invoice.issueDate).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap text-xs sm:text-sm">
                       {invoice.totalTtc.toLocaleString()} {invoice.currency}
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={getStatusColor(invoice.status)}
+                        className={`${getStatusColor(invoice.status)} text-[10px] sm:text-xs px-1 sm:px-2`}
                       >
                         {invoice.status.toUpperCase()}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm" asChild>
+                          <Button variant="ghost" size="sm" asChild className="h-8 px-2 text-xs sm:text-sm">
                           <Link to={`/invoices/${invoice._id}`}>View</Link>
                           </Button>
                           <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              className="h-8 w-8 text-destructive hover:text-destructive hidden sm:inline-flex"
                               onClick={() => handleDelete(invoice._id)}
                           >
                               <Trash2 className="h-4 w-4" />

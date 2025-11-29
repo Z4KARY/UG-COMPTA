@@ -233,12 +233,12 @@ export function CustomerDialog({ businessId, open, onOpenChange, customer, onSuc
             </TabsContent>
 
             <TabsContent value="invoices">
-              <div className="max-h-[400px] overflow-y-auto border rounded-md mt-4">
-                <Table>
+              <div className="max-h-[400px] overflow-y-auto overflow-x-auto border rounded-md mt-4">
+                <Table className="min-w-[400px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Number</TableHead>
-                      <TableHead>Date</TableHead>
+                      <TableHead className="w-[100px]">Number</TableHead>
+                      <TableHead className="hidden sm:table-cell">Date</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                     </TableRow>
@@ -253,17 +253,17 @@ export function CustomerDialog({ businessId, open, onOpenChange, customer, onSuc
                     )}
                     {invoices?.map((invoice) => (
                       <TableRow key={invoice._id}>
-                        <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
-                        <TableCell>{format(new Date(invoice.issueDate), "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="font-medium text-xs sm:text-sm whitespace-nowrap">{invoice.invoiceNumber}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm whitespace-nowrap">{format(new Date(invoice.issueDate), "dd/MM/yyyy")}</TableCell>
                         <TableCell>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium capitalize
                             ${invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 
                               invoice.status === 'overdue' ? 'bg-red-100 text-red-800' : 
                               'bg-gray-100 text-gray-800'}`}>
                             {invoice.status}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right font-medium">
+                        <TableCell className="text-right font-medium text-xs sm:text-sm whitespace-nowrap">
                           {invoice.totalTtc.toLocaleString()} DZD
                         </TableCell>
                       </TableRow>
