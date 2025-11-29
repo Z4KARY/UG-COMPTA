@@ -104,6 +104,94 @@ export const getDashboardStats = query({
   },
 });
 
+export const getFinancialBalance = query({
+  args: { businessId: v.id("businesses") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business) return null;
+    
+    // Check access
+    if (business.userId !== userId) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", args.businessId).eq("userId", userId))
+            .first();
+        if (!member) return null;
+    }
+
+    const now = new Date();
+    
+    // Time ranges
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay()).getTime(); // Sunday start
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+    // Fetch all active invoices
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    // Fetch all purchases
+    const purchases = await ctx.db
+      .query("purchaseInvoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    // Filter relevant documents (active only)
+    const activeInvoices = invoices.filter(i => i.status !== "cancelled" && i.status !== "draft");
+    
+    // Helper to calculate balance for a period
+    const calculateForPeriod = (startDate: number) => {
+        const periodInvoices = activeInvoices.filter(i => i.issueDate >= startDate);
+        const periodPurchases = purchases.filter(p => p.invoiceDate >= startDate);
+
+        const revenue = periodInvoices.reduce((sum, i) => sum + i.totalTtc, 0);
+        const expenses = periodPurchases.reduce((sum, p) => sum + p.totalTtc, 0);
+
+        return {
+            revenue,
+            expenses,
+            balance: revenue - expenses
+        };
+    };
+
+    const daily = calculateForPeriod(startOfDay);
+    const weekly = calculateForPeriod(startOfWeek);
+    const monthly = calculateForPeriod(startOfMonth);
+
+    // Cash vs Credit Breakdown (Current Month)
+    // "Cash" = Paid by CASH
+    // "Credit" = Paid by Bank/Card/Cheque OR Unpaid (Outstanding)
+    const monthInvoices = activeInvoices.filter(i => i.issueDate >= startOfMonth);
+    
+    let cashTotal = 0;
+    let creditTotal = 0; // Includes Bank and Unpaid
+
+    for (const inv of monthInvoices) {
+        if (inv.paymentMethod === "CASH") {
+            cashTotal += inv.totalTtc;
+        } else {
+            // Bank, Cheque, Card, Other, or Unpaid (null paymentMethod)
+            creditTotal += inv.totalTtc;
+        }
+    }
+
+    return {
+        daily,
+        weekly,
+        monthly,
+        distribution: {
+            cash: cashTotal,
+            credit: creditTotal
+        }
+    };
+  },
+});
+
 export const getRevenueTrend = query({
   args: { businessId: v.id("businesses") },
   handler: async (ctx, args) => {
