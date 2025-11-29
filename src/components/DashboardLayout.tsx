@@ -42,7 +42,7 @@ export default function DashboardLayout({
             <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background/50 backdrop-blur-sm px-4 sticky top-0 z-10">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
-                <Breadcrumb>
+                <Breadcrumb className="overflow-hidden">
                   <BreadcrumbList>
                     <BreadcrumbItem className="hidden md:block">
                       <BreadcrumbLink href="/dashboard">InvoiceFlow</BreadcrumbLink>

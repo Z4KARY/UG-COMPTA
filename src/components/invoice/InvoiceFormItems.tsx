@@ -93,15 +93,15 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
         {items.map((item, index) => (
           <div
             key={index}
-            className="grid grid-cols-12 gap-2 items-end border-b pb-4"
+            className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-2 items-end border-b pb-4"
           >
-            <div className="col-span-4 space-y-1">
+            <div className="col-span-1 md:col-span-4 space-y-1">
               <Label className="text-xs">Description</Label>
               <div className="flex gap-2">
                 <Select
                   onValueChange={(val) => handleProductSelect(index, val)}
                 >
-                  <SelectTrigger className="w-[40px] px-2">
+                  <SelectTrigger className="w-[40px] px-2 shrink-0">
                     <span className="sr-only">Select Product</span>
                   </SelectTrigger>
                   <SelectContent>
@@ -118,74 +118,84 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
                     handleItemChange(index, "description", e.target.value)
                   }
                   placeholder="Item description"
+                  className="w-full"
                 />
               </div>
             </div>
-            <div className="col-span-2 space-y-1">
-              <Label className="text-xs">Type</Label>
-              <Select 
-                  value={item.productType || "service"} 
-                  onValueChange={(val) => handleItemChange(index, "productType", val)}
-              >
-                  <SelectTrigger className="h-10">
-                      <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                      <SelectItem value="service">Service</SelectItem>
-                      <SelectItem value="goods">Goods</SelectItem>
-                  </SelectContent>
-              </Select>
+            
+            <div className="grid grid-cols-2 md:contents gap-4">
+                <div className="col-span-1 md:col-span-2 space-y-1">
+                <Label className="text-xs">Type</Label>
+                <Select 
+                    value={item.productType || "service"} 
+                    onValueChange={(val) => handleItemChange(index, "productType", val)}
+                >
+                    <SelectTrigger className="h-10">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="service">Service</SelectItem>
+                        <SelectItem value="goods">Goods</SelectItem>
+                    </SelectContent>
+                </Select>
+                </div>
+                <div className="col-span-1 md:col-span-1 space-y-1">
+                <Label className="text-xs">Qty</Label>
+                <Input
+                    type="number"
+                    value={item.quantity}
+                    onChange={(e) =>
+                    handleItemChange(index, "quantity", e.target.value)
+                    }
+                />
+                </div>
             </div>
-            <div className="col-span-1 space-y-1">
-              <Label className="text-xs">Qty</Label>
-              <Input
-                type="number"
-                value={item.quantity}
-                onChange={(e) =>
-                  handleItemChange(index, "quantity", e.target.value)
-                }
-              />
+
+            <div className="grid grid-cols-2 md:contents gap-4">
+                <div className="col-span-1 md:col-span-2 space-y-1">
+                <Label className="text-xs">Price</Label>
+                <Input
+                    type="number"
+                    value={item.unitPrice}
+                    onChange={(e) =>
+                    handleItemChange(index, "unitPrice", e.target.value)
+                    }
+                />
+                </div>
+                {business?.type !== "auto_entrepreneur" && (
+                <div className="col-span-1 md:col-span-1 space-y-1">
+                <Label className="text-xs">TVA %</Label>
+                <Input
+                    type="number"
+                    value={item.tvaRate}
+                    onChange={(e) =>
+                    handleItemChange(index, "tvaRate", e.target.value)
+                    }
+                    disabled={business?.fiscalRegime === "IFU"}
+                    className={business?.fiscalRegime === "IFU" ? "bg-gray-100 text-gray-500" : ""}
+                />
+                </div>
+                )}
             </div>
-            <div className="col-span-2 space-y-1">
-              <Label className="text-xs">Price</Label>
-              <Input
-                type="number"
-                value={item.unitPrice}
-                onChange={(e) =>
-                  handleItemChange(index, "unitPrice", e.target.value)
-                }
-              />
-            </div>
-            {business?.type !== "auto_entrepreneur" && (
-            <div className="col-span-1 space-y-1">
-              <Label className="text-xs">TVA %</Label>
-              <Input
-                type="number"
-                value={item.tvaRate}
-                onChange={(e) =>
-                  handleItemChange(index, "tvaRate", e.target.value)
-                }
-                disabled={business?.fiscalRegime === "IFU"}
-                className={business?.fiscalRegime === "IFU" ? "bg-gray-100 text-gray-500" : ""}
-              />
-            </div>
-            )}
-            <div className="col-span-1 space-y-1">
-              <Label className="text-xs">Total {business?.type === "auto_entrepreneur" ? "" : "HT"}</Label>
-              <div className="text-sm font-medium py-2">
-                {item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </div>
-            </div>
-            <div className="col-span-1 flex justify-end">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeItem(index)}
-                disabled={items.length === 1}
-                type="button"
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+
+            <div className="flex items-center justify-between md:contents">
+                <div className="col-span-1 md:col-span-1 space-y-1">
+                <Label className="text-xs md:hidden">Total</Label>
+                <div className="text-sm font-medium py-2">
+                    {item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+                </div>
+                <div className="col-span-1 flex justify-end">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeItem(index)}
+                    disabled={items.length === 1}
+                    type="button"
+                >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+                </div>
             </div>
           </div>
         ))}

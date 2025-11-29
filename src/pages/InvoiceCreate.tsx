@@ -248,13 +248,13 @@ export default function InvoiceCreate() {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Create {type === "quote" ? "Quote" : type === "credit_note" ? "Credit Note" : "Invoice"}</h1>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
             <InvoiceFormDetails />
 
             <InvoiceFormCustomer 
@@ -274,20 +274,20 @@ export default function InvoiceCreate() {
       </Form>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
           {/* Business Info (Read-Only) */}
           <Card className="bg-muted/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Business Information</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                         <p className="font-bold">{business.name}</p>
                         <p>{business.address}</p>
                         {business.city && <p>{business.city}</p>}
                     </div>
-                    <div className="text-right">
+                    <div className="sm:text-right">
                         <p>NIF: {business.nif || "-"}</p>
                         <p>RC: {business.rc || "-"}</p>
                         <p>AI: {business.ai || "-"}</p>
@@ -297,18 +297,20 @@ export default function InvoiceCreate() {
           </Card>
         </div>
 
-        <InvoiceFormSummary 
-          business={business}
-          subtotalHt={subtotalHt}
-          totalTva={totalTva}
-          totalTtc={totalTtc}
-          stampDutyAmount={stampDutyAmount}
-          paymentMethod={paymentMethod}
-          stampDutyConfig={stampDutyConfig}
-          notes={notes}
-          setNotes={setNotes}
-          onAction={handleSubmit}
-        />
+        <div className="order-1 lg:order-2">
+          <InvoiceFormSummary 
+            business={business}
+            subtotalHt={subtotalHt}
+            totalTva={totalTva}
+            totalTtc={totalTtc}
+            stampDutyAmount={stampDutyAmount}
+            paymentMethod={paymentMethod}
+            stampDutyConfig={stampDutyConfig}
+            notes={notes}
+            setNotes={setNotes}
+            onAction={handleSubmit}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );

@@ -88,8 +88,8 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
             <p className="text-muted-foreground mt-1">Overview of your financial performance.</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button asChild className="shadow-lg shadow-primary/20">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button asChild className="shadow-lg shadow-primary/20 w-full sm:w-auto">
               <Link to="/invoices/new">
                 <Plus className="mr-2 h-4 w-4" /> Create Invoice
               </Link>
@@ -98,7 +98,7 @@ export default function Dashboard() {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <motion.div variants={item}>
             <Card className="hover:shadow-md transition-shadow border-l-4 border-l-primary">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -182,9 +182,9 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
           {/* Revenue Chart */}
-          <motion.div variants={item} className="col-span-4">
+          <motion.div variants={item} className="col-span-1 md:col-span-2 lg:col-span-4">
             <Card className="h-full hover:shadow-md transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -194,7 +194,7 @@ export default function Dashboard() {
                 <CardDescription>Monthly revenue for the last 6 months</CardDescription>
               </CardHeader>
               <CardContent className="pl-2">
-                <div className="h-[350px] w-full">
+                <div className="h-[300px] sm:h-[350px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={revenueTrend || []} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
@@ -236,7 +236,7 @@ export default function Dashboard() {
           </motion.div>
 
           {/* Top Performers */}
-          <motion.div variants={item} className="col-span-3">
+          <motion.div variants={item} className="col-span-1 md:col-span-2 lg:col-span-3">
             <Card className="h-full hover:shadow-md transition-shadow flex flex-col">
               <CardHeader>
                 <CardTitle>Top Performers</CardTitle>

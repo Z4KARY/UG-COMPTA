@@ -131,78 +131,80 @@ export default function Invoices() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("invoiceNumber")}>
-                    Number <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("customerName")}>
-                    Customer <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("issueDate")}>
-                    Date <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("totalTtc")}>
-                    Amount <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedInvoices.map((invoice) => (
-                <TableRow key={invoice._id}>
-                  <TableCell>
-                    <Badge variant="secondary" className="capitalize">
-                      {invoice.type || "invoice"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {invoice.invoiceNumber}
-                  </TableCell>
-                  <TableCell>{invoice.customerName}</TableCell>
-                  <TableCell>
-                    {new Date(invoice.issueDate).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    {invoice.totalTtc.toLocaleString()} {invoice.currency}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={getStatusColor(invoice.status)}
-                    >
-                      {invoice.status.toUpperCase()}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" asChild>
-                        <Link to={`/invoices/${invoice._id}`}>View</Link>
-                        </Button>
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => handleDelete(invoice._id)}
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {invoices?.length === 0 && (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">
-                    No invoices found.
-                  </TableCell>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("invoiceNumber")}>
+                      Number <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                  </TableHead>
+                  <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("customerName")}>
+                      Customer <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                  </TableHead>
+                  <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("issueDate")}>
+                      Date <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                  </TableHead>
+                  <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("totalTtc")}>
+                      Amount <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                  </TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paginatedInvoices.map((invoice) => (
+                  <TableRow key={invoice._id}>
+                    <TableCell>
+                      <Badge variant="secondary" className="capitalize whitespace-nowrap">
+                        {invoice.type || "invoice"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-medium whitespace-nowrap">
+                      {invoice.invoiceNumber}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">{invoice.customerName}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {new Date(invoice.issueDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {invoice.totalTtc.toLocaleString()} {invoice.currency}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={getStatusColor(invoice.status)}
+                      >
+                        {invoice.status.toUpperCase()}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="sm" asChild>
+                          <Link to={`/invoices/${invoice._id}`}>View</Link>
+                          </Button>
+                          <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => handleDelete(invoice._id)}
+                          >
+                              <Trash2 className="h-4 w-4" />
+                          </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {invoices?.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center">
+                      No invoices found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
