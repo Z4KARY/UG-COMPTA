@@ -328,9 +328,9 @@ export default function Suppliers() {
                         <TableRow>
                             <TableHead className="pl-4">Name</TableHead>
                             <TableHead className="hidden md:table-cell">Contact</TableHead>
-                            <TableHead className="hidden lg:table-cell text-right">Total Purchases</TableHead>
-                            <TableHead className="hidden lg:table-cell text-right">Paid</TableHead>
-                            <TableHead className="text-right">Balance Due</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">Total Purchases</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">Paid</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">Balance Due</TableHead>
                             <TableHead className="w-[80px] text-right pr-4">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -359,13 +359,13 @@ export default function Suppliers() {
                                         <span className="text-muted-foreground">{supplier.email}</span>
                                     </div>
                                 </TableCell>
-                                <TableCell className="hidden lg:table-cell text-right font-medium">
+                                <TableCell className="text-right font-medium whitespace-nowrap">
                                     {supplier.financials?.totalPurchases.toLocaleString()} <span className="text-xs text-muted-foreground">{business?.currency}</span>
                                 </TableCell>
-                                <TableCell className="hidden lg:table-cell text-right text-emerald-600">
+                                <TableCell className="text-right text-emerald-600 whitespace-nowrap">
                                     {supplier.financials?.totalPaid.toLocaleString()} <span className="text-xs text-muted-foreground">{business?.currency}</span>
                                 </TableCell>
-                                <TableCell className="text-right">
+                                <TableCell className="text-right whitespace-nowrap">
                                     <span className={`text-sm ${supplier.financials?.balanceDue > 0 ? "text-red-600 font-bold" : "text-muted-foreground"}`}>
                                         {supplier.financials?.balanceDue.toLocaleString()} <span className="text-xs font-normal hidden sm:inline">{business?.currency}</span>
                                     </span>
