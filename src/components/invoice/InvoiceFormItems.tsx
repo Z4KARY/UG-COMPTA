@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2 } from "lucide-react";
 import { InvoiceItem } from "@/types/invoice";
+import { cn } from "@/lib/utils";
 
 interface InvoiceFormItemsProps {
   items: InvoiceItem[];
@@ -90,19 +91,35 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
         <CardTitle>Items</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Desktop Header - Hidden on Mobile */}
+        <div className="hidden md:grid grid-cols-12 gap-2 font-medium text-sm text-muted-foreground mb-2 px-2">
+            <div className="col-span-4">Description</div>
+            <div className="col-span-2">Type</div>
+            <div className="col-span-1">Qty</div>
+            <div className="col-span-2">Price</div>
+            <div className="col-span-1">TVA</div>
+            <div className="col-span-2 text-right">Total</div>
+        </div>
+
         {items.map((item, index) => (
           <div
             key={index}
-            className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-2 items-end border-b pb-4"
+            className={cn(
+                "group relative",
+                // Mobile styles: Card-like layout
+                "flex flex-col gap-4 p-4 border rounded-lg bg-muted/5",
+                // Desktop styles: Grid row, no border/bg/padding
+                "md:grid md:grid-cols-12 md:gap-2 md:items-start md:p-0 md:border-0 md:bg-transparent"
+            )}
           >
-            <div className="col-span-1 md:col-span-4 space-y-1">
-              <Label className="text-xs">Description</Label>
+            {/* Description */}
+            <div className="md:col-span-4 space-y-1.5 md:space-y-0">
+              <Label className="md:hidden text-xs text-muted-foreground">Description</Label>
               <div className="flex gap-2">
-                <Select
-                  onValueChange={(val) => handleProductSelect(index, val)}
-                >
-                  <SelectTrigger className="w-[40px] px-2 shrink-0">
+                <Select onValueChange={(val) => handleProductSelect(index, val)}>
+                  <SelectTrigger className="w-[40px] px-2 shrink-0 text-muted-foreground" title="Select Product">
                     <span className="sr-only">Select Product</span>
+                    <Plus className="h-4 w-4" />
                   </SelectTrigger>
                   <SelectContent>
                     {products?.map((p) => (
@@ -123,9 +140,9 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
               </div>
             </div>
             
-            <div className="grid grid-cols-2 md:contents gap-4">
-                <div className="col-span-1 md:col-span-2 space-y-1">
-                <Label className="text-xs">Type</Label>
+            {/* Type */}
+            <div className="md:col-span-2 space-y-1.5 md:space-y-0">
+                <Label className="md:hidden text-xs text-muted-foreground">Type</Label>
                 <Select 
                     value={item.productType || "service"} 
                     onValueChange={(val) => handleItemChange(index, "productType", val)}
@@ -138,68 +155,74 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
                         <SelectItem value="goods">Goods</SelectItem>
                     </SelectContent>
                 </Select>
-                </div>
-                <div className="col-span-1 md:col-span-1 space-y-1">
-                <Label className="text-xs">Qty</Label>
+            </div>
+
+            {/* Qty */}
+            <div className="md:col-span-1 space-y-1.5 md:space-y-0">
+                <Label className="md:hidden text-xs text-muted-foreground">Qty</Label>
                 <Input
                     type="number"
+                    min="0"
                     value={item.quantity}
                     onChange={(e) =>
                     handleItemChange(index, "quantity", e.target.value)
                     }
                 />
-                </div>
             </div>
 
-            <div className="grid grid-cols-2 md:contents gap-4">
-                <div className="col-span-1 md:col-span-2 space-y-1">
-                <Label className="text-xs">Price</Label>
+            {/* Price */}
+            <div className="md:col-span-2 space-y-1.5 md:space-y-0">
+                <Label className="md:hidden text-xs text-muted-foreground">Price</Label>
                 <Input
                     type="number"
+                    min="0"
+                    step="0.01"
                     value={item.unitPrice}
                     onChange={(e) =>
                     handleItemChange(index, "unitPrice", e.target.value)
                     }
                 />
-                </div>
-                {business?.type !== "auto_entrepreneur" && (
-                <div className="col-span-1 md:col-span-1 space-y-1">
-                <Label className="text-xs">TVA %</Label>
+            </div>
+
+            {/* TVA */}
+            <div className="md:col-span-1 space-y-1.5 md:space-y-0">
+                <Label className="md:hidden text-xs text-muted-foreground">TVA %</Label>
                 <Input
                     type="number"
+                    min="0"
+                    max="100"
                     value={item.tvaRate}
                     onChange={(e) =>
                     handleItemChange(index, "tvaRate", e.target.value)
                     }
                     disabled={business?.fiscalRegime === "IFU"}
-                    className={business?.fiscalRegime === "IFU" ? "bg-gray-100 text-gray-500" : ""}
+                    className={business?.fiscalRegime === "IFU" ? "bg-muted text-muted-foreground" : ""}
                 />
-                </div>
-                )}
             </div>
 
-            <div className="flex items-center justify-between md:contents">
-                <div className="col-span-1 md:col-span-1 space-y-1">
-                <Label className="text-xs md:hidden">Total</Label>
-                <div className="text-sm font-medium py-2">
+            {/* Total & Delete */}
+            <div className="md:col-span-2 flex items-center justify-between md:justify-end gap-2 pt-2 md:pt-0 border-t md:border-t-0 mt-2 md:mt-0">
+                <div className="md:hidden">
+                    <span className="text-xs text-muted-foreground mr-2">Total:</span>
+                    <span className="font-medium">{item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div className="hidden md:block text-sm font-medium text-right w-full pr-2">
                     {item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
-                </div>
-                <div className="col-span-1 flex justify-end">
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => removeItem(index)}
                     disabled={items.length === 1}
                     type="button"
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    <Trash2 className="h-4 w-4" />
                 </Button>
-                </div>
             </div>
           </div>
         ))}
-        <Button variant="outline" onClick={addItem} className="w-full" type="button">
+        <Button variant="outline" onClick={addItem} className="w-full border-dashed" type="button">
           <Plus className="mr-2 h-4 w-4" /> Add Item
         </Button>
       </CardContent>
