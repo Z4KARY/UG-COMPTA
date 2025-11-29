@@ -88,9 +88,18 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-500">
-                {stats?.expenses?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-2xl font-bold text-red-500 cursor-help">
+                      {stats?.expenses?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Total expenses including VAT (TTC)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <p className="text-xs text-muted-foreground mt-1">For {stats?.period}</p>
             </CardContent>
           </Card>
@@ -107,9 +116,18 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${getProfitColor(stats?.netProfit || 0)}`}>
-                {stats?.netProfit?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className={`text-2xl font-bold ${getProfitColor(stats?.netProfit || 0)} cursor-help`}>
+                      {stats?.netProfit?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Revenue (HT) - Expenses (HT)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <p className="text-xs text-muted-foreground mt-1">Margin: {stats?.netMargin.toFixed(1)}%</p>
             </CardContent>
           </Card>
@@ -205,9 +223,18 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-500">
-                {stats?.outstandingAmount?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-2xl font-bold text-yellow-500 cursor-help">
+                      {stats?.outstandingAmount?.toLocaleString() || 0} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Total unpaid invoices including VAT (TTC)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <p className="text-xs text-muted-foreground mt-1">Unpaid invoices</p>
             </CardContent>
           </Card>

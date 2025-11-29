@@ -47,9 +47,18 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-2">
               <Wallet className="h-3 w-3" /> Net Profit
             </span>
-            <div className={`text-3xl font-bold tracking-tight ${stats.netProfit >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-              {stats.netProfit.toLocaleString()} <span className="text-lg font-normal text-muted-foreground">{currency}</span>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className={`text-3xl font-bold tracking-tight ${stats.netProfit >= 0 ? 'text-emerald-500' : 'text-red-500'} cursor-help`}>
+                    {stats.netProfit.toLocaleString()} <span className="text-lg font-normal text-muted-foreground">{currency}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Revenue (HT) - Expenses (HT)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <p className="text-xs text-muted-foreground">Earnings after expenses</p>
           </CardContent>
         </Card>
@@ -61,9 +70,18 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-2">
               <ArrowDownRight className="h-3 w-3" /> Expenses
             </span>
-            <div className="text-3xl font-bold tracking-tight text-red-500">
-              {stats.expenses.toLocaleString()} <span className="text-lg font-normal text-muted-foreground">{currency}</span>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-3xl font-bold tracking-tight text-red-500 cursor-help">
+                    {stats.expenses.toLocaleString()} <span className="text-lg font-normal text-muted-foreground">{currency}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Total expenses including VAT (TTC)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <p className="text-xs text-muted-foreground">Total costs this month</p>
           </CardContent>
         </Card>
@@ -75,9 +93,18 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-2">
               <AlertCircle className="h-3 w-3" /> Outstanding
             </span>
-            <div className="text-3xl font-bold tracking-tight text-yellow-500">
-              {stats.outstandingAmount.toLocaleString()} <span className="text-lg font-normal text-muted-foreground">{currency}</span>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-3xl font-bold tracking-tight text-yellow-500 cursor-help">
+                    {stats.outstandingAmount.toLocaleString()} <span className="text-lg font-normal text-muted-foreground">{currency}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Total unpaid invoices including VAT (TTC)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <p className="text-xs text-muted-foreground">Unpaid invoices</p>
           </CardContent>
         </Card>
