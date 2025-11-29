@@ -36,6 +36,7 @@ import {
   Lock,
   Unlock,
   Calendar,
+  Loader2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -278,6 +279,16 @@ export default function BusinessSettings() {
       }
   };
 
+  if (business === undefined) {
+    return (
+      <DashboardLayout>
+        <div className="flex h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <motion.div
@@ -301,8 +312,8 @@ export default function BusinessSettings() {
           </Button>
         </div>
 
-        <Tabs>
-          <TabsList>
+        <Tabs defaultValue="general" className="space-y-4">
+          <TabsList className="w-full justify-start overflow-x-auto">
             <TabsTrigger value="general">General Settings</TabsTrigger>
             <TabsTrigger value="design">Invoice Design</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
