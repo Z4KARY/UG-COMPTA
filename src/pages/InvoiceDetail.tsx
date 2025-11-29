@@ -67,11 +67,12 @@ export default function InvoiceDetail() {
     <DashboardLayout>
       <style type="text/css" media="print">
         {`
-          @page { size: A4; margin: 20mm; }
+          @page { size: A4; margin: 0; }
           body { -webkit-print-color-adjust: exact; }
           @media print {
             .no-print { display: none !important; }
             .print-break-inside-avoid { break-inside: avoid; }
+            html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: visible; }
           }
         `}
       </style>
@@ -103,8 +104,8 @@ export default function InvoiceDetail() {
         </div>
       </div>
 
-      <div className="w-full mx-auto print:w-full print:max-w-none">
-        <div className="bg-white p-4 sm:p-6 md:p-8 shadow-sm border rounded-lg w-full max-w-4xl mx-auto print:shadow-none print:border-none print:w-full print:max-w-none print:p-0 print:m-0"
+      <div className="w-full mx-auto print:w-full print:max-w-none print:absolute print:top-0 print:left-0 print:m-0">
+        <div className="bg-white p-4 sm:p-6 md:p-8 shadow-sm border rounded-lg w-full max-w-4xl mx-auto print:shadow-none print:border-none print:w-full print:max-w-none print:p-[15mm] print:m-0 print:min-h-screen"
              style={{ fontFamily: font }}>
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-6 print:flex-row print:mb-4 print:gap-0">

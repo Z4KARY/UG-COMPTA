@@ -37,9 +37,11 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-muted/30">
-        <AppSidebar />
-        <main className="flex-1 flex flex-col min-h-screen overflow-hidden transition-all duration-300 ease-in-out">
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background/50 backdrop-blur-sm px-4 sticky top-0 z-10">
+        <div className="print:hidden">
+          <AppSidebar />
+        </div>
+        <main className="flex-1 flex flex-col min-h-screen overflow-hidden transition-all duration-300 ease-in-out print:h-auto print:overflow-visible">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background/50 backdrop-blur-sm px-4 sticky top-0 z-10 print:hidden">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
                 <Breadcrumb className="overflow-hidden">
@@ -71,8 +73,8 @@ export default function DashboardLayout({
                   </BreadcrumbList>
                 </Breadcrumb>
             </header>
-            <div className="flex-1 overflow-auto p-4 md:p-8 pt-6">
-                <div className="mx-auto max-w-7xl w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex-1 overflow-auto p-4 md:p-8 pt-6 print:p-0 print:overflow-visible">
+                <div className="mx-auto max-w-7xl w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 print:max-w-none print:w-full print:m-0 print:space-y-0">
                     {children}
                 </div>
             </div>
