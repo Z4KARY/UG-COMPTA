@@ -114,7 +114,7 @@ export default function PurchaseDetail() {
           @media print {
             .no-print { display: none !important; }
             .print-break-inside-avoid { break-inside: avoid; }
-            html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; overflow-x: hidden; }
+            html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; }
             .print-container { 
                 box-shadow: none !important; 
                 border: none !important; 
@@ -123,6 +123,8 @@ export default function PurchaseDetail() {
                 max-width: 100% !important;
                 padding: 10mm !important;
                 min-height: 100% !important;
+                overflow: visible !important;
+                border-radius: 0 !important;
             }
           }
         `}
@@ -215,9 +217,9 @@ export default function PurchaseDetail() {
           {/* Top Accent Line */}
           <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
-          <div className="p-8 md:p-12 flex-grow flex flex-col">
+          <div className="p-8 md:p-12 print:p-0 flex-grow flex flex-col">
             {/* Header - Supplier Info (Issuer) */}
-            <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12 print:mb-6 print:gap-4">
                 <div className="w-full md:w-1/2">
                     <div className="h-20 flex items-center mb-6">
                         <h2 className="text-2xl font-bold uppercase tracking-tight text-gray-900">{supplier?.name || "Unknown Supplier"}</h2>
@@ -265,7 +267,7 @@ export default function PurchaseDetail() {
             </div>
 
             {/* Bill To Section (My Business) */}
-            <div className="flex flex-col md:flex-row gap-8 mb-12">
+            <div className="flex flex-col md:flex-row gap-8 mb-12 print:mb-6">
                 <div className="w-full md:w-1/2">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Bill To</h3>
                     <div className="bg-gray-50/50 rounded-lg p-4 border border-gray-100">
@@ -285,7 +287,7 @@ export default function PurchaseDetail() {
             </div>
 
             {/* Items Table */}
-            <div className="mb-8">
+            <div className="mb-8 print:mb-4">
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b-2 border-gray-100">
@@ -311,7 +313,7 @@ export default function PurchaseDetail() {
             </div>
 
             {/* Totals & Notes */}
-            <div className="flex flex-col md:flex-row gap-12 mb-12 print:break-inside-avoid">
+            <div className="flex flex-col md:flex-row gap-12 mb-12 print:mb-6 print:break-inside-avoid">
                 <div className="flex-1">
                     {invoice.description && (
                         <div className="bg-gray-50/50 border border-gray-100 rounded-lg p-4 text-sm text-gray-600">
@@ -347,7 +349,7 @@ export default function PurchaseDetail() {
             </div>
 
             {/* Amount in Words */}
-            <div className="mb-12 print:break-inside-avoid">
+            <div className="mb-12 print:mb-0 print:break-inside-avoid">
                 <p className="text-sm text-gray-500 mb-1">Amount in words:</p>
                 <p className="text-gray-900 font-medium italic border-l-4 pl-4 py-1" style={{ borderColor: primaryColor }}>
                     "{numberToWords(invoice.totalTtc)}"
