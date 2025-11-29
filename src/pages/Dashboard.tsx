@@ -22,10 +22,11 @@ import {
 import { Link } from "react-router";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { ComposedChart, Line, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import { motion } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
 import { PieChart, Pie, Cell, Legend as PieLegend } from "recharts";
+import { Progress } from "@/components/ui/progress";
 
 export default function Dashboard() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -368,8 +369,9 @@ export default function Dashboard() {
                 <div className="text-2xl font-bold">
                   {receivablesRatio}%
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  of Profit is in Credit
+                <Progress value={receivablesRatio} className="h-2 mt-2 [&>div]:bg-purple-500" />
+                <p className="text-xs text-muted-foreground mt-2">
+                  of Profit is in Credit (Créances)
                 </p>
               </CardContent>
             </Card>
@@ -383,14 +385,14 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
-                  Cash Flow Trend
+                  Cash Flow & Balance Trend
                 </CardTitle>
-                <CardDescription>Revenue vs Expenses (Last 6 Months)</CardDescription>
+                <CardDescription>Revenue, Expenses & Net Balance (Last 6 Months)</CardDescription>
               </CardHeader>
               <CardContent className="pl-2">
                 <div className="h-[300px] sm:h-[350px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={revenueTrend || []} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                        <ComposedChart data={revenueTrend || []} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                             <XAxis 
                                 dataKey="month" 
@@ -431,7 +433,15 @@ export default function Dashboard() {
                               radius={[4, 4, 0, 0]} 
                               maxBarSize={50}
                             />
-                        </BarChart>
+                            <Line
+                              type="monotone"
+                              dataKey="balance"
+                              name="Net Balance"
+                              stroke="#10b981"
+                              strokeWidth={2}
+                              dot={{ r: 4, fill: "#10b981" }}
+                            />
+                        </ComposedChart>
                     </ResponsiveContainer>
                 </div>
               </CardContent>
