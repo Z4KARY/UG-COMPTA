@@ -67,7 +67,7 @@ export const getDashboardStats = query({
     let tvaDeductible = 0;
 
     for (const inv of periodInvoices) {
-      turnover += inv.subtotalHt || inv.totalHt || 0;
+      turnover += inv.totalTtc || 0;
       tva += inv.totalTva || 0;
       if (inv.status === "paid" && inv.paymentMethod === "CASH") {
         stampDuty += inv.stampDutyAmount || 0;
@@ -75,7 +75,7 @@ export const getDashboardStats = query({
     }
 
     for (const pur of periodPurchases) {
-      expenses += pur.subtotalHt || 0;
+      expenses += pur.totalTtc || 0;
       tvaDeductible += pur.vatDeductible || 0;
     }
 
@@ -393,7 +393,7 @@ export const getSummary = query({
     let stampDuty = 0;
 
     for (const inv of periodInvoices) {
-      turnover += inv.subtotalHt || inv.totalHt || 0;
+      turnover += inv.totalTtc || 0;
       tva += inv.totalTva || 0;
       stampDuty += inv.stampDutyAmount || 0;
     }
