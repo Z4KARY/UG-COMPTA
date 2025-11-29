@@ -19,8 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { motion } from "framer-motion";
 import {
   Building2,
@@ -40,8 +41,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { WebhookSettings } from "@/components/WebhookSettings";
-import { BusinessDesignSettings } from "@/components/BusinessDesignSettings";
-import { useAction } from "convex/react";
+import { SubscriptionSettings } from "@/components/SubscriptionSettings";
 
 export default function BusinessSettings() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -299,214 +299,269 @@ export default function BusinessSettings() {
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid gap-6 md:grid-cols-2">
-          {/* Company Identity Section */}
-          <Card className="md:col-span-2 shadow-sm">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Building2 className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle>Company Identity</CardTitle>
-                  <CardDescription>
-                    Basic information about your business entity.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">
-                  {formData.type === "societe" 
-                    ? "Business Name (Raison Sociale)" 
-                    : "Full Name (Nom & Prénom)"}
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder={formData.type === "societe" ? "e.g. SARL Tech Solutions" : "e.g. Ahmed Benali"}
-                  required
-                  className="bg-muted/30"
-                />
-                {formData.type !== "societe" && (
-                  <p className="text-[0.8rem] text-muted-foreground">
-                    Enter your full legal name as it appears on your documents.
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tradeName">Trade Name (Nom Commercial)</Label>
-                <Input
-                  id="tradeName"
-                  name="tradeName"
-                  value={formData.tradeName}
-                  onChange={handleChange}
-                  placeholder={formData.type === "societe" ? "Optional" : "e.g. My Shop"}
-                  className="bg-muted/30"
-                />
-                {formData.type !== "societe" && (
-                  <p className="text-[0.8rem] text-muted-foreground">
-                    Do not include legal prefixes (EURL, SARL, etc.) in the trade name.
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">Address</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    placeholder="Full business address"
-                    required
-                    className="pl-9 bg-muted/30"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="city">City (Wilaya/Commune)</Label>
-                <Input
-                  id="city"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  placeholder="e.g. Algiers"
-                  className="bg-muted/30"
-                />
-              </div>
-            </CardContent>
-          </Card>
+        <Tabs>
+          <TabsList>
+            <TabsTrigger value="general">General Settings</TabsTrigger>
+            <TabsTrigger value="design">Invoice Design</TabsTrigger>
+            <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
+            <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          </TabsList>
 
-          {/* Fiscal Information Section */}
-          <Card className="shadow-sm h-full">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <CardTitle>Fiscal & Legal</CardTitle>
-                  <CardDescription>
-                    Tax identification and registration details.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                  <Label htmlFor="type">Business Type</Label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(val) => handleSelectChange("type", val)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="societe">Société (SARL, EURL, SPA...)</SelectItem>
-                      <SelectItem value="personne_physique">Personne Physique (Entreprise Individuelle)</SelectItem>
-                      <SelectItem value="auto_entrepreneur">Auto-Entrepreneur</SelectItem>
-                    </SelectContent>
-                  </Select>
-              </div>
-
-              {formData.type === "personne_physique" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="fiscalRegime">Fiscal Regime</Label>
-                    <Select
-                        value={formData.fiscalRegime}
-                        onValueChange={(val) => handleSelectChange("fiscalRegime", val)}
-                    >
-                        <SelectTrigger>
-                        <SelectValue placeholder="Select regime" />
-                        </SelectTrigger>
-                        <SelectContent>
-                        <SelectItem value="forfaitaire">Régime Forfaitaire (IFU)</SelectItem>
-                        <SelectItem value="reel">Régime Réel Simplifié</SelectItem>
-                        </SelectContent>
-                    </Select>
+          <TabsContent value="general">
+            <form onSubmit={handleSubmit} className="grid gap-6 md:grid-cols-2">
+              {/* Company Identity Section */}
+              <Card className="md:col-span-2 shadow-sm">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Building2 className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle>Company Identity</CardTitle>
+                      <CardDescription>
+                        Basic information about your business entity.
+                      </CardDescription>
+                    </div>
                   </div>
-              )}
-
-              {formData.type === "societe" && (
+                </CardHeader>
+                <CardContent className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="legalForm">Legal Form</Label>
-                    <Select
-                        value={formData.legalForm}
-                        onValueChange={(val) => handleSelectChange("legalForm", val)}
-                    >
-                        <SelectTrigger>
-                        <SelectValue placeholder="Select form" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Sociétés Commerciales</SelectLabel>
-                            <SelectItem value="EURL">EURL</SelectItem>
-                            <SelectItem value="SARL">SARL</SelectItem>
-                            <SelectItem value="SPA">SPA</SelectItem>
-                            <SelectItem value="SPAS">SPAS (Startup)</SelectItem>
-                            <SelectItem value="SPASU">SPASU (Startup)</SelectItem>
-                            <SelectItem value="SNC">SNC</SelectItem>
-                            <SelectItem value="SCS">SCS</SelectItem>
-                            <SelectItem value="SCA">SCA</SelectItem>
-                            <SelectItem value="SOCIETE_PARTICIPATION">Société de participation</SelectItem>
-                          </SelectGroup>
-                          <SelectGroup>
-                            <SelectLabel>Entreprises Publiques</SelectLabel>
-                            <SelectItem value="EPE">EPE</SelectItem>
-                            <SelectItem value="EPIC">EPIC</SelectItem>
-                          </SelectGroup>
-                          <SelectGroup>
-                            <SelectLabel>Autres</SelectLabel>
-                            <SelectItem value="ASSOCIATION">Association</SelectItem>
-                            <SelectItem value="COOPERATIVE">Coopérative</SelectItem>
-                            <SelectItem value="ONG">ONG</SelectItem>
-                            <SelectItem value="OTHER">Other (specify)</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                  </div>
-              )}
-
-              {formData.legalForm === "OTHER" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="customLegalForm">Specify Legal Form</Label>
+                    <Label htmlFor="name">
+                      {formData.type === "societe" 
+                        ? "Business Name (Raison Sociale)" 
+                        : "Full Name (Nom & Prénom)"}
+                    </Label>
                     <Input
-                        id="customLegalForm"
-                        name="customLegalForm"
-                        value={formData.customLegalForm}
-                        onChange={handleChange}
-                        placeholder="e.g. Fondation, EPA..."
-                        required
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder={formData.type === "societe" ? "e.g. SARL Tech Solutions" : "e.g. Ahmed Benali"}
+                      required
+                      className="bg-muted/30"
                     />
-                    <p className="text-[0.8rem] text-muted-foreground">
-                        This entity will behave fiscally as a <strong>Société</strong> (G50, VAT).
-                    </p>
+                    {formData.type !== "societe" && (
+                      <p className="text-[0.8rem] text-muted-foreground">
+                        Enter your full legal name as it appears on your documents.
+                      </p>
+                    )}
                   </div>
-              )}
+                  <div className="space-y-2">
+                    <Label htmlFor="tradeName">Trade Name (Nom Commercial)</Label>
+                    <Input
+                      id="tradeName"
+                      name="tradeName"
+                      value={formData.tradeName}
+                      onChange={handleChange}
+                      placeholder={formData.type === "societe" ? "Optional" : "e.g. My Shop"}
+                      className="bg-muted/30"
+                    />
+                    {formData.type !== "societe" && (
+                      <p className="text-[0.8rem] text-muted-foreground">
+                        Do not include legal prefixes (EURL, SARL, etc.) in the trade name.
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="address">Address</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="address"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        placeholder="Full business address"
+                        required
+                        className="pl-9 bg-muted/30"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City (Wilaya/Commune)</Label>
+                    <Input
+                      id="city"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      placeholder="e.g. Algiers"
+                      className="bg-muted/30"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-              <Separator className="my-2" />
-              
-              {formData.type === "auto_entrepreneur" ? (
-                  <div className="space-y-4 bg-blue-50/50 p-4 rounded-md border border-blue-100">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="autoEntrepreneurCardNumber">AE Card Number</Label>
+              {/* Fiscal Information Section */}
+              <Card className="shadow-sm h-full">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-blue-500/10 rounded-lg">
+                      <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <CardTitle>Fiscal & Legal</CardTitle>
+                      <CardDescription>
+                        Tax identification and registration details.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                      <Label htmlFor="type">Business Type</Label>
+                      <Select
+                        value={formData.type}
+                        onValueChange={(val) => handleSelectChange("type", val)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="societe">Société (SARL, EURL, SPA...)</SelectItem>
+                          <SelectItem value="personne_physique">Personne Physique (Entreprise Individuelle)</SelectItem>
+                          <SelectItem value="auto_entrepreneur">Auto-Entrepreneur</SelectItem>
+                        </SelectContent>
+                      </Select>
+                  </div>
+
+                  {formData.type === "personne_physique" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="fiscalRegime">Fiscal Regime</Label>
+                        <Select
+                            value={formData.fiscalRegime}
+                            onValueChange={(val) => handleSelectChange("fiscalRegime", val)}
+                        >
+                            <SelectTrigger>
+                            <SelectValue placeholder="Select regime" />
+                            </SelectTrigger>
+                            <SelectContent>
+                            <SelectItem value="forfaitaire">Régime Forfaitaire (IFU)</SelectItem>
+                            <SelectItem value="reel">Régime Réel Simplifié</SelectItem>
+                            </SelectContent>
+                        </Select>
+                      </div>
+                  )}
+
+                  {formData.type === "societe" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="legalForm">Legal Form</Label>
+                        <Select
+                            value={formData.legalForm}
+                            onValueChange={(val) => handleSelectChange("legalForm", val)}
+                        >
+                            <SelectTrigger>
+                            <SelectValue placeholder="Select form" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Sociétés Commerciales</SelectLabel>
+                                <SelectItem value="EURL">EURL</SelectItem>
+                                <SelectItem value="SARL">SARL</SelectItem>
+                                <SelectItem value="SPA">SPA</SelectItem>
+                                <SelectItem value="SPAS">SPAS (Startup)</SelectItem>
+                                <SelectItem value="SPASU">SPASU (Startup)</SelectItem>
+                                <SelectItem value="SNC">SNC</SelectItem>
+                                <SelectItem value="SCS">SCS</SelectItem>
+                                <SelectItem value="SCA">SCA</SelectItem>
+                                <SelectItem value="SOCIETE_PARTICIPATION">Société de participation</SelectItem>
+                              </SelectGroup>
+                              <SelectGroup>
+                                <SelectLabel>Entreprises Publiques</SelectLabel>
+                                <SelectItem value="EPE">EPE</SelectItem>
+                                <SelectItem value="EPIC">EPIC</SelectItem>
+                              </SelectGroup>
+                              <SelectGroup>
+                                <SelectLabel>Autres</SelectLabel>
+                                <SelectItem value="ASSOCIATION">Association</SelectItem>
+                                <SelectItem value="COOPERATIVE">Coopérative</SelectItem>
+                                <SelectItem value="ONG">ONG</SelectItem>
+                                <SelectItem value="OTHER">Other (specify)</SelectItem>
+                              </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                      </div>
+                  )}
+
+                  {formData.legalForm === "OTHER" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="customLegalForm">Specify Legal Form</Label>
+                        <Input
+                            id="customLegalForm"
+                            name="customLegalForm"
+                            value={formData.customLegalForm}
+                            onChange={handleChange}
+                            placeholder="e.g. Fondation, EPA..."
+                            required
+                        />
+                        <p className="text-[0.8rem] text-muted-foreground">
+                            This entity will behave fiscally as a <strong>Société</strong> (G50, VAT).
+                        </p>
+                      </div>
+                  )}
+
+                  <Separator className="my-2" />
+                  
+                  {formData.type === "auto_entrepreneur" ? (
+                      <div className="space-y-4 bg-blue-50/50 p-4 rounded-md border border-blue-100">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="autoEntrepreneurCardNumber">AE Card Number</Label>
+                                <Input
+                                    id="autoEntrepreneurCardNumber"
+                                    name="autoEntrepreneurCardNumber"
+                                    value={formData.autoEntrepreneurCardNumber}
+                                    onChange={handleChange}
+                                    placeholder="National Registration Number"
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="nif">NIF</Label>
+                                <Input
+                                    id="nif"
+                                    name="nif"
+                                    value={formData.nif}
+                                    onChange={handleChange}
+                                    placeholder="Numéro Id. Fiscale"
+                                    required
+                                />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="activityCodes">Activity Codes (ANAE)</Label>
                             <Input
-                                id="autoEntrepreneurCardNumber"
-                                name="autoEntrepreneurCardNumber"
-                                value={formData.autoEntrepreneurCardNumber}
+                                id="activityCodes"
+                                name="activityCodes"
+                                value={formData.activityCodes}
                                 onChange={handleChange}
-                                placeholder="National Registration Number"
-                                required
+                                placeholder="e.g. 072100, 072300 (Comma separated)"
                             />
-                        </div>
-                        <div className="space-y-2">
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="ssNumber">CASNOS Number (Optional)</Label>
+                            <Input
+                                id="ssNumber"
+                                name="ssNumber"
+                                value={formData.ssNumber}
+                                onChange={handleChange}
+                                placeholder="Social Security Number"
+                            />
+                          </div>
+                      </div>
+                  ) : (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                            <Label htmlFor="rc">RC No.</Label>
+                            <Input
+                                id="rc"
+                                name="rc"
+                                value={formData.rc}
+                                onChange={handleChange}
+                                placeholder="Registre Commerce"
+                            />
+                            </div>
+                            <div className="space-y-2">
                             <Label htmlFor="nif">NIF</Label>
                             <Input
                                 id="nif"
@@ -514,379 +569,356 @@ export default function BusinessSettings() {
                                 value={formData.nif}
                                 onChange={handleChange}
                                 placeholder="Numéro Id. Fiscale"
-                                required
                             />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="activityCodes">Activity Codes (ANAE)</Label>
-                        <Input
-                            id="activityCodes"
-                            name="activityCodes"
-                            value={formData.activityCodes}
-                            onChange={handleChange}
-                            placeholder="e.g. 072100, 072300 (Comma separated)"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="ssNumber">CASNOS Number (Optional)</Label>
-                        <Input
-                            id="ssNumber"
-                            name="ssNumber"
-                            value={formData.ssNumber}
-                            onChange={handleChange}
-                            placeholder="Social Security Number"
-                        />
-                      </div>
-                  </div>
-              ) : (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                        <Label htmlFor="rc">RC No.</Label>
-                        <Input
-                            id="rc"
-                            name="rc"
-                            value={formData.rc}
-                            onChange={handleChange}
-                            placeholder="Registre Commerce"
-                        />
-                        </div>
-                        <div className="space-y-2">
-                        <Label htmlFor="nif">NIF</Label>
-                        <Input
-                            id="nif"
-                            name="nif"
-                            value={formData.nif}
-                            onChange={handleChange}
-                            placeholder="Numéro Id. Fiscale"
-                        />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="ai">Article d'Imposition (AI)</Label>
-                            <Input
-                            id="ai"
-                            name="ai"
-                            value={formData.ai}
-                            onChange={handleChange}
-                            placeholder="Article Imposition"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="nis">NIS</Label>
-                            <Input
-                            id="nis"
-                            name="nis"
-                            value={formData.nis}
-                            onChange={handleChange}
-                            placeholder="Numéro Id. Statistique"
-                            />
-                        </div>
-                    </div>
-                    {formData.type === "societe" && (
-                        <div className="space-y-2">
-                            <Label htmlFor="capital">Social Capital</Label>
-                            <Input
-                            id="capital"
-                            name="capital"
-                            type="number"
-                            value={formData.capital}
-                            onChange={handleChange}
-                            placeholder="e.g. 100000"
-                            />
-                        </div>
-                    )}
-                  </>
-              )}
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
-                  <Input
-                    id="currency"
-                    name="currency"
-                    value={formData.currency}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tvaDefault">Default TVA (%)</Label>
-                  <Input
-                    id="tvaDefault"
-                    name="tvaDefault"
-                    type="number"
-                    value={formData.tvaDefault}
-                    onChange={handleChange}
-                    required
-                    disabled={formData.fiscalRegime === "auto_entrepreneur" || formData.fiscalRegime === "forfaitaire"}
-                    className={formData.fiscalRegime === "auto_entrepreneur" || formData.fiscalRegime === "forfaitaire" ? "bg-muted text-muted-foreground" : ""}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Banking Information Section */}
-          <Card className="shadow-sm h-full">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-green-500/10 rounded-lg">
-                  <Landmark className="h-5 w-5 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <CardTitle>Banking Details</CardTitle>
-                  <CardDescription>
-                    Bank account information for invoices.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="bankName">Bank Name</Label>
-                <div className="relative">
-                  <Wallet className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="bankName"
-                    name="bankName"
-                    value={formData.bankName}
-                    onChange={handleChange}
-                    placeholder="e.g. CPA, BNA, AGB"
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bankIban">IBAN / RIP</Label>
-                <div className="relative">
-                  <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="bankIban"
-                    name="bankIban"
-                    value={formData.bankIban}
-                    onChange={handleChange}
-                    placeholder="Account number"
-                    className="pl-9 font-mono"
-                  />
-                </div>
-              </div>
-              <div className="rounded-md bg-muted p-4 mt-6">
-                <p className="text-sm text-muted-foreground">
-                  These details will appear on your invoices to help customers
-                  make payments directly to your account.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Sequencing Section */}
-          <Card className="shadow-sm h-full">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-indigo-500/10 rounded-lg">
-                  <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <div>
-                  <CardTitle>Numbering & Sequencing</CardTitle>
-                  <CardDescription>
-                    Customize how your document numbers are generated.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="invoicePrefix">Invoice Prefix</Label>
-                <Input
-                  id="invoicePrefix"
-                  name="invoicePrefix"
-                  value={formData.invoicePrefix}
-                  onChange={handleChange}
-                  placeholder="e.g. INV-"
-                />
-                <p className="text-xs text-muted-foreground">Format: {formData.invoicePrefix}YYYY-001</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="quotePrefix">Quote Prefix</Label>
-                <Input
-                  id="quotePrefix"
-                  name="quotePrefix"
-                  value={formData.quotePrefix}
-                  onChange={handleChange}
-                  placeholder="e.g. DEV-"
-                />
-                <p className="text-xs text-muted-foreground">Format: {formData.quotePrefix}YYYY-001</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="creditNotePrefix">Credit Note Prefix</Label>
-                <Input
-                  id="creditNotePrefix"
-                  name="creditNotePrefix"
-                  value={formData.creditNotePrefix}
-                  onChange={handleChange}
-                  placeholder="e.g. AV-"
-                />
-                <p className="text-xs text-muted-foreground">Format: {formData.creditNotePrefix}YYYY-001</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Data Management / Archiving Section */}
-          <Card className="md:col-span-2 shadow-sm border-dashed">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-amber-500/10 rounded-lg">
-                  <Archive className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <CardTitle>Legal Archiving & Data Export</CardTitle>
-                  <CardDescription>
-                    Download a full backup of your business data for legal retention (10 years).
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex items-center justify-between border-b pb-4">
-                    <div className="space-y-1">
-                        <p className="text-sm font-medium">Quick Data Backup (JSON)</p>
-                        <p className="text-xs text-muted-foreground">
-                            Instant download of all database records.
-                        </p>
-                    </div>
-                    <Button type="button" variant="outline" onClick={handleExport}>
-                        <Download className="mr-2 h-4 w-4" />
-                        Export JSON
-                    </Button>
-                </div>
-                <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                        <p className="text-sm font-medium">Full Archive (ZIP)</p>
-                        <p className="text-xs text-muted-foreground">
-                            Includes all data plus PDF files (Invoices & Purchases).
-                        </p>
-                    </div>
-                    <Button type="button" variant="default" onClick={handleFullExport} disabled={isExporting}>
-                        {isExporting ? (
-                            <span className="animate-spin mr-2">⏳</span>
-                        ) : (
-                            <Archive className="mr-2 h-4 w-4" />
-                        )}
-                        {isExporting ? "Generating..." : "Download Archive"}
-                    </Button>
-                </div>
-            </CardContent>
-          </Card>
-
-          {/* Accounting Periods Section */}
-          <Card className="md:col-span-2 shadow-sm">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-purple-500/10 rounded-lg">
-                  <Lock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <CardTitle>Accounting Periods</CardTitle>
-                  <CardDescription>
-                    Close fiscal periods to prevent modifications to invoices and purchases.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="flex items-end gap-4 border-b pb-6">
-                    <div className="space-y-2">
-                        <Label>Month</Label>
-                        <Select 
-                            value={closureData.month.toString()} 
-                            onValueChange={(v) => setClosureData({...closureData, month: parseInt(v)})}
-                        >
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Array.from({ length: 12 }).map((_, i) => (
-                                    <SelectItem key={i} value={i.toString()}>
-                                        {new Date(0, i).toLocaleString('default', { month: 'long' })}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Year</Label>
-                        <Input 
-                            type="number" 
-                            value={closureData.year} 
-                            onChange={(e) => setClosureData({...closureData, year: parseInt(e.target.value)})}
-                            className="w-[100px]"
-                        />
-                    </div>
-                    <Button type="button" onClick={handleClosePeriod}>
-                        <Lock className="mr-2 h-4 w-4" />
-                        Close Period
-                    </Button>
-                </div>
-
-                <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-muted-foreground">Closed Periods</h3>
-                    {periods?.length === 0 && (
-                        <p className="text-sm text-muted-foreground italic">No closed periods.</p>
-                    )}
-                    <div className="grid gap-2">
-                        {periods?.map((period) => (
-                            <div key={period._id} className="flex items-center justify-between p-3 bg-muted/30 rounded-md border">
-                                <div className="flex items-center gap-3">
-                                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm font-medium">
-                                        {format(period.startDate, "MMM yyyy")}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                        ({format(period.startDate, "dd/MM/yyyy")} - {format(period.endDate, "dd/MM/yyyy")})
-                                    </span>
-                                </div>
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-8 text-destructive hover:text-destructive"
-                                    onClick={() => handleReopenPeriod(period._id)}
-                                >
-                                    <Unlock className="mr-2 h-3 w-3" />
-                                    Reopen
-                                </Button>
                             </div>
-                        ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="ai">Article d'Imposition (AI)</Label>
+                                <Input
+                                id="ai"
+                                name="ai"
+                                value={formData.ai}
+                                onChange={handleChange}
+                                placeholder="Article Imposition"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="nis">NIS</Label>
+                                <Input
+                                id="nis"
+                                name="nis"
+                                value={formData.nis}
+                                onChange={handleChange}
+                                placeholder="Numéro Id. Statistique"
+                                />
+                            </div>
+                        </div>
+                        {formData.type === "societe" && (
+                            <div className="space-y-2">
+                                <Label htmlFor="capital">Social Capital</Label>
+                                <Input
+                                id="capital"
+                                name="capital"
+                                type="number"
+                                value={formData.capital}
+                                onChange={handleChange}
+                                placeholder="e.g. 100000"
+                                />
+                            </div>
+                        )}
+                      </>
+                  )}
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="currency">Currency</Label>
+                      <Input
+                        id="currency"
+                        name="currency"
+                        value={formData.currency}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
-                </div>
-            </CardContent>
-          </Card>
+                    <div className="space-y-2">
+                      <Label htmlFor="tvaDefault">Default TVA (%)</Label>
+                      <Input
+                        id="tvaDefault"
+                        name="tvaDefault"
+                        type="number"
+                        value={formData.tvaDefault}
+                        onChange={handleChange}
+                        required
+                        disabled={formData.fiscalRegime === "auto_entrepreneur" || formData.fiscalRegime === "forfaitaire"}
+                        className={formData.fiscalRegime === "auto_entrepreneur" || formData.fiscalRegime === "forfaitaire" ? "bg-muted text-muted-foreground" : ""}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Webhooks Section */}
-          <div className="md:col-span-2">
-            {business && <WebhookSettings businessId={business._id} />}
-          </div>
+              {/* Banking Information Section */}
+              <Card className="shadow-sm h-full">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-green-500/10 rounded-lg">
+                      <Landmark className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <CardTitle>Banking Details</CardTitle>
+                      <CardDescription>
+                        Bank account information for invoices.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bankName">Bank Name</Label>
+                    <div className="relative">
+                      <Wallet className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="bankName"
+                        name="bankName"
+                        value={formData.bankName}
+                        onChange={handleChange}
+                        placeholder="e.g. CPA, BNA, AGB"
+                        className="pl-9"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bankIban">IBAN / RIP</Label>
+                    <div className="relative">
+                      <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="bankIban"
+                        name="bankIban"
+                        value={formData.bankIban}
+                        onChange={handleChange}
+                        placeholder="Account number"
+                        className="pl-9 font-mono"
+                      />
+                    </div>
+                  </div>
+                  <div className="rounded-md bg-muted p-4 mt-6">
+                    <p className="text-sm text-muted-foreground">
+                      These details will appear on your invoices to help customers
+                      make payments directly to your account.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Design Settings Section */}
-          <div className="md:col-span-2">
+              {/* Sequencing Section */}
+              <Card className="shadow-sm h-full">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-indigo-500/10 rounded-lg">
+                      <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div>
+                      <CardTitle>Numbering & Sequencing</CardTitle>
+                      <CardDescription>
+                        Customize how your document numbers are generated.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="invoicePrefix">Invoice Prefix</Label>
+                    <Input
+                      id="invoicePrefix"
+                      name="invoicePrefix"
+                      value={formData.invoicePrefix}
+                      onChange={handleChange}
+                      placeholder="e.g. INV-"
+                    />
+                    <p className="text-xs text-muted-foreground">Format: {formData.invoicePrefix}YYYY-001</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="quotePrefix">Quote Prefix</Label>
+                    <Input
+                      id="quotePrefix"
+                      name="quotePrefix"
+                      value={formData.quotePrefix}
+                      onChange={handleChange}
+                      placeholder="e.g. DEV-"
+                    />
+                    <p className="text-xs text-muted-foreground">Format: {formData.quotePrefix}YYYY-001</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="creditNotePrefix">Credit Note Prefix</Label>
+                    <Input
+                      id="creditNotePrefix"
+                      name="creditNotePrefix"
+                      value={formData.creditNotePrefix}
+                      onChange={handleChange}
+                      placeholder="e.g. AV-"
+                    />
+                    <p className="text-xs text-muted-foreground">Format: {formData.creditNotePrefix}YYYY-001</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Data Management / Archiving Section */}
+              <Card className="md:col-span-2 shadow-sm border-dashed">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-amber-500/10 rounded-lg">
+                      <Archive className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <CardTitle>Legal Archiving & Data Export</CardTitle>
+                      <CardDescription>
+                        Download a full backup of your business data for legal retention (10 years).
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between border-b pb-4">
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium">Quick Data Backup (JSON)</p>
+                            <p className="text-xs text-muted-foreground">
+                                Instant download of all database records.
+                            </p>
+                        </div>
+                        <Button type="button" variant="outline" onClick={handleExport}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Export JSON
+                        </Button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium">Full Archive (ZIP)</p>
+                            <p className="text-xs text-muted-foreground">
+                                Includes all data plus PDF files (Invoices & Purchases).
+                            </p>
+                        </div>
+                        <Button type="button" variant="default" onClick={handleFullExport} disabled={isExporting}>
+                            {isExporting ? (
+                                <span className="animate-spin mr-2">⏳</span>
+                            ) : (
+                                <Archive className="mr-2 h-4 w-4" />
+                            )}
+                            {isExporting ? "Generating..." : "Download Archive"}
+                        </Button>
+                    </div>
+                </CardContent>
+              </Card>
+
+              {/* Accounting Periods Section */}
+              <Card className="md:col-span-2 shadow-sm">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-purple-500/10 rounded-lg">
+                      <Lock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <CardTitle>Accounting Periods</CardTitle>
+                      <CardDescription>
+                        Close fiscal periods to prevent modifications to invoices and purchases.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="flex items-end gap-4 border-b pb-6">
+                        <div className="space-y-2">
+                            <Label>Month</Label>
+                            <Select 
+                                value={closureData.month.toString()} 
+                                onValueChange={(v) => setClosureData({...closureData, month: parseInt(v)})}
+                            >
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from({ length: 12 }).map((_, i) => (
+                                        <SelectItem key={i} value={i.toString()}>
+                                            {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Year</Label>
+                            <Input 
+                                type="number" 
+                                value={closureData.year} 
+                                onChange={(e) => setClosureData({...closureData, year: parseInt(e.target.value)})}
+                                className="w-[100px]"
+                            />
+                        </div>
+                        <Button type="button" onClick={handleClosePeriod}>
+                            <Lock className="mr-2 h-4 w-4" />
+                            Close Period
+                        </Button>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-medium text-muted-foreground">Closed Periods</h3>
+                        {periods?.length === 0 && (
+                            <p className="text-sm text-muted-foreground italic">No closed periods.</p>
+                        )}
+                        <div className="grid gap-2">
+                            {periods?.map((period) => (
+                                <div key={period._id} className="flex items-center justify-between p-3 bg-muted/30 rounded-md border">
+                                    <div className="flex items-center gap-3">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm font-medium">
+                                            {format(period.startDate, "MMM yyyy")}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                            ({format(period.startDate, "dd/MM/yyyy")} - {format(period.endDate, "dd/MM/yyyy")})
+                                        </span>
+                                    </div>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-8 text-destructive hover:text-destructive"
+                                        onClick={() => handleReopenPeriod(period._id)}
+                                    >
+                                        <Unlock className="mr-2 h-3 w-3" />
+                                        Reopen
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </CardContent>
+              </Card>
+
+              {/* Webhooks Section */}
+              <div className="md:col-span-2">
+                {business && <WebhookSettings businessId={business._id} />}
+              </div>
+
+              {/* Design Settings Section */}
+              <div className="md:col-span-2">
+                {business && (
+                  <SubscriptionSettings 
+                    businessId={business._id} 
+                    currentPlan={business.plan as "free" | "pro" | "enterprise" | undefined}
+                    subscriptionEndsAt={business.subscriptionEndsAt}
+                  />
+                )}
+              </div>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="design">
+            <div className="md:col-span-2">
+              {business && (
+                <SubscriptionSettings 
+                  businessId={business._id} 
+                  currentPlan={business.plan as "free" | "pro" | "enterprise" | undefined}
+                  subscriptionEndsAt={business.subscriptionEndsAt}
+                />
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="webhooks">
+            <div className="md:col-span-2">
+              {business && <WebhookSettings businessId={business._id} />}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="subscription">
             {business && (
-              <BusinessDesignSettings 
+              <SubscriptionSettings 
                 businessId={business._id} 
-                initialData={{
-                  primaryColor: business.primaryColor,
-                  secondaryColor: business.secondaryColor,
-                  font: business.font,
-                  template: business.template,
-                  logoUrl: business.logoUrl,
-                  logoStorageId: business.logoStorageId,
-                }} 
+                currentPlan={business.plan as "free" | "pro" | "enterprise" | undefined}
+                subscriptionEndsAt={business.subscriptionEndsAt}
               />
             )}
-          </div>
-
-        </form>
+          </TabsContent>
+        </Tabs>
       </motion.div>
     </DashboardLayout>
   );

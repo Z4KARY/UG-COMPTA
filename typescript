@@ -1,73 +1,48 @@
-// ...
-// Helper
-async function generateInvoiceNumber(ctx: any, businessId: any, type: string, dateTimestamp: number) {
-    // ... implementation
-}
+import { SubscriptionSettings } from "@/components/SubscriptionSettings";
+// ... keep existing code
 
-export const create = mutation({
-  args: {
+webhookSubscriptions: defineTable({
+  businessId: v.id("businesses"),
+  targetUrl: v.string(),
+  secret: v.string(),
+  events: v.array(v.string()),
+  isActive: v.boolean(),
+}).index("by_business", ["businessId"]),
+
+subscriptions: defineTable({
     businessId: v.id("businesses"),
-    customerId: v.id("customers"),
-    invoiceNumber: v.string(),
-    // ...
-    invoicePrefix: v.optional(v.string()),
-    quotePrefix: v.optional(v.string()),
-    creditNotePrefix: v.optional(v.string()),
-    // ... keep existing code
-  },
-  handler: async (ctx, args) => {
-    const userId = ctx.userId;
-    const business = await ctx.db.get(args.businessId);
-    if (!business || business.userId !== userId) throw new Error("Unauthorized");
+    planId: v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise")),
+    status: v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial")),
+    amount: v.number(),
+    currency: v.string(),
+    interval: v.union(v.literal("month"), v.literal("year")),
+    startDate: v.number(),
+    endDate: v.optional(v.number()),
+    paymentMethod: v.optional(v.string()),
+    transactionId: v.optional(v.string()),
+}).index("by_business", ["businessId"]),
+},
+{
+  schemaValidation: false,
+},
+// ... keep existing code
+      fiscalRegime: finalFiscalRegime,
+      tvaDefault: finalTvaDefault,
+      
+      // Default plan
+      plan: "free",
+      subscriptionStatus: "active",
+    });
 
-    let invoiceNumber = args.invoiceNumber;
-    if (!invoiceNumber || invoiceNumber === "AUTO") {
-        invoiceNumber = await generateInvoiceNumber(ctx, args.businessId, args.type, args.issueDate);
-    }
-
-    // Auto-Entrepreneur Logic Enforcement: NO VAT
-    // ... keep existing code
-
-    const invoiceData = {
-      businessId: args.businessId,
-      customerId: args.customerId,
-      invoiceNumber: invoiceNumber!,
-      // ...
-    }
-    // ...
-  }
-})
-
-export const update = mutation({
-  args: {
-    // ... keep existing code
-    invoicePrefix: v.optional(v.string()),
-    quotePrefix: v.optional(v.string()),
-    creditNotePrefix: v.optional(v.string()),
-    // ... keep existing code
-  },
-  // ... keep existing code
-});
-
-// ...
-    businesses: defineTable({
-      // ...
-      // Invoice Sequencing Preferences
-      invoicePrefix: v.optional(v.string()),
-      quotePrefix: v.optional(v.string()),
-      creditNotePrefix: v.optional(v.string()),
-      // ...
-    })
-    // ...
-    invoiceCounters: defineTable({
-      businessId: v.id("businesses"),
-      type: v.union(
-        v.literal("invoice"),
-        v.literal("quote"),
-        v.literal("credit_note")
-      ),
-      year: v.number(),
-      count: v.number(),
-    }).index("by_business_type_year", ["businessId", "type", "year"]),
-    // ...
-}
+    // Add creator as owner
+    const businessId = await ctx.db.insert("businesses", {
+      userId,
+      ...args,
+      rc: finalRc,
+      ai: finalAi,
+      nis: finalNis,
+      fiscalRegime: finalFiscalRegime,
+      tvaDefault: finalTvaDefault,
+      plan: "free",
+      subscriptionStatus: "active",
+    });

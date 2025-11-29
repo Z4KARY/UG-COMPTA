@@ -110,6 +110,11 @@ const schema = defineSchema(
 
       // G50 Specific
       vatCreditCarriedForward: v.optional(v.number()),
+      
+      // SaaS Subscription Fields
+      plan: v.optional(v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise"))),
+      subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial"))),
+      subscriptionEndsAt: v.optional(v.number()),
     }).index("by_user", ["userId"])
       .index("by_ae_card", ["autoEntrepreneurCardNumber"]),
 
@@ -439,6 +444,19 @@ const schema = defineSchema(
       secret: v.string(),
       events: v.array(v.string()),
       isActive: v.boolean(),
+    }).index("by_business", ["businessId"]),
+
+    subscriptions: defineTable({
+      businessId: v.id("businesses"),
+      planId: v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise")),
+      status: v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial")),
+      amount: v.number(),
+      currency: v.string(),
+      interval: v.union(v.literal("month"), v.literal("year")),
+      startDate: v.number(),
+      endDate: v.optional(v.number()),
+      paymentMethod: v.optional(v.string()), // e.g., "chargily", "bank_transfer"
+      transactionId: v.optional(v.string()),
     }).index("by_business", ["businessId"]),
   },
   {

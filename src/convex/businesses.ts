@@ -201,6 +201,9 @@ export const create = mutation({
       nis: finalNis,
       fiscalRegime: finalFiscalRegime,
       tvaDefault: finalTvaDefault,
+      // Default plan
+      plan: "free",
+      subscriptionStatus: "active",
     });
 
     // Add creator as owner
