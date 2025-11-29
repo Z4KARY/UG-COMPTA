@@ -114,14 +114,15 @@ export default function PurchaseDetail() {
           @media print {
             .no-print { display: none !important; }
             .print-break-inside-avoid { break-inside: avoid; }
-            html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: visible; }
+            html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; overflow-x: hidden; }
             .print-container { 
                 box-shadow: none !important; 
                 border: none !important; 
                 margin: 0 !important; 
                 width: 100% !important; 
-                max-width: none !important;
-                padding: 20mm !important;
+                max-width: 100% !important;
+                padding: 10mm !important;
+                min-height: 100% !important;
             }
           }
         `}
