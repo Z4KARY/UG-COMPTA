@@ -51,7 +51,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/invoices">
           <Card className="hover:shadow-md transition-shadow border-l-4 border-l-emerald-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Turnover</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Revenue</CardTitle>
               <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
                 <DollarSign className="h-4 w-4 text-emerald-500" />
               </div>

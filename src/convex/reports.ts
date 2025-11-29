@@ -63,12 +63,14 @@ export const getDashboardStats = query({
     let turnover = 0;
     let tva = 0;
     let stampDuty = 0;
+    let totalStampDuty = 0;
     let expenses = 0;
     let tvaDeductible = 0;
 
     for (const inv of periodInvoices) {
       turnover += inv.totalTtc || 0;
       tva += inv.totalTva || 0;
+      totalStampDuty += inv.stampDutyAmount || 0;
       if (inv.status === "paid" && inv.paymentMethod === "CASH") {
         stampDuty += inv.stampDutyAmount || 0;
       }
@@ -97,7 +99,13 @@ export const getDashboardStats = query({
       }
     }
 
-    const netProfit = turnover - expenses;
+    // Net Profit = Revenue (HT) - Expenses (HT)
+    // Revenue HT = Turnover (TTC) - TVA - Total Stamp Duty
+    // Expenses HT = Expenses (TTC) - TVA Deductible
+    const revenueHt = turnover - tva - totalStampDuty;
+    const expensesHt = expenses - tvaDeductible;
+    const netProfit = revenueHt - expensesHt;
+    
     const netMargin = turnover > 0 ? (netProfit / turnover) * 100 : 0;
     const averageInvoiceValue = periodInvoices.length > 0 ? turnover / periodInvoices.length : 0;
     const tvaPayable = Math.max(0, tva - tvaDeductible);
@@ -391,10 +399,14 @@ export const getSummary = query({
     let turnover = 0;
     let tva = 0;
     let stampDuty = 0;
+    let totalStampDuty = 0;
+    let expenses = 0;
+    let tvaDeductible = 0;
 
     for (const inv of periodInvoices) {
       turnover += inv.totalTtc || 0;
       tva += inv.totalTva || 0;
+      totalStampDuty += inv.stampDutyAmount || 0;
       stampDuty += inv.stampDutyAmount || 0;
     }
 
