@@ -3,6 +3,41 @@ import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
 
+// Helper to generate next purchase number
+async function generatePurchaseNumber(
+  ctx: any, 
+  businessId: any, 
+  dateTimestamp: number
+) {
+  const date = new Date(dateTimestamp);
+  const year = date.getFullYear();
+  const prefix = "ACH-"; // Default prefix for purchases
+
+  // Get current counter
+  const counter = await ctx.db
+    .query("invoiceCounters")
+    .withIndex("by_business_type_year", (q: any) => 
+      q.eq("businessId", businessId).eq("type", "purchase").eq("year", year)
+    )
+    .first();
+
+  let nextCount = 1;
+  if (counter) {
+    nextCount = counter.count + 1;
+    await ctx.db.patch(counter._id, { count: nextCount });
+  } else {
+    await ctx.db.insert("invoiceCounters", {
+      businessId,
+      type: "purchase",
+      year,
+      count: nextCount,
+    });
+  }
+
+  const paddedNumber = nextCount.toString().padStart(3, "0");
+  return `${prefix}${year}-${paddedNumber}`;
+}
+
 export const list = query({
   args: { businessId: v.id("businesses") },
   handler: async (ctx, args) => {
@@ -43,7 +78,7 @@ export const create = mutation({
   args: {
     businessId: v.id("businesses"),
     supplierId: v.id("suppliers"),
-    invoiceNumber: v.string(),
+    invoiceNumber: v.optional(v.string()),
     invoiceDate: v.number(),
     paymentDate: v.optional(v.number()),
     paymentMethod: v.optional(v.union(
@@ -74,6 +109,12 @@ export const create = mutation({
             .withIndex("by_business_and_user", (q) => q.eq("businessId", args.businessId).eq("userId", userId))
             .first();
         if (!member) throw new Error("Unauthorized");
+    }
+
+    // Generate Invoice Number if not provided or AUTO
+    let finalInvoiceNumber = args.invoiceNumber;
+    if (!finalInvoiceNumber || finalInvoiceNumber === "AUTO") {
+        finalInvoiceNumber = await generatePurchaseNumber(ctx, args.businessId, args.invoiceDate);
     }
 
     // Calculate totals
@@ -119,7 +160,7 @@ export const create = mutation({
     const purchaseInvoiceId = await ctx.db.insert("purchaseInvoices", {
         businessId: args.businessId,
         supplierId: args.supplierId,
-        invoiceNumber: args.invoiceNumber,
+        invoiceNumber: finalInvoiceNumber,
         invoiceDate: args.invoiceDate,
         paymentDate: args.paymentDate,
         paymentMethod: args.paymentMethod,
@@ -143,7 +184,7 @@ export const create = mutation({
         event: "purchase_invoice.created",
         payload: {
             id: purchaseInvoiceId,
-            invoiceNumber: args.invoiceNumber,
+            invoiceNumber: finalInvoiceNumber,
             supplierId: args.supplierId,
             totalTtc,
             createdAt: Date.now(),

@@ -19,7 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -146,12 +146,32 @@ export default function PurchaseCreate() {
                     </div>
                     <div className="space-y-2">
                         <Label>Invoice Number</Label>
-                        <Input 
-                            value={formData.invoiceNumber}
-                            onChange={(e) => setFormData({...formData, invoiceNumber: e.target.value})}
-                            placeholder="e.g. INV-2024-001"
-                            required
-                        />
+                        <div className="flex gap-2">
+                            <Input 
+                                value={formData.invoiceNumber}
+                                onChange={(e) => setFormData({...formData, invoiceNumber: e.target.value})}
+                                placeholder="e.g. INV-2024-001"
+                                required={formData.invoiceNumber !== "AUTO"}
+                                disabled={formData.invoiceNumber === "AUTO"}
+                            />
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="icon"
+                                onClick={() => setFormData({
+                                    ...formData, 
+                                    invoiceNumber: formData.invoiceNumber === "AUTO" ? "" : "AUTO"
+                                })}
+                                title="Auto-generate number"
+                            >
+                                <Wand2 className={`h-4 w-4 ${formData.invoiceNumber === "AUTO" ? "text-primary" : "text-muted-foreground"}`} />
+                            </Button>
+                        </div>
+                        {formData.invoiceNumber === "AUTO" && (
+                            <p className="text-xs text-muted-foreground">
+                                Number will be generated automatically (e.g. ACH-2024-001)
+                            </p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label>Date</Label>

@@ -180,7 +180,8 @@ const schema = defineSchema(
       type: v.union(
         v.literal("invoice"),
         v.literal("quote"),
-        v.literal("credit_note")
+        v.literal("credit_note"),
+        v.literal("purchase")
       ),
       year: v.number(),
       count: v.number(),
