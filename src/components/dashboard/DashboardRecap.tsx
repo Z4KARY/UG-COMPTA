@@ -19,8 +19,8 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
     <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
       <motion.div variants={item}>
         <Card className="bg-primary text-primary-foreground shadow-lg shadow-primary/20 border-none">
-          <CardContent className="p-6 flex flex-col gap-2">
-            <span className="text-xs opacity-80 font-medium uppercase tracking-wider flex items-center gap-2">
+          <CardContent className="p-6 flex flex-col gap-2 items-center text-center">
+            <span className="text-xs opacity-80 font-medium uppercase tracking-wider flex items-center justify-center gap-2">
               <DollarSign className="h-3 w-3" /> Global Revenue
             </span>
             <div className="text-3xl font-bold tracking-tight">
