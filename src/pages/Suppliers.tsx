@@ -26,6 +26,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format } from "date-fns";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { Plus, Trash2, ArrowLeft, Pencil } from "lucide-react";
@@ -43,6 +45,12 @@ export default function Suppliers() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<Id<"suppliers"> | null>(null);
+  
+  // Fetch invoices for selected supplier
+  const supplierInvoices = useQuery(api.purchaseInvoices.listBySupplier, 
+    business && editingId ? { businessId: business._id, supplierId: editingId } : "skip"
+  );
+
   const [formData, setFormData] = useState({
       name: "",
       nif: "",
@@ -135,67 +143,168 @@ export default function Suppliers() {
                             Add Supplier
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-3xl">
                         <DialogHeader>
                             <DialogTitle>{editingId ? "Edit Supplier" : "Add New Supplier"}</DialogTitle>
-                            <DialogDescription>{editingId ? "Update supplier details." : "Enter supplier details for VAT tracking."}</DialogDescription>
+                            <DialogDescription>{editingId ? "Update supplier details and view history." : "Enter supplier details for VAT tracking."}</DialogDescription>
                         </DialogHeader>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Supplier Name *</Label>
-                                <Input 
-                                    id="name" 
-                                    value={formData.name} 
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                    required 
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                        
+                        {editingId ? (
+                            <Tabs defaultValue="details" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="details">Details</TabsTrigger>
+                                    <TabsTrigger value="invoices">Invoices ({supplierInvoices?.length || 0})</TabsTrigger>
+                                </TabsList>
+                                
+                                <TabsContent value="details">
+                                    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="name">Supplier Name *</Label>
+                                            <Input 
+                                                id="name" 
+                                                value={formData.name} 
+                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                                required 
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="nif">NIF</Label>
+                                                <Input 
+                                                    id="nif" 
+                                                    value={formData.nif} 
+                                                    onChange={(e) => setFormData({...formData, nif: e.target.value})}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="rc">RC</Label>
+                                                <Input 
+                                                    id="rc" 
+                                                    value={formData.rc} 
+                                                    onChange={(e) => setFormData({...formData, rc: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="address">Address</Label>
+                                            <Input 
+                                                id="address" 
+                                                value={formData.address} 
+                                                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="phone">Phone</Label>
+                                                <Input 
+                                                    id="phone" 
+                                                    value={formData.phone} 
+                                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="email">Email</Label>
+                                                <Input 
+                                                    id="email" 
+                                                    value={formData.email} 
+                                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <Button type="submit" className="w-full">Save Changes</Button>
+                                    </form>
+                                </TabsContent>
+
+                                <TabsContent value="invoices">
+                                    <div className="max-h-[400px] overflow-y-auto border rounded-md mt-4">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Number</TableHead>
+                                                    <TableHead>Date</TableHead>
+                                                    <TableHead className="text-right">Amount</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {supplierInvoices?.length === 0 && (
+                                                    <TableRow>
+                                                        <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
+                                                            No invoices found for this supplier.
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                                {supplierInvoices?.map((invoice) => (
+                                                    <TableRow key={invoice._id}>
+                                                        <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
+                                                        <TableCell>{format(new Date(invoice.invoiceDate), "dd/MM/yyyy")}</TableCell>
+                                                        <TableCell className="text-right font-medium">
+                                                            {invoice.totalTtc.toLocaleString()} {business?.currency}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="nif">NIF</Label>
+                                    <Label htmlFor="name">Supplier Name *</Label>
                                     <Input 
-                                        id="nif" 
-                                        value={formData.nif} 
-                                        onChange={(e) => setFormData({...formData, nif: e.target.value})}
+                                        id="name" 
+                                        value={formData.name} 
+                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        required 
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="rc">RC</Label>
-                                    <Input 
-                                        id="rc" 
-                                        value={formData.rc} 
-                                        onChange={(e) => setFormData({...formData, rc: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="address">Address</Label>
-                                <Input 
-                                    id="address" 
-                                    value={formData.address} 
-                                    onChange={(e) => setFormData({...formData, address: e.target.value})}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone">Phone</Label>
-                                    <Input 
-                                        id="phone" 
-                                        value={formData.phone} 
-                                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="nif">NIF</Label>
+                                        <Input 
+                                            id="nif" 
+                                            value={formData.nif} 
+                                            onChange={(e) => setFormData({...formData, nif: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="rc">RC</Label>
+                                        <Input 
+                                            id="rc" 
+                                            value={formData.rc} 
+                                            onChange={(e) => setFormData({...formData, rc: e.target.value})}
+                                        />
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
+                                    <Label htmlFor="address">Address</Label>
                                     <Input 
-                                        id="email" 
-                                        value={formData.email} 
-                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                        id="address" 
+                                        value={formData.address} 
+                                        onChange={(e) => setFormData({...formData, address: e.target.value})}
                                     />
                                 </div>
-                            </div>
-                            <Button type="submit" className="w-full">{editingId ? "Save Changes" : "Create Supplier"}</Button>
-                        </form>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="phone">Phone</Label>
+                                        <Input 
+                                            id="phone" 
+                                            value={formData.phone} 
+                                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">Email</Label>
+                                        <Input 
+                                            id="email" 
+                                            value={formData.email} 
+                                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+                                <Button type="submit" className="w-full">Create Supplier</Button>
+                            </form>
+                        )}
                     </DialogContent>
                 </Dialog>
             </div>

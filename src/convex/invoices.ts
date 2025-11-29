@@ -112,6 +112,34 @@ export const get = query({
   },
 });
 
+export const listByCustomer = query({
+  args: { 
+    businessId: v.id("businesses"), 
+    customerId: v.id("customers") 
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business) return [];
+    
+    if (business.userId !== userId) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", args.businessId).eq("userId", userId))
+            .first();
+        if (!member) return [];
+    }
+
+    return await ctx.db
+      .query("invoices")
+      .withIndex("by_customer", (q) => q.eq("customerId", args.customerId))
+      .order("desc")
+      .collect();
+  },
+});
+
 export const create = mutation({
   args: {
     businessId: v.id("businesses"),

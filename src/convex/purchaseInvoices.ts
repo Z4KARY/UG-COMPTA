@@ -74,6 +74,34 @@ export const list = query({
   },
 });
 
+export const listBySupplier = query({
+  args: { 
+    businessId: v.id("businesses"), 
+    supplierId: v.id("suppliers") 
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business) return [];
+    
+    if (business.userId !== userId) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", args.businessId).eq("userId", userId))
+            .first();
+        if (!member) return [];
+    }
+
+    return await ctx.db
+      .query("purchaseInvoices")
+      .withIndex("by_supplier", (q) => q.eq("supplierId", args.supplierId))
+      .order("desc")
+      .collect();
+  },
+});
+
 export const create = mutation({
   args: {
     businessId: v.id("businesses"),
