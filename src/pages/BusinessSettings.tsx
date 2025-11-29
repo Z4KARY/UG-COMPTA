@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { WebhookSettings } from "@/components/WebhookSettings";
 import { SubscriptionSettings } from "@/components/SubscriptionSettings";
+import { BusinessDesignSettings } from "@/components/BusinessDesignSettings";
 
 export default function BusinessSettings() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -894,10 +895,16 @@ export default function BusinessSettings() {
           <TabsContent value="design">
             <div className="md:col-span-2">
               {business && (
-                <SubscriptionSettings 
+                <BusinessDesignSettings 
                   businessId={business._id} 
-                  currentPlan={business.plan as "free" | "pro" | "enterprise" | undefined}
-                  subscriptionEndsAt={business.subscriptionEndsAt}
+                  initialData={{
+                    primaryColor: business.primaryColor,
+                    secondaryColor: business.secondaryColor,
+                    font: business.font,
+                    template: business.template,
+                    logoUrl: business.logoUrl,
+                    logoStorageId: business.logoStorageId,
+                  }}
                 />
               )}
             </div>
