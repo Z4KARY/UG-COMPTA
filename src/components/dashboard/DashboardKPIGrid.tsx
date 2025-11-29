@@ -126,9 +126,18 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${isTvaCredit ? 'text-emerald-500' : 'text-red-500'}`}>
-                {Math.abs(stats?.tvaPayable || 0).toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className={`text-2xl font-bold ${isTvaCredit ? 'text-emerald-500' : 'text-red-500'} cursor-help`}>
+                      {Math.abs(stats?.tvaPayable || 0).toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>VAT Collected ({stats?.tva.toLocaleString()}) - VAT Deductible ({stats?.tvaDeductible.toLocaleString()})</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <p className="text-xs text-muted-foreground mt-1">
                 Collected: {stats?.tva.toLocaleString()} | Ded: {stats?.tvaDeductible.toLocaleString()}
               </p>
@@ -168,9 +177,18 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-500">
-                {stats?.stampDuty.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-2xl font-bold text-red-500 cursor-help">
+                      {stats?.stampDuty.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Total Timbre Fiscal (1%) calculated on cash invoices</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <p className="text-xs text-muted-foreground mt-1">Total calculated stamp duty</p>
             </CardContent>
           </Card>
