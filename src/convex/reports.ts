@@ -86,7 +86,7 @@ export const getDashboardStats = query({
 
     for (const inv of invoices) {
       if (inv.status !== "cancelled" && inv.status !== "draft") {
-        totalTurnover += inv.subtotalHt || inv.totalHt || 0;
+        totalTurnover += inv.totalTtc || 0;
       }
 
       if (inv.status === "issued" || inv.status === "overdue") {
