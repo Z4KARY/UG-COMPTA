@@ -112,95 +112,98 @@ export default function Suppliers() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-                <Link to="/purchases">
-                    <ArrowLeft className="h-4 w-4" />
-                </Link>
-            </Button>
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Suppliers</h1>
-                <p className="text-muted-foreground mt-1">
-                Manage your suppliers for purchase tracking.
-                </p>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" asChild>
+                    <Link to="/purchases">
+                        <ArrowLeft className="h-4 w-4" />
+                    </Link>
+                </Button>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Suppliers</h1>
+                    <p className="text-muted-foreground mt-1">
+                    Manage your suppliers for purchase tracking.
+                    </p>
+                </div>
             </div>
-        </div>
 
-        <div className="flex justify-end">
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogTrigger asChild>
-                    <Button onClick={handleCreate}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Supplier
-                    </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{editingId ? "Edit Supplier" : "Add New Supplier"}</DialogTitle>
-                        <DialogDescription>{editingId ? "Update supplier details." : "Enter supplier details for VAT tracking."}</DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Supplier Name *</Label>
-                            <Input 
-                                id="name" 
-                                value={formData.name} 
-                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                required 
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
+            <div className="w-full md:w-auto">
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                        <Button onClick={handleCreate} className="w-full md:w-auto">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Supplier
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>{editingId ? "Edit Supplier" : "Add New Supplier"}</DialogTitle>
+                            <DialogDescription>{editingId ? "Update supplier details." : "Enter supplier details for VAT tracking."}</DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="nif">NIF</Label>
+                                <Label htmlFor="name">Supplier Name *</Label>
                                 <Input 
-                                    id="nif" 
-                                    value={formData.nif} 
-                                    onChange={(e) => setFormData({...formData, nif: e.target.value})}
+                                    id="name" 
+                                    value={formData.name} 
+                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    required 
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="rc">RC</Label>
-                                <Input 
-                                    id="rc" 
-                                    value={formData.rc} 
-                                    onChange={(e) => setFormData({...formData, rc: e.target.value})}
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="address">Address</Label>
-                            <Input 
-                                id="address" 
-                                value={formData.address} 
-                                onChange={(e) => setFormData({...formData, address: e.target.value})}
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="phone">Phone</Label>
-                                <Input 
-                                    id="phone" 
-                                    value={formData.phone} 
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="nif">NIF</Label>
+                                    <Input 
+                                        id="nif" 
+                                        value={formData.nif} 
+                                        onChange={(e) => setFormData({...formData, nif: e.target.value})}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="rc">RC</Label>
+                                    <Input 
+                                        id="rc" 
+                                        value={formData.rc} 
+                                        onChange={(e) => setFormData({...formData, rc: e.target.value})}
+                                    />
+                                </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
+                                <Label htmlFor="address">Address</Label>
                                 <Input 
-                                    id="email" 
-                                    value={formData.email} 
-                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    id="address" 
+                                    value={formData.address} 
+                                    onChange={(e) => setFormData({...formData, address: e.target.value})}
                                 />
                             </div>
-                        </div>
-                        <Button type="submit" className="w-full">{editingId ? "Save Changes" : "Create Supplier"}</Button>
-                    </form>
-                </DialogContent>
-            </Dialog>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone">Phone</Label>
+                                    <Input 
+                                        id="phone" 
+                                        value={formData.phone} 
+                                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input 
+                                        id="email" 
+                                        value={formData.email} 
+                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            <Button type="submit" className="w-full">{editingId ? "Save Changes" : "Create Supplier"}</Button>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            </div>
         </div>
 
         <Card>
             <CardContent className="p-0">
+                <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -244,6 +247,7 @@ export default function Suppliers() {
                         ))}
                     </TableBody>
                 </Table>
+                </div>
             </CardContent>
         </Card>
       </div>

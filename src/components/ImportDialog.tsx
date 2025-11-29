@@ -26,8 +26,8 @@ export function ImportDialog({ businessId, type }: ImportDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const generateUploadUrl = useMutation(api.importActions.generateUploadUrl);
-  const processImport = useMutation(api.importActions.processImport);
+  const generateUploadUrl = useMutation(api.imports.generateUploadUrl);
+  const createJob = useMutation(api.imports.createJob);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +53,7 @@ export function ImportDialog({ businessId, type }: ImportDialogProps) {
       const { storageId } = await result.json();
 
       // Step 3: Save the newly allocated storage id to the database
-      await processImport({
+      await createJob({
         businessId,
         storageId,
         type,

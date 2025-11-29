@@ -114,9 +114,9 @@ export default function Invoices() {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Invoices & Quotes</h1>
-        <Button asChild>
+        <Button asChild className="w-full md:w-auto">
           <Link to="/invoices/new">
             <Plus className="mr-2 h-4 w-4" /> Create New
           </Link>

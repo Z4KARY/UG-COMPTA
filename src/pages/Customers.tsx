@@ -69,16 +69,18 @@ export default function Customers() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
             <p className="text-muted-foreground mt-1">
               Manage your client base and their details.
             </p>
           </div>
-          <div className="flex gap-2">
-            <ImportDialog businessId={business._id} type="CUSTOMERS" />
-            <Button onClick={handleCreate}>
+          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <div className="w-full sm:w-auto">
+              <ImportDialog businessId={business._id} type="CUSTOMERS" />
+            </div>
+            <Button onClick={handleCreate} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Customer
             </Button>
