@@ -31,6 +31,15 @@ export default function DashboardCharts({ revenueTrend, balanceStats, topPerform
   };
 
   const COLORS = ['#10b981', '#3b82f6']; // Emerald (Cash), Blue (Credit)
+  const ALLOCATION_COLORS = ['#ef4444', '#10b981']; // Red (Expenses), Emerald (Profit)
+
+  // Calculate Revenue Allocation (Expenses vs Profit)
+  const expenses = balanceStats?.monthly?.expenses || 0;
+  const profit = Math.max(0, balanceStats?.monthly?.balance || 0);
+  const allocationData = [
+    { name: 'Expenses', value: expenses },
+    { name: 'Net Profit', value: profit }
+  ];
 
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
@@ -114,59 +123,112 @@ export default function DashboardCharts({ revenueTrend, balanceStats, topPerform
 
       {/* Cash vs Credit & Top Performers */}
       <motion.div variants={item} className="col-span-1 md:col-span-2 lg:col-span-3 space-y-4">
-        {/* Cash vs Credit Card */}
-        <Card className="hover:shadow-md transition-shadow">
-            <CardHeader>
-                <CardTitle className="text-base">Payment Distribution</CardTitle>
-                <CardDescription>Paid vs Credit (This Month)</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="h-[200px] w-full flex items-center justify-center">
-                    {balanceStats ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={[
-                                        { name: 'Paid', value: balanceStats.distribution.cash },
-                                        { name: 'Credit (Créances)', value: balanceStats.distribution.credit }
-                                    ]}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {COLORS.map((color, index) => (
-                                        <Cell key={`cell-${index}`} fill={color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip 
-                                    contentStyle={{ 
-                                        borderRadius: '8px', 
-                                        border: '1px solid var(--border)', 
-                                        backgroundColor: 'var(--background)'
-                                    }}
-                                />
-                                <PieLegend verticalAlign="bottom" height={36}/>
-                            </PieChart>
-                        </ResponsiveContainer>
-                    ) : (
-                        <div className="flex items-center justify-center h-full text-muted-foreground text-sm">Loading...</div>
-                    )}
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-4 text-center">
-                    <div>
-                        <p className="text-xs text-muted-foreground">Paid</p>
-                        <p className="font-bold text-lg text-emerald-500">{balanceStats?.distribution.cash.toLocaleString()} <span className="text-xs text-muted-foreground">{currency}</span></p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Cash vs Credit Card */}
+            <Card className="hover:shadow-md transition-shadow">
+                <CardHeader className="p-4 pb-2">
+                    <CardTitle className="text-sm font-medium">Payment Distribution</CardTitle>
+                    <CardDescription className="text-xs">Paid vs Credit (Revenue)</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                    <div className="h-[120px] w-full flex items-center justify-center">
+                        {balanceStats ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={[
+                                            { name: 'Paid', value: balanceStats.distribution.cash },
+                                            { name: 'Credit', value: balanceStats.distribution.credit }
+                                        ]}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={35}
+                                        outerRadius={50}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {COLORS.map((color, index) => (
+                                            <Cell key={`cell-${index}`} fill={color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip 
+                                        contentStyle={{ 
+                                            borderRadius: '8px', 
+                                            border: '1px solid var(--border)', 
+                                            backgroundColor: 'var(--background)',
+                                            fontSize: '12px'
+                                        }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-muted-foreground text-xs">Loading...</div>
+                        )}
                     </div>
-                    <div>
-                        <p className="text-xs text-muted-foreground">Credit (Créances)</p>
-                        <p className="font-bold text-lg text-blue-500">{balanceStats?.distribution.credit.toLocaleString()} <span className="text-xs text-muted-foreground">{currency}</span></p>
+                    <div className="flex justify-between mt-2 text-xs">
+                        <div>
+                            <p className="text-muted-foreground">Paid</p>
+                            <p className="font-bold text-emerald-500">{balanceStats?.distribution.cash.toLocaleString()}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-muted-foreground">Credit</p>
+                            <p className="font-bold text-blue-500">{balanceStats?.distribution.credit.toLocaleString()}</p>
+                        </div>
                     </div>
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+
+            {/* Profit Distribution Card */}
+            <Card className="hover:shadow-md transition-shadow">
+                <CardHeader className="p-4 pb-2">
+                    <CardTitle className="text-sm font-medium">Revenue Allocation</CardTitle>
+                    <CardDescription className="text-xs">Expenses vs Profit</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                    <div className="h-[120px] w-full flex items-center justify-center">
+                        {balanceStats ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={allocationData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={35}
+                                        outerRadius={50}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {ALLOCATION_COLORS.map((color, index) => (
+                                            <Cell key={`cell-${index}`} fill={color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip 
+                                        contentStyle={{ 
+                                            borderRadius: '8px', 
+                                            border: '1px solid var(--border)', 
+                                            backgroundColor: 'var(--background)',
+                                            fontSize: '12px'
+                                        }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-muted-foreground text-xs">Loading...</div>
+                        )}
+                    </div>
+                    <div className="flex justify-between mt-2 text-xs">
+                        <div>
+                            <p className="text-muted-foreground">Expenses</p>
+                            <p className="font-bold text-red-500">{expenses.toLocaleString()}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-muted-foreground">Profit</p>
+                            <p className="font-bold text-emerald-500">{profit.toLocaleString()}</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
 
         <Card className="hover:shadow-md transition-shadow flex flex-col">
           <CardHeader>
