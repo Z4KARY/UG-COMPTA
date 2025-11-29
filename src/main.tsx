@@ -21,6 +21,7 @@ import Declarations from "./pages/Declarations.tsx";
 import Admin from "./pages/Admin.tsx";
 import Purchases from "./pages/Purchases.tsx";
 import PurchaseCreate from "./pages/PurchaseCreate.tsx";
+import PurchaseDetail from "./pages/PurchaseDetail.tsx";
 import Suppliers from "./pages/Suppliers.tsx";
 import "./types/global.d.ts";
 
@@ -71,6 +72,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="/purchases" element={<Purchases />} />
             <Route path="/purchases/new" element={<PurchaseCreate />} />
+            <Route path="/purchases/:id" element={<PurchaseDetail />} />
             <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/declarations" element={<Declarations />} />
             <Route path="/admin" element={<Admin />} />

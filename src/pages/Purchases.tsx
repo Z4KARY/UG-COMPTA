@@ -105,15 +105,19 @@ export default function Purchases() {
                             </TableRow>
                         )}
                         {purchases?.map((purchase) => (
-                            <TableRow key={purchase._id}>
+                            <TableRow key={purchase._id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/purchases/${purchase._id}`)}>
                                 <TableCell>{format(purchase.invoiceDate, "dd/MM/yyyy")}</TableCell>
-                                <TableCell className="font-medium">{purchase.invoiceNumber}</TableCell>
+                                <TableCell className="font-medium text-blue-600">
+                                    <Link to={`/purchases/${purchase._id}`} className="hover:underline">
+                                        {purchase.invoiceNumber}
+                                    </Link>
+                                </TableCell>
                                 <TableCell>{purchase.supplierName}</TableCell>
                                 <TableCell className="text-right">{purchase.subtotalHt.toFixed(2)}</TableCell>
                                 <TableCell className="text-right">{purchase.vatTotal.toFixed(2)}</TableCell>
                                 <TableCell className="text-right">{purchase.totalTtc.toFixed(2)}</TableCell>
                                 <TableCell className="text-right font-bold text-green-600">{purchase.vatDeductible.toFixed(2)}</TableCell>
-                                <TableCell>
+                                <TableCell onClick={(e) => e.stopPropagation()}>
                                     <Button variant="ghost" size="icon" onClick={() => handleDelete(purchase._id)}>
                                         <Trash2 className="h-4 w-4 text-destructive" />
                                     </Button>

@@ -74,6 +74,42 @@ export const list = query({
   },
 });
 
+export const get = query({
+  args: { id: v.id("purchaseInvoices") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) return null;
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business) return null;
+
+    // Auth check
+    if (business.userId !== userId) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
+            .first();
+        if (!member) return null;
+    }
+
+    const supplier = await ctx.db.get(invoice.supplierId);
+    const items = await ctx.db
+        .query("purchaseInvoiceItems")
+        .withIndex("by_purchase_invoice", (q) => q.eq("purchaseInvoiceId", invoice._id))
+        .collect();
+
+    return {
+        ...invoice,
+        supplier,
+        items,
+        business
+    };
+  },
+});
+
 export const listBySupplier = query({
   args: { 
     businessId: v.id("businesses"), 
