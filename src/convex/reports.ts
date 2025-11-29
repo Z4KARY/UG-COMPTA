@@ -164,18 +164,18 @@ export const getFinancialBalance = query({
     const monthly = calculateForPeriod(startOfMonth);
 
     // Cash vs Credit Breakdown (Current Month)
-    // "Cash" = Paid by CASH
-    // "Credit" = Paid by Bank/Card/Cheque OR Unpaid (Outstanding)
+    // "Cash" = Paid (Recouvrement) - Money received
+    // "Credit" = Unpaid (Créances) - Money owed
     const monthInvoices = activeInvoices.filter(i => i.issueDate >= startOfMonth);
     
     let cashTotal = 0;
-    let creditTotal = 0; // Includes Bank and Unpaid
+    let creditTotal = 0; 
 
     for (const inv of monthInvoices) {
-        if (inv.paymentMethod === "CASH") {
+        if (inv.status === "paid") {
             cashTotal += inv.totalTtc;
         } else {
-            // Bank, Cheque, Card, Other, or Unpaid (null paymentMethod)
+            // issued, overdue -> Considered as Credit (Créance)
             creditTotal += inv.totalTtc;
         }
     }

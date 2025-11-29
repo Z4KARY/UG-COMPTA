@@ -404,7 +404,7 @@ export default function Dashboard() {
             <Card className="hover:shadow-md transition-shadow">
                 <CardHeader>
                     <CardTitle className="text-base">Payment Distribution</CardTitle>
-                    <CardDescription>Cash vs Credit (This Month)</CardDescription>
+                    <CardDescription>Paid vs Credit (This Month)</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="h-[200px] w-full flex items-center justify-center">
@@ -413,8 +413,8 @@ export default function Dashboard() {
                                 <PieChart>
                                     <Pie
                                         data={[
-                                            { name: 'Cash', value: balanceStats.distribution.cash },
-                                            { name: 'Credit/Bank', value: balanceStats.distribution.credit }
+                                            { name: 'Paid', value: balanceStats.distribution.cash },
+                                            { name: 'Credit', value: balanceStats.distribution.credit }
                                         ]}
                                         cx="50%"
                                         cy="50%"
@@ -443,11 +443,11 @@ export default function Dashboard() {
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-4 text-center">
                         <div>
-                            <p className="text-xs text-muted-foreground">Cash</p>
+                            <p className="text-xs text-muted-foreground">Paid</p>
                             <p className="font-bold text-lg text-emerald-500">{balanceStats?.distribution.cash.toLocaleString()} <span className="text-xs text-muted-foreground">{business.currency}</span></p>
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground">Credit/Bank</p>
+                            <p className="text-xs text-muted-foreground">Credit (Créances)</p>
                             <p className="font-bold text-lg text-blue-500">{balanceStats?.distribution.credit.toLocaleString()} <span className="text-xs text-muted-foreground">{business.currency}</span></p>
                         </div>
                     </div>
