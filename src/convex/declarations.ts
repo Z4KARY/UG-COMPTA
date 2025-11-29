@@ -51,7 +51,11 @@ export const getG50Data = query({
       .collect();
 
     const periodInvoices = invoices.filter(
-      (inv) => inv.issueDate >= startDate && inv.issueDate <= endDate && inv.status === "issued"
+      (inv) =>
+        inv.issueDate >= startDate &&
+        inv.issueDate <= endDate &&
+        inv.status !== "cancelled" &&
+        inv.status !== "draft"
     );
 
     let turnover19 = 0;
@@ -63,8 +67,8 @@ export const getG50Data = query({
     let stampDutyTotal = 0;
 
     for (const inv of periodInvoices) {
-        // Stamp Duty (Cash payments)
-        if (inv.paymentMethod === "CASH") {
+        // Stamp Duty (Cash payments) - Only on paid invoices
+        if (inv.paymentMethod === "CASH" && inv.status === "paid") {
             stampDutyTotal += inv.stampDutyAmount || 0;
         }
 
@@ -252,7 +256,7 @@ export const finalizeG50 = mutation({
         const endDate = new Date(args.year, args.month + 1, 0, 23, 59, 59).getTime();
 
         const invoices = await ctx.db.query("invoices").withIndex("by_business", q => q.eq("businessId", args.businessId)).collect();
-        const periodInvoices = invoices.filter(inv => inv.issueDate >= startDate && inv.issueDate <= endDate && inv.status === "issued");
+        const periodInvoices = invoices.filter(inv => inv.issueDate >= startDate && inv.issueDate <= endDate && inv.status !== "cancelled" && inv.status !== "draft");
 
         let turnover19 = 0; let vatCollected19 = 0;
         let turnover9 = 0; let vatCollected9 = 0;
@@ -260,7 +264,7 @@ export const finalizeG50 = mutation({
         let stampDutyTotal = 0;
 
         for (const inv of periodInvoices) {
-            if (inv.paymentMethod === "CASH") stampDutyTotal += inv.stampDutyAmount || 0;
+            if (inv.paymentMethod === "CASH" && inv.status === "paid") stampDutyTotal += inv.stampDutyAmount || 0;
             const items = await ctx.db.query("invoiceItems").withIndex("by_invoice", q => q.eq("invoiceId", inv._id)).collect();
             for (const item of items) {
                 if (inv.fiscalType === "EXPORT") turnoverExport += item.lineTotalHt || 0;
