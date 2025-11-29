@@ -64,6 +64,7 @@ export const getDashboardStats = query({
     let tva = 0;
     let stampDuty = 0;
     let expenses = 0;
+    let tvaDeductible = 0;
 
     for (const inv of periodInvoices) {
       turnover += inv.subtotalHt || inv.totalHt || 0;
@@ -75,6 +76,7 @@ export const getDashboardStats = query({
 
     for (const pur of periodPurchases) {
       expenses += pur.subtotalHt || 0;
+      tvaDeductible += pur.vatDeductible || 0;
     }
 
     // Calculate global stats (Outstanding & Overdue)
@@ -90,14 +92,23 @@ export const getDashboardStats = query({
       }
     }
 
+    const netProfit = turnover - expenses;
+    const netMargin = turnover > 0 ? (netProfit / turnover) * 100 : 0;
+    const averageInvoiceValue = periodInvoices.length > 0 ? turnover / periodInvoices.length : 0;
+    const tvaPayable = Math.max(0, tva - tvaDeductible);
+
     return {
       turnover,
       tva,
+      tvaDeductible,
+      tvaPayable,
       stampDuty,
       invoiceCount: periodInvoices.length,
       period: `${month + 1}/${year}`,
       expenses,
-      netProfit: turnover - expenses,
+      netProfit,
+      netMargin,
+      averageInvoiceValue,
       outstandingAmount,
       overdueCount,
     };
@@ -149,11 +160,24 @@ export const getFinancialBalance = query({
         const periodInvoices = activeInvoices.filter(i => i.issueDate >= startDate);
         const periodPurchases = purchases.filter(p => p.invoiceDate >= startDate);
 
-        const revenue = periodInvoices.reduce((sum, i) => sum + i.totalTtc, 0);
+        let revenueCash = 0;
+        let revenueCredit = 0;
+
+        for (const inv of periodInvoices) {
+            if (inv.status === "paid") {
+                revenueCash += inv.totalTtc;
+            } else {
+                revenueCredit += inv.totalTtc;
+            }
+        }
+
+        const revenue = revenueCash + revenueCredit;
         const expenses = periodPurchases.reduce((sum, p) => sum + p.totalTtc, 0);
 
         return {
             revenue,
+            revenueCash,
+            revenueCredit,
             expenses,
             balance: revenue - expenses
         };
@@ -215,14 +239,14 @@ export const getRevenueTrend = query({
       .order("desc")
       .take(500);
 
-    const monthlyData = new Map<string, { revenue: number; expenses: number }>();
+    const monthlyData = new Map<string, { revenue: number; revenueCash: number; revenueCredit: number; expenses: number }>();
     const now = new Date();
     
     // Initialize last 6 months
     for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        monthlyData.set(key, { revenue: 0, expenses: 0 });
+        monthlyData.set(key, { revenue: 0, revenueCash: 0, revenueCredit: 0, expenses: 0 });
     }
 
     for (const inv of invoices) {
@@ -234,6 +258,11 @@ export const getRevenueTrend = query({
         if (monthlyData.has(key)) {
             const current = monthlyData.get(key)!;
             current.revenue += (inv.totalTtc || 0);
+            if (inv.status === "paid") {
+                current.revenueCash += (inv.totalTtc || 0);
+            } else {
+                current.revenueCredit += (inv.totalTtc || 0);
+            }
         }
     }
 
@@ -250,6 +279,8 @@ export const getRevenueTrend = query({
     return Array.from(monthlyData.entries()).map(([month, data]) => ({
         month,
         revenue: data.revenue,
+        revenueCash: data.revenueCash,
+        revenueCredit: data.revenueCredit,
         expenses: data.expenses,
         balance: data.revenue - data.expenses
     }));
