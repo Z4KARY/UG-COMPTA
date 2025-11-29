@@ -28,6 +28,7 @@ import type * as http from "../http.js";
 import type * as importActions from "../importActions.js";
 import type * as imports from "../imports.js";
 import type * as invoices from "../invoices.js";
+import type * as members from "../members.js";
 import type * as periods from "../periods.js";
 import type * as products from "../products.js";
 import type * as purchaseInvoices from "../purchaseInvoices.js";
@@ -63,6 +64,7 @@ declare const fullApi: ApiFromModules<{
   importActions: typeof importActions;
   imports: typeof imports;
   invoices: typeof invoices;
+  members: typeof members;
   periods: typeof periods;
   products: typeof products;
   purchaseInvoices: typeof purchaseInvoices;

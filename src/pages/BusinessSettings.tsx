@@ -43,6 +43,7 @@ import { format } from "date-fns";
 import { WebhookSettings } from "@/components/WebhookSettings";
 import { SubscriptionSettings } from "@/components/SubscriptionSettings";
 import { BusinessDesignSettings } from "@/components/BusinessDesignSettings";
+import { TeamSettings } from "@/components/TeamSettings";
 
 export default function BusinessSettings() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -304,6 +305,7 @@ export default function BusinessSettings() {
           <TabsList>
             <TabsTrigger value="general">General Settings</TabsTrigger>
             <TabsTrigger value="design">Invoice Design</TabsTrigger>
+            <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
             <TabsTrigger value="subscription">Subscription</TabsTrigger>
           </TabsList>
@@ -907,6 +909,12 @@ export default function BusinessSettings() {
                   }}
                 />
               )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="team">
+            <div className="md:col-span-2">
+              {business && <TeamSettings businessId={business._id} />}
             </div>
           </TabsContent>
 
