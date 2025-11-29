@@ -10,8 +10,10 @@ import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({
   children,
+  breadcrumbOverrides,
 }: {
   children: React.ReactNode;
+  breadcrumbOverrides?: Record<string, string>;
 }) {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -53,7 +55,8 @@ export default function DashboardLayout({
                       const isLast = index === pathSegments.length - 1;
                       // Check if segment is likely an ID (long alphanumeric)
                       const isId = segment.length > 20 && /^[a-zA-Z0-9]+$/.test(segment);
-                      const displayName = isId ? "Details" : segment.replace(/-/g, " ");
+                      const override = breadcrumbOverrides?.[segment];
+                      const displayName = override || (isId ? "Details" : segment.replace(/-/g, " "));
 
                       return (
                         <div key={segment} className="flex items-center">

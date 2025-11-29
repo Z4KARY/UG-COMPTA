@@ -64,7 +64,7 @@ export default function InvoiceDetail() {
   const subtotalHt = invoice.subtotalHt ?? invoice.totalHt ?? 0;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout breadcrumbOverrides={{ [invoice._id]: invoice.invoiceNumber || "Draft" }}>
       <style type="text/css" media="print">
         {`
           @page { size: A4; margin: 0; }
