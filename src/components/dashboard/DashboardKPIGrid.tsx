@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   DollarSign, TrendingDown, Wallet, Activity, CreditCard, 
-  AlertCircle, AlertTriangle, FileText, Percent, Calculator, Scale
+  AlertCircle, AlertTriangle, FileText, Percent, Calculator
 } from "lucide-react";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DashboardStats {
   turnover: number;
@@ -21,6 +22,7 @@ interface DashboardStats {
   invoiceCount: number;
   averageInvoiceValue: number;
   period: string;
+  totalTurnover?: number;
 }
 
 interface DashboardKPIGridProps {
@@ -44,7 +46,6 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
   const rStyles = getReceivablesStyles(receivablesRatio);
 
   const getProfitColor = (amount: number) => amount >= 0 ? "text-emerald-500" : "text-red-500";
-  const getTvaColor = (amount: number) => amount <= 0 ? "text-emerald-500" : "text-red-500";
   const isTvaCredit = (stats?.tvaPayable || 0) < 0;
 
   return (
@@ -59,9 +60,18 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-emerald-500">
-                {stats?.turnover.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-2xl font-bold text-emerald-500 cursor-help">
+                      {stats?.turnover.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Monthly revenue including VAT and Stamp Duty (TTC)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <p className="text-xs text-muted-foreground mt-1">For {stats?.period}</p>
             </CardContent>
           </Card>

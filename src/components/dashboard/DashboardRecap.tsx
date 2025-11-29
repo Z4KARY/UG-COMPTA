@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDownRight, Wallet, AlertCircle, DollarSign } from "lucide-react";
 import { motion } from "framer-motion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DashboardRecapProps {
   stats: any;
@@ -23,9 +24,18 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
             <span className="text-xs opacity-80 font-medium uppercase tracking-wider flex items-center justify-center gap-2">
               <DollarSign className="h-3 w-3" /> Global Revenue
             </span>
-            <div className="text-3xl font-bold tracking-tight">
-              {stats.totalTurnover?.toLocaleString() || stats.turnover.toLocaleString()} <span className="text-lg font-normal opacity-70">{currency}</span>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-3xl font-bold tracking-tight cursor-help">
+                    {stats.totalTurnover?.toLocaleString() || stats.turnover.toLocaleString()} <span className="text-lg font-normal opacity-70">{currency}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Total revenue including VAT and Stamp Duty (TTC)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <p className="text-xs opacity-70">Total revenue all time</p>
           </CardContent>
         </Card>
