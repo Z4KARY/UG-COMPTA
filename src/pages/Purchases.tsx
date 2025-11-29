@@ -89,6 +89,7 @@ export default function Purchases() {
                             <TableHead>Date</TableHead>
                             <TableHead>Invoice #</TableHead>
                             <TableHead>Supplier</TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead className="text-right">Total HT</TableHead>
                             <TableHead className="text-right">VAT</TableHead>
                             <TableHead className="text-right">Total TTC</TableHead>
@@ -113,6 +114,15 @@ export default function Purchases() {
                                     </Link>
                                 </TableCell>
                                 <TableCell>{purchase.supplierName}</TableCell>
+                                <TableCell>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                                        (purchase.status === "paid" || purchase.paymentDate)
+                                            ? "bg-emerald-100 text-emerald-700" 
+                                            : "bg-yellow-100 text-yellow-700"
+                                    }`}>
+                                        {purchase.status || (purchase.paymentDate ? "paid" : "unpaid")}
+                                    </span>
+                                </TableCell>
                                 <TableCell className="text-right">{purchase.subtotalHt.toFixed(2)}</TableCell>
                                 <TableCell className="text-right">{purchase.vatTotal.toFixed(2)}</TableCell>
                                 <TableCell className="text-right">{purchase.totalTtc.toFixed(2)}</TableCell>

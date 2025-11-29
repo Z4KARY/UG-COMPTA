@@ -363,6 +363,7 @@ const schema = defineSchema(
         v.literal("CARD"),
         v.literal("OTHER")
       )),
+      status: v.optional(v.union(v.literal("unpaid"), v.literal("paid"))), // Added status
       description: v.optional(v.string()),
       subtotalHt: v.number(),
       vatTotal: v.number(),

@@ -3,11 +3,30 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { ArrowLeft, Printer, Trash2 } from "lucide-react";
+import { ArrowLeft, Printer, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { numberToWords } from "@/lib/numberToWords";
 import { Separator } from "@/components/ui/separator";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
 
 export default function PurchaseDetail() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +35,12 @@ export default function PurchaseDetail() {
     id: id as Id<"purchaseInvoices">,
   });
   const deletePurchase = useMutation(api.purchaseInvoices.remove);
+  const markAsPaid = useMutation(api.purchaseInvoices.markAsPaid);
+  const markAsUnpaid = useMutation(api.purchaseInvoices.markAsUnpaid);
+
+  const [isPayDialogOpen, setIsPayDialogOpen] = useState(false);
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "BANK_TRANSFER" | "CHEQUE" | "CARD" | "OTHER">("CASH");
 
   if (!invoice) {
     return (
@@ -46,12 +71,39 @@ export default function PurchaseDetail() {
     }
   };
 
+  const handleMarkAsPaid = async () => {
+    try {
+        await markAsPaid({
+            id: invoice._id,
+            paymentDate: new Date(paymentDate).getTime(),
+            paymentMethod,
+        });
+        toast.success("Invoice marked as paid");
+        setIsPayDialogOpen(false);
+    } catch (error) {
+        toast.error("Failed to mark as paid");
+    }
+  };
+
+  const handleMarkAsUnpaid = async () => {
+      if (confirm("Are you sure you want to mark this invoice as unpaid?")) {
+          try {
+              await markAsUnpaid({ id: invoice._id });
+              toast.success("Invoice marked as unpaid");
+          } catch (error) {
+              toast.error("Failed to mark as unpaid");
+          }
+      }
+  };
+
   const business = invoice.business;
   const supplier = invoice.supplier;
 
   // Design settings (using business settings for consistency, though this is an incoming invoice)
   const primaryColor = business?.primaryColor || "#0f172a"; 
   const font = business?.font || "Inter";
+
+  const status = invoice.status || (invoice.paymentDate ? "paid" : "unpaid");
 
   return (
     <DashboardLayout breadcrumbOverrides={{ [invoice._id]: invoice.invoiceNumber || "Purchase" }}>
@@ -83,12 +135,68 @@ export default function PurchaseDetail() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Link>
             </Button>
-            <div className="px-3 py-1 rounded-full text-xs font-medium border bg-slate-100 text-slate-700 border-slate-200">
-                Purchase Invoice
+            <div className={`px-3 py-1 rounded-full text-xs font-medium border capitalize ${
+                status === "paid" 
+                    ? "bg-emerald-100 text-emerald-700 border-emerald-200" 
+                    : "bg-yellow-100 text-yellow-700 border-yellow-200"
+            }`}>
+                {status}
             </div>
         </div>
 
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          {status === "unpaid" ? (
+              <Dialog open={isPayDialogOpen} onOpenChange={setIsPayDialogOpen}>
+                  <DialogTrigger asChild>
+                      <Button className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700">
+                          <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
+                      </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                      <DialogHeader>
+                          <DialogTitle>Mark Invoice as Paid</DialogTitle>
+                          <DialogDescription>
+                              Enter the payment details for this purchase invoice.
+                          </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                          <div className="grid gap-2">
+                              <Label htmlFor="paymentDate">Payment Date</Label>
+                              <Input
+                                  id="paymentDate"
+                                  type="date"
+                                  value={paymentDate}
+                                  onChange={(e) => setPaymentDate(e.target.value)}
+                              />
+                          </div>
+                          <div className="grid gap-2">
+                              <Label htmlFor="paymentMethod">Payment Method</Label>
+                              <Select value={paymentMethod} onValueChange={(v: any) => setPaymentMethod(v)}>
+                                  <SelectTrigger>
+                                      <SelectValue placeholder="Select method" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      <SelectItem value="CASH">Cash</SelectItem>
+                                      <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                                      <SelectItem value="CHEQUE">Cheque</SelectItem>
+                                      <SelectItem value="CARD">Card</SelectItem>
+                                      <SelectItem value="OTHER">Other</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                          </div>
+                      </div>
+                      <DialogFooter>
+                          <Button variant="outline" onClick={() => setIsPayDialogOpen(false)}>Cancel</Button>
+                          <Button onClick={handleMarkAsPaid}>Confirm Payment</Button>
+                      </DialogFooter>
+                  </DialogContent>
+              </Dialog>
+          ) : (
+              <Button onClick={handleMarkAsUnpaid} variant="outline" className="flex-1 md:flex-none text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200">
+                  <XCircle className="mr-2 h-4 w-4" /> Mark as Unpaid
+              </Button>
+          )}
+
           <Button onClick={handleDelete} variant="outline" className="flex-1 md:flex-none text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
             <Trash2 className="mr-2 h-4 w-4" /> Delete
           </Button>

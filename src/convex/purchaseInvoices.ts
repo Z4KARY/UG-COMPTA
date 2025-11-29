@@ -221,6 +221,12 @@ export const create = mutation({
         throw new Error("Cannot record purchase in a closed period");
     }
 
+    // Determine status
+    let status: "paid" | "unpaid" = "unpaid";
+    if (args.paymentDate) {
+        status = "paid";
+    }
+
     const purchaseInvoiceId = await ctx.db.insert("purchaseInvoices", {
         businessId: args.businessId,
         supplierId: args.supplierId,
@@ -228,6 +234,7 @@ export const create = mutation({
         invoiceDate: args.invoiceDate,
         paymentDate: args.paymentDate,
         paymentMethod: args.paymentMethod,
+        status, // Set status
         description: args.description,
         subtotalHt,
         vatTotal,
@@ -300,5 +307,71 @@ export const remove = mutation({
         }
 
         await ctx.db.delete(args.id);
+    }
+});
+
+export const markAsPaid = mutation({
+    args: {
+        id: v.id("purchaseInvoices"),
+        paymentDate: v.number(),
+        paymentMethod: v.union(
+            v.literal("CASH"),
+            v.literal("BANK_TRANSFER"),
+            v.literal("CHEQUE"),
+            v.literal("CARD"),
+            v.literal("OTHER")
+        ),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) throw new Error("Unauthorized");
+
+        const invoice = await ctx.db.get(args.id);
+        if (!invoice) throw new Error("Invoice not found");
+
+        const business = await ctx.db.get(invoice.businessId);
+        if (!business) throw new Error("Business not found");
+
+        if (business.userId !== userId) {
+            const member = await ctx.db
+                .query("businessMembers")
+                .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
+                .first();
+            if (!member) throw new Error("Unauthorized");
+        }
+
+        await ctx.db.patch(args.id, {
+            status: "paid",
+            paymentDate: args.paymentDate,
+            paymentMethod: args.paymentMethod,
+        });
+    }
+});
+
+export const markAsUnpaid = mutation({
+    args: { id: v.id("purchaseInvoices") },
+    handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) throw new Error("Unauthorized");
+
+        const invoice = await ctx.db.get(args.id);
+        if (!invoice) throw new Error("Invoice not found");
+
+        const business = await ctx.db.get(invoice.businessId);
+        if (!business) throw new Error("Business not found");
+
+        if (business.userId !== userId) {
+            const member = await ctx.db
+                .query("businessMembers")
+                .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
+                .first();
+            if (!member) throw new Error("Unauthorized");
+        }
+
+        await ctx.db.patch(args.id, {
+            status: "unpaid",
+            paymentDate: undefined,
+            paymentMethod: undefined,
+        });
     }
 });
