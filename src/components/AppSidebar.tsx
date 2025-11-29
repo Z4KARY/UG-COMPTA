@@ -24,6 +24,7 @@ import {
   FileSpreadsheet,
   ShoppingCart,
   ChevronRight,
+  Truck,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { useQuery } from "convex/react";
@@ -59,6 +60,11 @@ const items = [
     title: "Customers",
     url: "/customers",
     icon: Users,
+  },
+  {
+    title: "Suppliers",
+    url: "/suppliers",
+    icon: Truck,
   },
   {
     title: "Products",
