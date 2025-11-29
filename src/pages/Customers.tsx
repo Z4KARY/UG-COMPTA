@@ -101,73 +101,78 @@ export default function Customers() {
               Overview of customers and their account balance.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead className="text-right">Total Sales</TableHead>
-                  <TableHead className="text-right">Paid</TableHead>
-                  <TableHead className="text-right">Balance Due</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {customers?.map((customer) => (
-                  <TableRow key={customer._id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEdit(customer)}>
-                    <TableCell className="font-medium">
-                      <div>{customer.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                          {[customer.taxId && `NIF: ${customer.taxId}`, customer.rc && `RC: ${customer.rc}`].filter(Boolean).join(" | ")}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                        <div className="flex flex-col text-xs">
-                            <span>{customer.phone}</span>
-                            <span className="text-muted-foreground">{customer.email}</span>
-                        </div>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                        {customer.financials?.totalSales.toLocaleString()} <span className="text-xs text-muted-foreground">{business.currency}</span>
-                    </TableCell>
-                    <TableCell className="text-right text-emerald-600">
-                        {customer.financials?.totalPaid.toLocaleString()} <span className="text-xs text-muted-foreground">{business.currency}</span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                        <span className={customer.financials?.balanceDue > 0 ? "text-red-600 font-bold" : "text-muted-foreground"}>
-                            {customer.financials?.balanceDue.toLocaleString()} <span className="text-xs font-normal">{business.currency}</span>
-                        </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(customer)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(customer._id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {customers?.length === 0 && (
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center">
-                      No customers found.
-                    </TableCell>
+                    <TableHead className="pl-4">Name</TableHead>
+                    <TableHead className="hidden md:table-cell">Contact</TableHead>
+                    <TableHead className="text-right whitespace-nowrap">Total Sales</TableHead>
+                    <TableHead className="text-right whitespace-nowrap">Paid</TableHead>
+                    <TableHead className="text-right whitespace-nowrap">Balance Due</TableHead>
+                    <TableHead className="text-right pr-4">Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {customers?.map((customer) => (
+                    <TableRow key={customer._id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEdit(customer)}>
+                      <TableCell className="font-medium pl-4">
+                        <div>{customer.name}</div>
+                        <div className="text-xs text-muted-foreground md:hidden">
+                            {customer.phone}
+                        </div>
+                        <div className="text-xs text-muted-foreground hidden md:block">
+                            {[customer.taxId && `NIF: ${customer.taxId}`, customer.rc && `RC: ${customer.rc}`].filter(Boolean).join(" | ")}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                          <div className="flex flex-col text-xs">
+                              <span>{customer.phone}</span>
+                              <span className="text-muted-foreground">{customer.email}</span>
+                          </div>
+                      </TableCell>
+                      <TableCell className="text-right font-medium whitespace-nowrap">
+                          {customer.financials?.totalSales.toLocaleString()} <span className="text-xs text-muted-foreground">{business.currency}</span>
+                      </TableCell>
+                      <TableCell className="text-right text-emerald-600 whitespace-nowrap">
+                          {customer.financials?.totalPaid.toLocaleString()} <span className="text-xs text-muted-foreground">{business.currency}</span>
+                      </TableCell>
+                      <TableCell className="text-right whitespace-nowrap">
+                          <span className={customer.financials?.balanceDue > 0 ? "text-red-600 font-bold" : "text-muted-foreground"}>
+                              {customer.financials?.balanceDue.toLocaleString()} <span className="text-xs font-normal">{business.currency}</span>
+                          </span>
+                      </TableCell>
+                      <TableCell className="text-right pr-4">
+                        <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(customer)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(customer._id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {customers?.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        No customers found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

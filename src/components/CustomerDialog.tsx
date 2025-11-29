@@ -234,36 +234,36 @@ export function CustomerDialog({ businessId, open, onOpenChange, customer, onSuc
 
             <TabsContent value="invoices">
               <div className="max-h-[400px] overflow-y-auto overflow-x-auto border rounded-md mt-4">
-                <Table className="min-w-[400px]">
+                <Table className="min-w-full">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">Number</TableHead>
+                      <TableHead className="px-2 text-xs">Number</TableHead>
                       <TableHead className="hidden sm:table-cell">Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead className="px-2 text-xs">Status</TableHead>
+                      <TableHead className="text-right px-2 text-xs">Amount</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {invoices?.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                        <TableCell colSpan={4} className="text-center py-4 text-muted-foreground text-xs">
                           No invoices found for this customer.
                         </TableCell>
                       </TableRow>
                     )}
                     {invoices?.map((invoice) => (
                       <TableRow key={invoice._id}>
-                        <TableCell className="font-medium text-xs sm:text-sm whitespace-nowrap">{invoice.invoiceNumber}</TableCell>
-                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm whitespace-nowrap">{format(new Date(invoice.issueDate), "dd/MM/yyyy")}</TableCell>
-                        <TableCell>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium capitalize
+                        <TableCell className="font-medium text-xs px-2 py-3 whitespace-nowrap">{invoice.invoiceNumber}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs px-2 py-3 whitespace-nowrap">{format(new Date(invoice.issueDate), "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="px-2 py-3">
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium capitalize
                             ${invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 
                               invoice.status === 'overdue' ? 'bg-red-100 text-red-800' : 
                               'bg-gray-100 text-gray-800'}`}>
                             {invoice.status}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right font-medium text-xs sm:text-sm whitespace-nowrap">
+                        <TableCell className="text-right font-medium text-xs px-2 py-3 whitespace-nowrap">
                           {invoice.totalTtc.toLocaleString()} DZD
                         </TableCell>
                       </TableRow>
