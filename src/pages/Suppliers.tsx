@@ -216,28 +216,38 @@ export default function Suppliers() {
                                 </TabsContent>
 
                                 <TabsContent value="invoices">
-                                    <div className="max-h-[400px] overflow-y-auto border rounded-md mt-4">
-                                        <Table>
+                                    <div className="max-h-[400px] overflow-y-auto overflow-x-auto border rounded-md mt-4">
+                                        <Table className="min-w-[400px]">
                                             <TableHeader>
                                                 <TableRow>
-                                                    <TableHead>Number</TableHead>
-                                                    <TableHead>Date</TableHead>
+                                                    <TableHead className="w-[100px]">Number</TableHead>
+                                                    <TableHead className="hidden sm:table-cell">Date</TableHead>
+                                                    <TableHead>Status</TableHead>
                                                     <TableHead className="text-right">Amount</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 {supplierInvoices?.length === 0 && (
                                                     <TableRow>
-                                                        <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
+                                                        <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
                                                             No invoices found for this supplier.
                                                         </TableCell>
                                                     </TableRow>
                                                 )}
                                                 {supplierInvoices?.map((invoice) => (
                                                     <TableRow key={invoice._id}>
-                                                        <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
-                                                        <TableCell>{format(new Date(invoice.invoiceDate), "dd/MM/yyyy")}</TableCell>
-                                                        <TableCell className="text-right font-medium">
+                                                        <TableCell className="font-medium text-xs sm:text-sm whitespace-nowrap">{invoice.invoiceNumber}</TableCell>
+                                                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm whitespace-nowrap">{format(new Date(invoice.invoiceDate), "dd/MM/yyyy")}</TableCell>
+                                                        <TableCell>
+                                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium capitalize ${
+                                                                (invoice.status === "paid" || invoice.paymentDate) 
+                                                                    ? "bg-emerald-100 text-emerald-700" 
+                                                                    : "bg-yellow-100 text-yellow-700"
+                                                            }`}>
+                                                                {invoice.status || (invoice.paymentDate ? "paid" : "unpaid")}
+                                                            </span>
+                                                        </TableCell>
+                                                        <TableCell className="text-right font-medium text-xs sm:text-sm whitespace-nowrap">
                                                             {invoice.totalTtc.toLocaleString()} {business?.currency}
                                                         </TableCell>
                                                     </TableRow>
