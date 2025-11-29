@@ -28,6 +28,7 @@ export const FISCAL_CONSTANTS = {
 
 // Helper for rounding to 2 decimal places
 export function roundCurrency(amount: number): number {
+  if (isNaN(amount)) throw new Error("Invalid currency amount: NaN");
   return Math.round((amount + Number.EPSILON) * 100) / 100;
 }
 
@@ -37,6 +38,11 @@ export function calculateLineItem(
   discountRate: number, 
   tvaRate: number
 ) {
+  if (quantity < 0) throw new Error("Quantity cannot be negative");
+  if (unitPrice < 0) throw new Error("Unit price cannot be negative");
+  if (discountRate < 0 || discountRate > 100) throw new Error("Discount rate must be between 0 and 100");
+  if (tvaRate < 0) throw new Error("VAT rate cannot be negative");
+
   const basePrice = unitPrice * quantity;
   const discountAmount = roundCurrency(basePrice * (discountRate / 100));
   const lineTotalHt = roundCurrency(basePrice - discountAmount);
@@ -72,6 +78,12 @@ export function calculateStampDuty(
   paymentMethod: string,
   config: StampDutyConfig = FISCAL_CONSTANTS.STAMP_DUTY
 ): number {
+  if (amountTtcBeforeStamp < 0) throw new Error("Amount cannot be negative for stamp duty calculation");
+  if (!config || !Array.isArray(config.BRACKETS)) {
+    console.error("Invalid stamp duty config:", config);
+    throw new Error("Invalid stamp duty configuration: Missing brackets");
+  }
+
   // Art. 258 quinquies: Electronic payments (Bank Transfer, Cheque, Card) are exempt.
   // Only CASH (Espèces) is subject to stamp duty.
   if (paymentMethod !== "CASH") {
@@ -93,6 +105,11 @@ export function calculateStampDuty(
      duty = Math.ceil(amountTtcBeforeStamp / 100) * 1.0;
   } else {
     for (const bracket of BRACKETS) {
+        // Validate bracket structure
+        if (typeof bracket.rate_per_100da !== 'number') {
+            throw new Error("Invalid stamp duty bracket: missing rate");
+        }
+
         // Determine the amount applicable in this bracket
         // The bracket.up_to is the cumulative upper limit.
         // The amount in this bracket is min(remaining, (bracket.up_to - previousLimit))
@@ -148,6 +165,9 @@ export function calculateLineTotals(
   discountRate: number, 
   tvaRate: number
 ) {
+  if (quantity < 0) throw new Error("Quantity cannot be negative");
+  if (unitPrice < 0) throw new Error("Unit price cannot be negative");
+  
   const priceAfterDiscount = unitPrice * (1 - (discountRate || 0) / 100);
   const lineTotalHt = priceAfterDiscount * quantity;
   const lineTva = lineTotalHt * (tvaRate / 100);
