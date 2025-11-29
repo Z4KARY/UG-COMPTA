@@ -28,6 +28,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, MoreVertical, Plus, Shield, Trash2, UserPlus, Users } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TeamSettingsProps {
   businessId: Id<"businesses">;
@@ -42,6 +52,7 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [newMemberRole, setNewMemberRole] = useState<"staff" | "accountant">("staff");
   const [isAdding, setIsAdding] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<Id<"businessMembers"> | null>(null);
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,11 +84,12 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
     }
   };
 
-  const handleRemoveMember = async (memberId: Id<"businessMembers">) => {
-    if (!confirm("Are you sure you want to remove this member?")) return;
+  const confirmRemoveMember = async () => {
+    if (!memberToRemove) return;
     try {
-      await removeMember({ memberId });
+      await removeMember({ memberId: memberToRemove });
       toast.success("Member removed successfully");
+      setMemberToRemove(null);
     } catch (error: any) {
       toast.error(error.message || "Failed to remove member");
     }
@@ -211,7 +223,7 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
-                        onClick={() => handleRemoveMember(member._id)}
+                        onClick={() => setMemberToRemove(member._id)}
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Remove Member
@@ -229,6 +241,26 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!memberToRemove} onOpenChange={(open) => !open && setMemberToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently remove the member from the team.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmRemoveMember}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove Member
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

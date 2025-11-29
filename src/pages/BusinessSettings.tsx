@@ -45,6 +45,16 @@ import { WebhookSettings } from "@/components/WebhookSettings";
 import { SubscriptionSettings } from "@/components/SubscriptionSettings";
 import { BusinessDesignSettings } from "@/components/BusinessDesignSettings";
 import { TeamSettings } from "@/components/TeamSettings";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function BusinessSettings() {
   const business = useQuery(api.businesses.getMyBusiness, {});
@@ -59,6 +69,7 @@ export default function BusinessSettings() {
   // Export Action
   const generateZip = useAction(api.exportActions.generateZip);
   const [isExporting, setIsExporting] = useState(false);
+  const [periodToReopen, setPeriodToReopen] = useState<any>(null);
 
   const [closureData, setClosureData] = useState({
       month: new Date().getMonth(),
@@ -268,14 +279,14 @@ export default function BusinessSettings() {
       }
   };
 
-  const handleReopenPeriod = async (id: any) => {
-      if (confirm("Are you sure you want to reopen this period? This will allow modifications.")) {
-          try {
-              await openPeriod({ id });
-              toast.success("Period reopened");
-          } catch (error) {
-              toast.error("Failed to reopen period");
-          }
+  const confirmReopenPeriod = async () => {
+      if (!periodToReopen) return;
+      try {
+          await openPeriod({ id: periodToReopen });
+          toast.success("Period reopened");
+          setPeriodToReopen(null);
+      } catch (error) {
+          toast.error("Failed to reopen period");
       }
   };
 
@@ -875,7 +886,7 @@ export default function BusinessSettings() {
                                         variant="ghost" 
                                         size="sm" 
                                         className="h-8 text-destructive hover:text-destructive"
-                                        onClick={() => handleReopenPeriod(period._id)}
+                                        onClick={() => setPeriodToReopen(period._id)}
                                     >
                                         <Unlock className="mr-2 h-3 w-3" />
                                         Reopen
@@ -946,6 +957,23 @@ export default function BusinessSettings() {
           </TabsContent>
         </Tabs>
       </motion.div>
+
+      <AlertDialog open={!!periodToReopen} onOpenChange={(open) => !open && setPeriodToReopen(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reopen Period?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Reopening a period allows modifications to invoices and purchases within that timeframe. This may affect your fiscal reports.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmReopenPeriod}>
+              Reopen Period
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
