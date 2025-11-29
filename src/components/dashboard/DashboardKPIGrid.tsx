@@ -35,15 +35,23 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
     show: { opacity: 1, y: 0 }
   };
 
+  const getReceivablesStyles = (ratio: number) => {
+    if (ratio < 30) return { color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-l-emerald-500", progress: "[&>div]:bg-emerald-500" };
+    if (ratio < 60) return { color: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-l-yellow-500", progress: "[&>div]:bg-yellow-500" };
+    return { color: "text-red-500", bg: "bg-red-500/10", border: "border-l-red-500", progress: "[&>div]:bg-red-500" };
+  };
+
+  const rStyles = getReceivablesStyles(receivablesRatio);
+
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       <motion.div variants={item}>
         <Link to="/invoices">
-          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-primary cursor-pointer h-full">
+          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-emerald-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Turnover</CardTitle>
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <DollarSign className="h-4 w-4 text-primary" />
+              <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-emerald-500" />
               </div>
             </CardHeader>
             <CardContent>
@@ -96,11 +104,11 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
 
       <motion.div variants={item}>
         <Link to="/declarations">
-          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500 cursor-pointer h-full">
+          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-red-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">TVA Payable</CardTitle>
-              <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-blue-500" />
+              <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-red-500" />
               </div>
             </CardHeader>
             <CardContent>
@@ -117,11 +125,11 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
 
       <motion.div variants={item}>
         <Link to="/invoices">
-          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-indigo-500 cursor-pointer h-full">
+          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Avg Invoice Value</CardTitle>
-              <div className="h-8 w-8 rounded-full bg-indigo-500/10 flex items-center justify-center">
-                <Calculator className="h-4 w-4 text-indigo-500" />
+              <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <Calculator className="h-4 w-4 text-blue-500" />
               </div>
             </CardHeader>
             <CardContent>
@@ -138,11 +146,11 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
 
       <motion.div variants={item}>
         <Link to="/declarations">
-          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-orange-500 cursor-pointer h-full">
+          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-red-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Stamp Duty</CardTitle>
-              <div className="h-8 w-8 rounded-full bg-orange-500/10 flex items-center justify-center">
-                <CreditCard className="h-4 w-4 text-orange-500" />
+              <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                <CreditCard className="h-4 w-4 text-red-500" />
               </div>
             </CardHeader>
             <CardContent>
@@ -176,11 +184,11 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
 
       <motion.div variants={item}>
         <Link to="/invoices">
-          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-rose-500 cursor-pointer h-full">
+          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-red-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Invoices</CardTitle>
-              <div className="h-8 w-8 rounded-full bg-rose-500/10 flex items-center justify-center">
-                <AlertTriangle className="h-4 w-4 text-rose-500" />
+              <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
               </div>
             </CardHeader>
             <CardContent>
@@ -193,11 +201,11 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
 
       <motion.div variants={item}>
         <Link to="/invoices">
-          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-green-500 cursor-pointer h-full">
+          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Invoices Issued</CardTitle>
-              <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
-                <FileText className="h-4 w-4 text-green-500" />
+              <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <FileText className="h-4 w-4 text-blue-500" />
               </div>
             </CardHeader>
             <CardContent>
@@ -209,16 +217,16 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
       </motion.div>
 
       <motion.div variants={item}>
-        <Card className="hover:shadow-md transition-shadow border-l-4 border-l-purple-500 h-full">
+        <Card className={`hover:shadow-md transition-shadow border-l-4 ${rStyles.border} h-full`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Receivables Impact</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-purple-500/10 flex items-center justify-center">
-              <Percent className="h-4 w-4 text-purple-500" />
+            <div className={`h-8 w-8 rounded-full ${rStyles.bg} flex items-center justify-center`}>
+              <Percent className={`h-4 w-4 ${rStyles.color}`} />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{receivablesRatio}%</div>
-            <Progress value={receivablesRatio} className="h-2 mt-2 [&>div]:bg-purple-500" />
+            <Progress value={receivablesRatio} className={`h-2 mt-2 ${rStyles.progress}`} />
             <p className="text-xs text-muted-foreground mt-2">of Profit is in Credit (Créances)</p>
           </CardContent>
         </Card>

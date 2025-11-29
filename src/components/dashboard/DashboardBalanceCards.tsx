@@ -26,14 +26,18 @@ export default function DashboardBalanceCards({ balanceStats, currency }: Dashbo
     show: { opacity: 1, y: 0 }
   };
 
-  const renderCard = (title: string, data: BalanceData | undefined) => (
+  const renderCard = (title: string, data: BalanceData | undefined) => {
+    const isPositive = (data?.balance || 0) >= 0;
+    const balanceColor = isPositive ? "text-emerald-500" : "text-red-500";
+
+    return (
     <motion.div variants={item}>
       <Card className="bg-gradient-to-br from-background to-muted/50 h-full">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
+          <div className={`text-2xl font-bold ${balanceColor}`}>
             {data?.balance.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
           </div>
           <div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
@@ -57,7 +61,8 @@ export default function DashboardBalanceCards({ balanceStats, currency }: Dashbo
         </CardContent>
       </Card>
     </motion.div>
-  );
+    );
+  };
 
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-3">

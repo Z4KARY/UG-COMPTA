@@ -41,6 +41,8 @@ export default function DashboardCharts({ revenueTrend, balanceStats, topPerform
     { name: 'Net Profit', value: profit }
   ];
 
+  const hasTrendData = revenueTrend && revenueTrend.length > 0 && revenueTrend.some(d => d.revenue > 0 || d.expenses > 0);
+
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
       {/* Revenue Chart */}
@@ -54,68 +56,74 @@ export default function DashboardCharts({ revenueTrend, balanceStats, topPerform
             <CardDescription>Revenue (Cash vs Credit), Expenses & Net Balance</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <div className="h-[300px] sm:h-[350px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={revenueTrend || []} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                        <XAxis 
-                            dataKey="month" 
-                            stroke="#888888" 
-                            fontSize={12} 
-                            tickLine={false} 
-                            axisLine={false}
-                            dy={10}
-                        />
-                        <YAxis
-                            stroke="#888888"
-                            fontSize={12}
-                            tickLine={false}
-                            axisLine={false}
-                            tickFormatter={(value) => `${value}`}
-                        />
-                        <Tooltip 
-                            cursor={{ fill: 'var(--muted)' }}
-                            contentStyle={{ 
-                              borderRadius: '8px', 
-                              border: '1px solid var(--border)', 
-                              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                              backgroundColor: 'var(--background)'
-                            }}
-                        />
-                        <Legend />
-                        <Bar 
-                          dataKey="revenueCash" 
-                          name="Revenue (Cash)"
-                          stackId="a"
-                          fill="#10b981" 
-                          radius={[0, 0, 0, 0]} 
-                          maxBarSize={50}
-                        />
-                        <Bar 
-                          dataKey="revenueCredit" 
-                          name="Revenue (Credit)"
-                          stackId="a"
-                          fill="#3b82f6" 
-                          radius={[4, 4, 0, 0]} 
-                          maxBarSize={50}
-                        />
-                        <Bar 
-                          dataKey="expenses" 
-                          name="Expenses"
-                          fill="#ef4444" 
-                          radius={[4, 4, 0, 0]} 
-                          maxBarSize={50}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="balance"
-                          name="Net Balance"
-                          stroke="#8b5cf6"
-                          strokeWidth={2}
-                          dot={{ r: 4, fill: "#8b5cf6" }}
-                        />
-                    </ComposedChart>
-                </ResponsiveContainer>
+            <div className="h-[300px] sm:h-[350px] w-full min-h-[300px]">
+                {hasTrendData ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart data={revenueTrend || []} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                            <XAxis 
+                                dataKey="month" 
+                                stroke="#888888" 
+                                fontSize={12} 
+                                tickLine={false} 
+                                axisLine={false}
+                                dy={10}
+                            />
+                            <YAxis
+                                stroke="#888888"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                                tickFormatter={(value) => `${value}`}
+                            />
+                            <Tooltip 
+                                cursor={{ fill: 'var(--muted)' }}
+                                contentStyle={{ 
+                                  borderRadius: '8px', 
+                                  border: '1px solid var(--border)', 
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                  backgroundColor: 'var(--background)'
+                                }}
+                            />
+                            <Legend />
+                            <Bar 
+                              dataKey="revenueCash" 
+                              name="Revenue (Cash)"
+                              stackId="a"
+                              fill="#10b981" 
+                              radius={[0, 0, 0, 0]} 
+                              maxBarSize={50}
+                            />
+                            <Bar 
+                              dataKey="revenueCredit" 
+                              name="Revenue (Credit)"
+                              stackId="a"
+                              fill="#3b82f6" 
+                              radius={[4, 4, 0, 0]} 
+                              maxBarSize={50}
+                            />
+                            <Bar 
+                              dataKey="expenses" 
+                              name="Expenses"
+                              fill="#ef4444" 
+                              radius={[4, 4, 0, 0]} 
+                              maxBarSize={50}
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="balance"
+                              name="Net Balance"
+                              stroke="#8b5cf6"
+                              strokeWidth={2}
+                              dot={{ r: 4, fill: "#8b5cf6" }}
+                            />
+                        </ComposedChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                        No trend data available yet.
+                    </div>
+                )}
             </div>
           </CardContent>
         </Card>
