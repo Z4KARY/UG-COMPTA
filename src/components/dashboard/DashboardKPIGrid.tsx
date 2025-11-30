@@ -74,7 +74,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <p className="text-xs text-muted-foreground mt-1">For {stats?.period}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("kpi.for")} {stats?.period}</p>
             </CardContent>
           </Card>
         </Link>
@@ -102,7 +102,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <p className="text-xs text-muted-foreground mt-1">For {stats?.period}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("kpi.for")} {stats?.period}</p>
             </CardContent>
           </Card>
         </Link>
@@ -180,7 +180,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                 {Math.round(stats?.averageInvoiceValue || 0).toLocaleString()} <span className="text-sm font-normal text-muted-foreground">{currency}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Based on {stats?.invoiceCount} invoices
+                {t("kpi.basedOn")} {stats?.invoiceCount} {t("kpi.invoicesLower")}
               </p>
             </CardContent>
           </Card>
@@ -209,7 +209,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <p className="text-xs text-muted-foreground mt-1">Total calculated stamp duty</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("kpi.totalCalculatedStampDuty")}</p>
             </CardContent>
           </Card>
         </Link>
