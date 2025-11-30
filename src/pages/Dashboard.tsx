@@ -10,8 +10,10 @@ import DashboardBalanceCards from "@/components/dashboard/DashboardBalanceCards"
 import DashboardKPIGrid from "@/components/dashboard/DashboardKPIGrid";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import DashboardRecap from "@/components/dashboard/DashboardRecap";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Dashboard() {
+  const { t } = useLanguage();
   const business = useQuery(api.businesses.getMyBusiness, {});
   
   const stats = useQuery(api.reports.getDashboardStats, 
@@ -59,13 +61,13 @@ export default function Dashboard() {
             <Building2Icon className="h-12 w-12 text-primary" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight">Welcome to InvoiceFlow</h2>
+            <h2 className="text-3xl font-bold tracking-tight">{t("dashboard.welcome")}</h2>
             <p className="text-muted-foreground max-w-md mx-auto">
-              You're just one step away. Set up your business profile to start managing your invoices and finances.
+              {t("dashboard.setupDescription")}
             </p>
           </div>
           <Button asChild size="lg" className="rounded-full px-8">
-            <Link to="/settings">Setup Business <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            <Link to="/settings">{t("dashboard.setupBusiness")} <ArrowRight className="ml-2 h-4 w-4" /></Link>
           </Button>
         </motion.div>
       </DashboardLayout>
@@ -82,13 +84,13 @@ export default function Dashboard() {
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Overview of your financial performance.</p>
+            <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("dashboard.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button asChild className="shadow-lg shadow-primary/20 w-full sm:w-auto">
               <Link to="/invoices/new">
-                <Plus className="mr-2 h-4 w-4" /> Create Invoice
+                <Plus className="mr-2 h-4 w-4" /> {t("dashboard.createInvoice")}
               </Link>
             </Button>
           </div>

@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDownRight, Wallet, AlertCircle, DollarSign } from "lucide-react";
 import { motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DashboardRecapProps {
   stats: any;
@@ -9,6 +10,7 @@ interface DashboardRecapProps {
 }
 
 export default function DashboardRecap({ stats, currency }: DashboardRecapProps) {
+  const { t } = useLanguage();
   if (!stats) return null;
 
   const item = {
@@ -22,7 +24,7 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
         <Card className="bg-primary text-primary-foreground shadow-lg shadow-primary/20 border-none">
           <CardContent className="p-6 flex flex-col gap-2 items-center text-center">
             <span className="text-xs opacity-80 font-medium uppercase tracking-wider flex items-center justify-center gap-2">
-              <DollarSign className="h-3 w-3" /> Global Revenue
+              <DollarSign className="h-3 w-3" /> {t("recap.globalRevenue")}
             </span>
             <TooltipProvider>
               <Tooltip>
@@ -32,11 +34,11 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Total revenue including VAT and Stamp Duty (TTC)</p>
+                  <p>{t("recap.tooltip.revenue")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <p className="text-xs opacity-70">Total revenue all time</p>
+            <p className="text-xs opacity-70">{t("recap.totalRevenueAllTime")}</p>
           </CardContent>
         </Card>
       </motion.div>
@@ -45,7 +47,7 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
         <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-6 flex flex-col gap-2">
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-2">
-              <Wallet className="h-3 w-3" /> Net Profit
+              <Wallet className="h-3 w-3" /> {t("recap.netProfit")}
             </span>
             <TooltipProvider>
               <Tooltip>
@@ -55,11 +57,11 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Revenue (HT) - Expenses (HT)</p>
+                  <p>{t("recap.tooltip.profit")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <p className="text-xs text-muted-foreground">Earnings after expenses</p>
+            <p className="text-xs text-muted-foreground">{t("recap.earningsAfterExpenses")}</p>
           </CardContent>
         </Card>
       </motion.div>
@@ -68,7 +70,7 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
         <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-6 flex flex-col gap-2">
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-2">
-              <ArrowDownRight className="h-3 w-3" /> Expenses
+              <ArrowDownRight className="h-3 w-3" /> {t("recap.expenses")}
             </span>
             <TooltipProvider>
               <Tooltip>
@@ -78,11 +80,11 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Total expenses including VAT (TTC)</p>
+                  <p>{t("recap.tooltip.expenses")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <p className="text-xs text-muted-foreground">Total costs this month</p>
+            <p className="text-xs text-muted-foreground">{t("recap.totalCostsThisMonth")}</p>
           </CardContent>
         </Card>
       </motion.div>
@@ -91,7 +93,7 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
         <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-6 flex flex-col gap-2">
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-2">
-              <AlertCircle className="h-3 w-3" /> Outstanding
+              <AlertCircle className="h-3 w-3" /> {t("recap.outstanding")}
             </span>
             <TooltipProvider>
               <Tooltip>
@@ -101,11 +103,11 @@ export default function DashboardRecap({ stats, currency }: DashboardRecapProps)
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Total unpaid invoices including VAT (TTC)</p>
+                  <p>{t("recap.tooltip.outstanding")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <p className="text-xs text-muted-foreground">Unpaid invoices</p>
+            <p className="text-xs text-muted-foreground">{t("recap.unpaidInvoices")}</p>
           </CardContent>
         </Card>
       </motion.div>

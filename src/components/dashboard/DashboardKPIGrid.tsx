@@ -7,6 +7,7 @@ import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DashboardStats {
   turnover: number;
@@ -32,6 +33,7 @@ interface DashboardKPIGridProps {
 }
 
 export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: DashboardKPIGridProps) {
+  const { t } = useLanguage();
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
@@ -54,7 +56,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/invoices">
           <Card className="hover:shadow-md transition-shadow border-l-4 border-l-emerald-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("kpi.monthlyRevenue")}</CardTitle>
               <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
                 <DollarSign className="h-4 w-4 text-emerald-500" />
               </div>
@@ -68,7 +70,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Monthly revenue including VAT and Stamp Duty (TTC)</p>
+                    <p>{t("kpi.tooltip.revenue")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -82,7 +84,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/purchases">
           <Card className="hover:shadow-md transition-shadow border-l-4 border-l-red-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Expenses</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("kpi.monthlyExpenses")}</CardTitle>
               <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
                 <TrendingDown className="h-4 w-4 text-red-500" />
               </div>
@@ -96,7 +98,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Total expenses including VAT (TTC)</p>
+                    <p>{t("kpi.tooltip.expenses")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -110,7 +112,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/invoices">
           <Card className="hover:shadow-md transition-shadow border-l-4 border-l-emerald-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Net Profit</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("kpi.netProfit")}</CardTitle>
               <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
                 <Wallet className="h-4 w-4 text-emerald-500" />
               </div>
@@ -124,11 +126,11 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Revenue (HT) - Expenses (HT)</p>
+                    <p>{t("kpi.tooltip.profit")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <p className="text-xs text-muted-foreground mt-1">Margin: {stats?.netMargin.toFixed(1)}%</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("kpi.margin")}: {stats?.netMargin.toFixed(1)}%</p>
             </CardContent>
           </Card>
         </Link>
@@ -138,7 +140,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/declarations">
           <Card className={`hover:shadow-md transition-shadow border-l-4 ${isTvaCredit ? 'border-l-emerald-500' : 'border-l-red-500'} cursor-pointer h-full`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{isTvaCredit ? "VAT Credit" : "TVA Payable"}</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{isTvaCredit ? t("kpi.vatCredit") : t("kpi.tvaPayable")}</CardTitle>
               <div className={`h-8 w-8 rounded-full ${isTvaCredit ? 'bg-emerald-500/10' : 'bg-red-500/10'} flex items-center justify-center`}>
                 <Activity className={`h-4 w-4 ${isTvaCredit ? 'text-emerald-500' : 'text-red-500'}`} />
               </div>
@@ -152,12 +154,12 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>VAT Collected ({stats?.tva.toLocaleString()}) - VAT Deductible ({stats?.tvaDeductible.toLocaleString()})</p>
+                    <p>{t("kpi.tooltip.vat")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
               <p className="text-xs text-muted-foreground mt-1">
-                Collected: {stats?.tva.toLocaleString()} | Ded: {stats?.tvaDeductible.toLocaleString()}
+                {t("kpi.collected")}: {stats?.tva.toLocaleString()} | {t("kpi.deductible")}: {stats?.tvaDeductible.toLocaleString()}
               </p>
             </CardContent>
           </Card>
@@ -168,7 +170,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/invoices">
           <Card className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Avg Invoice Value</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("kpi.avgInvoiceValue")}</CardTitle>
               <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
                 <Calculator className="h-4 w-4 text-blue-500" />
               </div>
@@ -189,7 +191,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/declarations">
           <Card className="hover:shadow-md transition-shadow border-l-4 border-l-red-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Stamp Duty</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("kpi.stampDuty")}</CardTitle>
               <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
                 <CreditCard className="h-4 w-4 text-red-500" />
               </div>
@@ -203,7 +205,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Total Timbre Fiscal (1%) calculated on cash invoices</p>
+                    <p>{t("kpi.tooltip.stampDuty")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -217,7 +219,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/invoices">
           <Card className="hover:shadow-md transition-shadow border-l-4 border-l-yellow-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Outstanding</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("kpi.outstanding")}</CardTitle>
               <div className="h-8 w-8 rounded-full bg-yellow-500/10 flex items-center justify-center">
                 <AlertCircle className="h-4 w-4 text-yellow-500" />
               </div>
@@ -231,11 +233,11 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Total unpaid invoices including VAT (TTC)</p>
+                    <p>{t("kpi.tooltip.outstanding")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <p className="text-xs text-muted-foreground mt-1">Unpaid invoices</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("recap.unpaidInvoices")}</p>
             </CardContent>
           </Card>
         </Link>
@@ -245,14 +247,14 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/invoices">
           <Card className="hover:shadow-md transition-shadow border-l-4 border-l-red-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Invoices</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("kpi.overdueInvoices")}</CardTitle>
               <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-500">{stats?.overdueCount || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Action required</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("kpi.actionRequired")}</p>
             </CardContent>
           </Card>
         </Link>
@@ -262,14 +264,14 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
         <Link to="/invoices">
           <Card className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500 cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Invoices Issued</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("kpi.invoicesIssued")}</CardTitle>
               <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
                 <FileText className="h-4 w-4 text-blue-500" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-500">{stats?.invoiceCount || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">This month</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("kpi.thisMonth")}</p>
             </CardContent>
           </Card>
         </Link>
@@ -278,7 +280,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
       <motion.div variants={item}>
         <Card className={`hover:shadow-md transition-shadow border-l-4 ${rStyles.border} h-full`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Receivables Impact</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("kpi.receivablesImpact")}</CardTitle>
             <div className={`h-8 w-8 rounded-full ${rStyles.bg} flex items-center justify-center`}>
               <Percent className={`h-4 w-4 ${rStyles.color}`} />
             </div>
@@ -286,7 +288,7 @@ export default function DashboardKPIGrid({ stats, receivablesRatio, currency }: 
           <CardContent>
             <div className="text-2xl font-bold">{receivablesRatio}%</div>
             <Progress value={receivablesRatio} className={`h-2 mt-2 ${rStyles.progress}`} />
-            <p className="text-xs text-muted-foreground mt-2">of Profit is in Credit (Créances)</p>
+            <p className="text-xs text-muted-foreground mt-2">{t("kpi.profitInCredit")}</p>
           </CardContent>
         </Card>
       </motion.div>
