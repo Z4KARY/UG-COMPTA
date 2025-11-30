@@ -104,6 +104,15 @@ export const translations = {
     "charts.revenueCredit": "Revenue (Credit)",
     "charts.loading": "Loading...",
     "charts.noTrendData": "No trend data available yet.",
+
+    // Footer
+    "footer.description": "The #1 invoicing solution for Algerian businesses. Simple, compliant, and powerful.",
+    "footer.product": "Product",
+    "footer.company": "Company",
+    "footer.about": "About",
+    "footer.contact": "Contact",
+    "footer.privacy": "Privacy Policy",
+    "footer.rights": "All rights reserved.",
   },
   fr: {
     "nav.features": "Fonctionnalités",
@@ -210,6 +219,15 @@ export const translations = {
     "charts.revenueCredit": "Revenu (Crédit)",
     "charts.loading": "Chargement...",
     "charts.noTrendData": "Aucune donnée de tendance disponible.",
+
+    // Footer
+    "footer.description": "La solution de facturation n°1 pour les entreprises algériennes. Simple, conforme et puissante.",
+    "footer.product": "Produit",
+    "footer.company": "Entreprise",
+    "footer.about": "À propos",
+    "footer.contact": "Contact",
+    "footer.privacy": "Politique de confidentialité",
+    "footer.rights": "Tous droits réservés.",
   },
   ar: {
     "nav.features": "المميزات",
@@ -316,6 +334,15 @@ export const translations = {
     "charts.revenueCredit": "الإيرادات (آجل)",
     "charts.loading": "جار التحميل...",
     "charts.noTrendData": "لا توجد بيانات اتجاه متاحة بعد.",
+
+    // Footer
+    "footer.description": "الحل الأول للفوترة للشركات الجزائرية. بسيط، متوافق، وقوي.",
+    "footer.product": "المنتج",
+    "footer.company": "الشركة",
+    "footer.about": "حول",
+    "footer.contact": "اتصل بنا",
+    "footer.privacy": "سياسة الخصوصية",
+    "footer.rights": "جميع الحقوق محفوظة.",
   }
 };
 

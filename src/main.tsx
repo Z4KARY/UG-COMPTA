@@ -56,10 +56,10 @@ function RouteSyncer() {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <VlyToolbar />
-    <InstrumentationProvider>
-      <ConvexAuthProvider client={convex}>
-        <LanguageProvider>
+    <LanguageProvider>
+      <VlyToolbar />
+      <InstrumentationProvider>
+        <ConvexAuthProvider client={convex}>
           <BrowserRouter>
             <RouteSyncer />
             <Routes>
@@ -82,8 +82,8 @@ createRoot(document.getElementById("root")!).render(
             </Routes>
           </BrowserRouter>
           <Toaster />
-        </LanguageProvider>
-      </ConvexAuthProvider>
-    </InstrumentationProvider>
+        </ConvexAuthProvider>
+      </InstrumentationProvider>
+    </LanguageProvider>
   </StrictMode>,
 );
