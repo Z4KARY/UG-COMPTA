@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { translations, TranslationKey } from "@/lib/translations";
 
 type Language = "en" | "fr" | "ar";
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string; // Placeholder for future translation function
+  t: (key: TranslationKey) => string;
   dir: "ltr" | "rtl";
 }
 
@@ -29,10 +30,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.lang = language;
   }, [dir, language]);
 
-  // Simple placeholder translation function
-  // In a real app, this would look up keys in a dictionary
-  const t = (key: string) => {
-    return key;
+  const t = (key: TranslationKey) => {
+    return translations[language][key] || translations["en"][key] || key;
   };
 
   return (

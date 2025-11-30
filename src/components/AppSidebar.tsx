@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const items = [
   {
@@ -88,9 +89,53 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { t } = useLanguage();
   
   const businesses = useQuery(api.businesses.listMyBusinesses);
   const activeBusiness = useQuery(api.businesses.getMyBusiness, {});
+
+  const items = [
+    {
+      title: t("sidebar.dashboard"),
+      url: "/dashboard",
+      icon: Home,
+    },
+    {
+      title: t("sidebar.invoices"),
+      url: "/invoices",
+      icon: FileText,
+    },
+    {
+      title: t("sidebar.purchases"),
+      url: "/purchases",
+      icon: ShoppingCart,
+    },
+    {
+      title: t("sidebar.customers"),
+      url: "/customers",
+      icon: Users,
+    },
+    {
+      title: t("sidebar.suppliers"),
+      url: "/suppliers",
+      icon: Truck,
+    },
+    {
+      title: t("sidebar.products"),
+      url: "/products",
+      icon: Package,
+    },
+    {
+      title: t("sidebar.declarations"),
+      url: "/declarations",
+      icon: FileSpreadsheet,
+    },
+    {
+      title: t("sidebar.settings"),
+      url: "/settings",
+      icon: Building2,
+    },
+  ];
 
   const handleLogout = async () => {
     await signOut();
@@ -122,14 +167,14 @@ export function AppSidebar() {
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" align="start" side="bottom" sideOffset={4}>
-                <DropdownMenuLabel className="text-xs text-muted-foreground">My Businesses</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-xs text-muted-foreground">{t("sidebar.myBusinesses")}</DropdownMenuLabel>
                 {businesses?.map((b) => (
                     <DropdownMenuItem key={b._id} className="cursor-pointer gap-2 p-2" onClick={() => { /* Logic to switch business would go here if implemented */ }}>
                         <div className="flex size-6 items-center justify-center rounded-sm border">
                           <Building2 className="size-4 shrink-0" />
                         </div>
                         {b.name}
-                        {activeBusiness?._id === b._id && <span className="ml-auto text-xs text-muted-foreground">Active</span>}
+                        {activeBusiness?._id === b._id && <span className="ml-auto text-xs text-muted-foreground">{t("sidebar.active")}</span>}
                     </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
@@ -137,14 +182,14 @@ export function AppSidebar() {
                     <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                       <Plus className="size-4" />
                     </div>
-                    <div className="font-medium text-muted-foreground">Add Business</div>
+                    <div className="font-medium text-muted-foreground">{t("sidebar.addBusiness")}</div>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.platform")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -171,7 +216,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center justify-between mb-2 px-2">
-               <span className="text-xs text-muted-foreground font-medium">Language</span>
+               <span className="text-xs text-muted-foreground font-medium">{t("sidebar.language")}</span>
                <LanguageSelector />
             </div>
           </SidebarMenuItem>
@@ -217,7 +262,7 @@ export function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  {t("sidebar.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

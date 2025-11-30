@@ -3,12 +3,14 @@ import { useAuth } from "@/hooks/use-auth";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function LandingHero() {
   const { isAuthenticated } = useAuth();
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
+  const { t } = useLanguage();
 
   return (
     <section className="relative py-20 md:py-32 overflow-hidden">
@@ -26,7 +28,7 @@ export function LandingHero() {
                 transition={{ duration: 0.5 }}
                 className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary/10 text-primary hover:bg-primary/20"
               >
-                New: AI-Powered OCR Support
+                {t("hero.new")}
               </motion.div>
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
@@ -34,8 +36,8 @@ export function LandingHero() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-5xl md:text-7xl font-extrabold tracking-tight text-foreground"
               >
-                Invoicing for <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Algerian Business</span>
-                <br /> Made Simple.
+                {t("hero.title.start")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">{t("hero.title.highlight")}</span>
+                <br /> {t("hero.title.end")}
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -43,8 +45,7 @@ export function LandingHero() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
               >
-                The complete financial operating system for Algerian companies. 
-                Handle TVA, Timbre Fiscal, and compliance effortlessly.
+                {t("hero.description")}
               </motion.p>
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -54,11 +55,11 @@ export function LandingHero() {
               >
                 <Button size="lg" className="rounded-full text-lg h-12 px-8 shadow-xl shadow-primary/20 transition-transform hover:scale-105" asChild>
                   <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
-                    Start for Free <ArrowRight className="ml-2 h-5 w-5" />
+                    {t("hero.startFree")} <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" className="rounded-full text-lg h-12 px-8 transition-transform hover:scale-105" asChild>
-                   <Link to="/auth">View Demo</Link>
+                   <Link to="/auth">{t("hero.viewDemo")}</Link>
                 </Button>
               </motion.div>
             </motion.div>

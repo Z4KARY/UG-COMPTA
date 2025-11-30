@@ -5,10 +5,12 @@ import { Menu, X } from "lucide-react";
 import { Link } from "react-router";
 import { useState } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function LandingNavbar() {
   const { isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useLanguage();
 
   const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
@@ -26,22 +28,22 @@ export function LandingNavbar() {
           
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
-            <a href="#pricing" className="text-sm font-medium hover:text-primary transition-colors">Pricing</a>
-            <a href="#testimonials" className="text-sm font-medium hover:text-primary transition-colors">Testimonials</a>
-            <a href="#faq" className="text-sm font-medium hover:text-primary transition-colors">FAQ</a>
+            <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.features")}</a>
+            <a href="#pricing" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.pricing")}</a>
+            <a href="#testimonials" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.testimonials")}</a>
+            <a href="#faq" className="text-sm font-medium hover:text-primary transition-colors">{t("nav.faq")}</a>
             <LanguageSelector />
             {isAuthenticated ? (
               <Button asChild variant="default" className="rounded-full shadow-lg shadow-primary/20">
-                <Link to="/dashboard">Go to Dashboard</Link>
+                <Link to="/dashboard">{t("nav.dashboard")}</Link>
               </Button>
             ) : (
               <div className="flex items-center gap-4">
                 <Link to="/auth" className="text-sm font-medium hover:text-primary transition-colors">
-                  Sign In
+                  {t("nav.signin")}
                 </Link>
                 <Button asChild className="rounded-full shadow-lg shadow-primary/20">
-                  <Link to="/auth">Get Started</Link>
+                  <Link to="/auth">{t("nav.getStarted")}</Link>
                 </Button>
               </div>
             )}
@@ -65,12 +67,12 @@ export function LandingNavbar() {
             exit={{ opacity: 0, y: -20 }}
             className="md:hidden absolute top-16 left-0 w-full bg-background border-b p-4 flex flex-col gap-4 shadow-xl"
           >
-            <a href="#features" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={toggleMenu}>Features</a>
-            <a href="#pricing" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={toggleMenu}>Pricing</a>
-            <a href="#testimonials" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={toggleMenu}>Testimonials</a>
-            <Link to="/auth" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={toggleMenu}>Sign In</Link>
+            <a href="#features" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={toggleMenu}>{t("nav.features")}</a>
+            <a href="#pricing" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={toggleMenu}>{t("nav.pricing")}</a>
+            <a href="#testimonials" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={toggleMenu}>{t("nav.testimonials")}</a>
+            <Link to="/auth" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={toggleMenu}>{t("nav.signin")}</Link>
             <Button asChild className="w-full">
-              <Link to="/auth">Get Started</Link>
+              <Link to="/auth">{t("nav.getStarted")}</Link>
             </Button>
           </motion.div>
         )}
