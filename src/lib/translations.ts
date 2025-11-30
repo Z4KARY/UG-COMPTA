@@ -33,7 +33,7 @@ export const translations = {
     "dashboard.title": "Dashboard",
     "dashboard.subtitle": "Overview of your financial performance.",
     "dashboard.createInvoice": "Create Invoice",
-    "dashboard.welcome": "Welcome to InvoiceFlow",
+    "dashboard.welcome": "Welcome to UGCOMPTA",
     "dashboard.setupBusiness": "Setup Business",
     "dashboard.setupDescription": "You're just one step away. Set up your business profile to start managing your invoices and finances.",
 
@@ -188,7 +188,7 @@ export const translations = {
     "dashboard.title": "Tableau de bord",
     "dashboard.subtitle": "Aperçu de votre performance financière.",
     "dashboard.createInvoice": "Créer une facture",
-    "dashboard.welcome": "Bienvenue sur InvoiceFlow",
+    "dashboard.welcome": "Bienvenue sur UGCOMPTA",
     "dashboard.setupBusiness": "Configurer l'entreprise",
     "dashboard.setupDescription": "Vous n'êtes qu'à une étape. Configurez votre profil d'entreprise pour commencer à gérer vos factures et vos finances.",
 
@@ -343,7 +343,7 @@ export const translations = {
     "dashboard.title": "لوحة التحكم",
     "dashboard.subtitle": "نظرة عامة على أدائك المالي.",
     "dashboard.createInvoice": "إنشاء فاتورة",
-    "dashboard.welcome": "مرحبًا بك في InvoiceFlow",
+    "dashboard.welcome": "مرحبًا بك في UGCOMPTA",
     "dashboard.setupBusiness": "إعداد العمل",
     "dashboard.setupDescription": "أنت على بعد خطوة واحدة فقط. قم بإعداد ملف تعريف عملك للبدء في إدارة فواتيرك وأموالك.",
 

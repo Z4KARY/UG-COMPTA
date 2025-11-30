@@ -23,7 +23,7 @@ export function LandingNavbar() {
               alt="UpGrowth" 
               className="h-8 w-auto object-contain" 
             />
-            <span>InvoiceFlow</span>
+            <span>UGCOMPTA</span>
           </div>
           
           {/* Desktop Nav */}

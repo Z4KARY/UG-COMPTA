@@ -49,7 +49,7 @@ export default function DashboardLayout({
                 <Breadcrumb className="overflow-hidden">
                   <BreadcrumbList>
                     <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbLink href="/dashboard">InvoiceFlow</BreadcrumbLink>
+                      <BreadcrumbLink href="/dashboard">UGCOMPTA</BreadcrumbLink>
                     </BreadcrumbItem>
                     {pathSegments.map((segment, index) => {
                       const isLast = index === pathSegments.length - 1;

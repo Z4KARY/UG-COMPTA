@@ -156,7 +156,7 @@ export function AppSidebar() {
                       />
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{activeBusiness?.name || "InvoiceFlow"}</span>
+                      <span className="truncate font-semibold">{activeBusiness?.name || "UGCOMPTA"}</span>
                       <span className="truncate text-xs text-muted-foreground">
                         {activeBusiness?.plan 
                           ? (activeBusiness.plan === "free" ? "Auto-Entrepreneur" : activeBusiness.plan === "pro" ? "Small Business" : "Enterprise") 

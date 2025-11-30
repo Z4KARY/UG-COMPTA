@@ -14,7 +14,7 @@ export function LandingFooter() {
                   alt="UpGrowth" 
                   className="h-8 w-auto object-contain" 
                 />
-                <span>InvoiceFlow</span>
+                <span>UGCOMPTA</span>
               </div>
               <p className="text-muted-foreground max-w-xs">
                 {t("footer.description")}
@@ -38,7 +38,7 @@ export function LandingFooter() {
             </div>
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 InvoiceFlow. {t("footer.rights")}</p>
+            <p>&copy; 2024 UGCOMPTA. {t("footer.rights")}</p>
           </div>
         </div>
       </footer>
