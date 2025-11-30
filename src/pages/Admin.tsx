@@ -33,10 +33,11 @@ export default function Admin() {
   // Since we don't have a direct hook for role in context, we rely on the query failing or returning null if not authorized,
   // but ideally we check the user object.
   const user = useQuery(api.users.currentUser);
+  const isAdmin = user?.role === "admin";
   
-  const businesses = useQuery(api.admin.listBusinesses);
-  const users = useQuery(api.admin.listUsers);
-  const globalParams = useQuery(api.admin.getGlobalFiscalParameters);
+  const businesses = useQuery(api.admin.listBusinesses, isAdmin ? {} : "skip");
+  const users = useQuery(api.admin.listUsers, isAdmin ? {} : "skip");
+  const globalParams = useQuery(api.admin.getGlobalFiscalParameters, isAdmin ? {} : "skip");
   
   const toggleBusiness = useMutation(api.admin.toggleBusinessSuspension);
   const toggleUser = useMutation(api.admin.toggleUserSuspension);
