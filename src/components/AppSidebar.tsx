@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const items = [
   {
@@ -168,6 +169,12 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-4">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="flex items-center justify-between mb-2 px-2">
+               <span className="text-xs text-muted-foreground font-medium">Language</span>
+               <LanguageSelector />
+            </div>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

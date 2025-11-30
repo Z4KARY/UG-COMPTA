@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router";
 import { useState } from "react";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 export function LandingNavbar() {
   const { isAuthenticated } = useAuth();
@@ -29,6 +30,7 @@ export function LandingNavbar() {
             <a href="#pricing" className="text-sm font-medium hover:text-primary transition-colors">Pricing</a>
             <a href="#testimonials" className="text-sm font-medium hover:text-primary transition-colors">Testimonials</a>
             <a href="#faq" className="text-sm font-medium hover:text-primary transition-colors">FAQ</a>
+            <LanguageSelector />
             {isAuthenticated ? (
               <Button asChild variant="default" className="rounded-full shadow-lg shadow-primary/20">
                 <Link to="/dashboard">Go to Dashboard</Link>
@@ -46,9 +48,12 @@ export function LandingNavbar() {
           </nav>
 
           {/* Mobile Menu Toggle */}
-          <button className="md:hidden p-2" onClick={toggleMenu}>
-            {isMobileMenuOpen ? <X /> : <Menu />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <LanguageSelector />
+            <button className="p-2" onClick={toggleMenu}>
+              {isMobileMenuOpen ? <X /> : <Menu />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Nav */}

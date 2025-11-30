@@ -24,6 +24,7 @@ import PurchaseCreate from "./pages/PurchaseCreate.tsx";
 import PurchaseDetail from "./pages/PurchaseDetail.tsx";
 import Suppliers from "./pages/Suppliers.tsx";
 import "./types/global.d.ts";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -58,28 +59,30 @@ createRoot(document.getElementById("root")!).render(
     <VlyToolbar />
     <InstrumentationProvider>
       <ConvexAuthProvider client={convex}>
-        <BrowserRouter>
-          <RouteSyncer />
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/settings" element={<BusinessSettings />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/invoices" element={<Invoices />} />
-            <Route path="/invoices/new" element={<InvoiceCreate />} />
-            <Route path="/invoices/:id" element={<InvoiceDetail />} />
-            <Route path="/purchases" element={<Purchases />} />
-            <Route path="/purchases/new" element={<PurchaseCreate />} />
-            <Route path="/purchases/:id" element={<PurchaseDetail />} />
-            <Route path="/suppliers" element={<Suppliers />} />
-            <Route path="/declarations" element={<Declarations />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
+        <LanguageProvider>
+          <BrowserRouter>
+            <RouteSyncer />
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/settings" element={<BusinessSettings />} />
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/invoices" element={<Invoices />} />
+              <Route path="/invoices/new" element={<InvoiceCreate />} />
+              <Route path="/invoices/:id" element={<InvoiceDetail />} />
+              <Route path="/purchases" element={<Purchases />} />
+              <Route path="/purchases/new" element={<PurchaseCreate />} />
+              <Route path="/purchases/:id" element={<PurchaseDetail />} />
+              <Route path="/suppliers" element={<Suppliers />} />
+              <Route path="/declarations" element={<Declarations />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+        </LanguageProvider>
       </ConvexAuthProvider>
     </InstrumentationProvider>
   </StrictMode>,
