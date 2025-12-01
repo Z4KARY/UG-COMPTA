@@ -36,12 +36,13 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { ImportDialog } from "@/components/ImportDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SetupRequired } from "@/components/SetupRequired";
 
 export default function Products() {
   const { t } = useLanguage();
@@ -142,12 +143,20 @@ export default function Products() {
     }
   };
 
-  if (!business) {
+  if (business === undefined) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <p>{t("declarations.setup")}</p>
+        <div className="flex h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (business === null) {
+    return (
+      <DashboardLayout>
+        <SetupRequired />
       </DashboardLayout>
     );
   }

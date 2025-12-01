@@ -30,12 +30,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { Plus, Trash2, ArrowLeft, Pencil } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Pencil, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SetupRequired } from "@/components/SetupRequired";
 
 export default function Suppliers() {
   const { t } = useLanguage();
@@ -118,6 +119,24 @@ export default function Suppliers() {
           }
       }
   };
+
+  if (business === undefined) {
+    return (
+      <DashboardLayout>
+        <div className="flex h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (business === null) {
+    return (
+      <DashboardLayout>
+        <SetupRequired />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

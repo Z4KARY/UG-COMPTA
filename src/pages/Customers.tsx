@@ -19,11 +19,12 @@ import { ImportDialog } from "@/components/ImportDialog";
 import { CustomerDialog } from "@/components/CustomerDialog";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Trash2, Pencil, Plus } from "lucide-react";
+import { Trash2, Pencil, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SetupRequired } from "@/components/SetupRequired";
 
 export default function Customers() {
   const { t } = useLanguage();
@@ -58,12 +59,20 @@ export default function Customers() {
     setIsDialogOpen(true);
   };
 
-  if (!business) {
+  if (business === undefined) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <p>{t("declarations.setup")}</p>
+        <div className="flex h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (business === null) {
+    return (
+      <DashboardLayout>
+        <SetupRequired />
       </DashboardLayout>
     );
   }

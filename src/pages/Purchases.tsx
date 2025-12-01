@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { Plus, ShoppingCart, Trash2, Users } from "lucide-react";
+import { Plus, ShoppingCart, Trash2, Users, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { format } from "date-fns";
@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SetupRequired } from "@/components/SetupRequired";
 
 export default function Purchases() {
   const { t } = useLanguage();
@@ -52,6 +53,24 @@ export default function Purchases() {
           }
       }
   };
+
+  if (business === undefined) {
+    return (
+      <DashboardLayout>
+        <div className="flex h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (business === null) {
+    return (
+      <DashboardLayout>
+        <SetupRequired />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

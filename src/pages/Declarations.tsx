@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { FileText, Download, Printer, Save, Settings } from "lucide-react";
+import { FileText, Download, Printer, Save, Settings, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { Link } from "react-router";
 import { G50Declaration } from "@/components/G50Declaration";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SetupRequired } from "@/components/SetupRequired";
 
 export default function Declarations() {
   const { t } = useLanguage();
@@ -233,12 +234,20 @@ export default function Declarations() {
     window.print();
   };
 
-  if (!business) {
+  if (business === undefined) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <p>{t("declarations.setup")}</p>
+        <div className="flex h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (business === null) {
+    return (
+      <DashboardLayout>
+        <SetupRequired />
       </DashboardLayout>
     );
   }

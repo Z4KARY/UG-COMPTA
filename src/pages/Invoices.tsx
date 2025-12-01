@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 import { ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SetupRequired } from "@/components/SetupRequired";
 
 export default function Invoices() {
   const { t } = useLanguage();
@@ -104,12 +105,20 @@ export default function Invoices() {
     setSortConfig({ key, direction });
   };
 
-  if (!business) {
+  if (business === undefined) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <p>{t("declarations.setup")}</p>
+        <div className="flex h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (business === null) {
+    return (
+      <DashboardLayout>
+        <SetupRequired />
       </DashboardLayout>
     );
   }
