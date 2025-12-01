@@ -357,6 +357,9 @@ export const translations = {
     "settings.toast.periodCloseFailed": "Failed to close period",
     "settings.toast.periodReopened": "Period reopened",
     "settings.toast.periodReopenFailed": "Failed to reopen period",
+    "settings.setupRequired.title": "Setup Required",
+    "settings.setupRequired.description": "Please set up your business profile in the General Settings tab before accessing these settings.",
+    "settings.setupRequired.button": "Go to General Settings",
 
     // Auth
     "auth.getStarted": "Get Started",
@@ -688,6 +691,9 @@ export const translations = {
     "settings.toast.periodCloseFailed": "Échec de la fermeture de la période",
     "settings.toast.periodReopened": "Période réouverte",
     "settings.toast.periodReopenFailed": "Échec de la réouverture de la période",
+    "settings.setupRequired.title": "Configuration Requise",
+    "settings.setupRequired.description": "Veuillez configurer votre profil d'entreprise dans l'onglet Paramètres Généraux avant d'accéder à ces paramètres.",
+    "settings.setupRequired.button": "Aller aux Paramètres Généraux",
 
     // Auth
     "auth.getStarted": "Commencer",
@@ -1092,6 +1098,9 @@ export const translations = {
     "settings.toast.periodCloseFailed": "فشل إغلاق الفترة",
     "settings.toast.periodReopened": "تم إعادة فتح الفترة",
     "settings.toast.periodReopenFailed": "فشل إعادة فتح الفترة",
+    "settings.setupRequired.title": "الإعداد مطلوب",
+    "settings.setupRequired.description": "يرجى إعداد ملف تعريف عملك في علامة تبويب الإعدادات العامة قبل الوصول إلى هذه الإعدادات.",
+    "settings.setupRequired.button": "الذهاب إلى الإعدادات العامة",
 
     // Auth
     "auth.getStarted": "ابدأ الآن",
