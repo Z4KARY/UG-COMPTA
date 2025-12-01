@@ -64,12 +64,8 @@ export default function Suppliers() {
     );
   }
 
-  if (business === null) {
-    return (
-      <DashboardLayout>
-        <SetupRequired />
-      </DashboardLayout>
-    );
+  if (business === null || !business.type) {
+    return <SetupRequired />;
   }
 
   return (

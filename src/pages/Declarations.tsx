@@ -244,20 +244,8 @@ export default function Declarations() {
     );
   }
 
-  if (business === null) {
-    return (
-      <DashboardLayout>
-        <SetupRequired />
-      </DashboardLayout>
-    );
-  }
-
-  if (!business.type) {
-    return (
-      <DashboardLayout>
-        <SetupRequired />
-      </DashboardLayout>
-    );
+  if (business === null || !business.type) {
+    return <SetupRequired />;
   }
 
   // Logic Implementation Summary Check

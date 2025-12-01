@@ -154,11 +154,7 @@ export default function Products() {
   }
 
   if (business === null || !business.type) {
-    return (
-      <DashboardLayout>
-        <SetupRequired />
-      </DashboardLayout>
-    );
+    return <SetupRequired />;
   }
 
   return (
