@@ -1,9 +1,9 @@
 export function LandingTrustedBy() {
   return (
-    <section className="py-16 border-y bg-card/50 backdrop-blur-sm">
+    <section className="py-20 bg-background">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-sm font-bold text-muted-foreground/80 mb-10 uppercase tracking-widest">Trusted by forward-thinking companies</p>
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+            <p className="text-sm font-medium text-muted-foreground mb-8 uppercase tracking-widest">Trusted by forward-thinking companies</p>
+            <div className="mx-auto max-w-5xl bg-card border rounded-[2rem] p-10 md:p-14 flex flex-wrap justify-center items-center gap-12 md:gap-24 shadow-sm">
               <img 
                 src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
                 alt="UpGrowth" 
