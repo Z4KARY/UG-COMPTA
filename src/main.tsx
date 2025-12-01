@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/sonner";
-import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
 import { InstrumentationProvider } from "@/instrumentation.tsx";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
@@ -57,7 +56,6 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <LanguageProvider>
       <InstrumentationProvider>
-        <VlyToolbar />
         <ConvexAuthProvider client={convex}>
           <BrowserRouter>
             <RouteSyncer />
