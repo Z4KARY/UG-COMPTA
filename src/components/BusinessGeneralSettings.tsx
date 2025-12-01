@@ -311,7 +311,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder={formData.type === "societe" ? "e.g. SARL Tech Solutions" : "e.g. Ahmed Benali"}
+              placeholder={formData.type === "societe" ? t("settings.placeholders.companyName") : t("settings.placeholders.personName")}
               required
               className="bg-muted/30"
             />
@@ -328,7 +328,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
               name="tradeName"
               value={formData.tradeName}
               onChange={handleChange}
-              placeholder={formData.type === "societe" ? "Optional" : "e.g. My Shop"}
+              placeholder={formData.type === "societe" ? t("settings.placeholders.optional") : t("settings.placeholders.tradeName")}
               className="bg-muted/30"
             />
           </div>
@@ -341,7 +341,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Full business address"
+                placeholder={t("settings.placeholders.address")}
                 required
                 className="pl-9 bg-muted/30"
               />
@@ -381,7 +381,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                 id="phone"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+213 ..."
+                placeholder={t("settings.placeholders.phone")}
               />
             </div>
             <div className="grid gap-2">
@@ -391,7 +391,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="contact@business.com"
+                placeholder={t("settings.placeholders.email")}
               />
             </div>
           </div>
@@ -421,12 +421,12 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                 onValueChange={(val) => handleSelectChange("type", val)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t("settings.placeholders.selectType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="societe">Société (SARL, EURL, SPA...)</SelectItem>
-                  <SelectItem value="personne_physique">Personne Physique (Entreprise Individuelle)</SelectItem>
-                  <SelectItem value="auto_entrepreneur">Auto-Entrepreneur</SelectItem>
+                  <SelectItem value="societe">{t("settings.options.societe")}</SelectItem>
+                  <SelectItem value="personne_physique">{t("settings.options.personnePhysique")}</SelectItem>
+                  <SelectItem value="auto_entrepreneur">{t("settings.options.autoEntrepreneur")}</SelectItem>
                 </SelectContent>
               </Select>
           </div>
@@ -439,11 +439,11 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                     onValueChange={(val) => handleSelectChange("fiscalRegime", val)}
                 >
                     <SelectTrigger>
-                    <SelectValue placeholder="Select regime" />
+                    <SelectValue placeholder={t("settings.placeholders.selectRegime")} />
                     </SelectTrigger>
                     <SelectContent>
-                    <SelectItem value="forfaitaire">Régime Forfaitaire (IFU)</SelectItem>
-                    <SelectItem value="reel">Régime Réel Simplifié</SelectItem>
+                    <SelectItem value="forfaitaire">{t("settings.options.regimeForfaitaire")}</SelectItem>
+                    <SelectItem value="reel">{t("settings.options.regimeReel")}</SelectItem>
                     </SelectContent>
                 </Select>
               </div>
@@ -457,11 +457,11 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                     onValueChange={(val) => handleSelectChange("legalForm", val)}
                 >
                     <SelectTrigger>
-                    <SelectValue placeholder="Select form" />
+                    <SelectValue placeholder={t("settings.placeholders.selectForm")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectLabel>Sociétés Commerciales</SelectLabel>
+                        <SelectLabel>{t("settings.groups.commercial")}</SelectLabel>
                         <SelectItem value="EURL">EURL</SelectItem>
                         <SelectItem value="SARL">SARL</SelectItem>
                         <SelectItem value="SPA">SPA</SelectItem>
@@ -473,16 +473,16 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                         <SelectItem value="SOCIETE_PARTICIPATION">Société de participation</SelectItem>
                       </SelectGroup>
                       <SelectGroup>
-                        <SelectLabel>Entreprises Publiques</SelectLabel>
+                        <SelectLabel>{t("settings.groups.public")}</SelectLabel>
                         <SelectItem value="EPE">EPE</SelectItem>
                         <SelectItem value="EPIC">EPIC</SelectItem>
                       </SelectGroup>
                       <SelectGroup>
-                        <SelectLabel>Autres</SelectLabel>
+                        <SelectLabel>{t("settings.groups.other")}</SelectLabel>
                         <SelectItem value="ASSOCIATION">Association</SelectItem>
                         <SelectItem value="COOPERATIVE">Coopérative</SelectItem>
                         <SelectItem value="ONG">ONG</SelectItem>
-                        <SelectItem value="OTHER">Other (specify)</SelectItem>
+                        <SelectItem value="OTHER">{t("settings.options.other")}</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                 </Select>
@@ -497,12 +497,10 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                     name="customLegalForm"
                     value={formData.customLegalForm}
                     onChange={handleChange}
-                    placeholder="e.g. Fondation, EPA..."
+                    placeholder={t("settings.placeholders.customForm")}
                     required
                 />
-                <p className="text-[0.8rem] text-muted-foreground">
-                    This entity will behave fiscally as a <strong>Société</strong> (G50, VAT).
-                </p>
+                <p className="text-[0.8rem] text-muted-foreground" dangerouslySetInnerHTML={{ __html: t("settings.helpers.customForm") }} />
               </div>
           )}
 
@@ -518,7 +516,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                             name="autoEntrepreneurCardNumber"
                             value={formData.autoEntrepreneurCardNumber}
                             onChange={handleChange}
-                            placeholder="National Registration Number"
+                            placeholder={t("settings.placeholders.aeCard")}
                             required
                         />
                     </div>
@@ -529,7 +527,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                             name="nif"
                             value={formData.nif}
                             onChange={handleChange}
-                            placeholder="Numéro Id. Fiscale"
+                            placeholder={t("settings.placeholders.nif")}
                             required
                         />
                     </div>
@@ -541,7 +539,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                         name="activityCodes"
                         value={formData.activityCodes}
                         onChange={handleChange}
-                        placeholder="e.g. 072100, 072300 (Comma separated)"
+                        placeholder={t("settings.placeholders.activityCodes")}
                     />
                   </div>
                   <div className="space-y-2">
@@ -551,7 +549,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                         name="ssNumber"
                         value={formData.ssNumber}
                         onChange={handleChange}
-                        placeholder="Social Security Number"
+                        placeholder={t("settings.placeholders.casnos")}
                     />
                   </div>
               </div>
@@ -565,7 +563,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                         name="rc"
                         value={formData.rc}
                         onChange={handleChange}
-                        placeholder="Registre Commerce"
+                        placeholder={t("settings.placeholders.rc")}
                     />
                     </div>
                     <div className="space-y-2">
@@ -575,7 +573,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                         name="nif"
                         value={formData.nif}
                         onChange={handleChange}
-                        placeholder="Numéro Id. Fiscale"
+                        placeholder={t("settings.placeholders.nif")}
                     />
                     </div>
                 </div>
@@ -587,7 +585,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                         name="ai"
                         value={formData.ai}
                         onChange={handleChange}
-                        placeholder="Article Imposition"
+                        placeholder={t("settings.placeholders.ai")}
                         />
                     </div>
                     <div className="space-y-2">
@@ -597,7 +595,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                         name="nis"
                         value={formData.nis}
                         onChange={handleChange}
-                        placeholder="Numéro Id. Statistique"
+                        placeholder={t("settings.placeholders.nis")}
                         />
                     </div>
                 </div>
@@ -610,7 +608,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                         type="number"
                         value={formData.capital}
                         onChange={handleChange}
-                        placeholder="e.g. 100000"
+                        placeholder={t("settings.placeholders.capital")}
                         />
                     </div>
                 )}
@@ -670,7 +668,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                 name="bankName"
                 value={formData.bankName}
                 onChange={handleChange}
-                placeholder="e.g. CPA, BNA, AGB"
+                placeholder={t("settings.placeholders.bankName")}
                 className="pl-9"
               />
             </div>
@@ -684,7 +682,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
                 name="bankIban"
                 value={formData.bankIban}
                 onChange={handleChange}
-                placeholder="Account number"
+                placeholder={t("settings.placeholders.iban")}
                 className="pl-9 font-mono"
               />
             </div>
@@ -720,9 +718,9 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
               name="invoicePrefix"
               value={formData.invoicePrefix}
               onChange={handleChange}
-              placeholder="e.g. INV-"
+              placeholder={t("settings.placeholders.prefixInv")}
             />
-            <p className="text-xs text-muted-foreground">Format: {formData.invoicePrefix}YYYY-001</p>
+            <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.invoicePrefix}YYYY-001</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="quotePrefix">{t("settings.sequencing.quotePrefix")}</Label>
@@ -731,9 +729,9 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
               name="quotePrefix"
               value={formData.quotePrefix}
               onChange={handleChange}
-              placeholder="e.g. DEV-"
+              placeholder={t("settings.placeholders.prefixQuote")}
             />
-            <p className="text-xs text-muted-foreground">Format: {formData.quotePrefix}YYYY-001</p>
+            <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.quotePrefix}YYYY-001</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="creditNotePrefix">{t("settings.sequencing.creditNotePrefix")}</Label>
@@ -742,9 +740,9 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
               name="creditNotePrefix"
               value={formData.creditNotePrefix}
               onChange={handleChange}
-              placeholder="e.g. AV-"
+              placeholder={t("settings.placeholders.prefixCredit")}
             />
-            <p className="text-xs text-muted-foreground">Format: {formData.creditNotePrefix}YYYY-001</p>
+            <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.creditNotePrefix}YYYY-001</p>
           </div>
         </CardContent>
       </Card>
