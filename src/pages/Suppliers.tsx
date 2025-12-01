@@ -35,8 +35,10 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Suppliers() {
+  const { t } = useLanguage();
   const business = useQuery(api.businesses.getMyBusiness, {});
   const suppliers = useQuery(api.suppliers.list, business ? { businessId: business._id } : "skip");
   const createSupplier = useMutation(api.suppliers.create);
@@ -107,7 +109,7 @@ export default function Suppliers() {
   };
 
   const handleDelete = async (id: any) => {
-      if (confirm("Are you sure? This will fail if the supplier has linked invoices.")) {
+      if (confirm(t("suppliers.deleteConfirm"))) {
           try {
               await deleteSupplier({ id });
               toast.success("Supplier deleted");
@@ -128,9 +130,9 @@ export default function Suppliers() {
                     </Link>
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Suppliers</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{t("suppliers.title")}</h1>
                     <p className="text-muted-foreground mt-1">
-                    Manage your suppliers and track amounts owed.
+                    {t("suppliers.subtitle")}
                     </p>
                 </div>
             </div>
@@ -140,26 +142,26 @@ export default function Suppliers() {
                     <DialogTrigger asChild>
                         <Button onClick={handleCreate} className="w-full md:w-auto">
                             <Plus className="mr-2 h-4 w-4" />
-                            Add Supplier
+                            {t("suppliers.add")}
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-3xl">
                         <DialogHeader>
-                            <DialogTitle>{editingId ? "Edit Supplier" : "Add New Supplier"}</DialogTitle>
-                            <DialogDescription>{editingId ? "Update supplier details and view history." : "Enter supplier details for VAT tracking."}</DialogDescription>
+                            <DialogTitle>{editingId ? t("suppliers.edit") : t("suppliers.add")}</DialogTitle>
+                            <DialogDescription>{editingId ? t("suppliers.subtitle") : t("suppliers.subtitle")}</DialogDescription>
                         </DialogHeader>
                         
                         {editingId ? (
                             <Tabs defaultValue="details" className="w-full">
                                 <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="details">Details</TabsTrigger>
-                                    <TabsTrigger value="invoices">Invoices ({supplierInvoices?.length || 0})</TabsTrigger>
+                                    <TabsTrigger value="details">{t("suppliers.details")}</TabsTrigger>
+                                    <TabsTrigger value="invoices">{t("suppliers.invoices")} ({supplierInvoices?.length || 0})</TabsTrigger>
                                 </TabsList>
                                 
                                 <TabsContent value="details">
                                     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="name">Supplier Name *</Label>
+                                            <Label htmlFor="name">{t("customers.name")} *</Label>
                                             <Input 
                                                 id="name" 
                                                 value={formData.name} 
@@ -169,7 +171,7 @@ export default function Suppliers() {
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor="nif">NIF</Label>
+                                                <Label htmlFor="nif">{t("customers.nif")}</Label>
                                                 <Input 
                                                     id="nif" 
                                                     value={formData.nif} 
@@ -177,7 +179,7 @@ export default function Suppliers() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="rc">RC</Label>
+                                                <Label htmlFor="rc">{t("customers.rc")}</Label>
                                                 <Input 
                                                     id="rc" 
                                                     value={formData.rc} 
@@ -186,7 +188,7 @@ export default function Suppliers() {
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="address">Address</Label>
+                                            <Label htmlFor="address">{t("customers.address")}</Label>
                                             <Input 
                                                 id="address" 
                                                 value={formData.address} 
@@ -195,7 +197,7 @@ export default function Suppliers() {
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor="phone">Phone</Label>
+                                                <Label htmlFor="phone">{t("customers.phone")}</Label>
                                                 <Input 
                                                     id="phone" 
                                                     value={formData.phone} 
@@ -203,7 +205,7 @@ export default function Suppliers() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="email">Email</Label>
+                                                <Label htmlFor="email">{t("customers.email")}</Label>
                                                 <Input 
                                                     id="email" 
                                                     value={formData.email} 
@@ -220,17 +222,17 @@ export default function Suppliers() {
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
-                                                    <TableHead className="w-[80px] px-2 text-xs">Number</TableHead>
-                                                    <TableHead className="hidden sm:table-cell">Date</TableHead>
-                                                    <TableHead className="px-2 text-xs">Status</TableHead>
-                                                    <TableHead className="text-right px-2 text-xs">Amount</TableHead>
+                                                    <TableHead className="w-[80px] px-2 text-xs">{t("invoices.number")}</TableHead>
+                                                    <TableHead className="hidden sm:table-cell">{t("invoices.date")}</TableHead>
+                                                    <TableHead className="px-2 text-xs">{t("invoices.status")}</TableHead>
+                                                    <TableHead className="text-right px-2 text-xs">{t("invoices.amount")}</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 {supplierInvoices?.length === 0 && (
                                                     <TableRow>
                                                         <TableCell colSpan={4} className="text-center py-4 text-muted-foreground text-xs">
-                                                            No invoices found.
+                                                            {t("invoices.empty")}
                                                         </TableCell>
                                                     </TableRow>
                                                 )}
@@ -244,7 +246,7 @@ export default function Suppliers() {
                                                                     ? "bg-emerald-100 text-emerald-700" 
                                                                     : "bg-yellow-100 text-yellow-700"
                                                             }`}>
-                                                                {invoice.status || (invoice.paymentDate ? "paid" : "unpaid")}
+                                                                {invoice.status === "paid" ? t("invoices.status.paid") : t("invoices.status.unpaid")}
                                                             </span>
                                                         </TableCell>
                                                         <TableCell className="text-right font-medium text-xs px-2 py-3 whitespace-nowrap">
@@ -260,7 +262,7 @@ export default function Suppliers() {
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Supplier Name *</Label>
+                                    <Label htmlFor="name">{t("customers.name")} *</Label>
                                     <Input 
                                         id="name" 
                                         value={formData.name} 
@@ -270,7 +272,7 @@ export default function Suppliers() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="nif">NIF</Label>
+                                        <Label htmlFor="nif">{t("customers.nif")}</Label>
                                         <Input 
                                             id="nif" 
                                             value={formData.nif} 
@@ -278,7 +280,7 @@ export default function Suppliers() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="rc">RC</Label>
+                                        <Label htmlFor="rc">{t("customers.rc")}</Label>
                                         <Input 
                                             id="rc" 
                                             value={formData.rc} 
@@ -287,7 +289,7 @@ export default function Suppliers() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="address">Address</Label>
+                                    <Label htmlFor="address">{t("customers.address")}</Label>
                                     <Input 
                                         id="address" 
                                         value={formData.address} 
@@ -296,7 +298,7 @@ export default function Suppliers() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="phone">Phone</Label>
+                                        <Label htmlFor="phone">{t("customers.phone")}</Label>
                                         <Input 
                                             id="phone" 
                                             value={formData.phone} 
@@ -304,7 +306,7 @@ export default function Suppliers() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="email">Email</Label>
+                                        <Label htmlFor="email">{t("customers.email")}</Label>
                                         <Input 
                                             id="email" 
                                             value={formData.email} 
@@ -312,7 +314,7 @@ export default function Suppliers() {
                                         />
                                     </div>
                                 </div>
-                                <Button type="submit" className="w-full">Create Supplier</Button>
+                                <Button type="submit" className="w-full">{t("suppliers.add")}</Button>
                             </form>
                         )}
                     </DialogContent>
@@ -326,19 +328,19 @@ export default function Suppliers() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="pl-4">Name</TableHead>
-                            <TableHead className="hidden md:table-cell">Contact</TableHead>
-                            <TableHead className="text-right whitespace-nowrap">Total Purchases</TableHead>
-                            <TableHead className="text-right whitespace-nowrap">Paid</TableHead>
-                            <TableHead className="text-right whitespace-nowrap">Balance Due</TableHead>
-                            <TableHead className="w-[80px] text-right pr-4">Actions</TableHead>
+                            <TableHead className="pl-4">{t("customers.name")}</TableHead>
+                            <TableHead className="hidden md:table-cell">{t("customers.contact")}</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">{t("suppliers.totalPurchases")}</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">{t("suppliers.paid")}</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">{t("suppliers.balanceDue")}</TableHead>
+                            <TableHead className="w-[80px] text-right pr-4">{t("invoices.actions")}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {suppliers?.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                    No suppliers found.
+                                    {t("suppliers.empty")}
                                 </TableCell>
                             </TableRow>
                         )}

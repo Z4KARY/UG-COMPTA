@@ -15,6 +15,7 @@ import { InvoiceFormCustomer } from "@/components/invoice/InvoiceFormCustomer";
 import { InvoiceFormItems } from "@/components/invoice/InvoiceFormItems";
 import { InvoiceFormSummary } from "@/components/invoice/InvoiceFormSummary";
 import { InvoiceItem } from "@/types/invoice";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // We will fetch these from backend now, but keep defaults for initial state
 const DEFAULT_FISCAL_CONSTANTS = {
@@ -53,6 +54,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function InvoiceCreate() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const business = useQuery(api.businesses.getMyBusiness, {});
   const customers = useQuery(
@@ -231,11 +233,11 @@ export default function InvoiceCreate() {
         })),
       });
 
-      toast.success(`Invoice ${submitStatus === 'draft' ? 'saved as draft' : 'issued'} successfully`);
+      toast.success(submitStatus === 'draft' ? t("invoiceCreate.success.draft") : t("invoiceCreate.success.issued"));
       navigate("/invoices");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create invoice");
+      toast.error(t("invoiceCreate.error.create"));
     }
   }
 
@@ -249,7 +251,9 @@ export default function InvoiceCreate() {
   return (
     <DashboardLayout>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">Create {type === "quote" ? "Quote" : type === "credit_note" ? "Credit Note" : "Invoice"}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+            {type === "quote" ? t("invoiceCreate.title.quote") : type === "credit_note" ? t("invoiceCreate.title.creditNote") : t("invoiceCreate.title.invoice")}
+        </h1>
       </div>
 
       <Form {...form}>
@@ -278,7 +282,7 @@ export default function InvoiceCreate() {
           {/* Business Info (Read-Only) */}
           <Card className="bg-muted/20">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Business Information</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t("invoiceCreate.businessInfo")}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">

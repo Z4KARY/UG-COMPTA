@@ -23,8 +23,10 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Link } from "react-router";
 import { G50Declaration } from "@/components/G50Declaration";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Declarations() {
+  const { t } = useLanguage();
   const business = useQuery(api.businesses.getMyBusiness, {});
   
   const currentYear = new Date().getFullYear();
@@ -235,7 +237,7 @@ export default function Declarations() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <p>Please set up your business profile first.</p>
+          <p>{t("declarations.setup")}</p>
         </div>
       </DashboardLayout>
     );
@@ -249,13 +251,13 @@ export default function Declarations() {
                 <Settings className="h-12 w-12 text-muted-foreground" />
             </div>
             <div className="text-center space-y-2 max-w-md">
-                <h2 className="text-2xl font-bold tracking-tight">Business Configuration Required</h2>
+                <h2 className="text-2xl font-bold tracking-tight">{t("declarations.configure")}</h2>
                 <p className="text-muted-foreground">
-                    We need to know your business type (Société, Personne Physique, or Auto-Entrepreneur) to show the correct tax declarations.
+                    {t("declarations.configureDesc")}
                 </p>
             </div>
             <Button asChild size="lg">
-                <Link to="/settings">Configure Business Type</Link>
+                <Link to="/settings">{t("declarations.configureBtn")}</Link>
             </Button>
         </div>
       </DashboardLayout>
@@ -274,9 +276,9 @@ export default function Declarations() {
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6 print:hidden">
-        <h1 className="text-3xl font-bold tracking-tight">Declarations</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("declarations.title")}</h1>
         <Button variant="outline" onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" /> Print Summary
+            <Printer className="mr-2 h-4 w-4" /> {t("declarations.print")}
         </Button>
       </div>
 
@@ -287,10 +289,10 @@ export default function Declarations() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                G50 Monthly Declaration
+                {t("declarations.g50.title")}
             </CardTitle>
             <CardDescription>
-              Monthly declaration of taxes (TVA, Stamp Duty).
+              {t("declarations.g50.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -319,8 +321,8 @@ export default function Declarations() {
             </div>
             
             <div className="hidden print:block mb-4">
-                <p className="font-bold">Period: {new Date(0, parseInt(selectedMonth)).toLocaleString('default', { month: 'long' })} {selectedYear}</p>
-                <p>Business: {business.name} (NIF: {business.nif || "N/A"})</p>
+                <p className="font-bold">{t("declarations.g50.period")}: {new Date(0, parseInt(selectedMonth)).toLocaleString('default', { month: 'long' })} {selectedYear}</p>
+                <p>{t("declarations.g50.business")}: {business.name} (NIF: {business.nif || "N/A"})</p>
             </div>
 
             {g50Data ? (
@@ -343,10 +345,10 @@ export default function Declarations() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                G12 / G12bis Annual
+                {t("declarations.g12.title")}
             </CardTitle>
             <CardDescription>
-              Annual turnover declaration for {(business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire" || business.fiscalRegime === "auto_entrepreneur") ? "IFU (Simplified)" : "Real"} regime.
+              {t("declarations.g12.description")} {(business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire" || business.fiscalRegime === "auto_entrepreneur") ? "IFU (Simplified)" : "Real"} {t("declarations.g12.regime").toLowerCase()}.
               <br/>
               <span className="text-xs text-muted-foreground">
                   {business.type === "auto_entrepreneur" ? "Auto-Entrepreneur" : "Personne Physique (Entreprise Individuelle)"}
@@ -368,7 +370,7 @@ export default function Declarations() {
 
             <div className="hidden print:block mb-4">
                 <p className="font-bold">Year: {selectedYear}</p>
-                <p>Regime: {business.fiscalRegime || "VAT"}</p>
+                <p>{t("declarations.g12.regime")}: {business.fiscalRegime || "VAT"}</p>
             </div>
 
             {(business.fiscalRegime === "IFU" || business.fiscalRegime === "forfaitaire" || business.fiscalRegime === "auto_entrepreneur") ? (
@@ -377,14 +379,14 @@ export default function Declarations() {
                     {g12IfuData ? (
                         <>
                             <div className="p-4 border rounded-md bg-blue-50/50 space-y-2">
-                                <h3 className="font-semibold text-sm">G12 Forecast (Prévisionnel)</h3>
+                                <h3 className="font-semibold text-sm">{t("declarations.g12.forecast")}</h3>
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">Turnover N-1 (Ref):</span>
+                                    <span className="text-muted-foreground">{t("declarations.g12.turnoverN1")}:</span>
                                     <span>{g12IfuData.previousYearTurnover.toLocaleString()} {business.currency}</span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 pt-2 print:hidden">
                                     <div className="space-y-1">
-                                        <Label className="text-xs">Forecast N</Label>
+                                        <Label className="text-xs">{t("declarations.g12.forecastN")}</Label>
                                         <Input 
                                             type="number" 
                                             value={forecastAmount} 
@@ -393,7 +395,7 @@ export default function Declarations() {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <Label className="text-xs">IFU Rate (%)</Label>
+                                        <Label className="text-xs">{t("declarations.g12.ifuRate")}</Label>
                                         <Input 
                                             type="number" 
                                             value={ifuRate} 
@@ -404,17 +406,17 @@ export default function Declarations() {
                                 </div>
                                 <div className="pt-2 print:hidden">
                                     <Button size="sm" onClick={handleSaveForecast} className="w-full">
-                                        <Save className="mr-2 h-3 w-3" /> Save Forecast
+                                        <Save className="mr-2 h-3 w-3" /> {t("declarations.g12.save")}
                                     </Button>
                                 </div>
                                 {g12IfuData.forecast && (
                                     <div className="pt-2 border-t mt-2 text-sm">
                                         <div className="flex justify-between">
-                                            <span>Saved Forecast:</span>
+                                            <span>{t("declarations.g12.saved")}:</span>
                                             <span className="font-medium">{g12IfuData.forecast.forecastTurnover.toLocaleString()} {business.currency}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span>Initial Tax Due:</span>
+                                            <span>{t("declarations.g12.initialTax")}:</span>
                                             <span className="font-medium">{g12IfuData.forecast.taxDueInitial.toLocaleString()} {business.currency}</span>
                                         </div>
                                         <div className="pt-2 print:hidden">
@@ -424,7 +426,7 @@ export default function Declarations() {
                                                 className="w-full"
                                                 onClick={() => downloadG12CSV(g12IfuData)}
                                             >
-                                                <Download className="mr-2 h-4 w-4" /> Export G12 CSV
+                                                <Download className="mr-2 h-4 w-4" /> {t("declarations.g12.export")}
                                             </Button>
                                         </div>
                                     </div>
@@ -432,21 +434,21 @@ export default function Declarations() {
                             </div>
 
                             <div className="p-4 border rounded-md bg-green-50/50 space-y-2">
-                                <h3 className="font-semibold text-sm">G12bis Definitive (Régularisation)</h3>
+                                <h3 className="font-semibold text-sm">{t("declarations.g12bis.title")}</h3>
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">Real Turnover N:</span>
+                                    <span className="text-muted-foreground">{t("declarations.g12bis.realTurnover")}:</span>
                                     <span className="font-bold">{g12IfuData.currentYearRealTurnover.toLocaleString()} {business.currency}</span>
                                 </div>
                                 {g12IfuData.forecast && (
                                     <>
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">Difference:</span>
+                                            <span className="text-muted-foreground">{t("declarations.g12bis.difference")}:</span>
                                             <span className={g12IfuData.currentYearRealTurnover > g12IfuData.forecast.forecastTurnover ? "text-red-600" : "text-green-600"}>
                                                 {(g12IfuData.currentYearRealTurnover - g12IfuData.forecast.forecastTurnover).toLocaleString()} {business.currency}
                                             </span>
                                         </div>
                                         <div className="flex justify-between text-sm font-medium pt-2 border-t">
-                                            <span>Adjustment (Regularisation):</span>
+                                            <span>{t("declarations.g12bis.adjustment")}:</span>
                                             <span>
                                                 {((g12IfuData.currentYearRealTurnover * (g12IfuData.forecast.ifuRate/100)) - g12IfuData.forecast.taxDueInitial).toLocaleString()} {business.currency}
                                             </span>
@@ -460,7 +462,7 @@ export default function Declarations() {
                                     className="w-full"
                                     onClick={() => downloadG12BisCSV(g12IfuData)}
                                 >
-                                    <Download className="mr-2 h-4 w-4" /> Export G12bis CSV
+                                    <Download className="mr-2 h-4 w-4" /> {t("declarations.g12bis.export")}
                                 </Button>
                             </div>
                             
@@ -473,7 +475,7 @@ export default function Declarations() {
                                         className="w-full"
                                         onClick={() => downloadAEInvoicesCSV(aeInvoicesData)}
                                     >
-                                        <Download className="mr-2 h-4 w-4" /> Export Annual Invoices (AE)
+                                        <Download className="mr-2 h-4 w-4" /> {t("declarations.ae.export")}
                                     </Button>
                                 </div>
                             )}
@@ -487,7 +489,7 @@ export default function Declarations() {
                 g12Data ? (
                     <div className="space-y-2 border rounded-md p-4 bg-muted/20 print:bg-white print:border-gray-300">
                         <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Fiscal Regime:</span>
+                            <span className="text-sm text-muted-foreground">{t("declarations.g12.regime")}:</span>
                             <span className="font-medium">{g12Data.fiscalRegime}</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
@@ -513,9 +515,9 @@ export default function Declarations() {
         ) : (
             <Card className="print:hidden bg-muted/10 border-dashed">
                 <CardHeader>
-                    <CardTitle className="text-muted-foreground text-lg">G12 / G12bis Not Applicable</CardTitle>
+                    <CardTitle className="text-muted-foreground text-lg">{t("declarations.notApplicable")}</CardTitle>
                     <CardDescription>
-                        These declarations are not applicable for your business type ({business.type}).
+                        {t("declarations.notApplicableDesc")} ({business.type}).
                     </CardDescription>
                 </CardHeader>
             </Card>

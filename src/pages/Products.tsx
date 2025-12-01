@@ -41,8 +41,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { ImportDialog } from "@/components/ImportDialog";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Products() {
+  const { t } = useLanguage();
   const business = useQuery(api.businesses.getMyBusiness, {});
   const products = useQuery(
     api.products.list,
@@ -144,7 +146,7 @@ export default function Products() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <p>Please set up your business profile first.</p>
+          <p>{t("declarations.setup")}</p>
         </div>
       </DashboardLayout>
     );
@@ -155,9 +157,9 @@ export default function Products() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Products & Services</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("products.title")}</h1>
             <p className="text-muted-foreground mt-1">
-              Manage your catalog of goods and services.
+              {t("products.subtitle")}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
@@ -169,35 +171,35 @@ export default function Products() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={handleCreate} className="w-full sm:w-auto">
-                  <Plus className="mr-2 h-4 w-4" /> Add Product
+                  <Plus className="mr-2 h-4 w-4" /> {t("products.add")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{editingId ? "Edit Product" : "Add New Product"}</DialogTitle>
+                  <DialogTitle>{editingId ? t("products.edit") : t("products.add")}</DialogTitle>
                   <DialogDescription>
-                    {editingId ? "Update product details." : "Enter the product details below."}
+                    {editingId ? t("products.edit") : t("products.subtitle")}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="type" className="text-right">
-                        Type
+                        {t("products.type")}
                       </Label>
                       <Select value={formData.type} onValueChange={handleTypeChange}>
                         <SelectTrigger className="col-span-3">
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder={t("products.type")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="service">Service (Prestation)</SelectItem>
-                          <SelectItem value="goods">Goods (Marchandise)</SelectItem>
+                          <SelectItem value="service">{t("products.type.service")}</SelectItem>
+                          <SelectItem value="goods">{t("products.type.goods")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="name" className="text-right">
-                        Name
+                        {t("products.name")}
                       </Label>
                       <Input
                         id="name"
@@ -210,7 +212,7 @@ export default function Products() {
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="description" className="text-right">
-                        Description
+                        {t("products.description")}
                       </Label>
                       <Input
                         id="description"
@@ -222,7 +224,7 @@ export default function Products() {
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="unitPrice" className="text-right">
-                        Price
+                        {t("products.price")}
                       </Label>
                       <Input
                         id="unitPrice"
@@ -236,7 +238,7 @@ export default function Products() {
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="unitLabel" className="text-right">
-                        Unit Label
+                        {t("products.unitLabel")}
                       </Label>
                       <Input
                         id="unitLabel"
@@ -249,7 +251,7 @@ export default function Products() {
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="tvaRate" className="text-right">
-                        TVA (%)
+                        {t("products.tva")}
                       </Label>
                       <Input
                         id="tvaRate"
@@ -263,7 +265,7 @@ export default function Products() {
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="defaultDiscount" className="text-right">
-                        Discount (%)
+                        {t("products.discount")}
                       </Label>
                       <Input
                         id="defaultDiscount"
@@ -276,7 +278,7 @@ export default function Products() {
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="isActive" className="text-right">
-                        Active
+                        {t("products.active")}
                       </Label>
                       <div className="col-span-3 flex items-center space-x-2">
                         <Switch
@@ -288,7 +290,7 @@ export default function Products() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button type="submit">{editingId ? "Save Changes" : "Create Product"}</Button>
+                    <Button type="submit">{editingId ? t("products.edit") : t("products.add")}</Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -298,9 +300,9 @@ export default function Products() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Product List</CardTitle>
+            <CardTitle>{t("products.title")}</CardTitle>
             <CardDescription>
-              Manage your products and services.
+              {t("products.subtitle")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -308,12 +310,12 @@ export default function Products() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Unit</TableHead>
-                    <TableHead>TVA (%)</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t("products.name")}</TableHead>
+                    <TableHead>{t("products.price")}</TableHead>
+                    <TableHead>{t("products.unit")}</TableHead>
+                    <TableHead>{t("products.tva")}</TableHead>
+                    <TableHead>{t("products.status")}</TableHead>
+                    <TableHead className="text-right">{t("products.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -321,7 +323,9 @@ export default function Products() {
                     <TableRow key={product._id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEdit(product)}>
                       <TableCell className="font-medium min-w-[150px]">
                         {product.name}
-                        <div className="text-xs text-muted-foreground capitalize">{product.type || "service"}</div>
+                        <div className="text-xs text-muted-foreground capitalize">
+                            {product.type === "goods" ? t("products.type.goods") : t("products.type.service")}
+                        </div>
                         {product.description && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{product.description}</div>}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">{product.unitPrice.toLocaleString()} {business.currency}</TableCell>
@@ -329,7 +333,7 @@ export default function Products() {
                       <TableCell>{product.tvaRate}%</TableCell>
                       <TableCell>
                         <div className={`text-xs px-2 py-1 rounded-full inline-block ${product.isActive !== false ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
-                            {product.isActive !== false ? "Active" : "Inactive"}
+                            {product.isActive !== false ? t("products.active") : t("products.inactive")}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -355,7 +359,7 @@ export default function Products() {
                   {products?.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center">
-                        No products found.
+                        {t("products.empty")}
                       </TableCell>
                     </TableRow>
                   )}

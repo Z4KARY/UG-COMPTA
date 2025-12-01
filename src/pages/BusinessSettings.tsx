@@ -55,8 +55,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function BusinessSettings() {
+  const { t } = useLanguage();
   const business = useQuery(api.businesses.getMyBusiness, {});
   const createBusiness = useMutation(api.businesses.create);
   const updateBusiness = useMutation(api.businesses.update);
@@ -204,20 +206,20 @@ export default function BusinessSettings() {
           id: business._id,
           ...payload,
         });
-        toast.success("Business profile updated");
+        toast.success(t("settings.toast.updated"));
       } else {
         await createBusiness(payload);
-        toast.success("Business profile created");
+        toast.success(t("settings.toast.created"));
       }
     } catch (error) {
-      toast.error("Failed to save business profile");
+      toast.error(t("settings.toast.failed"));
       console.error(error);
     }
   };
 
   const handleExport = () => {
     if (!exportData) {
-        toast.error("Data not ready for export yet");
+        toast.error(t("settings.toast.exportNotReady"));
         return;
     }
     
@@ -230,7 +232,7 @@ export default function BusinessSettings() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("Backup downloaded successfully");
+    toast.success(t("settings.toast.backupSuccess"));
   };
 
   const handleFullExport = async () => {
@@ -252,9 +254,9 @@ export default function BusinessSettings() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success("Full archive downloaded successfully");
+        toast.success(t("settings.toast.archiveSuccess"));
     } catch (error) {
-        toast.error("Failed to generate full export");
+        toast.error(t("settings.toast.archiveFailed"));
         console.error(error);
     } finally {
         setIsExporting(false);
@@ -276,9 +278,9 @@ export default function BusinessSettings() {
               endDate,
               notes: `Closed ${closureData.month + 1}/${closureData.year}`,
           });
-          toast.success("Period closed successfully");
+          toast.success(t("settings.toast.periodClosed"));
       } catch (error) {
-          toast.error("Failed to close period");
+          toast.error(t("settings.toast.periodCloseFailed"));
           console.error(error);
       }
   };
@@ -287,10 +289,10 @@ export default function BusinessSettings() {
       if (!periodToReopen) return;
       try {
           await openPeriod({ id: periodToReopen });
-          toast.success("Period reopened");
+          toast.success(t("settings.toast.periodReopened"));
           setPeriodToReopen(null);
       } catch (error) {
-          toast.error("Failed to reopen period");
+          toast.error(t("settings.toast.periodReopenFailed"));
       }
   };
 
@@ -315,25 +317,25 @@ export default function BusinessSettings() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Business Settings
+              {t("settings.title")}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Manage your company profile, fiscal parameters, and banking details.
+              {t("settings.subtitle")}
             </p>
           </div>
           <Button onClick={handleSubmit} size="lg" className="shadow-sm">
             <Save className="mr-2 h-4 w-4" />
-            Save Changes
+            {t("settings.save")}
           </Button>
         </div>
 
         <Tabs defaultValue="general" className="space-y-4">
           <TabsList className="w-full justify-start overflow-x-auto">
-            <TabsTrigger value="general">General Settings</TabsTrigger>
-            <TabsTrigger value="design">Invoice Design</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-            <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
-            <TabsTrigger value="subscription">Subscription</TabsTrigger>
+            <TabsTrigger value="general">{t("settings.tab.general")}</TabsTrigger>
+            <TabsTrigger value="design">{t("settings.tab.design")}</TabsTrigger>
+            <TabsTrigger value="team">{t("settings.tab.team")}</TabsTrigger>
+            <TabsTrigger value="webhooks">{t("settings.tab.webhooks")}</TabsTrigger>
+            <TabsTrigger value="subscription">{t("settings.tab.subscription")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
@@ -346,9 +348,9 @@ export default function BusinessSettings() {
                       <Building2 className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <CardTitle>Company Identity</CardTitle>
+                      <CardTitle>{t("settings.identity.title")}</CardTitle>
                       <CardDescription>
-                        Basic information about your business entity.
+                        {t("settings.identity.description")}
                       </CardDescription>
                     </div>
                   </div>
@@ -357,8 +359,8 @@ export default function BusinessSettings() {
                   <div className="space-y-2">
                     <Label htmlFor="name">
                       {formData.type === "societe" 
-                        ? "Business Name (Raison Sociale)" 
-                        : "Full Name (Nom & Prénom)"}
+                        ? t("settings.identity.name") 
+                        : t("settings.identity.fullName")}
                     </Label>
                     <Input
                       id="name"
@@ -371,12 +373,12 @@ export default function BusinessSettings() {
                     />
                     {formData.type !== "societe" && (
                       <p className="text-[0.8rem] text-muted-foreground">
-                        Enter your full legal name as it appears on your documents.
+                        {t("settings.identity.description")}
                       </p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="tradeName">Trade Name (Nom Commercial)</Label>
+                    <Label htmlFor="tradeName">{t("settings.identity.tradeName")}</Label>
                     <Input
                       id="tradeName"
                       name="tradeName"
@@ -385,14 +387,9 @@ export default function BusinessSettings() {
                       placeholder={formData.type === "societe" ? "Optional" : "e.g. My Shop"}
                       className="bg-muted/30"
                     />
-                    {formData.type !== "societe" && (
-                      <p className="text-[0.8rem] text-muted-foreground">
-                        Do not include legal prefixes (EURL, SARL, etc.) in the trade name.
-                      </p>
-                    )}
                   </div>
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="address">Address</Label>
+                    <Label htmlFor="address">{t("settings.identity.address")}</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -407,7 +404,7 @@ export default function BusinessSettings() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
+                    <Label htmlFor="city">{t("settings.identity.city")}</Label>
                     <Input
                       id="city"
                       value={formData.city}
@@ -425,9 +422,9 @@ export default function BusinessSettings() {
                       <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <CardTitle>Contact Information</CardTitle>
+                      <CardTitle>{t("settings.contact.title")}</CardTitle>
                       <CardDescription>
-                        Business contact details for communication.
+                        {t("settings.contact.description")}
                       </CardDescription>
                     </div>
                   </div>
@@ -435,7 +432,7 @@ export default function BusinessSettings() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="phone">{t("settings.contact.phone")}</Label>
                       <Input
                         id="phone"
                         value={formData.phone}
@@ -444,7 +441,7 @@ export default function BusinessSettings() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="email">Business Email</Label>
+                      <Label htmlFor="email">{t("settings.contact.email")}</Label>
                       <Input
                         id="email"
                         type="email"
@@ -465,16 +462,16 @@ export default function BusinessSettings() {
                       <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <CardTitle>Fiscal & Legal</CardTitle>
+                      <CardTitle>{t("settings.fiscal.title")}</CardTitle>
                       <CardDescription>
-                        Tax identification and registration details.
+                        {t("settings.fiscal.description")}
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                      <Label htmlFor="type">Business Type</Label>
+                      <Label htmlFor="type">{t("settings.fiscal.type")}</Label>
                       <Select
                         value={formData.type}
                         onValueChange={(val) => handleSelectChange("type", val)}
@@ -492,7 +489,7 @@ export default function BusinessSettings() {
 
                   {formData.type === "personne_physique" && (
                       <div className="space-y-2">
-                        <Label htmlFor="fiscalRegime">Fiscal Regime</Label>
+                        <Label htmlFor="fiscalRegime">{t("settings.fiscal.regime")}</Label>
                         <Select
                             value={formData.fiscalRegime}
                             onValueChange={(val) => handleSelectChange("fiscalRegime", val)}
@@ -510,7 +507,7 @@ export default function BusinessSettings() {
 
                   {formData.type === "societe" && (
                       <div className="space-y-2">
-                        <Label htmlFor="legalForm">Legal Form</Label>
+                        <Label htmlFor="legalForm">{t("settings.fiscal.legalForm")}</Label>
                         <Select
                             value={formData.legalForm}
                             onValueChange={(val) => handleSelectChange("legalForm", val)}
@@ -550,7 +547,7 @@ export default function BusinessSettings() {
 
                   {formData.legalForm === "OTHER" && (
                       <div className="space-y-2">
-                        <Label htmlFor="customLegalForm">Specify Legal Form</Label>
+                        <Label htmlFor="customLegalForm">{t("settings.fiscal.customForm")}</Label>
                         <Input
                             id="customLegalForm"
                             name="customLegalForm"
@@ -571,7 +568,7 @@ export default function BusinessSettings() {
                       <div className="space-y-4 bg-blue-50/50 p-4 rounded-md border border-blue-100">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="autoEntrepreneurCardNumber">AE Card Number</Label>
+                                <Label htmlFor="autoEntrepreneurCardNumber">{t("settings.fiscal.aeCard")}</Label>
                                 <Input
                                     id="autoEntrepreneurCardNumber"
                                     name="autoEntrepreneurCardNumber"
@@ -582,7 +579,7 @@ export default function BusinessSettings() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="nif">NIF</Label>
+                                <Label htmlFor="nif">{t("settings.fiscal.nif")}</Label>
                                 <Input
                                     id="nif"
                                     name="nif"
@@ -594,7 +591,7 @@ export default function BusinessSettings() {
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="activityCodes">Activity Codes (ANAE)</Label>
+                            <Label htmlFor="activityCodes">{t("settings.fiscal.activityCodes")}</Label>
                             <Input
                                 id="activityCodes"
                                 name="activityCodes"
@@ -604,7 +601,7 @@ export default function BusinessSettings() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="ssNumber">CASNOS Number (Optional)</Label>
+                            <Label htmlFor="ssNumber">{t("settings.fiscal.casnos")}</Label>
                             <Input
                                 id="ssNumber"
                                 name="ssNumber"
@@ -618,7 +615,7 @@ export default function BusinessSettings() {
                       <>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                            <Label htmlFor="rc">RC (Registre de Commerce)</Label>
+                            <Label htmlFor="rc">{t("settings.fiscal.rc")}</Label>
                             <Input
                                 id="rc"
                                 name="rc"
@@ -628,7 +625,7 @@ export default function BusinessSettings() {
                             />
                             </div>
                             <div className="space-y-2">
-                            <Label htmlFor="nif">NIF</Label>
+                            <Label htmlFor="nif">{t("settings.fiscal.nif")}</Label>
                             <Input
                                 id="nif"
                                 name="nif"
@@ -640,7 +637,7 @@ export default function BusinessSettings() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="ai">Article d'Imposition (AI)</Label>
+                                <Label htmlFor="ai">{t("settings.fiscal.ai")}</Label>
                                 <Input
                                 id="ai"
                                 name="ai"
@@ -650,7 +647,7 @@ export default function BusinessSettings() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="nis">NIS</Label>
+                                <Label htmlFor="nis">{t("settings.fiscal.nis")}</Label>
                                 <Input
                                 id="nis"
                                 name="nis"
@@ -662,7 +659,7 @@ export default function BusinessSettings() {
                         </div>
                         {formData.type === "societe" && (
                             <div className="space-y-2">
-                                <Label htmlFor="capital">Social Capital</Label>
+                                <Label htmlFor="capital">{t("settings.fiscal.capital")}</Label>
                                 <Input
                                 id="capital"
                                 name="capital"
@@ -678,7 +675,7 @@ export default function BusinessSettings() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="currency">Currency</Label>
+                      <Label htmlFor="currency">{t("settings.fiscal.currency")}</Label>
                       <Input
                         id="currency"
                         name="currency"
@@ -688,7 +685,7 @@ export default function BusinessSettings() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="tvaDefault">Default TVA (%)</Label>
+                      <Label htmlFor="tvaDefault">{t("settings.fiscal.tva")}</Label>
                       <Input
                         id="tvaDefault"
                         name="tvaDefault"
@@ -712,16 +709,16 @@ export default function BusinessSettings() {
                       <Landmark className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <CardTitle>Banking Details</CardTitle>
+                      <CardTitle>{t("settings.banking.title")}</CardTitle>
                       <CardDescription>
-                        Bank account information for invoices.
+                        {t("settings.banking.description")}
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="bankName">Bank Name</Label>
+                    <Label htmlFor="bankName">{t("settings.banking.bankName")}</Label>
                     <div className="relative">
                       <Wallet className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -735,7 +732,7 @@ export default function BusinessSettings() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="bankIban">IBAN / RIP</Label>
+                    <Label htmlFor="bankIban">{t("settings.banking.iban")}</Label>
                     <div className="relative">
                       <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -750,8 +747,7 @@ export default function BusinessSettings() {
                   </div>
                   <div className="rounded-md bg-muted p-4 mt-6">
                     <p className="text-sm text-muted-foreground">
-                      These details will appear on your invoices to help customers
-                      make payments directly to your account.
+                      {t("settings.banking.helper")}
                     </p>
                   </div>
                 </CardContent>
@@ -765,16 +761,16 @@ export default function BusinessSettings() {
                       <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div>
-                      <CardTitle>Numbering & Sequencing</CardTitle>
+                      <CardTitle>{t("settings.sequencing.title")}</CardTitle>
                       <CardDescription>
-                        Customize how your document numbers are generated.
+                        {t("settings.sequencing.description")}
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="invoicePrefix">Invoice Prefix</Label>
+                    <Label htmlFor="invoicePrefix">{t("settings.sequencing.invoicePrefix")}</Label>
                     <Input
                       id="invoicePrefix"
                       name="invoicePrefix"
@@ -785,7 +781,7 @@ export default function BusinessSettings() {
                     <p className="text-xs text-muted-foreground">Format: {formData.invoicePrefix}YYYY-001</p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="quotePrefix">Quote Prefix</Label>
+                    <Label htmlFor="quotePrefix">{t("settings.sequencing.quotePrefix")}</Label>
                     <Input
                       id="quotePrefix"
                       name="quotePrefix"
@@ -796,7 +792,7 @@ export default function BusinessSettings() {
                     <p className="text-xs text-muted-foreground">Format: {formData.quotePrefix}YYYY-001</p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="creditNotePrefix">Credit Note Prefix</Label>
+                    <Label htmlFor="creditNotePrefix">{t("settings.sequencing.creditNotePrefix")}</Label>
                     <Input
                       id="creditNotePrefix"
                       name="creditNotePrefix"
@@ -817,9 +813,9 @@ export default function BusinessSettings() {
                       <Archive className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div>
-                      <CardTitle>Legal Archiving & Data Export</CardTitle>
+                      <CardTitle>{t("settings.archiving.title")}</CardTitle>
                       <CardDescription>
-                        Download a full backup of your business data for legal retention (10 years).
+                        {t("settings.archiving.description")}
                       </CardDescription>
                     </div>
                   </div>
@@ -827,21 +823,21 @@ export default function BusinessSettings() {
                 <CardContent className="space-y-4">
                     <div className="flex items-center justify-between border-b pb-4">
                         <div className="space-y-1">
-                            <p className="text-sm font-medium">Quick Data Backup (JSON)</p>
+                            <p className="text-sm font-medium">{t("settings.archiving.jsonTitle")}</p>
                             <p className="text-xs text-muted-foreground">
-                                Instant download of all database records.
+                                {t("settings.archiving.jsonDesc")}
                             </p>
                         </div>
                         <Button type="button" variant="outline" onClick={handleExport}>
                             <Download className="mr-2 h-4 w-4" />
-                            Export JSON
+                            {t("settings.archiving.exportJson")}
                         </Button>
                     </div>
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                            <p className="text-sm font-medium">Full Archive (ZIP)</p>
+                            <p className="text-sm font-medium">{t("settings.archiving.zipTitle")}</p>
                             <p className="text-xs text-muted-foreground">
-                                Includes all data plus PDF files (Invoices & Purchases).
+                                {t("settings.archiving.zipDesc")}
                             </p>
                         </div>
                         <Button type="button" variant="default" onClick={handleFullExport} disabled={isExporting}>
@@ -850,7 +846,7 @@ export default function BusinessSettings() {
                             ) : (
                                 <Archive className="mr-2 h-4 w-4" />
                             )}
-                            {isExporting ? "Generating..." : "Download Archive"}
+                            {isExporting ? t("settings.archiving.generating") : t("settings.archiving.downloadZip")}
                         </Button>
                     </div>
                 </CardContent>
@@ -864,9 +860,9 @@ export default function BusinessSettings() {
                       <Lock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <CardTitle>Accounting Periods</CardTitle>
+                      <CardTitle>{t("settings.periods.title")}</CardTitle>
                       <CardDescription>
-                        Close fiscal periods to prevent modifications to invoices and purchases.
+                        {t("settings.periods.description")}
                       </CardDescription>
                     </div>
                   </div>
@@ -874,7 +870,7 @@ export default function BusinessSettings() {
                 <CardContent className="space-y-6">
                     <div className="flex items-end gap-4 border-b pb-6">
                         <div className="space-y-2">
-                            <Label>Month</Label>
+                            <Label>{t("settings.periods.month")}</Label>
                             <Select 
                                 value={closureData.month.toString()} 
                                 onValueChange={(v) => setClosureData({...closureData, month: parseInt(v)})}
@@ -892,7 +888,7 @@ export default function BusinessSettings() {
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label>Year</Label>
+                            <Label>{t("settings.periods.year")}</Label>
                             <Input 
                                 type="number" 
                                 value={closureData.year} 
@@ -902,14 +898,14 @@ export default function BusinessSettings() {
                         </div>
                         <Button type="button" onClick={handleClosePeriod}>
                             <Lock className="mr-2 h-4 w-4" />
-                            Close Period
+                            {t("settings.periods.close")}
                         </Button>
                     </div>
 
                     <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-muted-foreground">Closed Periods</h3>
+                        <h3 className="text-sm font-medium text-muted-foreground">{t("settings.periods.closedList")}</h3>
                         {periods?.length === 0 && (
-                            <p className="text-sm text-muted-foreground italic">No closed periods.</p>
+                            <p className="text-sm text-muted-foreground italic">{t("settings.periods.noClosed")}</p>
                         )}
                         <div className="grid gap-2">
                             {periods?.map((period) => (
@@ -930,7 +926,7 @@ export default function BusinessSettings() {
                                         onClick={() => setPeriodToReopen(period._id)}
                                     >
                                         <Unlock className="mr-2 h-3 w-3" />
-                                        Reopen
+                                        {t("settings.periods.reopen")}
                                     </Button>
                                 </div>
                             ))}
@@ -1002,15 +998,15 @@ export default function BusinessSettings() {
       <AlertDialog open={!!periodToReopen} onOpenChange={(open) => !open && setPeriodToReopen(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Reopen Period?</AlertDialogTitle>
+            <AlertDialogTitle>{t("settings.periods.reopenTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Reopening a period allows modifications to invoices and purchases within that timeframe. This may affect your fiscal reports.
+              {t("settings.periods.reopenDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("settings.periods.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmReopenPeriod}>
-              Reopen Period
+              {t("settings.periods.confirmReopen")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

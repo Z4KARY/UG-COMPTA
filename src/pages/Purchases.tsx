@@ -33,20 +33,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Purchases() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const business = useQuery(api.businesses.getMyBusiness, {});
   const purchases = useQuery(api.purchaseInvoices.list, business ? { businessId: business._id } : "skip");
   const deletePurchase = useMutation(api.purchaseInvoices.remove);
 
   const handleDelete = async (id: any) => {
-      if (confirm("Are you sure you want to delete this purchase invoice?")) {
+      if (confirm(t("purchases.deleteConfirm"))) {
           try {
               await deletePurchase({ id });
-              toast.success("Purchase invoice deleted");
+              toast.success(t("purchases.deleteSuccess"));
           } catch (error) {
-              toast.error("Failed to delete purchase invoice");
+              toast.error(t("purchases.deleteError"));
           }
       }
   };
@@ -56,22 +58,22 @@ export default function Purchases() {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Purchases</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("purchases.title")}</h1>
             <p className="text-muted-foreground mt-1">
-              Track your business expenses and VAT deductions.
+              {t("purchases.subtitle")}
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" asChild>
                 <Link to="/suppliers">
                     <Users className="mr-2 h-4 w-4" />
-                    Manage Suppliers
+                    {t("purchases.manageSuppliers")}
                 </Link>
             </Button>
             <Button asChild>
                 <Link to="/purchases/new">
                     <Plus className="mr-2 h-4 w-4" />
-                    New Purchase
+                    {t("purchases.new")}
                 </Link>
             </Button>
           </div>
@@ -79,21 +81,21 @@ export default function Purchases() {
 
         <Card>
             <CardHeader>
-                <CardTitle>Purchase Invoices</CardTitle>
-                <CardDescription>List of all recorded purchase invoices.</CardDescription>
+                <CardTitle>{t("purchases.listTitle")}</CardTitle>
+                <CardDescription>{t("purchases.listDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Invoice #</TableHead>
-                            <TableHead>Supplier</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Total HT</TableHead>
-                            <TableHead className="text-right">VAT</TableHead>
-                            <TableHead className="text-right">Total TTC</TableHead>
-                            <TableHead className="text-right">Deductible</TableHead>
+                            <TableHead>{t("purchases.table.date")}</TableHead>
+                            <TableHead>{t("purchases.table.invoiceNumber")}</TableHead>
+                            <TableHead>{t("purchases.table.supplier")}</TableHead>
+                            <TableHead>{t("purchases.table.status")}</TableHead>
+                            <TableHead className="text-right">{t("purchases.table.totalHt")}</TableHead>
+                            <TableHead className="text-right">{t("purchases.table.vat")}</TableHead>
+                            <TableHead className="text-right">{t("purchases.table.totalTtc")}</TableHead>
+                            <TableHead className="text-right">{t("purchases.table.deductible")}</TableHead>
                             <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -101,7 +103,7 @@ export default function Purchases() {
                         {purchases?.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                                    No purchase invoices found.
+                                    {t("purchases.empty")}
                                 </TableCell>
                             </TableRow>
                         )}

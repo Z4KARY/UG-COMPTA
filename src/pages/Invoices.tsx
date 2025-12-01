@@ -24,8 +24,10 @@ import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 import { ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Invoices() {
+  const { t } = useLanguage();
   const business = useQuery(api.businesses.getMyBusiness, {});
   const invoices = useQuery(
     api.invoices.list,
@@ -39,12 +41,12 @@ export default function Invoices() {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
 
   const handleDelete = async (id: Id<"invoices">) => {
-    if (confirm("Are you sure you want to delete this invoice? This action cannot be undone.")) {
+    if (confirm(t("invoices.deleteConfirm"))) {
       try {
         await deleteInvoice({ id });
-        toast.success("Invoice deleted");
+        toast.success(t("invoices.deleteSuccess"));
       } catch (error) {
-        toast.error("Failed to delete invoice");
+        toast.error(t("invoices.deleteError"));
       }
     }
   };
@@ -106,7 +108,7 @@ export default function Invoices() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <p>Please set up your business profile first.</p>
+          <p>{t("declarations.setup")}</p>
         </div>
       </DashboardLayout>
     );
@@ -115,19 +117,19 @@ export default function Invoices() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Invoices & Quotes</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("invoices.title")}</h1>
         <Button asChild className="w-full md:w-auto">
           <Link to="/invoices/new">
-            <Plus className="mr-2 h-4 w-4" /> Create New
+            <Plus className="mr-2 h-4 w-4" /> {t("invoices.createNew")}
           </Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Documents</CardTitle>
+          <CardTitle>{t("invoices.documents")}</CardTitle>
           <CardDescription>
-            Manage your invoices, quotes, and credit notes.
+            {t("invoices.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -135,21 +137,21 @@ export default function Invoices() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="hidden md:table-cell">Type</TableHead>
+                  <TableHead className="hidden md:table-cell">{t("invoices.type")}</TableHead>
                   <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("invoiceNumber")}>
-                      Number <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                      {t("invoices.number")} <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
                   <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("customerName")}>
-                      Customer <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                      {t("invoices.customer")} <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
                   <TableHead className="cursor-pointer whitespace-nowrap hidden md:table-cell" onClick={() => handleSort("issueDate")}>
-                      Date <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                      {t("invoices.date")} <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
                   <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => handleSort("totalTtc")}>
-                      Amount <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                      {t("invoices.amount")} <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("invoices.status")}</TableHead>
+                  <TableHead className="text-right">{t("invoices.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -177,13 +179,13 @@ export default function Invoices() {
                         variant="outline"
                         className={`${getStatusColor(invoice.status)} text-[10px] sm:text-xs px-1 sm:px-2`}
                       >
-                        {invoice.status.toUpperCase()}
+                        {t(`invoices.status.${invoice.status}` as any) || invoice.status.toUpperCase()}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="sm" asChild className="h-8 px-2 text-xs sm:text-sm">
-                          <Link to={`/invoices/${invoice._id}`}>View</Link>
+                          <Link to={`/invoices/${invoice._id}`}>{t("invoices.view")}</Link>
                           </Button>
                           <Button 
                               variant="ghost" 
@@ -200,7 +202,7 @@ export default function Invoices() {
                 {invoices?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center">
-                      No invoices found.
+                      {t("invoices.empty")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -218,10 +220,10 @@ export default function Invoices() {
                     disabled={currentPage === 1}
                 >
                     <ChevronLeft className="h-4 w-4" />
-                    Previous
+                    {t("common.previous") || "Previous"}
                 </Button>
                 <div className="text-sm font-medium">
-                    Page {currentPage} of {totalPages}
+                    {t("common.pageOf") ? t("common.pageOf").replace("{current}", currentPage.toString()).replace("{total}", totalPages.toString()) : `Page ${currentPage} of ${totalPages}`}
                 </div>
                 <Button
                     variant="outline"
@@ -229,7 +231,7 @@ export default function Invoices() {
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
                 >
-                    Next
+                    {t("common.next") || "Next"}
                     <ChevronRight className="h-4 w-4" />
                 </Button>
             </div>

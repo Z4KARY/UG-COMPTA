@@ -23,8 +23,10 @@ import { Trash2, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Customers() {
+  const { t } = useLanguage();
   const business = useQuery(api.businesses.getMyBusiness, {});
   const customers = useQuery(
     api.customers.list,
@@ -36,12 +38,12 @@ export default function Customers() {
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
 
   const handleDelete = async (id: Id<"customers">) => {
-    if (confirm("Are you sure you want to delete this customer?")) {
+    if (confirm(t("customers.deleteConfirm"))) {
       try {
         await deleteCustomer({ id });
-        toast.success("Customer deleted");
+        toast.success(t("customers.deleteSuccess"));
       } catch (error) {
-        toast.error("Failed to delete customer");
+        toast.error(t("customers.deleteError"));
       }
     }
   };
@@ -60,7 +62,7 @@ export default function Customers() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <p>Please set up your business profile first.</p>
+          <p>{t("declarations.setup")}</p>
         </div>
       </DashboardLayout>
     );
@@ -71,9 +73,9 @@ export default function Customers() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("customers.title")}</h1>
             <p className="text-muted-foreground mt-1">
-              Manage your client base and view their financial situation.
+              {t("customers.subtitle")}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
@@ -82,7 +84,7 @@ export default function Customers() {
             </div>
             <Button onClick={handleCreate} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
-              Add Customer
+              {t("customers.add")}
             </Button>
           </div>
         </div>
@@ -96,9 +98,9 @@ export default function Customers() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Customer List</CardTitle>
+            <CardTitle>{t("customers.listTitle")}</CardTitle>
             <CardDescription>
-              Overview of customers and their account balance.
+              {t("customers.listDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
@@ -106,12 +108,12 @@ export default function Customers() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="pl-4">Name</TableHead>
-                    <TableHead className="hidden md:table-cell">Contact</TableHead>
-                    <TableHead className="text-right whitespace-nowrap">Total Sales</TableHead>
-                    <TableHead className="text-right whitespace-nowrap">Paid</TableHead>
-                    <TableHead className="text-right whitespace-nowrap">Balance Due</TableHead>
-                    <TableHead className="text-right pr-4">Actions</TableHead>
+                    <TableHead className="pl-4">{t("customers.name")}</TableHead>
+                    <TableHead className="hidden md:table-cell">{t("customers.contact")}</TableHead>
+                    <TableHead className="text-right whitespace-nowrap">{t("customers.totalSales")}</TableHead>
+                    <TableHead className="text-right whitespace-nowrap">{t("customers.paid")}</TableHead>
+                    <TableHead className="text-right whitespace-nowrap">{t("customers.balanceDue")}</TableHead>
+                    <TableHead className="text-right pr-4">{t("invoices.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -123,7 +125,7 @@ export default function Customers() {
                             {customer.phone}
                         </div>
                         <div className="text-xs text-muted-foreground hidden md:block">
-                            {[customer.taxId && `NIF: ${customer.taxId}`, customer.rc && `RC: ${customer.rc}`].filter(Boolean).join(" | ")}
+                            {[customer.taxId && `${t("customers.nif")}: ${customer.taxId}`, customer.rc && `${t("customers.rc")}: ${customer.rc}`].filter(Boolean).join(" | ")}
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
@@ -166,7 +168,7 @@ export default function Customers() {
                   {customers?.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No customers found.
+                        {t("customers.empty")}
                       </TableCell>
                     </TableRow>
                   )}

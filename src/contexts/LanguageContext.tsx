@@ -31,7 +31,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [dir, language]);
 
   const t = (key: TranslationKey) => {
-    return translations[language][key] || translations["en"][key] || key;
+    return (translations[language] as Record<string, string>)[key] || translations["en"][key] || key;
   };
 
   return (
