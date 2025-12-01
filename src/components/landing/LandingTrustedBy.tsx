@@ -3,7 +3,7 @@ export function LandingTrustedBy() {
     <section className="py-20 bg-background">
           <div className="container mx-auto px-4 text-center">
             <p className="text-sm font-medium text-muted-foreground mb-8 uppercase tracking-widest">Trusted by forward-thinking companies</p>
-            <div className="mx-auto max-w-5xl bg-card border rounded-[2rem] p-8 md:p-14 flex flex-col md:flex-row justify-center items-center gap-8 md:gap-24 shadow-sm">
+            <div className="mx-auto max-w-5xl bg-card border rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row justify-center items-center gap-10 md:gap-20 shadow-sm">
               <img 
                 src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
                 alt="UpGrowth" 
