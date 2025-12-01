@@ -17,7 +17,7 @@ export function LandingTrustedBy() {
               <img 
                 src="https://harmless-tapir-303.convex.cloud/api/storage/ef75208c-7736-4b74-b7f4-a8a8aa9cc483" 
                 alt="FA Management Solutions" 
-                className="h-12 md:h-16 w-auto object-contain transition-all hover:scale-105 grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
+                className="h-20 md:h-28 w-auto object-contain transition-all hover:scale-105 grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
               />
             </div>
           </div>
