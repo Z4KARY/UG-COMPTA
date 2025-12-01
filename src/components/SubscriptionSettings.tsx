@@ -8,6 +8,7 @@ import { Check, Loader2, CreditCard, Zap, Shield, Star, LucideIcon } from "lucid
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SubscriptionSettingsProps {
   businessId: Id<"businesses">;
@@ -27,6 +28,7 @@ interface Plan {
 }
 
 export function SubscriptionSettings({ businessId, currentPlan = "free", subscriptionEndsAt }: SubscriptionSettingsProps) {
+  const { t } = useLanguage();
   const upgrade = useMutation(api.subscriptions.upgradeSubscription);
   const history = useQuery(api.subscriptions.getSubscriptionHistory, { businessId });
   const [isLoading, setIsLoading] = useState<string | null>(null);
@@ -40,9 +42,9 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
         interval: "month",
         paymentMethod: "simulated_card",
       });
-      toast.success(`Successfully subscribed to ${planId.toUpperCase()} plan`);
+      toast.success(t("settings.subscription.toast.success").replace("{plan}", planId.toUpperCase()));
     } catch (error) {
-      toast.error("Failed to upgrade subscription");
+      toast.error(t("settings.subscription.toast.error"));
       console.error(error);
     } finally {
       setIsLoading(null);
@@ -52,27 +54,27 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
   const plans: Plan[] = [
     {
       id: "free",
-      name: "Auto-Entrepreneur",
+      name: t("settings.subscription.plans.free.name"),
       price: "Free",
-      description: "Essential tools for solo entrepreneurs.",
+      description: t("settings.subscription.plans.free.desc"),
       features: ["Unlimited Invoices", "Client Management", "G12 Reports", "Basic Support"],
       icon: Star,
     },
     {
       id: "pro",
-      name: "Small Business",
+      name: t("settings.subscription.plans.pro.name"),
       price: "2000 DA",
       period: "/month",
-      description: "Perfect for growing companies.",
+      description: t("settings.subscription.plans.pro.desc"),
       features: ["Everything in Free", "G50 Declarations", "VAT Management", "Multi-user Access", "Priority Support"],
       icon: Zap,
       popular: true,
     },
     {
       id: "enterprise",
-      name: "Enterprise",
+      name: t("settings.subscription.plans.enterprise.name"),
       price: "Custom",
-      description: "For large organizations with specific needs.",
+      description: t("settings.subscription.plans.enterprise.desc"),
       features: ["Everything in Pro", "Custom Integrations", "Dedicated Account Manager", "SLA Support"],
       icon: Shield,
     },
@@ -97,12 +99,12 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
             >
               {isCurrent && (
                 <div className="absolute -top-3 left-0 right-0 flex justify-center">
-                  <Badge className="bg-primary text-primary-foreground hover:bg-primary">Current Plan</Badge>
+                  <Badge className="bg-primary text-primary-foreground hover:bg-primary">{t("settings.subscription.currentPlan")}</Badge>
                 </div>
               )}
               {isPopular && !isCurrent && (
                 <div className="absolute -top-3 left-0 right-0 flex justify-center">
-                  <Badge variant="secondary" className="bg-blue-500 text-white hover:bg-blue-600">Most Popular</Badge>
+                  <Badge variant="secondary" className="bg-blue-500 text-white hover:bg-blue-600">{t("settings.subscription.mostPopular")}</Badge>
                 </div>
               )}
               
@@ -142,9 +144,9 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
                   {isLoading === plan.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : isCurrent ? (
-                    "Current Plan"
+                    t("settings.subscription.currentPlan")
                   ) : (
-                    "Upgrade Plan"
+                    t("settings.subscription.upgrade")
                   )}
                 </Button>
               </CardFooter>
@@ -159,18 +161,18 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-primary" />
-                Subscription Status
+                {t("settings.subscription.statusTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
                 <div className="space-y-1">
-                  <p className="font-medium">Current Billing Cycle</p>
+                  <p className="font-medium">{t("settings.subscription.billingCycle")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Renews on {new Date(subscriptionEndsAt).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                    {t("settings.subscription.renewsOn")} {new Date(subscriptionEndsAt).toLocaleDateString(undefined, { dateStyle: 'long' })}
                   </p>
                 </div>
-                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">Active</Badge>
+                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">{t("settings.subscription.active")}</Badge>
               </div>
             </CardContent>
           </Card>
@@ -179,8 +181,8 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
         {history && history.length > 0 && (
           <Card className={subscriptionEndsAt ? "" : "md:col-span-2"}>
             <CardHeader>
-              <CardTitle className="text-lg">Billing History</CardTitle>
-              <CardDescription>Recent transactions and invoices</CardDescription>
+              <CardTitle className="text-lg">{t("settings.subscription.historyTitle")}</CardTitle>
+              <CardDescription>{t("settings.subscription.historyDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -191,7 +193,7 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
                         <CreditCard className="h-4 w-4 text-muted-foreground" />
                       </div>
                       <div>
-                        <p className="font-medium capitalize text-sm">{sub.planId} Plan</p>
+                        <p className="font-medium capitalize text-sm">{sub.planId} {t("settings.subscription.plan")}</p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(sub.startDate).toLocaleDateString()}
                         </p>

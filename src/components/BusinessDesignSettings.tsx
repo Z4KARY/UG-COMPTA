@@ -21,6 +21,7 @@ import { useMutation } from "convex/react";
 import { Palette, Upload, Image as ImageIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BusinessDesignSettingsProps {
   businessId: Id<"businesses">;
@@ -35,6 +36,7 @@ interface BusinessDesignSettingsProps {
 }
 
 export function BusinessDesignSettings({ businessId, initialData }: BusinessDesignSettingsProps) {
+  const { t } = useLanguage();
   const updateBusiness = useMutation(api.businesses.update);
   const generateUploadUrl = useMutation(api.businesses.generateUploadUrl);
   
@@ -83,10 +85,10 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
         logoStorageId: storageId,
       });
       
-      toast.success("Logo uploaded successfully");
+      toast.success(t("settings.design.toast.logoSuccess"));
     } catch (error) {
       console.error(error);
-      toast.error("Failed to upload logo");
+      toast.error(t("settings.design.toast.logoError"));
     } finally {
       setIsUploading(false);
     }
@@ -98,10 +100,10 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
         id: businessId,
         ...formData,
       });
-      toast.success("Design settings saved");
+      toast.success(t("settings.design.toast.saveSuccess"));
     } catch (error) {
       console.error(error);
-      toast.error("Failed to save design settings");
+      toast.error(t("settings.design.toast.saveError"));
     }
   };
 
@@ -113,9 +115,9 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
             <Palette className="h-5 w-5 text-pink-600 dark:text-pink-400" />
           </div>
           <div>
-            <CardTitle>Invoice Design</CardTitle>
+            <CardTitle>{t("settings.design.title")}</CardTitle>
             <CardDescription>
-              Customize the look and feel of your documents.
+              {t("settings.design.description")}
             </CardDescription>
           </div>
         </div>
@@ -123,7 +125,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
       <CardContent className="space-y-6">
         {/* Logo Section */}
         <div className="space-y-4">
-          <Label>Company Logo</Label>
+          <Label>{t("settings.design.logo")}</Label>
           <div className="flex items-center gap-4">
             <div className="h-20 w-20 rounded-lg border border-dashed flex items-center justify-center bg-muted/50 overflow-hidden relative">
               {initialData.logoUrl ? (
@@ -144,7 +146,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
                 disabled={isUploading}
               >
                 <Upload className="mr-2 h-4 w-4" />
-                {isUploading ? "Uploading..." : "Upload Logo"}
+                {isUploading ? t("settings.design.uploading") : t("settings.design.upload")}
               </Button>
               <input
                 type="file"
@@ -154,7 +156,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
                 onChange={handleLogoUpload}
               />
               <p className="text-xs text-muted-foreground">
-                Recommended: PNG or JPG, max 2MB.
+                {t("settings.design.recommended")}
               </p>
             </div>
           </div>
@@ -163,7 +165,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Colors */}
           <div className="space-y-2">
-            <Label htmlFor="primaryColor">Primary Color</Label>
+            <Label htmlFor="primaryColor">{t("settings.design.primaryColor")}</Label>
             <div className="flex gap-2">
               <Input
                 id="primaryColor"
@@ -183,7 +185,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="secondaryColor">Secondary Color</Label>
+            <Label htmlFor="secondaryColor">{t("settings.design.secondaryColor")}</Label>
             <div className="flex gap-2">
               <Input
                 id="secondaryColor"
@@ -204,13 +206,13 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
 
           {/* Typography */}
           <div className="space-y-2">
-            <Label htmlFor="font">Font Family</Label>
+            <Label htmlFor="font">{t("settings.design.font")}</Label>
             <Select
               value={formData.font}
               onValueChange={(val) => handleSelectChange("font", val)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select font" />
+                <SelectValue placeholder={t("settings.design.selectFont")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Inter">Inter (Default)</SelectItem>
@@ -224,13 +226,13 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
 
           {/* Template */}
           <div className="space-y-2">
-            <Label htmlFor="template">Template Style</Label>
+            <Label htmlFor="template">{t("settings.design.template")}</Label>
             <Select
               value={formData.template}
               onValueChange={(val) => handleSelectChange("template", val)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select template" />
+                <SelectValue placeholder={t("settings.design.selectTemplate")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="modern">Modern</SelectItem>
@@ -242,7 +244,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={handleSave}>Save Design Settings</Button>
+          <Button onClick={handleSave}>{t("settings.design.save")}</Button>
         </div>
       </CardContent>
     </Card>

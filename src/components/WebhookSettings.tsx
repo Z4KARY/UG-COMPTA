@@ -24,6 +24,7 @@ import { Network, Plus, Trash2, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface WebhookSettingsProps {
   businessId: Id<"businesses">;
@@ -37,6 +38,7 @@ const AVAILABLE_EVENTS = [
 ];
 
 export function WebhookSettings({ businessId }: WebhookSettingsProps) {
+  const { t } = useLanguage();
   const subscriptions = useQuery(api.webhooks.list, { businessId });
   const createSubscription = useMutation(api.webhooks.create);
   const deleteSubscription = useMutation(api.webhooks.remove);
@@ -48,11 +50,11 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
 
   const handleAdd = async () => {
     if (!newUrl) {
-        toast.error("Please enter a target URL");
+        toast.error(t("settings.webhooks.toast.urlRequired"));
         return;
     }
     if (selectedEvents.length === 0) {
-        toast.error("Please select at least one event");
+        toast.error(t("settings.webhooks.toast.eventRequired"));
         return;
     }
 
@@ -62,18 +64,18 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
             targetUrl: newUrl,
             events: selectedEvents,
         });
-        toast.success("Webhook subscription added");
+        toast.success(t("settings.webhooks.toast.addSuccess"));
         setNewUrl("");
         setSelectedEvents([]);
     } catch (error) {
-        toast.error("Failed to add webhook");
+        toast.error(t("settings.webhooks.toast.addError"));
     }
   };
 
   const handleDelete = async (id: Id<"webhookSubscriptions">) => {
-    if (confirm("Delete this webhook?")) {
+    if (confirm(t("settings.webhooks.confirmDelete"))) {
         await deleteSubscription({ id });
-        toast.success("Webhook deleted");
+        toast.success(t("settings.webhooks.toast.deleteSuccess"));
     }
   };
 
@@ -89,7 +91,7 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
     navigator.clipboard.writeText(text);
     setCopiedSecret(id);
     setTimeout(() => setCopiedSecret(null), 2000);
-    toast.success("Secret copied to clipboard");
+    toast.success(t("settings.webhooks.toast.copySuccess"));
   };
 
   return (
@@ -100,18 +102,18 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
             <Network className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <CardTitle>API & Webhooks</CardTitle>
+            <CardTitle>{t("settings.webhooks.title")}</CardTitle>
             <CardDescription>
-              Integrate with external systems by subscribing to events.
+              {t("settings.webhooks.description")}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4 border rounded-lg p-4 bg-muted/20">
-            <h3 className="text-sm font-medium">Add New Webhook</h3>
+            <h3 className="text-sm font-medium">{t("settings.webhooks.addTitle")}</h3>
             <div className="space-y-2">
-                <Label>Target URL</Label>
+                <Label>{t("settings.webhooks.url")}</Label>
                 <Input 
                     placeholder="https://api.yoursystem.com/webhook" 
                     value={newUrl}
@@ -119,7 +121,7 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
                 />
             </div>
             <div className="space-y-2">
-                <Label>Events</Label>
+                <Label>{t("settings.webhooks.events")}</Label>
                 <div className="grid grid-cols-2 gap-2">
                     {AVAILABLE_EVENTS.map(event => (
                         <div key={event.id} className="flex items-center space-x-2">
@@ -140,19 +142,19 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
             </div>
             <Button onClick={handleAdd} disabled={!newUrl || selectedEvents.length === 0}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Webhook
+                {t("settings.webhooks.addBtn")}
             </Button>
         </div>
 
         <div className="space-y-2">
-            <h3 className="text-sm font-medium">Active Subscriptions</h3>
+            <h3 className="text-sm font-medium">{t("settings.webhooks.activeTitle")}</h3>
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Target URL</TableHead>
-                        <TableHead>Events</TableHead>
-                        <TableHead>Secret</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t("settings.webhooks.url")}</TableHead>
+                        <TableHead>{t("settings.webhooks.events")}</TableHead>
+                        <TableHead>{t("settings.webhooks.secret")}</TableHead>
+                        <TableHead className="text-right">{t("settings.webhooks.actions")}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -176,7 +178,7 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
                                     onClick={() => copyToClipboard(sub.secret, sub._id)}
                                 >
                                     {copiedSecret === sub._id ? <Check className="h-3 w-3 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
-                                    Copy Secret
+                                    {t("settings.webhooks.copy")}
                                 </Button>
                             </TableCell>
                             <TableCell className="text-right">
@@ -194,7 +196,7 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
                     {subscriptions?.length === 0 && (
                         <TableRow>
                             <TableCell colSpan={4} className="text-center text-muted-foreground text-sm">
-                                No webhooks configured.
+                                {t("settings.webhooks.empty")}
                             </TableCell>
                         </TableRow>
                     )}

@@ -38,12 +38,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TeamSettingsProps {
   businessId: Id<"businesses">;
 }
 
 export function TeamSettings({ businessId }: TeamSettingsProps) {
+  const { t } = useLanguage();
   const members = useQuery(api.members.list, { businessId });
   const addMember = useMutation(api.members.add);
   const updateMember = useMutation(api.members.update);
@@ -65,11 +67,11 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
         email: newMemberEmail,
         role: newMemberRole,
       });
-      toast.success("Member added successfully");
+      toast.success(t("settings.team.toast.addSuccess"));
       setNewMemberEmail("");
       setNewMemberRole("staff");
     } catch (error: any) {
-      toast.error(error.message || "Failed to add member");
+      toast.error(error.message || t("settings.team.toast.addError"));
     } finally {
       setIsAdding(false);
     }
@@ -78,9 +80,9 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
   const handleUpdateRole = async (memberId: Id<"businessMembers">, role: "owner" | "accountant" | "staff") => {
     try {
       await updateMember({ memberId, role });
-      toast.success("Role updated successfully");
+      toast.success(t("settings.team.toast.roleSuccess"));
     } catch (error: any) {
-      toast.error(error.message || "Failed to update role");
+      toast.error(error.message || t("settings.team.toast.roleError"));
     }
   };
 
@@ -88,10 +90,10 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
     if (!memberToRemove) return;
     try {
       await removeMember({ memberId: memberToRemove });
-      toast.success("Member removed successfully");
+      toast.success(t("settings.team.toast.removeSuccess"));
       setMemberToRemove(null);
     } catch (error: any) {
-      toast.error(error.message || "Failed to remove member");
+      toast.error(error.message || t("settings.team.toast.removeError"));
     }
   };
 
@@ -104,9 +106,9 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
               <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <CardTitle>Add Team Member</CardTitle>
+              <CardTitle>{t("settings.team.addTitle")}</CardTitle>
               <CardDescription>
-                Invite users to collaborate on this business.
+                {t("settings.team.addDescription")}
               </CardDescription>
             </div>
           </div>
@@ -115,7 +117,7 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
           <form onSubmit={handleAddMember} className="flex flex-col md:flex-row gap-4 items-end">
             <div className="grid w-full gap-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email Address
+                {t("settings.team.email")}
               </label>
               <Input
                 id="email"
@@ -128,7 +130,7 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
             </div>
             <div className="grid w-full md:w-[200px] gap-2">
               <label htmlFor="role" className="text-sm font-medium">
-                Role
+                {t("settings.team.role")}
               </label>
               <Select
                 value={newMemberRole}
@@ -149,7 +151,7 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
               ) : (
                 <Plus className="h-4 w-4 mr-2" />
               )}
-              Add Member
+              {t("settings.team.addBtn")}
             </Button>
           </form>
         </CardContent>
@@ -162,9 +164,9 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
               <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
-              <CardTitle>Team Members</CardTitle>
+              <CardTitle>{t("settings.team.listTitle")}</CardTitle>
               <CardDescription>
-                Manage access and permissions for your team.
+                {t("settings.team.listDescription")}
               </CardDescription>
             </div>
           </div>
@@ -211,22 +213,22 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => handleUpdateRole(member._id, "owner")}>
                         <Shield className="mr-2 h-4 w-4" />
-                        Make Owner
+                        {t("settings.team.makeOwner")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleUpdateRole(member._id, "accountant")}>
                         <Users className="mr-2 h-4 w-4" />
-                        Make Accountant
+                        {t("settings.team.makeAccountant")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleUpdateRole(member._id, "staff")}>
                         <Users className="mr-2 h-4 w-4" />
-                        Make Staff
+                        {t("settings.team.makeStaff")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
                         onClick={() => setMemberToRemove(member._id)}
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Remove Member
+                        {t("settings.team.remove")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -235,7 +237,7 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
             ))}
             {members?.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                No members found.
+                {t("settings.team.empty")}
               </div>
             )}
           </div>
@@ -245,18 +247,18 @@ export function TeamSettings({ businessId }: TeamSettingsProps) {
       <AlertDialog open={!!memberToRemove} onOpenChange={(open) => !open && setMemberToRemove(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("settings.team.confirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently remove the member from the team.
+              {t("settings.team.confirmDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("settings.team.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmRemoveMember}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Remove Member
+              {t("settings.team.confirmRemove")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
