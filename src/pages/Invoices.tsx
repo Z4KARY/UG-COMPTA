@@ -115,7 +115,7 @@ export default function Invoices() {
     );
   }
 
-  if (business === null) {
+  if (business === null || !business.type) {
     return (
       <DashboardLayout>
         <SetupRequired />

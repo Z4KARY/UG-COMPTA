@@ -69,7 +69,7 @@ export default function Customers() {
     );
   }
 
-  if (business === null) {
+  if (business === null || !business.type) {
     return (
       <DashboardLayout>
         <SetupRequired />

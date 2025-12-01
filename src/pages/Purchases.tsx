@@ -64,7 +64,7 @@ export default function Purchases() {
     );
   }
 
-  if (business === null) {
+  if (business === null || !business.type) {
     return (
       <DashboardLayout>
         <SetupRequired />

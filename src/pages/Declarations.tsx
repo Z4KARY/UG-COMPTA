@@ -255,20 +255,7 @@ export default function Declarations() {
   if (!business.type) {
     return (
       <DashboardLayout>
-        <div className="flex flex-col items-center justify-center h-[60vh] space-y-6">
-            <div className="p-4 rounded-full bg-muted/30">
-                <Settings className="h-12 w-12 text-muted-foreground" />
-            </div>
-            <div className="text-center space-y-2 max-w-md">
-                <h2 className="text-2xl font-bold tracking-tight">{t("declarations.configure")}</h2>
-                <p className="text-muted-foreground">
-                    {t("declarations.configureDesc")}
-                </p>
-            </div>
-            <Button asChild size="lg">
-                <Link to="/settings">{t("declarations.configureBtn")}</Link>
-            </Button>
-        </div>
+        <SetupRequired />
       </DashboardLayout>
     );
   }
