@@ -14,13 +14,21 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem("language");
-    return (saved as Language) || "en";
+    try {
+      const saved = localStorage.getItem("language");
+      return (saved as Language) || "en";
+    } catch (e) {
+      return "en";
+    }
   });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem("language", lang);
+    try {
+      localStorage.setItem("language", lang);
+    } catch (e) {
+      // Ignore storage errors
+    }
   };
 
   const dir = language === "ar" ? "rtl" : "ltr";
