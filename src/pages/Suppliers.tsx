@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -15,98 +14,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format } from "date-fns";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { Plus, Trash2, ArrowLeft, Pencil, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
-import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SetupRequired } from "@/components/SetupRequired";
+import { SupplierDialog } from "@/components/SupplierDialog";
 
 export default function Suppliers() {
   const { t } = useLanguage();
   const business = useQuery(api.businesses.getMyBusiness, {});
   const suppliers = useQuery(api.suppliers.list, business ? { businessId: business._id } : "skip");
-  const createSupplier = useMutation(api.suppliers.create);
-  const updateSupplier = useMutation(api.suppliers.update);
   const deleteSupplier = useMutation(api.suppliers.remove);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [editingId, setEditingId] = useState<Id<"suppliers"> | null>(null);
-  
-  // Fetch invoices for selected supplier
-  const supplierInvoices = useQuery(api.purchaseInvoices.listBySupplier, 
-    business && editingId ? { businessId: business._id, supplierId: editingId } : "skip"
-  );
-
-  const [formData, setFormData] = useState({
-      name: "",
-      nif: "",
-      rc: "",
-      address: "",
-      phone: "",
-      email: "",
-      notes: ""
-  });
+  const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
 
   const handleEdit = (supplier: any) => {
-    setEditingId(supplier._id);
-    setFormData({
-      name: supplier.name,
-      nif: supplier.nif || "",
-      rc: supplier.rc || "",
-      address: supplier.address || "",
-      phone: supplier.phone || "",
-      email: supplier.email || "",
-      notes: supplier.notes || ""
-    });
+    setSelectedSupplier(supplier);
     setIsOpen(true);
   };
 
   const handleCreate = () => {
-    setEditingId(null);
-    setFormData({ name: "", nif: "", rc: "", address: "", phone: "", email: "", notes: "" });
+    setSelectedSupplier(null);
     setIsOpen(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!business) return;
-      try {
-          if (editingId) {
-            await updateSupplier({
-              id: editingId,
-              ...formData
-            });
-            toast.success("Supplier updated");
-          } else {
-            await createSupplier({
-                businessId: business._id,
-                ...formData
-            });
-            toast.success("Supplier created");
-          }
-          setIsOpen(false);
-          setFormData({ name: "", nif: "", rc: "", address: "", phone: "", email: "", notes: "" });
-          setEditingId(null);
-      } catch (error) {
-          toast.error(editingId ? "Failed to update supplier" : "Failed to create supplier");
-      }
   };
 
   const handleDelete = async (id: any) => {
@@ -157,189 +91,20 @@ export default function Suppliers() {
             </div>
 
             <div className="w-full md:w-auto">
-                <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                    <DialogTrigger asChild>
-                        <Button onClick={handleCreate} className="w-full md:w-auto">
-                            <Plus className="mr-2 h-4 w-4" />
-                            {t("suppliers.add")}
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-3xl">
-                        <DialogHeader>
-                            <DialogTitle>{editingId ? t("suppliers.edit") : t("suppliers.add")}</DialogTitle>
-                            <DialogDescription>{editingId ? t("suppliers.subtitle") : t("suppliers.subtitle")}</DialogDescription>
-                        </DialogHeader>
-                        
-                        {editingId ? (
-                            <Tabs defaultValue="details" className="w-full">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="details">{t("suppliers.details")}</TabsTrigger>
-                                    <TabsTrigger value="invoices">{t("suppliers.invoices")} ({supplierInvoices?.length || 0})</TabsTrigger>
-                                </TabsList>
-                                
-                                <TabsContent value="details">
-                                    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="name">{t("customers.name")} *</Label>
-                                            <Input 
-                                                id="name" 
-                                                value={formData.name} 
-                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                                required 
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="nif">{t("customers.nif")}</Label>
-                                                <Input 
-                                                    id="nif" 
-                                                    value={formData.nif} 
-                                                    onChange={(e) => setFormData({...formData, nif: e.target.value})}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="rc">{t("customers.rc")}</Label>
-                                                <Input 
-                                                    id="rc" 
-                                                    value={formData.rc} 
-                                                    onChange={(e) => setFormData({...formData, rc: e.target.value})}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="address">{t("customers.address")}</Label>
-                                            <Input 
-                                                id="address" 
-                                                value={formData.address} 
-                                                onChange={(e) => setFormData({...formData, address: e.target.value})}
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="phone">{t("customers.phone")}</Label>
-                                                <Input 
-                                                    id="phone" 
-                                                    value={formData.phone} 
-                                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="email">{t("customers.email")}</Label>
-                                                <Input 
-                                                    id="email" 
-                                                    value={formData.email} 
-                                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                                />
-                                            </div>
-                                        </div>
-                                        <Button type="submit" className="w-full">Save Changes</Button>
-                                    </form>
-                                </TabsContent>
-
-                                <TabsContent value="invoices">
-                                    <div className="max-h-[400px] overflow-y-auto border rounded-md mt-4">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead className="w-[80px] px-2 text-xs">{t("invoices.number")}</TableHead>
-                                                    <TableHead className="hidden sm:table-cell">{t("invoices.date")}</TableHead>
-                                                    <TableHead className="px-2 text-xs">{t("invoices.status")}</TableHead>
-                                                    <TableHead className="text-right px-2 text-xs">{t("invoices.amount")}</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {supplierInvoices?.length === 0 && (
-                                                    <TableRow>
-                                                        <TableCell colSpan={4} className="text-center py-4 text-muted-foreground text-xs">
-                                                            {t("invoices.empty")}
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )}
-                                                {supplierInvoices?.map((invoice) => (
-                                                    <TableRow key={invoice._id}>
-                                                        <TableCell className="font-medium text-xs px-2 py-3 whitespace-nowrap">{invoice.invoiceNumber}</TableCell>
-                                                        <TableCell className="hidden sm:table-cell text-xs px-2 py-3 whitespace-nowrap">{format(new Date(invoice.invoiceDate), "dd/MM/yyyy")}</TableCell>
-                                                        <TableCell className="px-2 py-3">
-                                                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium capitalize ${
-                                                                (invoice.status === "paid" || invoice.paymentDate) 
-                                                                    ? "bg-emerald-100 text-emerald-700" 
-                                                                    : "bg-yellow-100 text-yellow-700"
-                                                            }`}>
-                                                                {invoice.status === "paid" ? t("invoices.status.paid") : t("invoices.status.unpaid")}
-                                                            </span>
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-medium text-xs px-2 py-3 whitespace-nowrap">
-                                                            {invoice.totalTtc.toLocaleString()} <span className="hidden sm:inline">{business?.currency}</span>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                </TabsContent>
-                            </Tabs>
-                        ) : (
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">{t("customers.name")} *</Label>
-                                    <Input 
-                                        id="name" 
-                                        value={formData.name} 
-                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                        required 
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="nif">{t("customers.nif")}</Label>
-                                        <Input 
-                                            id="nif" 
-                                            value={formData.nif} 
-                                            onChange={(e) => setFormData({...formData, nif: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="rc">{t("customers.rc")}</Label>
-                                        <Input 
-                                            id="rc" 
-                                            value={formData.rc} 
-                                            onChange={(e) => setFormData({...formData, rc: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="address">{t("customers.address")}</Label>
-                                    <Input 
-                                        id="address" 
-                                        value={formData.address} 
-                                        onChange={(e) => setFormData({...formData, address: e.target.value})}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phone">{t("customers.phone")}</Label>
-                                        <Input 
-                                            id="phone" 
-                                            value={formData.phone} 
-                                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">{t("customers.email")}</Label>
-                                        <Input 
-                                            id="email" 
-                                            value={formData.email} 
-                                            onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-                                <Button type="submit" className="w-full">{t("suppliers.add")}</Button>
-                            </form>
-                        )}
-                    </DialogContent>
-                </Dialog>
+                <Button onClick={handleCreate} className="w-full md:w-auto">
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t("suppliers.add")}
+                </Button>
             </div>
         </div>
+
+        <SupplierDialog 
+            open={isOpen} 
+            onOpenChange={setIsOpen} 
+            businessId={business._id} 
+            supplier={selectedSupplier}
+            currency={business.currency}
+        />
 
         <Card>
             <CardContent className="p-0">
