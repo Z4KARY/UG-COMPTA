@@ -7,17 +7,17 @@ export function LandingTrustedBy() {
               <img 
                 src="https://harmless-tapir-303.convex.cloud/api/storage/4e7cc034-a414-43c2-a72f-cfea36b14e8e" 
                 alt="UpGrowth" 
-                className="h-16 md:h-20 w-auto object-contain transition-all hover:scale-105 grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
+                className="h-16 md:h-24 w-auto object-contain transition-all hover:scale-105 grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
               />
               <img 
                 src="https://harmless-tapir-303.convex.cloud/api/storage/360ad36b-e195-467f-80b4-05af3785761f" 
                 alt="UpGrowth Connect" 
-                className="h-16 md:h-20 w-auto object-contain transition-all hover:scale-105 grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
+                className="h-16 md:h-24 w-auto object-contain transition-all hover:scale-105 grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
               />
               <img 
                 src="https://harmless-tapir-303.convex.cloud/api/storage/ef75208c-7736-4b74-b7f4-a8a8aa9cc483" 
                 alt="FA Management Solutions" 
-                className="h-16 md:h-20 w-auto object-contain transition-all hover:scale-105 grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
+                className="h-16 md:h-24 w-auto object-contain transition-all hover:scale-105 grayscale hover:grayscale-0 opacity-70 hover:opacity-100"
               />
             </div>
           </div>
