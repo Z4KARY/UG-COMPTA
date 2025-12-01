@@ -1,34 +1,34 @@
 import { Toaster } from "@/components/ui/sonner";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
 import { InstrumentationProvider } from "@/instrumentation.tsx";
-import AuthPage from "@/pages/Auth.tsx";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
-import Landing from "./pages/Landing.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import Dashboard from "./pages/Dashboard.tsx";
-import BusinessSettings from "./pages/BusinessSettings.tsx";
-import Customers from "./pages/Customers.tsx";
-import Products from "./pages/Products.tsx";
-import Invoices from "./pages/Invoices.tsx";
-import InvoiceCreate from "./pages/InvoiceCreate.tsx";
-import InvoiceDetail from "./pages/InvoiceDetail.tsx";
-import Declarations from "./pages/Declarations.tsx";
-import Admin from "./pages/Admin.tsx";
-import Purchases from "./pages/Purchases.tsx";
-import PurchaseCreate from "./pages/PurchaseCreate.tsx";
-import PurchaseDetail from "./pages/PurchaseDetail.tsx";
-import Suppliers from "./pages/Suppliers.tsx";
 import "./types/global.d.ts";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 
+// Pages
+import Landing from "@/pages/Landing.tsx";
+import AuthPage from "@/pages/Auth.tsx";
+import Dashboard from "@/pages/Dashboard.tsx";
+import BusinessSettings from "@/pages/BusinessSettings.tsx";
+import Customers from "@/pages/Customers.tsx";
+import Products from "@/pages/Products.tsx";
+import Invoices from "@/pages/Invoices.tsx";
+import InvoiceCreate from "@/pages/InvoiceCreate.tsx";
+import InvoiceDetail from "@/pages/InvoiceDetail.tsx";
+import Declarations from "@/pages/Declarations.tsx";
+import Admin from "@/pages/Admin.tsx";
+import Purchases from "@/pages/Purchases.tsx";
+import PurchaseCreate from "@/pages/PurchaseCreate.tsx";
+import PurchaseDetail from "@/pages/PurchaseDetail.tsx";
+import Suppliers from "@/pages/Suppliers.tsx";
+import NotFound from "@/pages/NotFound.tsx";
+
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
-
-
 
 function RouteSyncer() {
   const location = useLocation();
@@ -53,11 +53,10 @@ function RouteSyncer() {
   return null;
 }
 
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <InstrumentationProvider>
-      <LanguageProvider>
+    <LanguageProvider>
+      <InstrumentationProvider>
         <VlyToolbar />
         <ConvexAuthProvider client={convex}>
           <BrowserRouter>
@@ -83,7 +82,7 @@ createRoot(document.getElementById("root")!).render(
           </BrowserRouter>
           <Toaster />
         </ConvexAuthProvider>
-      </LanguageProvider>
-    </InstrumentationProvider>
+      </InstrumentationProvider>
+    </LanguageProvider>
   </StrictMode>,
 );
