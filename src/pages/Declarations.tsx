@@ -78,9 +78,9 @@ export default function Declarations() {
             forecastTurnover: parseFloat(forecastAmount),
             ifuRate: parseFloat(ifuRate),
         });
-        toast.success("G12 Forecast saved successfully");
+        toast.success(t("declarations.g12.saved"));
     } catch (error) {
-        toast.error("Failed to save forecast");
+        toast.error(t("settings.toast.failed"));
     }
   };
 
@@ -283,7 +283,7 @@ export default function Declarations() {
             <div className="flex gap-4 print:hidden">
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                     <SelectTrigger className="w-[140px]">
-                        <SelectValue placeholder="Month" />
+                        <SelectValue placeholder={t("common.month")} />
                     </SelectTrigger>
                     <SelectContent>
                         {Array.from({ length: 12 }).map((_, i) => (
@@ -295,7 +295,7 @@ export default function Declarations() {
                 </Select>
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
                     <SelectTrigger className="w-[100px]">
-                        <SelectValue placeholder="Year" />
+                        <SelectValue placeholder={t("common.year")} />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="2024">2024</SelectItem>
@@ -306,7 +306,7 @@ export default function Declarations() {
             
             <div className="hidden print:block mb-4">
                 <p className="font-bold">{t("declarations.g50.period")}: {new Date(0, parseInt(selectedMonth)).toLocaleString('default', { month: 'long' })} {selectedYear}</p>
-                <p>{t("declarations.g50.business")}: {business.name} (NIF: {business.nif || "N/A"})</p>
+                <p>{t("declarations.g50.business")}: {business.name} ({t("common.nif")}: {business.nif || "N/A"})</p>
             </div>
 
             {g50Data ? (
@@ -317,7 +317,7 @@ export default function Declarations() {
                     data={g50Data} 
                 />
             ) : (
-                <div className="p-4 text-center text-muted-foreground">Loading data...</div>
+                <div className="p-4 text-center text-muted-foreground">{t("declarations.loading")}</div>
             )}
           </CardContent>
         </Card>
@@ -343,7 +343,7 @@ export default function Declarations() {
              <div className="flex gap-4 print:hidden">
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
                     <SelectTrigger className="w-[100px]">
-                        <SelectValue placeholder="Year" />
+                        <SelectValue placeholder={t("common.year")} />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="2024">2024</SelectItem>
@@ -353,7 +353,7 @@ export default function Declarations() {
             </div>
 
             <div className="hidden print:block mb-4">
-                <p className="font-bold">Year: {selectedYear}</p>
+                <p className="font-bold">{t("common.year")}: {selectedYear}</p>
                 <p>{t("declarations.g12.regime")}: {business.fiscalRegime || "VAT"}</p>
             </div>
 
@@ -375,7 +375,7 @@ export default function Declarations() {
                                             type="number" 
                                             value={forecastAmount} 
                                             onChange={(e) => setForecastAmount(e.target.value)}
-                                            placeholder={g12IfuData.forecast?.forecastTurnover.toString() || "Enter forecast"}
+                                            placeholder={g12IfuData.forecast?.forecastTurnover.toString() || t("declarations.g12.enterForecast")}
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -453,7 +453,7 @@ export default function Declarations() {
                             {/* AE Invoice Export Button */}
                             {business.type === "auto_entrepreneur" && aeInvoicesData && (
                                 <div className="pt-4 border-t mt-4">
-                                    <h3 className="font-semibold text-sm mb-2">Accounting Export</h3>
+                                    <h3 className="font-semibold text-sm mb-2">{t("declarations.ae.accountingExport")}</h3>
                                     <Button 
                                         variant="secondary" 
                                         className="w-full"
@@ -465,7 +465,7 @@ export default function Declarations() {
                             )}
                         </>
                     ) : (
-                        <div className="text-center text-muted-foreground">Loading IFU data...</div>
+                        <div className="text-center text-muted-foreground">{t("declarations.g12.loadingIfu")}</div>
                     )}
                 </div>
             ) : (
@@ -477,21 +477,21 @@ export default function Declarations() {
                             <span className="font-medium">{g12Data.fiscalRegime}</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
-                            <span className="text-sm text-muted-foreground">Total Annual Turnover (HT):</span>
+                            <span className="text-sm text-muted-foreground">{t("declarations.g12.totalTurnover")}:</span>
                             <span className="font-bold">{g12Data.turnoverHt.toLocaleString()} {business.currency}</span>
                         </div>
                         <div className="flex justify-between pt-2">
-                            <span className="text-sm text-muted-foreground">Goods (Vente de marchandises):</span>
+                            <span className="text-sm text-muted-foreground">{t("declarations.g12.goods")}:</span>
                             <span className="font-medium">{g12Data.turnoverGoods.toLocaleString()} {business.currency}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Services (Prestations):</span>
+                            <span className="text-sm text-muted-foreground">{t("declarations.g12.services")}:</span>
                             <span className="font-medium">{g12Data.turnoverServices.toLocaleString()} {business.currency}</span>
                         </div>
                         {/* Note: G12/G12bis CSVs for Réel Simplifié might differ or be less relevant if they don't do forecast, but we leave the option if needed or just show summary */}
                     </div>
                 ) : (
-                    <div className="p-4 text-center text-muted-foreground">Loading data...</div>
+                    <div className="p-4 text-center text-muted-foreground">{t("declarations.loading")}</div>
                 )
             )}
           </CardContent>

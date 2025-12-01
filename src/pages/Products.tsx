@@ -113,13 +113,13 @@ export default function Products() {
           id: editingId,
           ...formData,
         });
-        toast.success("Product updated");
+        toast.success(t("products.toast.updated"));
       } else {
         await createProduct({
           businessId: business._id,
           ...formData,
         });
-        toast.success("Product created");
+        toast.success(t("products.toast.created"));
       }
       setIsDialogOpen(false);
       setFormData({ 
@@ -128,17 +128,17 @@ export default function Products() {
       });
       setEditingId(null);
     } catch (error) {
-      toast.error(editingId ? "Failed to update product" : "Failed to create product");
+      toast.error(editingId ? t("products.toast.updateError") : t("products.toast.createError"));
     }
   };
 
   const handleDelete = async (id: Id<"products">) => {
-    if (confirm("Are you sure you want to delete this product?")) {
+    if (confirm(t("products.deleteConfirm"))) {
       try {
         await deleteProduct({ id });
-        toast.success("Product deleted");
+        toast.success(t("products.toast.deleted"));
       } catch (error) {
-        toast.error("Failed to delete product");
+        toast.error(t("products.toast.deleteError"));
       }
     }
   };
@@ -251,7 +251,7 @@ export default function Products() {
                         value={formData.unitLabel}
                         onChange={handleChange}
                         className="col-span-3"
-                        placeholder="e.g. Hour, Piece"
+                        placeholder={t("products.placeholders.unitLabel")}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">

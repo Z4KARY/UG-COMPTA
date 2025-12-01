@@ -47,9 +47,9 @@ export default function Purchases() {
       if (confirm(t("purchases.deleteConfirm"))) {
           try {
               await deletePurchase({ id });
-              toast.success(t("purchases.deleteSuccess"));
+              toast.success(t("purchases.toast.deleted"));
           } catch (error) {
-              toast.error(t("purchases.deleteError"));
+              toast.error(t("purchases.toast.deleteError"));
           }
       }
   };
@@ -137,7 +137,7 @@ export default function Purchases() {
                                             ? "bg-emerald-100 text-emerald-700" 
                                             : "bg-yellow-100 text-yellow-700"
                                     }`}>
-                                        {purchase.status || (purchase.paymentDate ? "paid" : "unpaid")}
+                                        {purchase.status === "paid" || purchase.paymentDate ? t("status.paid") : t("status.unpaid")}
                                     </span>
                                 </TableCell>
                                 <TableCell className="text-right">{purchase.subtotalHt.toFixed(2)}</TableCell>

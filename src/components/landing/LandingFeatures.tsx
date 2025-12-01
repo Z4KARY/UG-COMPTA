@@ -1,37 +1,40 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, Zap, Shield, FileText, Globe, Users } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function LandingFeatures() {
+  const { t } = useLanguage();
+  
   const features = [
     {
       icon: CheckCircle2,
-      title: "Algerian Compliance",
-      description: "Automatic calculation of Timbre Fiscal, TVA, and legal requirements tailored for DZ businesses."
+      title: t("landing.features.compliance.title"),
+      description: t("landing.features.compliance.desc")
     },
     {
       icon: Zap,
-      title: "Lightning Fast",
-      description: "Create and send invoices in seconds. Streamlined workflow designed for efficiency."
+      title: t("landing.features.fast.title"),
+      description: t("landing.features.fast.desc")
     },
     {
       icon: Shield,
-      title: "Secure & Reliable",
-      description: "Your data is encrypted and backed up automatically. Bank-grade security for your peace of mind."
+      title: t("landing.features.secure.title"),
+      description: t("landing.features.secure.desc")
     },
     {
       icon: FileText,
-      title: "Professional PDF",
-      description: "Generate beautiful, branded PDF invoices that look professional on any device."
+      title: t("landing.features.pdf.title"),
+      description: t("landing.features.pdf.desc")
     },
     {
       icon: Globe,
-      title: "Access Anywhere",
-      description: "Cloud-based platform allows you to manage your business from the office or on the go."
+      title: t("landing.features.access.title"),
+      description: t("landing.features.access.desc")
     },
     {
       icon: Users,
-      title: "Client Management",
-      description: "Keep track of your customers, their history, and outstanding balances in one place."
+      title: t("landing.features.clients.title"),
+      description: t("landing.features.clients.desc")
     }
   ];
 
@@ -39,9 +42,9 @@ export function LandingFeatures() {
     <section id="features" className="py-24 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Everything you need to run your business</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{t("landing.features.title")}</h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Built specifically for the Algerian market, ensuring 100% compliance with local regulations.
+                {t("landing.features.subtitle")}
               </p>
             </div>
             

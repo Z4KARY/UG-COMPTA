@@ -4,51 +4,54 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function LandingPricing() {
+  const { t } = useLanguage();
+
   const pricing = [
     {
-      name: "Auto-Entrepreneur",
+      name: t("landing.pricing.auto.name"),
       price: "Free",
-      description: "Perfect for freelancers and consultants.",
+      description: t("landing.pricing.auto.desc"),
       features: [
-        "Unlimited Invoices",
-        "Client Management",
-        "G12 Reports",
-        "Timbre Fiscal Calculation",
-        "PDF Exports"
+        t("landing.pricing.features.unlimited"),
+        t("landing.pricing.features.clients"),
+        t("landing.pricing.features.g12"),
+        t("landing.pricing.features.timbre"),
+        t("landing.pricing.features.pdf")
       ],
-      cta: "Get Started",
+      cta: t("landing.pricing.auto.cta"),
       popular: false
     },
     {
-      name: "Small Business",
+      name: t("landing.pricing.small.name"),
       price: "2000 DA",
       period: "/month",
-      description: "For growing companies with VAT needs.",
+      description: t("landing.pricing.small.desc"),
       features: [
-        "Everything in Free",
-        "G50 Declarations",
-        "VAT Management",
-        "Expense Tracking",
-        "Priority Support",
-        "Multi-user Access"
+        t("landing.pricing.features.unlimited"),
+        t("landing.pricing.features.g50"),
+        t("landing.pricing.features.vat"),
+        t("landing.pricing.features.expenses"),
+        t("landing.pricing.features.support"),
+        t("landing.pricing.features.multiuser")
       ],
-      cta: "Start Free Trial",
+      cta: t("landing.pricing.small.cta"),
       popular: true
     },
     {
-      name: "Enterprise",
+      name: t("landing.pricing.enterprise.name"),
       price: "Custom",
-      description: "For large organizations with specific needs.",
+      description: t("landing.pricing.enterprise.desc"),
       features: [
-        "Everything in Small Business",
-        "Custom Integrations",
-        "Dedicated Account Manager",
-        "SLA Support",
-        "On-premise Options"
+        t("landing.pricing.features.multiuser"),
+        t("landing.pricing.features.custom"),
+        t("landing.pricing.features.manager"),
+        t("landing.pricing.features.sla"),
+        t("landing.pricing.features.onprem")
       ],
-      cta: "Contact Sales",
+      cta: t("landing.pricing.enterprise.cta"),
       popular: false
     },
   ];
@@ -57,9 +60,9 @@ export function LandingPricing() {
     <section id="pricing" className="py-24 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Simple, Transparent Pricing</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{t("landing.pricing.title")}</h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Choose the plan that fits your business stage. No hidden fees.
+                {t("landing.pricing.subtitle")}
               </p>
             </div>
 
@@ -75,7 +78,7 @@ export function LandingPricing() {
                 >
                   {plan.popular && (
                     <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                      <Badge className="bg-primary text-primary-foreground px-3 py-1 text-sm">Most Popular</Badge>
+                      <Badge className="bg-primary text-primary-foreground px-3 py-1 text-sm">{t("landing.pricing.mostPopular")}</Badge>
                     </div>
                   )}
                   <Card className={`flex-1 flex flex-col ${plan.popular ? 'border-primary shadow-lg' : ''}`}>

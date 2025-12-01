@@ -1,25 +1,28 @@
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function LandingTestimonials() {
+  const { t } = useLanguage();
+
   const testimonials = [
     {
       name: "Amine Benali",
-      role: "Auto-Entrepreneur",
-      content: "InvoiceFlow changed how I manage my freelance work. The G12 export saved me hours during tax season.",
+      role: t("landing.testimonials.1.role"),
+      content: t("landing.testimonials.1.content"),
       avatar: "AB"
     },
     {
       name: "Sarah Khelil",
-      role: "CEO, TechDz",
-      content: "Finally, software that understands Algerian tax laws. The support for Timbre Fiscal is spot on.",
+      role: t("landing.testimonials.2.role"),
+      content: t("landing.testimonials.2.content"),
       avatar: "SK"
     },
     {
       name: "Mohamed Idir",
-      role: "Founder, StartUp Algiers",
-      content: "Beautiful interface and very easy to use. My accountant loves the export features.",
+      role: t("landing.testimonials.3.role"),
+      content: t("landing.testimonials.3.content"),
       avatar: "MI"
     }
   ];
@@ -28,9 +31,9 @@ export function LandingTestimonials() {
     <section id="testimonials" className="py-24 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Loved by Algerian Businesses</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{t("landing.testimonials.title")}</h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Don't just take our word for it. Here's what our users have to say.
+                {t("landing.testimonials.subtitle")}
               </p>
             </div>
 

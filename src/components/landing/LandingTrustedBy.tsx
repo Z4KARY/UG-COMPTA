@@ -1,8 +1,11 @@
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export function LandingTrustedBy() {
+  const { t } = useLanguage();
   return (
     <section className="py-20 bg-background">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-sm font-medium text-muted-foreground mb-8 uppercase tracking-widest">Trusted by forward-thinking companies</p>
+            <p className="text-sm font-medium text-muted-foreground mb-8 uppercase tracking-widest">{t("landing.trustedBy")}</p>
             <div className="mx-auto max-w-5xl bg-card border rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row flex-wrap justify-center items-center gap-8 md:gap-16 shadow-sm">
               <a href="https://www.upgrowth.dz" target="_blank" rel="noopener noreferrer" className="transition-transform hover:scale-105">
                 <img 

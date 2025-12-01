@@ -42,9 +42,9 @@ export default function Customers() {
     if (confirm(t("customers.deleteConfirm"))) {
       try {
         await deleteCustomer({ id });
-        toast.success(t("customers.deleteSuccess"));
+        toast.success(t("customers.toast.deleted"));
       } catch (error) {
-        toast.error(t("customers.deleteError"));
+        toast.error(t("customers.toast.deleteError"));
       }
     }
   };
@@ -130,7 +130,7 @@ export default function Customers() {
                             {customer.phone}
                         </div>
                         <div className="text-xs text-muted-foreground hidden md:block">
-                            {[customer.taxId && `${t("customers.nif")}: ${customer.taxId}`, customer.rc && `${t("customers.rc")}: ${customer.rc}`].filter(Boolean).join(" | ")}
+                            {[customer.taxId && `${t("common.nif")}: ${customer.taxId}`, customer.rc && `${t("common.rc")}: ${customer.rc}`].filter(Boolean).join(" | ")}
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">

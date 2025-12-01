@@ -47,9 +47,9 @@ export default function Suppliers() {
       if (confirm(t("suppliers.deleteConfirm"))) {
           try {
               await deleteSupplier({ id });
-              toast.success("Supplier deleted");
+              toast.success(t("suppliers.toast.deleted"));
           } catch (error) {
-              toast.error("Failed to delete supplier");
+              toast.error(t("suppliers.toast.deleteError"));
           }
       }
   };
@@ -132,7 +132,7 @@ export default function Suppliers() {
                                         {supplier.phone}
                                     </div>
                                     <div className="text-xs text-muted-foreground hidden md:block">
-                                        {[supplier.nif && `NIF: ${supplier.nif}`, supplier.rc && `RC: ${supplier.rc}`].filter(Boolean).join(" | ")}
+                                        {[supplier.nif && `${t("common.nif")}: ${supplier.nif}`, supplier.rc && `${t("common.rc")}: ${supplier.rc}`].filter(Boolean).join(" | ")}
                                     </div>
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
