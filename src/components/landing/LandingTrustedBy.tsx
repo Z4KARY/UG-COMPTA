@@ -11,14 +11,14 @@ export function LandingTrustedBy() {
                   className="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 opacity-70 hover:opacity-100 transition-all duration-300"
                 />
               </a>
-              <a href="https://www.connect.upgrowth.dz" target="_blank" rel="noopener noreferrer" className="transition-transform hover:scale-105">
+              <a href="https://www.fams-dz.com" target="_blank" rel="noopener noreferrer" className="transition-transform hover:scale-105">
                 <img 
                   src="https://harmless-tapir-303.convex.cloud/api/storage/360ad36b-e195-467f-80b4-05af3785761f" 
                   alt="UpGrowth Connect" 
                   className="h-10 md:h-14 w-auto object-contain grayscale hover:grayscale-0 opacity-70 hover:opacity-100 transition-all duration-300"
                 />
               </a>
-              <a href="https://www.fams-dz.com" target="_blank" rel="noopener noreferrer" className="transition-transform hover:scale-105">
+              <a href="https://www.connect.upgrowth.dz" target="_blank" rel="noopener noreferrer" className="transition-transform hover:scale-105">
                 <img 
                   src="https://harmless-tapir-303.convex.cloud/api/storage/ef75208c-7736-4b74-b7f4-a8a8aa9cc483" 
                   alt="FA Management Solutions" 
