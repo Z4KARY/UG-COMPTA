@@ -1,9 +1,11 @@
 {
   "type": "tool_call",
-  "tool_number": 1,
   "tool_name": "readFilesToContextTool",
+  "tool_number": 1,
   "input_args": {
-    "file_paths": ["src/convex/fiscalParameters.ts"],
-    "replace_files_in_context": false
+    "file_paths": [
+      "src/components/landing/LandingTrustedBy.tsx"
+    ],
+    "replace_files_in_context": true
   }
 }
