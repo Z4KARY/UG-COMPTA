@@ -81,20 +81,24 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
       </Card>
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.outstanding")}</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">Net Profit</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-orange-600">{formatCurrency(outstanding)}</div>
+          <div className={`text-2xl font-bold ${currentStats.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+            {formatCurrency(currentStats.netProfit)}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">Margin: {currentStats.netMargin.toFixed(1)}%</p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.growth")}</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Invoices</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${growth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-            {growth > 0 ? '+' : ''}{growth.toFixed(1)}%
+          <div className={`text-2xl font-bold ${currentStats.overdueCount > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+            {currentStats.overdueCount}
           </div>
+          <p className="text-xs text-muted-foreground mt-1">Action Required</p>
         </CardContent>
       </Card>
     </div>

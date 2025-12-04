@@ -34,7 +34,8 @@ export function DashboardCharts({ businessId }: { businessId: Id<"businesses"> }
     const date = new Date(parseInt(year), parseInt(month) - 1);
     return {
       name: date.toLocaleString('default', { month: 'short' }),
-      total: item.revenue,
+      revenue: item.revenue,
+      expenses: item.expenses,
       fullDate: item.month
     };
   });
@@ -64,14 +65,22 @@ export function DashboardCharts({ businessId }: { businessId: Id<"businesses"> }
                   tickFormatter={(value) => `${value / 1000}k`}
                 />
                 <Tooltip 
-                    formatter={(value: number) => [`${value.toLocaleString()} DA`, "Revenue"]}
+                    formatter={(value: number, name: string) => [`${value.toLocaleString()} DA`, name === 'revenue' ? 'Revenue' : 'Expenses']}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                 />
                 <Bar
-                  dataKey="total"
+                  dataKey="revenue"
                   fill="currentColor"
                   radius={[4, 4, 0, 0]}
                   className="fill-primary"
+                  name="Revenue"
+                />
+                <Bar
+                  dataKey="expenses"
+                  fill="currentColor"
+                  radius={[4, 4, 0, 0]}
+                  className="fill-red-400"
+                  name="Expenses"
                 />
               </BarChart>
             </ResponsiveContainer>

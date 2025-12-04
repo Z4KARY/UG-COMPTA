@@ -3,6 +3,8 @@ import { DashboardRecap } from "@/components/dashboard/DashboardRecap";
 import { DashboardBalanceCards } from "@/components/dashboard/DashboardBalanceCards";
 import { DashboardKPIGrid } from "@/components/dashboard/DashboardKPIGrid";
 import { DashboardCharts } from "@/components/dashboard/DashboardCharts";
+import { DashboardTaxStats } from "@/components/dashboard/DashboardTaxStats";
+import { DashboardTopPerformers } from "@/components/dashboard/DashboardTopPerformers";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "convex/react";
@@ -49,8 +51,16 @@ export default function Dashboard() {
 
         <DashboardRecap businessId={business._id} />
         <DashboardBalanceCards businessId={business._id} />
+        <DashboardTaxStats businessId={business._id} />
         <DashboardKPIGrid businessId={business._id} />
-        <DashboardCharts businessId={business._id} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+                <DashboardCharts businessId={business._id} />
+            </div>
+            <div className="lg:col-span-1">
+                <DashboardTopPerformers businessId={business._id} />
+            </div>
+        </div>
       </div>
     </DashboardLayout>
   );
