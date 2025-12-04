@@ -1,18 +1,43 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const data = [
-  { name: "Jan", total: 150000 },
-  { name: "Feb", total: 230000 },
-  { name: "Mar", total: 180000 },
-  { name: "Apr", total: 320000 },
-  { name: "May", total: 290000 },
-  { name: "Jun", total: 450000 },
-];
-
-export function DashboardCharts() {
+export function DashboardCharts({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
+  const trendData = useQuery(api.reports.getRevenueTrend, { businessId });
+
+  if (!trendData) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle><Skeleton className="h-6 w-48" /></CardTitle>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <div className="h-[300px] flex items-center justify-center">
+              <Skeleton className="h-full w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Format data for chart
+  // trendData is [{ month: "2023-01", revenue: 1000, ... }]
+  const chartData = trendData.map(item => {
+    const [year, month] = item.month.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return {
+      name: date.toLocaleString('default', { month: 'short' }),
+      total: item.revenue,
+      fullDate: item.month
+    };
+  });
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -23,7 +48,7 @@ export function DashboardCharts() {
         <CardContent className="pl-2">
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
+              <BarChart data={chartData}>
                 <XAxis
                   dataKey="name"
                   stroke="#888888"

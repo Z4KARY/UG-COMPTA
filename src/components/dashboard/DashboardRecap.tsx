@@ -1,38 +1,99 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpRight, Users, FileText, CreditCard, DollarSign } from "lucide-react";
+import { ArrowUpRight, Users, FileText, CreditCard, DollarSign, ArrowDownRight, Minus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function DashboardRecap() {
+export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
+  
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  const prevDate = new Date(currentYear, currentMonth - 1, 1);
+  const prevMonth = prevDate.getMonth();
+  const prevYear = prevDate.getFullYear();
+
+  const currentStats = useQuery(api.reports.getDashboardStats, { 
+    businessId, 
+    month: currentMonth, 
+    year: currentYear 
+  });
+
+  const prevStats = useQuery(api.reports.getDashboardStats, { 
+    businessId, 
+    month: prevMonth, 
+    year: prevYear 
+  });
+
+  if (!currentStats) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium"><Skeleton className="h-4 w-20" /></CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-32 mb-2" />
+              <Skeleton className="h-4 w-24" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  const calculateChange = (current: number, prev: number) => {
+    if (prev === 0) return current > 0 ? 100 : 0;
+    return ((current - prev) / prev) * 100;
+  };
+
+  const revenueChange = calculateChange(currentStats.turnover, prevStats?.turnover || 0);
+  const invoiceChange = calculateChange(currentStats.invoiceCount, prevStats?.invoiceCount || 0);
+  // For pending (outstanding), we compare current outstanding vs previous outstanding isn't quite right as it's a snapshot
+  // But let's compare the outstanding amount returned by the stats (which is global outstanding)
+  // Actually getDashboardStats returns global outstanding.
+  // Let's just use 0 change for now if we can't track history of outstanding easily without more queries
+  const pendingChange = 0; 
+  // Customer count is also global
+  const customerChange = calculateChange(currentStats.customerCount, prevStats?.customerCount || 0);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(amount).replace('DZD', 'DA');
+  };
 
   const stats = [
     {
       title: t("dashboard.recap.revenue"),
-      value: "2,350,000 DA",
-      change: "+12.5%",
+      value: formatCurrency(currentStats.turnover),
+      change: `${revenueChange > 0 ? '+' : ''}${revenueChange.toFixed(1)}%`,
       icon: DollarSign,
-      trend: "up",
+      trend: revenueChange >= 0 ? "up" : "down",
     },
     {
       title: t("dashboard.recap.invoices"),
-      value: "145",
-      change: "+4.2%",
+      value: currentStats.invoiceCount.toString(),
+      change: `${invoiceChange > 0 ? '+' : ''}${invoiceChange.toFixed(1)}%`,
       icon: FileText,
-      trend: "up",
+      trend: invoiceChange >= 0 ? "up" : "down",
     },
     {
       title: t("dashboard.recap.pending"),
-      value: "450,000 DA",
-      change: "-2.1%",
+      value: formatCurrency(currentStats.outstandingAmount),
+      change: "Total", // Global stat
       icon: CreditCard,
-      trend: "down",
+      trend: "neutral",
     },
     {
       title: t("dashboard.recap.customers"),
-      value: "48",
-      change: "+8.4%",
+      value: currentStats.customerCount.toString(),
+      change: "Total", // Global stat
       icon: Users,
-      trend: "up",
+      trend: "neutral",
     },
   ];
 
@@ -49,10 +110,15 @@ export function DashboardRecap() {
           <CardContent>
             <div className="text-2xl font-bold">{stat.value}</div>
             <p className="text-xs text-muted-foreground flex items-center mt-1">
-              <span className={stat.trend === "up" ? "text-emerald-500" : "text-red-500"}>
-                {stat.change}
-              </span>
-              <span className="ml-1">{t("dashboard.recap.vsLastMonth")}</span>
+              {stat.trend !== "neutral" && (
+                 <span className={stat.trend === "up" ? "text-emerald-500" : "text-red-500"}>
+                   {stat.change}
+                 </span>
+              )}
+              {stat.trend === "neutral" && (
+                  <span className="text-muted-foreground">{stat.change}</span>
+              )}
+              {stat.trend !== "neutral" && <span className="ml-1">{t("dashboard.recap.vsLastMonth")}</span>}
             </p>
           </CardContent>
         </Card>

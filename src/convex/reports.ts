@@ -46,6 +46,13 @@ export const getDashboardStats = query({
       .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
       .collect();
 
+    // Fetch customer count
+    const customers = await ctx.db
+      .query("customers")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+    const customerCount = customers.length;
+
     const periodInvoices = invoices.filter(
       (inv) =>
         inv.issueDate >= startDate &&
@@ -125,6 +132,7 @@ export const getDashboardStats = query({
       averageInvoiceValue,
       outstandingAmount,
       overdueCount,
+      customerCount,
     };
   },
 });
