@@ -1,0 +1,27 @@
+export interface BusinessFormData {
+  name: string;
+  tradeName: string;
+  address: string;
+  city: string;
+  phone: string;
+  email: string;
+  rc: string;
+  nif: string;
+  ai: string;
+  nis: string;
+  capital: string | number;
+  currency: string;
+  tvaDefault: number;
+  type: string;
+  fiscalRegime: string;
+  legalForm: string;
+  customLegalForm: string;
+  bankName: string;
+  bankIban: string;
+  autoEntrepreneurCardNumber: string;
+  ssNumber: string;
+  activityCodes: string;
+  invoicePrefix: string;
+  quotePrefix: string;
+  creditNotePrefix: string;
+}

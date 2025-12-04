@@ -150,6 +150,11 @@ export const create = mutation({
     autoEntrepreneurCardNumber: v.optional(v.string()),
     activityCodes: v.optional(v.array(v.string())),
     ssNumber: v.optional(v.string()),
+
+    // Sequencing
+    invoicePrefix: v.optional(v.string()),
+    quotePrefix: v.optional(v.string()),
+    creditNotePrefix: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
