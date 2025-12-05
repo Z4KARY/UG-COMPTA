@@ -65,6 +65,12 @@ const schema = defineSchema(
       tvaDefault: v.number(),
       
       // New fields based on strict requirements
+      mainActivity: v.optional(v.union(
+        v.literal("PRODUCTION"),
+        v.literal("SERVICES"),
+        v.literal("DISTRIBUTION")
+      )),
+      
       type: v.optional(v.union(
         v.literal("societe"),
         v.literal("personne_physique"),

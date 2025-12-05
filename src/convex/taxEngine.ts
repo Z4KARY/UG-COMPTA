@@ -130,10 +130,23 @@ export function getApplicableTaxRates(business: Doc<"businesses">) {
       minTax: 10000
     };
   } else {
+    // Determine IBS rate based on main activity
+    const activity = business.mainActivity || "DISTRIBUTION";
+    // We need to import FISCAL_CONSTANTS or hardcode/map here. 
+    // Since we can't easily import from fiscal.ts due to circular deps if not careful (though fiscal.ts is pure logic),
+    // let's just map it or assume the caller knows. 
+    // Actually, let's use the values directly for the frontend helper.
+    const ibsRates = {
+        "PRODUCTION": 19,
+        "SERVICES": 23,
+        "DISTRIBUTION": 26
+    };
+    const ibsRate = ibsRates[activity as keyof typeof ibsRates] || 26;
+
     return {
       type: "reel",
       rates: {
-        ibs: 26, // Default to Distribution (26%)
+        ibs: ibsRate, 
         tap: 0, // Abrogated
         vat: [9, 19]
       }

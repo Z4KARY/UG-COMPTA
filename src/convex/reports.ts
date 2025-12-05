@@ -25,7 +25,7 @@ export const getDashboardStats = query({
     const business = await ctx.db.get(args.businessId);
     
     // Allow if owner (legacy check) or member
-    if (!member && business?.userId !== userId) {
+    if (!member && business.userId !== userId) {
         return null;
     }
 
@@ -173,8 +173,9 @@ export const getDashboardStats = query({
 
     // IBS (Impôt sur les Bénéfices des Sociétés)
     // Rates: 19% (Production), 23% (Services/Construction), 26% (Distribution/Resale)
-    // Defaulting to 26% (Distribution) as it's the common commercial rate if not specified.
-    const ibsRate = FISCAL_CONSTANTS.IBS_RATES.DISTRIBUTION; 
+    const activity = business.mainActivity || "DISTRIBUTION";
+    const ibsRate = FISCAL_CONSTANTS.IBS_RATES[activity as keyof typeof FISCAL_CONSTANTS.IBS_RATES] || FISCAL_CONSTANTS.IBS_RATES.DISTRIBUTION;
+    
     const ibsEstimate = netProfit > 0 ? netProfit * (ibsRate / 100) : 0;
 
     // Cash Flow (Net Cash Movement)
@@ -214,6 +215,7 @@ export const getDashboardStats = query({
       expensesLoggedToday,
       tapEstimate,
       ibsEstimate,
+      ibsRate,
       cashFlow,
     };
   },

@@ -125,6 +125,12 @@ export const create = mutation({
     currency: v.string(),
     tvaDefault: v.number(),
     
+    mainActivity: v.optional(v.union(
+        v.literal("PRODUCTION"),
+        v.literal("SERVICES"),
+        v.literal("DISTRIBUTION")
+    )),
+
     type: v.optional(v.union(
         v.literal("societe"),
         v.literal("personne_physique"),
@@ -269,6 +275,12 @@ export const update = mutation({
     currency: v.optional(v.string()),
     tvaDefault: v.optional(v.number()),
     
+    mainActivity: v.optional(v.union(
+        v.literal("PRODUCTION"),
+        v.literal("SERVICES"),
+        v.literal("DISTRIBUTION")
+    )),
+
     type: v.optional(v.union(
       v.literal("societe"),
       v.literal("personne_physique"),

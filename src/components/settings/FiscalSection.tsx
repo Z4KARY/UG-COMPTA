@@ -258,6 +258,26 @@ export function FiscalSection({ formData, handleChange, handleSelectChange }: Fi
             />
           </div>
         </div>
+
+        <div className="space-y-2">
+            <Label htmlFor="mainActivity">Main Activity (IBS Rate)</Label>
+            <Select
+              value={formData.mainActivity}
+              onValueChange={(val) => handleSelectChange("mainActivity", val)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Main Activity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PRODUCTION">Production (19%)</SelectItem>
+                <SelectItem value="SERVICES">Services (23%)</SelectItem>
+                <SelectItem value="DISTRIBUTION">Distribution / Achat-Revente (26%)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-[0.8rem] text-muted-foreground">
+                Determines your Corporate Tax (IBS) rate.
+            </p>
+        </div>
       </CardContent>
     </Card>
   );

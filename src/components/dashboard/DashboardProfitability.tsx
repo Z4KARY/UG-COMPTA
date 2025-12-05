@@ -65,7 +65,7 @@ export function DashboardProfitability({ businessId }: { businessId: Id<"busines
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight text-orange-600">{formatCurrency(stats.ibsEstimate)}</div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">Estimated at 23% of Profit</p>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">Estimated at {stats.ibsRate}% of Profit</p>
           </CardContent>
         </Card>
 
@@ -78,7 +78,7 @@ export function DashboardProfitability({ businessId }: { businessId: Id<"busines
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight text-orange-600">{formatCurrency(stats.tapEstimate)}</div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">Estimated at 1.5% of Turnover</p>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">Estimated at 0% of Turnover</p>
           </CardContent>
         </Card>
       </div>

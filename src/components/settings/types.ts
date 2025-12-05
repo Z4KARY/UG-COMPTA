@@ -21,6 +21,7 @@ export interface BusinessFormData {
   autoEntrepreneurCardNumber: string;
   ssNumber: string;
   activityCodes: string;
+  mainActivity: string;
   invoicePrefix: string;
   quotePrefix: string;
   creditNotePrefix: string;
