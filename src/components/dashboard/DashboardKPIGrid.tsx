@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Info } from "lucide-react";
 
 export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> }) {
@@ -47,23 +47,10 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
     return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD', maximumFractionDigits: 0 }).format(amount).replace('DZD', 'DA');
   };
 
-  // Calculate Collection Rate
-  // Collection Rate = (Total Revenue - Outstanding) / Total Revenue * 100
-  // Note: turnover in stats is for the period. outstandingAmount is global.
-  // This might be skewed if we mix period and global.
-  // Let's try to estimate based on global turnover if available, or just use period data if we had paid amount.
-  // getDashboardStats returns `turnover` (TTC) and `outstandingAmount` (Global).
-  // We also have `totalTurnover` (Global) in the updated reports.ts
-  
   const totalTurnover = currentStats.totalTurnover || 0;
   const outstanding = currentStats.outstandingAmount || 0;
   const collected = totalTurnover - outstanding;
   const collectionRate = totalTurnover > 0 ? (collected / totalTurnover) * 100 : 0;
-
-  // Growth
-  const currentRevenue = currentStats.turnover;
-  const prevRevenue = prevStats?.turnover || 0;
-  const growth = prevRevenue === 0 ? (currentRevenue > 0 ? 100 : 0) : ((currentRevenue - prevRevenue) / prevRevenue) * 100;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -71,14 +58,14 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.avgInvoice")}</CardTitle>
-            <Tooltip>
-              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Popover>
+              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-              </TooltipTrigger>
-              <TooltipContent>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Average value of invoices issued this month</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardHeader>
         <CardContent>
@@ -89,14 +76,14 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.collectionRate")}</CardTitle>
-            <Tooltip>
-              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Popover>
+              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-              </TooltipTrigger>
-              <TooltipContent>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Percentage of revenue collected vs total revenue</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardHeader>
         <CardContent>
@@ -107,14 +94,14 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Net Profit</CardTitle>
-            <Tooltip>
-              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Popover>
+              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-              </TooltipTrigger>
-              <TooltipContent>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Total Revenue (HT) minus Total Expenses (HT)</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardHeader>
         <CardContent>
@@ -128,14 +115,14 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Invoices</CardTitle>
-            <Tooltip>
-              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Popover>
+              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-              </TooltipTrigger>
-              <TooltipContent>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Number of invoices past their due date</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardHeader>
         <CardContent>

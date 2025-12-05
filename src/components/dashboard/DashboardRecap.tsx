@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpRight, Users, FileText, CreditCard, DollarSign, ArrowDownRight, Minus, Info } from "lucide-react";
+import { Users, FileText, CreditCard, DollarSign, Info } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
@@ -57,12 +57,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
 
   const revenueChange = calculateChange(currentStats.turnover, prevStats?.turnover || 0);
   const invoiceChange = calculateChange(currentStats.invoiceCount, prevStats?.invoiceCount || 0);
-  // For pending (outstanding), we compare current outstanding vs previous outstanding isn't quite right as it's a snapshot
-  // But let's compare the outstanding amount returned by the stats (which is global outstanding)
-  // Actually getDashboardStats returns global outstanding.
-  // Let's just use 0 change for now if we can't track history of outstanding easily without more queries
   const pendingChange = 0; 
-  // Customer count is also global
   const customerChange = calculateChange(currentStats.customerCount, prevStats?.customerCount || 0);
 
   const formatCurrency = (amount: number) => {
@@ -121,14 +116,14 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
               <CardTitle className="text-sm font-medium">
                 {stat.title}
               </CardTitle>
-              <Tooltip>
-                <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <Popover>
+                <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                   <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-                </TooltipTrigger>
-                <TooltipContent>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                   <p>{stat.tooltip}</p>
-                </TooltipContent>
-              </Tooltip>
+                </PopoverContent>
+              </Popover>
             </div>
             <stat.icon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>

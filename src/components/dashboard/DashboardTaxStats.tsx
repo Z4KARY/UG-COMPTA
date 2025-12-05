@@ -6,7 +6,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calculator, Receipt, Scale, Stamp, Info } from "lucide-react";
 import { useNavigate } from "react-router";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
@@ -32,14 +32,14 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">TVA Collected</CardTitle>
-            <Tooltip>
-              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Popover>
+              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-              </TooltipTrigger>
-              <TooltipContent>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Total VAT collected from sales this month</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverContent>
+            </Popover>
           </div>
           <Receipt className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
@@ -52,14 +52,14 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">TVA Deductible</CardTitle>
-            <Tooltip>
-              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Popover>
+              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-              </TooltipTrigger>
-              <TooltipContent>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Total VAT deductible from purchases this month</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverContent>
+            </Popover>
           </div>
           <Calculator className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
@@ -72,14 +72,14 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Net TVA Payable</CardTitle>
-            <Tooltip>
-              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Popover>
+              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-              </TooltipTrigger>
-              <TooltipContent>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Net VAT to be paid (Collected - Deductible)</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverContent>
+            </Popover>
           </div>
           <Scale className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
@@ -94,14 +94,14 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Stamp Duty</CardTitle>
-            <Tooltip>
-              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Popover>
+              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
-              </TooltipTrigger>
-              <TooltipContent>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Total stamp duty collected (Cash payments)</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverContent>
+            </Popover>
           </div>
           <Stamp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
