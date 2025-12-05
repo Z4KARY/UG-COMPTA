@@ -64,11 +64,11 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
     autoEntrepreneurCardNumber: "",
     ssNumber: "",
     activityCodes: "",
+    mainActivity: "DISTRIBUTION",
     // Sequencing
     invoicePrefix: "INV-",
     quotePrefix: "DEV-",
     creditNotePrefix: "AV-",
-    mainActivity: "DISTRIBUTION",
   });
 
   useEffect(() => {
@@ -96,10 +96,10 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
         autoEntrepreneurCardNumber: business.autoEntrepreneurCardNumber || "",
         ssNumber: business.ssNumber || "",
         activityCodes: business.activityCodes?.join(", ") || "",
+        mainActivity: business.mainActivity || "DISTRIBUTION",
         invoicePrefix: business.invoicePrefix || "INV-",
         quotePrefix: business.quotePrefix || "DEV-",
         creditNotePrefix: business.creditNotePrefix || "AV-",
-        mainActivity: business.mainActivity || "DISTRIBUTION",
       });
     }
   }, [business]);
