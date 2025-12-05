@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpRight, Users, FileText, CreditCard, DollarSign, ArrowDownRight, Minus } from "lucide-react";
+import { ArrowUpRight, Users, FileText, CreditCard, DollarSign, ArrowDownRight, Minus, Info } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
@@ -76,6 +77,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       icon: DollarSign,
       trend: revenueChange >= 0 ? "up" : "down",
       path: "/invoices",
+      tooltip: "Total revenue (TTC) generated this month",
     },
     {
       title: t("dashboard.recap.invoices"),
@@ -84,6 +86,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       icon: FileText,
       trend: invoiceChange >= 0 ? "up" : "down",
       path: "/invoices",
+      tooltip: "Number of invoices issued this month",
     },
     {
       title: t("dashboard.recap.pending"),
@@ -92,6 +95,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       icon: CreditCard,
       trend: "neutral",
       path: "/invoices",
+      tooltip: "Total outstanding amount from unpaid invoices",
     },
     {
       title: t("dashboard.recap.customers"),
@@ -100,6 +104,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       icon: Users,
       trend: "neutral",
       path: "/customers",
+      tooltip: "Total number of active customers",
     },
   ];
 
@@ -112,9 +117,19 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
           onClick={() => navigate(stat.path)}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {stat.title}
-            </CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-sm font-medium">
+                {stat.title}
+              </CardTitle>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{stat.tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <stat.icon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>

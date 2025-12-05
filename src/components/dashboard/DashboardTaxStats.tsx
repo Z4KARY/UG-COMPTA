@@ -4,8 +4,9 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calculator, Receipt, Scale, Stamp } from "lucide-react";
+import { Calculator, Receipt, Scale, Stamp, Info } from "lucide-react";
 import { useNavigate } from "react-router";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
@@ -29,7 +30,17 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">TVA Collected</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">TVA Collected</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Total VAT collected from sales this month</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <Receipt className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -39,7 +50,17 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
       </Card>
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">TVA Deductible</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">TVA Deductible</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Total VAT deductible from purchases this month</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <Calculator className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -49,7 +70,17 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
       </Card>
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Net TVA Payable</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Net TVA Payable</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Net VAT to be paid (Collected - Deductible)</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <Scale className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -61,7 +92,17 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
       </Card>
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Stamp Duty</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Stamp Duty</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Total stamp duty collected (Cash payments)</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <Stamp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>

@@ -5,6 +5,8 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
 export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
@@ -67,7 +69,17 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate("/invoices")}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.avgInvoice")}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.avgInvoice")}</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Average value of invoices issued this month</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(currentStats.averageInvoiceValue)}</div>
@@ -75,7 +87,17 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
       </Card>
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate("/invoices")}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.collectionRate")}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.collectionRate")}</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Percentage of revenue collected vs total revenue</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{collectionRate.toFixed(1)}%</div>
@@ -83,7 +105,17 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
       </Card>
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate("/declarations")}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Net Profit</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Net Profit</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Total Revenue (HT) minus Total Expenses (HT)</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardHeader>
         <CardContent>
           <div className={`text-2xl font-bold ${currentStats.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
@@ -94,7 +126,17 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
       </Card>
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate("/invoices")}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Invoices</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Invoices</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Number of invoices past their due date</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardHeader>
         <CardContent>
           <div className={`text-2xl font-bold ${currentStats.overdueCount > 0 ? 'text-red-600' : 'text-emerald-600'}`}>

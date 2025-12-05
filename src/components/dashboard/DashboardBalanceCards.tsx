@@ -5,6 +5,8 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
 export function DashboardBalanceCards({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
@@ -48,7 +50,17 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
         onClick={() => navigate("/invoices")}
       >
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium opacity-80">{t("dashboard.balance.total")}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium opacity-80">{t("dashboard.balance.total")}</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 opacity-50 hover:opacity-100 transition-opacity" />
+              </TooltipTrigger>
+              <TooltipContent className="bg-primary-foreground text-primary">
+                <p>Current financial balance (Revenue - Expenses)</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold">{formatCurrency(netBalance)}</div>
@@ -60,7 +72,17 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
         onClick={() => navigate("/invoices")}
       >
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.income")}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.income")}</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Total income recorded this month</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-emerald-600">+ {formatCurrency(revenue)}</div>
@@ -72,7 +94,17 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
         onClick={() => navigate("/purchases")}
       >
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.expenses")}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.expenses")}</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Total expenses recorded this month</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-600">- {formatCurrency(expenses)}</div>
