@@ -22,7 +22,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
 
   if (!currentStats) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
@@ -47,7 +47,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
   const collectionRate = totalTurnover > 0 ? (collected / totalTurnover) * 100 : 0;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       {/* Row 1: Core Financials */}
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate("/invoices")}>
         <CardHeader className="pb-2">
