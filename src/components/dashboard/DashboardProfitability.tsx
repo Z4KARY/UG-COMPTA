@@ -25,91 +25,99 @@ export function DashboardProfitability({ businessId }: { businessId: Id<"busines
   return (
     <div className="space-y-4">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="hover:shadow-md transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Net Profit Margin</CardTitle>
-            <Percent className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-full bg-primary/10">
+              <Percent className="h-4 w-4 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.netMargin >= 20 ? 'text-emerald-600' : stats.netMargin > 0 ? 'text-primary' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold tracking-tight ${stats.netMargin >= 20 ? 'text-emerald-600' : stats.netMargin > 0 ? 'text-primary' : 'text-red-600'}`}>
               {stats.netMargin.toFixed(1)}%
             </div>
             <Progress value={Math.max(0, Math.min(100, stats.netMargin))} className="h-2 mt-2" />
-            <p className="text-xs text-muted-foreground mt-2">Target: &gt;20%</p>
+            <p className="text-xs text-muted-foreground mt-2 font-medium">Target: &gt;20%</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Cash Flow</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900/20">
+              <DollarSign className="h-4 w-4 text-emerald-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.cashFlow >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold tracking-tight ${stats.cashFlow >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
               {stats.cashFlow >= 0 ? '+' : ''}{formatCurrency(stats.cashFlow)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Net Cash Movement</p>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">Net Cash Movement</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Est. IBS (Corporate Tax)</CardTitle>
-            <Building className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900/20">
+              <Building className="h-4 w-4 text-orange-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{formatCurrency(stats.ibsEstimate)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Estimated at 23% of Profit</p>
+            <div className="text-2xl font-bold tracking-tight text-orange-600">{formatCurrency(stats.ibsEstimate)}</div>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">Estimated at 23% of Profit</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-md transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Est. TAP Liability</CardTitle>
-            <Scale className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900/20">
+              <Scale className="h-4 w-4 text-orange-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{formatCurrency(stats.tapEstimate)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Estimated at 1.5% of Turnover</p>
+            <div className="text-2xl font-bold tracking-tight text-orange-600">{formatCurrency(stats.tapEstimate)}</div>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">Estimated at 1.5% of Turnover</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-         <Card>
+         <Card className="hover:shadow-md transition-all duration-200">
             <CardHeader>
                 <CardTitle className="text-base">Growth Metrics</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">New Customers</span>
                     <span className="text-sm font-bold bg-primary/10 text-primary px-2 py-1 rounded">{stats.newCustomers}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Invoices Created</span>
                     <span className="text-sm font-bold">{stats.invoiceCount}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Avg. Invoice Value</span>
                     <span className="text-sm font-bold">{formatCurrency(stats.averageInvoiceValue)}</span>
                 </div>
             </CardContent>
          </Card>
 
-         <Card>
+         <Card className="hover:shadow-md transition-all duration-200">
             <CardHeader>
                 <CardTitle className="text-base">Operational Efficiency</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Invoices Created Today</span>
                     <span className="text-sm font-bold">{stats.invoicesCreatedToday}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Expenses Logged Today</span>
                     <span className="text-sm font-bold">{stats.expensesLoggedToday}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Working Capital</span>
                     <span className={`text-sm font-bold ${stats.workingCapital > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                         {formatCurrency(stats.workingCapital)}

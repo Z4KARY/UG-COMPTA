@@ -73,6 +73,8 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       trend: revenueChange >= 0 ? "up" : "down",
       path: "/invoices",
       tooltip: "Total revenue (TTC) generated this month",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-100 dark:bg-emerald-900/20",
     },
     {
       title: t("dashboard.recap.invoices"),
@@ -82,6 +84,8 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       trend: invoiceChange >= 0 ? "up" : "down",
       path: "/invoices",
       tooltip: "Number of invoices issued this month",
+      color: "text-blue-600",
+      bgColor: "bg-blue-100 dark:bg-blue-900/20",
     },
     {
       title: t("dashboard.recap.pending"),
@@ -91,6 +95,8 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       trend: "neutral",
       path: "/invoices",
       tooltip: "Total outstanding amount from unpaid invoices",
+      color: "text-orange-600",
+      bgColor: "bg-orange-100 dark:bg-orange-900/20",
     },
     {
       title: t("dashboard.recap.customers"),
@@ -100,6 +106,8 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       trend: "neutral",
       path: "/customers",
       tooltip: "Total number of active customers",
+      color: "text-purple-600",
+      bgColor: "bg-purple-100 dark:bg-purple-900/20",
     },
   ];
 
@@ -108,37 +116,40 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       {stats.map((stat) => (
         <Card 
           key={stat.title}
-          className="cursor-pointer hover:bg-muted/50 transition-colors"
+          className="cursor-pointer hover:shadow-md transition-all duration-200 border-l-4"
+          style={{ borderLeftColor: stat.trend === 'up' ? '#10b981' : stat.trend === 'down' ? '#ef4444' : '#cbd5e1' }}
           onClick={() => navigate(stat.path)}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </CardTitle>
               <Popover>
                 <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                  <Info className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors" />
                 </PopoverTrigger>
                 <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                   <p>{stat.tooltip}</p>
                 </PopoverContent>
               </Popover>
             </div>
-            <stat.icon className="h-4 w-4 text-muted-foreground" />
+            <div className={`p-2 rounded-full ${stat.bgColor}`}>
+              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <p className="text-xs text-muted-foreground flex items-center mt-1">
+            <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
+            <p className="text-xs text-muted-foreground flex items-center mt-1 font-medium">
               {stat.trend !== "neutral" && (
-                 <span className={stat.trend === "up" ? "text-emerald-500" : "text-red-500"}>
+                 <span className={stat.trend === "up" ? "text-emerald-600 flex items-center" : "text-red-600 flex items-center"}>
                    {stat.change}
                  </span>
               )}
               {stat.trend === "neutral" && (
                   <span className="text-muted-foreground">{stat.change}</span>
               )}
-              {stat.trend !== "neutral" && <span className="ml-1">{t("dashboard.recap.vsLastMonth")}</span>}
+              {stat.trend !== "neutral" && <span className="ml-1 text-muted-foreground/80">{t("dashboard.recap.vsLastMonth")}</span>}
             </p>
           </CardContent>
         </Card>

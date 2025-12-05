@@ -39,29 +39,31 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <Card 
-        className="bg-primary text-primary-foreground cursor-pointer hover:opacity-90 transition-opacity"
+        className="bg-primary text-primary-foreground cursor-pointer hover:opacity-90 transition-all duration-200 shadow-lg"
         onClick={() => navigate("/invoices")}
       >
         <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-sm font-medium opacity-80">{t("dashboard.balance.total")}</CardTitle>
-            <Popover>
-              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Info className="h-3 w-3 opacity-50 hover:opacity-100 transition-opacity" />
-              </PopoverTrigger>
-              <PopoverContent className="w-auto max-w-[200px] p-2 text-xs text-primary">
-                <p>Current financial balance (Revenue - Expenses)</p>
-              </PopoverContent>
-            </Popover>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-sm font-medium opacity-90">{t("dashboard.balance.total")}</CardTitle>
+              <Popover>
+                <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Info className="h-3.5 w-3.5 opacity-60 hover:opacity-100 transition-opacity" />
+                </PopoverTrigger>
+                <PopoverContent className="w-auto max-w-[200px] p-2 text-xs text-primary">
+                  <p>Current financial balance (Revenue - Expenses)</p>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{formatCurrency(netBalance)}</div>
-          <p className="text-xs opacity-80 mt-1">This Month</p>
+          <div className="text-4xl font-bold tracking-tight">{formatCurrency(netBalance)}</div>
+          <p className="text-xs opacity-80 mt-2 font-medium">This Month</p>
         </CardContent>
       </Card>
       <Card 
-        className="cursor-pointer hover:bg-muted/50 transition-colors"
+        className="cursor-pointer hover:shadow-md transition-all duration-200 border-l-4 border-l-emerald-500"
         onClick={() => navigate("/invoices")}
       >
         <CardHeader className="pb-2">
@@ -69,7 +71,7 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
             <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.income")}</CardTitle>
             <Popover>
               <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                <Info className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors" />
               </PopoverTrigger>
               <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Total income recorded this month</p>
@@ -78,12 +80,12 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-emerald-600">+ {formatCurrency(revenue)}</div>
-          <p className="text-xs text-muted-foreground mt-1">This Month</p>
+          <div className="text-2xl font-bold tracking-tight text-emerald-600">+ {formatCurrency(revenue)}</div>
+          <p className="text-xs text-muted-foreground mt-1 font-medium">This Month</p>
         </CardContent>
       </Card>
       <Card 
-        className="cursor-pointer hover:bg-muted/50 transition-colors"
+        className="cursor-pointer hover:shadow-md transition-all duration-200 border-l-4 border-l-red-500"
         onClick={() => navigate("/purchases")}
       >
         <CardHeader className="pb-2">
@@ -91,7 +93,7 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
             <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.expenses")}</CardTitle>
             <Popover>
               <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                <Info className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors" />
               </PopoverTrigger>
               <PopoverContent className="w-auto max-w-[200px] p-2 text-xs">
                 <p>Total expenses recorded this month</p>
@@ -100,8 +102,8 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-red-600">- {formatCurrency(expenses)}</div>
-          <p className="text-xs text-muted-foreground mt-1">This Month</p>
+          <div className="text-2xl font-bold tracking-tight text-red-600">- {formatCurrency(expenses)}</div>
+          <p className="text-xs text-muted-foreground mt-1 font-medium">This Month</p>
         </CardContent>
       </Card>
     </div>
