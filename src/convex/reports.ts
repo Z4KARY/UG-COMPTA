@@ -60,6 +60,9 @@ export const getDashboardStats = query({
       .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
       .collect();
     const customerCount = customers.length;
+    
+    // New Customers this month
+    const newCustomers = customers.filter(c => c._creationTime >= startDate && c._creationTime <= endDate).length;
 
     const periodInvoices = invoices.filter(
       (inv) =>
@@ -81,13 +84,17 @@ export const getDashboardStats = query({
     let totalStampDuty = 0;
     let expenses = 0;
     let tvaDeductible = 0;
+    let cashIn = 0; // Collected this month (approx based on paid invoices)
 
     for (const inv of periodInvoices) {
       turnover += inv.totalTtc || 0;
       tva += inv.totalTva || 0;
       totalStampDuty += inv.stampDutyAmount || 0;
-      if (inv.status === "paid" && inv.paymentMethod === "CASH") {
-        stampDuty += inv.stampDutyAmount || 0;
+      if (inv.status === "paid") {
+        cashIn += inv.totalTtc;
+        if (inv.paymentMethod === "CASH") {
+            stampDuty += inv.stampDutyAmount || 0;
+        }
       }
     }
 
@@ -102,6 +109,8 @@ export const getDashboardStats = query({
     let totalTurnover = 0;
     let accountsPayable = 0;
     let invoicesCreatedToday = 0;
+    let totalPaymentDelay = 0;
+    let paidInvoiceCount = 0;
 
     for (const inv of invoices) {
       if (inv.status !== "cancelled" && inv.status !== "draft") {
@@ -117,6 +126,11 @@ export const getDashboardStats = query({
       if (inv._creationTime >= startOfDay) {
         invoicesCreatedToday++;
       }
+      
+      // Calculate average payment delay for paid invoices
+      // Note: We need a paymentDate field on invoices or payments table. 
+      // Assuming we might not have it on invoice object directly in all cases, skipping for now or using creation vs update if status changed.
+      // For now, we'll skip complex payment delay calc without a dedicated payment date field on invoice or join.
     }
 
     let expensesLoggedToday = 0;
@@ -145,13 +159,30 @@ export const getDashboardStats = query({
     const workingCapital = (cashBalance + outstandingAmount) - (accountsPayable + (tvaPayable > 0 ? tvaPayable : 0));
     
     // Cash Runway (Months)
-    // Use average monthly expenses from last 3 months for better accuracy, but here we use current month or 1 if 0
     const monthlyBurnRate = expenses > 0 ? expenses : 1; 
     const cashRunway = cashBalance / monthlyBurnRate;
 
     // Tax Deadlines (Mock logic based on date)
     const nextG50Due = new Date(year, month + 1, 20).getTime(); // Usually 20th of next month
     const daysToG50 = Math.ceil((nextG50Due - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    // New Profitability & Tax Estimates
+    // TAP (Taxe sur l'Activité Professionnelle) - Approx 1.5% to 2% of Turnover (HT) depending on sector (if applicable)
+    // We'll estimate at 1.5% for display purposes
+    const tapEstimate = revenueHt * 0.015;
+
+    // IBS (Impôt sur les Bénéfices des Sociétés) - 19% (Production), 23% (Services), 26% (Distribution)
+    // We'll use 23% as a middle ground default for services
+    const ibsEstimate = netProfit > 0 ? netProfit * 0.23 : 0;
+
+    // Cash Flow (Net Cash Movement)
+    // Cash In (Paid Invoices) - Cash Out (Paid Expenses)
+    // We need to know paid expenses.
+    let paidExpenses = 0;
+    for (const pur of periodPurchases) {
+        if (pur.status === "paid") paidExpenses += pur.totalTtc;
+    }
+    const cashFlow = cashIn - paidExpenses;
 
     return {
       turnover,
@@ -169,6 +200,7 @@ export const getDashboardStats = query({
       outstandingAmount,
       overdueCount,
       customerCount,
+      newCustomers,
       // New KPIs
       ebitda,
       workingCapital,
@@ -178,6 +210,9 @@ export const getDashboardStats = query({
       daysToG50,
       invoicesCreatedToday,
       expensesLoggedToday,
+      tapEstimate,
+      ibsEstimate,
+      cashFlow,
     };
   },
 });

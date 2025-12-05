@@ -9,6 +9,7 @@ import { DashboardSales } from "@/components/dashboard/DashboardSales";
 import { DashboardExpenses } from "@/components/dashboard/DashboardExpenses";
 import { DashboardTreasury } from "@/components/dashboard/DashboardTreasury";
 import { DashboardNotifications } from "@/components/dashboard/DashboardNotifications";
+import { DashboardProfitability } from "@/components/dashboard/DashboardProfitability";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "convex/react";
@@ -66,6 +67,7 @@ export default function Dashboard() {
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
             <TabsTrigger value="treasury">Treasury</TabsTrigger>
             <TabsTrigger value="tax">Tax</TabsTrigger>
+            <TabsTrigger value="profitability">Profitability</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
@@ -104,6 +106,10 @@ export default function Dashboard() {
 
           <TabsContent value="tax" className="space-y-4">
             <DashboardTaxStats businessId={business._id} />
+          </TabsContent>
+
+          <TabsContent value="profitability" className="space-y-4">
+            <DashboardProfitability businessId={business._id} />
           </TabsContent>
         </Tabs>
       </div>
