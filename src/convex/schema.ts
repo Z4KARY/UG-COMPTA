@@ -364,6 +364,7 @@ const schema = defineSchema(
         v.literal("OTHER")
       )),
       status: v.optional(v.union(v.literal("unpaid"), v.literal("paid"))), // Added status
+      category: v.optional(v.string()), // Added category
       description: v.optional(v.string()),
       subtotalHt: v.number(),
       vatTotal: v.number(),
@@ -374,6 +375,16 @@ const schema = defineSchema(
       .index("by_business", ["businessId"])
       .index("by_supplier", ["supplierId"])
       .index("by_business_and_date", ["businessId", "invoiceDate"]),
+
+    bankAccounts: defineTable({
+      businessId: v.id("businesses"),
+      bankName: v.string(),
+      accountNumber: v.string(),
+      iban: v.optional(v.string()),
+      currency: v.string(),
+      balance: v.number(),
+      lastUpdated: v.number(),
+    }).index("by_business", ["businessId"]),
 
     purchaseInvoiceItems: defineTable({
       purchaseInvoiceId: v.id("purchaseInvoices"),

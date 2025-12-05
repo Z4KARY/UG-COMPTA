@@ -5,11 +5,15 @@ import { DashboardKPIGrid } from "@/components/dashboard/DashboardKPIGrid";
 import { DashboardCharts } from "@/components/dashboard/DashboardCharts";
 import { DashboardTaxStats } from "@/components/dashboard/DashboardTaxStats";
 import { DashboardTopPerformers } from "@/components/dashboard/DashboardTopPerformers";
+import { DashboardSales } from "@/components/dashboard/DashboardSales";
+import { DashboardExpenses } from "@/components/dashboard/DashboardExpenses";
+import { DashboardTreasury } from "@/components/dashboard/DashboardTreasury";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -49,18 +53,45 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <DashboardRecap businessId={business._id} />
-        <DashboardBalanceCards businessId={business._id} />
-        <DashboardTaxStats businessId={business._id} />
-        <DashboardKPIGrid businessId={business._id} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-                <DashboardCharts businessId={business._id} />
+        <Tabs defaultValue="overview" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="sales">Sales</TabsTrigger>
+            <TabsTrigger value="expenses">Expenses</TabsTrigger>
+            <TabsTrigger value="treasury">Treasury</TabsTrigger>
+            <TabsTrigger value="tax">Tax</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-4">
+            <DashboardRecap businessId={business._id} />
+            <DashboardBalanceCards businessId={business._id} />
+            <DashboardKPIGrid businessId={business._id} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                    <DashboardCharts businessId={business._id} />
+                </div>
+                <div className="lg:col-span-1">
+                    <DashboardTopPerformers businessId={business._id} />
+                </div>
             </div>
-            <div className="lg:col-span-1">
-                <DashboardTopPerformers businessId={business._id} />
-            </div>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="sales" className="space-y-4">
+            <DashboardSales businessId={business._id} />
+          </TabsContent>
+
+          <TabsContent value="expenses" className="space-y-4">
+            <DashboardExpenses businessId={business._id} />
+          </TabsContent>
+
+          <TabsContent value="treasury" className="space-y-4">
+            <DashboardTreasury businessId={business._id} />
+          </TabsContent>
+
+          <TabsContent value="tax" className="space-y-4">
+            <DashboardTaxStats businessId={business._id} />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

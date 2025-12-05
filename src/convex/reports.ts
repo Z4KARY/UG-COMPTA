@@ -427,3 +427,131 @@ export const getSummary = query({
     };
   },
 });
+
+export const getSalesStats = query({
+  args: { 
+    businessId: v.id("businesses"), 
+    year: v.optional(v.number()),
+    month: v.optional(v.number())
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const now = new Date();
+    const year = args.year ?? now.getFullYear();
+    const month = args.month ?? now.getMonth();
+    
+    const startDate = new Date(year, month, 1).getTime();
+    const endDate = new Date(year, month + 1, 0, 23, 59, 59).getTime();
+
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const periodInvoices = invoices.filter(
+      (inv) =>
+        inv.issueDate >= startDate &&
+        inv.issueDate <= endDate &&
+        inv.status !== "cancelled" &&
+        inv.status !== "draft"
+    );
+
+    // Daily Sales
+    const dailySales = new Map<number, number>();
+    for (const inv of periodInvoices) {
+        const day = new Date(inv.issueDate).getDate();
+        dailySales.set(day, (dailySales.get(day) || 0) + inv.totalTtc);
+    }
+
+    const chartData = Array.from({ length: new Date(year, month + 1, 0).getDate() }, (_, i) => {
+        const day = i + 1;
+        return {
+            day: day.toString(),
+            amount: dailySales.get(day) || 0
+        };
+    });
+
+    // Sales by Status
+    const byStatus = {
+        paid: 0,
+        issued: 0,
+        overdue: 0
+    };
+
+    for (const inv of periodInvoices) {
+        if (inv.status === "paid") byStatus.paid += inv.totalTtc;
+        else if (inv.status === "issued") byStatus.issued += inv.totalTtc;
+        else if (inv.status === "overdue") byStatus.overdue += inv.totalTtc;
+    }
+
+    return {
+        totalSales: periodInvoices.reduce((sum, inv) => sum + inv.totalTtc, 0),
+        count: periodInvoices.length,
+        chartData,
+        byStatus
+    };
+  },
+});
+
+export const getExpenseStats = query({
+  args: { 
+    businessId: v.id("businesses"),
+    year: v.optional(v.number()),
+    month: v.optional(v.number())
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const now = new Date();
+    const year = args.year ?? now.getFullYear();
+    const month = args.month ?? now.getMonth();
+    
+    const startDate = new Date(year, month, 1).getTime();
+    const endDate = new Date(year, month + 1, 0, 23, 59, 59).getTime();
+
+    const purchases = await ctx.db
+      .query("purchaseInvoices")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .collect();
+
+    const periodPurchases = purchases.filter(
+      (p) => p.invoiceDate >= startDate && p.invoiceDate <= endDate
+    );
+
+    // By Category
+    const byCategory = new Map<string, number>();
+    for (const p of periodPurchases) {
+        const cat = p.category || "Uncategorized";
+        byCategory.set(cat, (byCategory.get(cat) || 0) + p.totalTtc);
+    }
+
+    return {
+        totalExpenses: periodPurchases.reduce((sum, p) => sum + p.totalTtc, 0),
+        count: periodPurchases.length,
+        byCategory: Array.from(byCategory.entries()).map(([name, value]) => ({ name, value }))
+    };
+  },
+});
+
+export const getTreasuryStats = query({
+  args: { businessId: v.id("businesses") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const accounts = await ctx.db
+        .query("bankAccounts")
+        .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+        .collect();
+
+    const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+
+    return {
+        accounts,
+        totalBalance
+    };
+  },
+});
