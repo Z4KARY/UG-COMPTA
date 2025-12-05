@@ -34,6 +34,7 @@ export const getDashboardStats = query({
 
     const startDate = new Date(year, month, 1).getTime();
     const endDate = new Date(year, month + 1, 0, 23, 59, 59).getTime();
+    const startOfDay = new Date(year, month, now.getDate()).getTime();
 
     const invoices = await ctx.db
       .query("invoices")
@@ -45,6 +46,13 @@ export const getDashboardStats = query({
       .query("purchaseInvoices")
       .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
       .collect();
+
+    // Fetch bank accounts for cash balance
+    const accounts = await ctx.db
+        .query("bankAccounts")
+        .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+        .collect();
+    const cashBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
     // Fetch customer count
     const customers = await ctx.db
@@ -92,6 +100,8 @@ export const getDashboardStats = query({
     let outstandingAmount = 0;
     let overdueCount = 0;
     let totalTurnover = 0;
+    let accountsPayable = 0;
+    let invoicesCreatedToday = 0;
 
     for (const inv of invoices) {
       if (inv.status !== "cancelled" && inv.status !== "draft") {
@@ -104,6 +114,19 @@ export const getDashboardStats = query({
       if (inv.status === "overdue") {
         overdueCount++;
       }
+      if (inv._creationTime >= startOfDay) {
+        invoicesCreatedToday++;
+      }
+    }
+
+    let expensesLoggedToday = 0;
+    for (const pur of purchases) {
+        if (pur.status === "unpaid") {
+            accountsPayable += pur.totalTtc;
+        }
+        if (pur._creationTime >= startOfDay) {
+            expensesLoggedToday++;
+        }
     }
 
     // Net Profit = Revenue (HT) - Expenses (HT)
@@ -116,6 +139,19 @@ export const getDashboardStats = query({
     const netMargin = turnover > 0 ? (netProfit / turnover) * 100 : 0;
     const averageInvoiceValue = periodInvoices.length > 0 ? turnover / periodInvoices.length : 0;
     const tvaPayable = tva - tvaDeductible;
+
+    // Advanced KPIs
+    const ebitda = netProfit + tvaPayable; // Simplified approximation (Net + Taxes)
+    const workingCapital = (cashBalance + outstandingAmount) - (accountsPayable + (tvaPayable > 0 ? tvaPayable : 0));
+    
+    // Cash Runway (Months)
+    // Use average monthly expenses from last 3 months for better accuracy, but here we use current month or 1 if 0
+    const monthlyBurnRate = expenses > 0 ? expenses : 1; 
+    const cashRunway = cashBalance / monthlyBurnRate;
+
+    // Tax Deadlines (Mock logic based on date)
+    const nextG50Due = new Date(year, month + 1, 20).getTime(); // Usually 20th of next month
+    const daysToG50 = Math.ceil((nextG50Due - now.getTime()) / (1000 * 60 * 60 * 24));
 
     return {
       turnover,
@@ -133,6 +169,15 @@ export const getDashboardStats = query({
       outstandingAmount,
       overdueCount,
       customerCount,
+      // New KPIs
+      ebitda,
+      workingCapital,
+      cashRunway,
+      accountsPayable,
+      cashBalance,
+      daysToG50,
+      invoicesCreatedToday,
+      expensesLoggedToday,
     };
   },
 });
@@ -480,17 +525,38 @@ export const getSalesStats = query({
         overdue: 0
     };
 
+    // Payment Methods
+    const paymentMethods = new Map<string, number>();
+
     for (const inv of periodInvoices) {
         if (inv.status === "paid") byStatus.paid += inv.totalTtc;
         else if (inv.status === "issued") byStatus.issued += inv.totalTtc;
         else if (inv.status === "overdue") byStatus.overdue += inv.totalTtc;
+
+        if (inv.paymentMethod) {
+            paymentMethods.set(inv.paymentMethod, (paymentMethods.get(inv.paymentMethod) || 0) + inv.totalTtc);
+        }
     }
 
+    // DSO Calculation (Days Sales Outstanding)
+    // DSO = (Accounts Receivable / Total Credit Sales) * Number of Days
+    // We'll use outstanding from ALL invoices for AR, and period sales for Credit Sales
+    let totalOutstanding = 0;
+    for (const inv of invoices) {
+        if (inv.status === "issued" || inv.status === "overdue") {
+            totalOutstanding += inv.totalTtc;
+        }
+    }
+    const totalPeriodSales = periodInvoices.reduce((sum, inv) => sum + inv.totalTtc, 0);
+    const dso = totalPeriodSales > 0 ? (totalOutstanding / totalPeriodSales) * 30 : 0;
+
     return {
-        totalSales: periodInvoices.reduce((sum, inv) => sum + inv.totalTtc, 0),
+        totalSales: totalPeriodSales,
         count: periodInvoices.length,
         chartData,
-        byStatus
+        byStatus,
+        paymentMethods: Array.from(paymentMethods.entries()).map(([method, amount]) => ({ method, amount })),
+        dso
     };
   },
 });
@@ -523,15 +589,29 @@ export const getExpenseStats = query({
 
     // By Category
     const byCategory = new Map<string, number>();
+    let accountsPayable = 0;
+    let paidExpenses = 0;
+
     for (const p of periodPurchases) {
         const cat = p.category || "Uncategorized";
         byCategory.set(cat, (byCategory.get(cat) || 0) + p.totalTtc);
+        
+        if (p.status === "unpaid") accountsPayable += p.totalTtc;
+        else paidExpenses += p.totalTtc;
     }
+    
+    // Calculate Burn Rate (Average monthly expenses over last 3 months)
+    // For simplicity, we'll just use current month for now, or fetch more if needed.
+    // Let's stick to current month burn rate.
+    const burnRate = periodPurchases.reduce((sum, p) => sum + p.totalTtc, 0);
 
     return {
-        totalExpenses: periodPurchases.reduce((sum, p) => sum + p.totalTtc, 0),
+        totalExpenses: burnRate,
         count: periodPurchases.length,
-        byCategory: Array.from(byCategory.entries()).map(([name, value]) => ({ name, value }))
+        byCategory: Array.from(byCategory.entries()).map(([name, value]) => ({ name, value })),
+        accountsPayable,
+        paidExpenses,
+        burnRate
     };
   },
 });

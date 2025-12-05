@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calculator, Receipt, Scale, Stamp, Info } from "lucide-react";
+import { Calculator, Receipt, Scale, Stamp, Info, CalendarClock } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -27,7 +27,7 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
   const handleClick = () => navigate("/declarations");
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center gap-2">
@@ -108,6 +108,21 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(stats.stampDuty)}</div>
           <p className="text-xs text-muted-foreground mt-1">This Month</p>
+        </CardContent>
+      </Card>
+      
+      <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Next G50 Due</CardTitle>
+          </div>
+          <CalendarClock className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className={`text-2xl font-bold ${stats.daysToG50 <= 5 ? 'text-red-600' : 'text-primary'}`}>
+            {stats.daysToG50} Days
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">Deadline: 20th</p>
         </CardContent>
       </Card>
     </div>

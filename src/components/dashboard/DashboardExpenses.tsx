@@ -18,7 +18,7 @@ export function DashboardExpenses({ businessId }: { businessId: Id<"businesses">
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Expenses</CardTitle>
@@ -26,6 +26,24 @@ export function DashboardExpenses({ businessId }: { businessId: Id<"businesses">
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(stats.totalExpenses)}</div>
             <p className="text-xs text-muted-foreground">{stats.count} records</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Accounts Payable</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{formatCurrency(stats.accountsPayable)}</div>
+            <p className="text-xs text-muted-foreground">Unpaid Supplier Bills</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Burn Rate</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(stats.burnRate)}</div>
+            <p className="text-xs text-muted-foreground">Avg. Monthly Spend</p>
           </CardContent>
         </Card>
       </div>

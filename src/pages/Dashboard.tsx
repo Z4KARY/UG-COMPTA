@@ -8,6 +8,7 @@ import { DashboardTopPerformers } from "@/components/dashboard/DashboardTopPerfo
 import { DashboardSales } from "@/components/dashboard/DashboardSales";
 import { DashboardExpenses } from "@/components/dashboard/DashboardExpenses";
 import { DashboardTreasury } from "@/components/dashboard/DashboardTreasury";
+import { DashboardNotifications } from "@/components/dashboard/DashboardNotifications";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "convex/react";
@@ -44,13 +45,18 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {t("dashboard.welcome")}, {user?.name?.split(" ")[0]}!
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {t("dashboard.subtitle")}
-          </p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">
+                    {t("dashboard.welcome")}, {user?.name?.split(" ")[0]}!
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                    {t("dashboard.subtitle")}
+                </p>
+            </div>
+            <div className="w-full md:w-auto">
+                {/* Placeholder for global actions or date picker */}
+            </div>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4">
@@ -63,15 +69,23 @@ export default function Dashboard() {
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
-            <DashboardRecap businessId={business._id} />
-            <DashboardBalanceCards businessId={business._id} />
-            <DashboardKPIGrid businessId={business._id} />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                    <DashboardCharts businessId={business._id} />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <div className="lg:col-span-3 space-y-4">
+                    <DashboardRecap businessId={business._id} />
+                    <DashboardBalanceCards businessId={business._id} />
+                    <DashboardKPIGrid businessId={business._id} />
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2">
+                            <DashboardCharts businessId={business._id} />
+                        </div>
+                        <div className="lg:col-span-1">
+                            <DashboardTopPerformers businessId={business._id} />
+                        </div>
+                    </div>
                 </div>
-                <div className="lg:col-span-1">
-                    <DashboardTopPerformers businessId={business._id} />
+                <div className="lg:col-span-1 space-y-4">
+                    <DashboardNotifications businessId={business._id} />
+                    {/* Future: Add Activity Feed here */}
                 </div>
             </div>
           </TabsContent>
