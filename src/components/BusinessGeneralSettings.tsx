@@ -68,6 +68,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
     invoicePrefix: "INV-",
     quotePrefix: "DEV-",
     creditNotePrefix: "AV-",
+    mainActivity: "DISTRIBUTION",
   });
 
   useEffect(() => {
@@ -98,6 +99,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
         invoicePrefix: business.invoicePrefix || "INV-",
         quotePrefix: business.quotePrefix || "DEV-",
         creditNotePrefix: business.creditNotePrefix || "AV-",
+        mainActivity: business.mainActivity || "DISTRIBUTION",
       });
     }
   }, [business]);
@@ -159,6 +161,7 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
           legalForm: formData.legalForm as any,
           activityCodes: formData.activityCodes.split(",").map(s => s.trim()).filter(s => s !== ""),
           capital: formData.capital ? parseFloat(formData.capital.toString()) : undefined,
+          mainActivity: formData.mainActivity as "PRODUCTION" | "SERVICES" | "DISTRIBUTION",
       };
 
       if (business) {
