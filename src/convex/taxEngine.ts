@@ -36,45 +36,61 @@ export function configureTaxModules(business: Doc<"businesses">): TaxConfigurati
 
   const { type, fiscalRegime, legalForm, capital, rc, nif, ai, nis, autoEntrepreneurCardNumber } = business;
 
-  // 1. Determine Modules based on Regime and Type
+  // 1. Determine Modules based on Regime and Type (Rules from Technical File)
+  
+  // Case A: Company (Personne Morale, real regime)
   if (type === "societe") {
-    // Companies are always under Reel regime (mostly)
     config.modules.G50 = true;
-    config.modules.IBS = true;
+    config.modules.IBS = true; // Annual declaration E n°6
     config.modules.VAT = true;
     config.modules.WITHHOLDINGS = true;
     config.modules.STAMP = true;
-  } else if (type === "personne_physique") {
-    if (fiscalRegime === "reel") {
-      // Physical Person under Real Regime
-      config.modules.G50 = true;
-      config.modules.VAT = true;
-      config.modules.WITHHOLDINGS = true;
-      config.modules.STAMP = true;
-      // No IBS, they pay IRG (handled in G50)
-    } else {
-      // IFU (Forfaitaire)
-      config.modules.G12 = true; // Annual declaration
-      config.modules.G12bis = true; // Often used for IFU
-      config.modules.VAT = false; // Exempt
-      config.modules.STAMP = true;
-      config.legalMentions.push("TVA non applicable, art. 282 ter du Code des Impôts Directs");
-    }
-  } else if (type === "auto_entrepreneur") {
-    // Auto Entrepreneur
-    config.modules.G12 = true; // Simplified declaration
-    config.modules.VAT = false; // Exempt
-    config.modules.STAMP = false; // Often exempt or simplified
-    config.legalMentions.push("Exonéré de TVA et de TAP (Auto-Entrepreneur)");
+    // Standard VAT rules apply, no specific footer text required by default
+  } 
+  // Case C: Auto-Entrepreneur (Specific Case of PP under IFU)
+  else if (type === "auto_entrepreneur" || (type === "personne_physique" && fiscalRegime === "auto_entrepreneur")) {
+    config.modules.G12 = true;
+    config.modules.G12bis = true;
+    config.modules.STAMP = true;
+    config.modules.VAT = false;
+    
+    const footerText = "VAT not applicable – IFU auto-entrepreneur flat-tax regime (0.5%)";
+    config.invoiceFooter = footerText;
+    config.legalMentions.push(footerText);
+  }
+  // Case B: Individual PP under IFU (Non-AE)
+  else if (type === "personne_physique" && (fiscalRegime === "forfaitaire" || fiscalRegime === "IFU")) {
+    config.modules.G12 = true;
+    config.modules.G12bis = true;
+    config.modules.STAMP = true;
+    config.modules.VAT = false;
+    
+    const footerText = "VAT not applicable – IFU flat-tax regime";
+    config.invoiceFooter = footerText;
+    config.legalMentions.push(footerText);
+  }
+  // Case D: Individual PP under Real / Real Simplified
+  else if (type === "personne_physique" && (fiscalRegime === "reel" || fiscalRegime === "VAT")) {
+    config.modules.G50 = true;
+    config.modules.IBS = true; // Subject to IBS (profit tax) as per technical file
+    config.modules.VAT = true;
+    config.modules.WITHHOLDINGS = true;
+    config.modules.STAMP = true;
+    // Standard VAT rules apply
   }
 
-  // 2. Construct Invoice Footer
+  // 2. Construct Invoice Footer (Append Business Details)
   const parts: string[] = [];
+  
+  // Add the tax regime footer if set
+  if (config.invoiceFooter) {
+      parts.push(config.invoiceFooter);
+  }
 
   if (type === "societe") {
     if (legalForm) parts.push(legalForm);
     if (capital) parts.push(`au capital de ${capital.toLocaleString("fr-DZ")} DA`);
-  } else if (type === "auto_entrepreneur") {
+  } else if (type === "auto_entrepreneur" || (type === "personne_physique" && fiscalRegime === "auto_entrepreneur")) {
     parts.push("Auto-Entrepreneur");
     if (autoEntrepreneurCardNumber) parts.push(`Carte N° ${autoEntrepreneurCardNumber}`);
   } else {
@@ -98,7 +114,7 @@ export function configureTaxModules(business: Doc<"businesses">): TaxConfigurati
  * Useful for frontend calculations and display.
  */
 export function getApplicableTaxRates(business: Doc<"businesses">) {
-  if (business.type === "auto_entrepreneur") {
+  if (business.type === "auto_entrepreneur" || (business.type === "personne_physique" && business.fiscalRegime === "auto_entrepreneur")) {
     return {
       type: "auto_entrepreneur",
       rate: 0.5,
