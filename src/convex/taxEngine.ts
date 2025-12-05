@@ -92,3 +92,35 @@ export function configureTaxModules(business: Doc<"businesses">): TaxConfigurati
 
   return config;
 }
+
+/**
+ * Returns the applicable tax rates for a business based on its regime.
+ * Useful for frontend calculations and display.
+ */
+export function getApplicableTaxRates(business: Doc<"businesses">) {
+  if (business.type === "auto_entrepreneur") {
+    return {
+      type: "auto_entrepreneur",
+      rate: 0.5,
+      minTax: 10000
+    };
+  } else if (business.fiscalRegime === "forfaitaire" || business.fiscalRegime === "IFU") {
+    return {
+      type: "ifu",
+      rates: {
+        goods: 5,
+        services: 12
+      },
+      minTax: 10000
+    };
+  } else {
+    return {
+      type: "reel",
+      rates: {
+        ibs: 19, // Standard IBS rate (simplified, can vary)
+        tap: 0, // Removed/Reduced
+        vat: [9, 19]
+      }
+    };
+  }
+}

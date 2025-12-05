@@ -24,6 +24,15 @@ export const FISCAL_CONSTANTS = {
     ]
   } as StampDutyConfig,
   VAT_RATES: [0, 9, 19],
+  IFU_RATES: {
+    GOODS: 5, // 5% for production and sales of goods
+    SERVICES: 12, // 12% for services and other activities
+  },
+  AE_RATE: 0.5, // 0.5% for Auto-Entrepreneur
+  MINIMUM_TAX: {
+    IFU: 10000, // 10,000 DA minimum annual tax for IFU
+    AE: 10000, // 10,000 DA minimum annual tax for Auto-Entrepreneur
+  }
 };
 
 // Helper for rounding to 2 decimal places
@@ -55,6 +64,33 @@ export function calculateLineItem(
     tvaAmount,
     lineTotalTtc
   };
+}
+
+/**
+ * Calculates the IFU tax based on turnover breakdown.
+ * Rate: 5% for goods, 12% for services.
+ * Minimum: 10,000 DA.
+ */
+export function calculateIFUTax(turnoverGoods: number, turnoverServices: number): number {
+  if (turnoverGoods < 0 || turnoverServices < 0) throw new Error("Turnover cannot be negative");
+  
+  const taxGoods = turnoverGoods * (FISCAL_CONSTANTS.IFU_RATES.GOODS / 100);
+  const taxServices = turnoverServices * (FISCAL_CONSTANTS.IFU_RATES.SERVICES / 100);
+  const totalCalculated = taxGoods + taxServices;
+  
+  return Math.max(totalCalculated, FISCAL_CONSTANTS.MINIMUM_TAX.IFU);
+}
+
+/**
+ * Calculates the Auto-Entrepreneur tax.
+ * Rate: 0.5% of turnover.
+ * Minimum: 10,000 DA.
+ */
+export function calculateAETax(turnover: number): number {
+  if (turnover < 0) throw new Error("Turnover cannot be negative");
+  
+  const tax = turnover * (FISCAL_CONSTANTS.AE_RATE / 100);
+  return Math.max(tax, FISCAL_CONSTANTS.MINIMUM_TAX.AE);
 }
 
 /**

@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { calculateIFUTax, calculateAETax, FISCAL_CONSTANTS } from "./fiscal";
 
 // G50 Data (Monthly) - For Sociétés & Personne Physique (Réel)
 export const getG50Data = query({
@@ -528,9 +529,32 @@ export const getG12IFUData = query({
     const startCurr = new Date(args.year, 0, 1).getTime();
     const endCurr = new Date(args.year, 11, 31, 23, 59, 59).getTime();
     
-    const currTurnover = invoices
-        .filter(inv => inv.issueDate >= startCurr && inv.issueDate <= endCurr && inv.status !== "cancelled" && inv.status !== "draft")
-        .reduce((sum, inv) => sum + (inv.subtotalHt || inv.totalHt || 0), 0);
+    // We need breakdown for IFU calculation (Goods vs Services)
+    let currTurnover = 0;
+    let currTurnoverGoods = 0;
+    let currTurnoverServices = 0;
+
+    const currInvoices = invoices
+        .filter(inv => inv.issueDate >= startCurr && inv.issueDate <= endCurr && inv.status !== "cancelled" && inv.status !== "draft");
+
+    // Note: This loop might be heavy if many invoices. 
+    // Optimization: Store goods/services split on invoice level or use aggregate table.
+    for (const inv of currInvoices) {
+        const total = inv.subtotalHt || inv.totalHt || 0;
+        currTurnover += total;
+        
+        // Approximate split if not available, or fetch items
+        // For accuracy, we should fetch items, but for dashboard speed, we might estimate or fetch lazily.
+        // Let's fetch items for now to be accurate as per requirements.
+        const items = await ctx.db.query("invoiceItems").withIndex("by_invoice", q => q.eq("invoiceId", inv._id)).collect();
+        for (const item of items) {
+             if (item.productType === "goods") {
+                 currTurnoverGoods += item.lineTotalHt || item.lineTotal || 0;
+             } else {
+                 currTurnoverServices += item.lineTotalHt || item.lineTotal || 0;
+             }
+        }
+    }
 
     // 3. Forecast
     const forecast = await ctx.db
@@ -538,19 +562,38 @@ export const getG12IFUData = query({
       .withIndex("by_business_and_year", (q) => q.eq("businessId", args.businessId).eq("year", args.year))
       .first();
 
+    // 4. Calculate Projected Tax
+    let projectedTax = 0;
+    if (business.fiscalRegime === "auto_entrepreneur") {
+        projectedTax = calculateAETax(currTurnover);
+    } else {
+        projectedTax = calculateIFUTax(currTurnoverGoods, currTurnoverServices);
+    }
+
     return {
         year: args.year,
         businessName: business.name,
         nif: business.nif || "",
-        autoEntrepreneurCardNumber: business.autoEntrepreneurCardNumber, // Added for AE
+        autoEntrepreneurCardNumber: business.autoEntrepreneurCardNumber,
         activityLabel: business.activityCodes?.join(", ") || "N/A",
         previousYearTurnover: prevTurnover,
         currentYearRealTurnover: currTurnover,
+        currentYearBreakdown: {
+            goods: currTurnoverGoods,
+            services: currTurnoverServices
+        },
+        projectedTax,
         forecast: forecast ? {
             forecastTurnover: forecast.forecastTurnover,
             ifuRate: forecast.ifuRate,
             taxDueInitial: forecast.taxDueInitial,
         } : null,
+        rates: {
+            ae: FISCAL_CONSTANTS.AE_RATE,
+            ifuGoods: FISCAL_CONSTANTS.IFU_RATES.GOODS,
+            ifuServices: FISCAL_CONSTANTS.IFU_RATES.SERVICES,
+            minTax: FISCAL_CONSTANTS.MINIMUM_TAX.IFU
+        },
         createdAt: Date.now(),
     };
   },
