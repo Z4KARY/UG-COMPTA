@@ -31,6 +31,7 @@ import type * as reminders from "../reminders.js";
 import type * as reports from "../reports.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as suppliers from "../suppliers.js";
+import type * as taxEngine from "../taxEngine.js";
 import type * as users from "../users.js";
 import type * as webhookActions from "../webhookActions.js";
 import type * as webhooks from "../webhooks.js";
@@ -65,6 +66,7 @@ declare const fullApi: ApiFromModules<{
   reports: typeof reports;
   subscriptions: typeof subscriptions;
   suppliers: typeof suppliers;
+  taxEngine: typeof taxEngine;
   users: typeof users;
   webhookActions: typeof webhookActions;
   webhooks: typeof webhooks;

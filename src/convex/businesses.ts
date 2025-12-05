@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query, internalQuery } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
+import { configureTaxModules } from "./taxEngine";
 
 export const getMyBusiness = query({
   args: { businessId: v.optional(v.id("businesses")) },
@@ -50,6 +51,12 @@ export const getMyBusiness = query({
         }
     }
 
+    if (business) {
+        // Inject Tax Configuration
+        const taxConfig = configureTaxModules(business);
+        return { ...business, taxConfig };
+    }
+
     return business;
   },
 });
@@ -81,11 +88,17 @@ export const listMyBusinesses = query({
         // Deduplicate and return
         const all = [...owned, ...memberBusinesses.filter(b => b !== null)];
         const seen = new Set();
+        
+        // Map to include tax config
         return all.filter(b => {
             if (!b) return false;
             if (seen.has(b._id)) return false;
             seen.add(b._id);
             return true;
+        }).map(b => {
+            if (!b) return b;
+            const taxConfig = configureTaxModules(b);
+            return { ...b, taxConfig };
         });
     }
 });
