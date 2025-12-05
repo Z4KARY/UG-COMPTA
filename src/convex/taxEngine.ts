@@ -117,8 +117,8 @@ export function getApplicableTaxRates(business: Doc<"businesses">) {
     return {
       type: "reel",
       rates: {
-        ibs: 19, // Standard IBS rate (simplified, can vary)
-        tap: 0, // Removed/Reduced
+        ibs: 26, // Default to Distribution (26%)
+        tap: 0, // Abrogated
         vat: [9, 19]
       }
     };

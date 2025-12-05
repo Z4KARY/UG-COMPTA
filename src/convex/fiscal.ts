@@ -24,6 +24,12 @@ export const FISCAL_CONSTANTS = {
     ]
   } as StampDutyConfig,
   VAT_RATES: [0, 9, 19],
+  IBS_RATES: {
+    PRODUCTION: 19,
+    SERVICES: 23,
+    DISTRIBUTION: 26
+  },
+  TAP_RATE: 0, // Abrogated (LF 2024/2025)
   IFU_RATES: {
     GOODS: 5, // 5% for production and sales of goods
     SERVICES: 12, // 12% for services and other activities

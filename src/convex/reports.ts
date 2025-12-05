@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { Id } from "./_generated/dataModel";
+import { FISCAL_CONSTANTS } from "./fiscal";
 
 export const getDashboardStats = query({
   args: {
@@ -167,13 +168,14 @@ export const getDashboardStats = query({
     const daysToG50 = Math.ceil((nextG50Due - now.getTime()) / (1000 * 60 * 60 * 24));
 
     // New Profitability & Tax Estimates
-    // TAP (Taxe sur l'Activité Professionnelle) - Approx 1.5% to 2% of Turnover (HT) depending on sector (if applicable)
-    // We'll estimate at 1.5% for display purposes
-    const tapEstimate = revenueHt * 0.015;
+    // TAP (Taxe sur l'Activité Professionnelle) - Abrogated (0%)
+    const tapEstimate = revenueHt * (FISCAL_CONSTANTS.TAP_RATE / 100);
 
-    // IBS (Impôt sur les Bénéfices des Sociétés) - 19% (Production), 23% (Services), 26% (Distribution)
-    // We'll use 23% as a middle ground default for services
-    const ibsEstimate = netProfit > 0 ? netProfit * 0.23 : 0;
+    // IBS (Impôt sur les Bénéfices des Sociétés)
+    // Rates: 19% (Production), 23% (Services/Construction), 26% (Distribution/Resale)
+    // Defaulting to 26% (Distribution) as it's the common commercial rate if not specified.
+    const ibsRate = FISCAL_CONSTANTS.IBS_RATES.DISTRIBUTION; 
+    const ibsEstimate = netProfit > 0 ? netProfit * (ibsRate / 100) : 0;
 
     // Cash Flow (Net Cash Movement)
     // Cash In (Paid Invoices) - Cash Out (Paid Expenses)
