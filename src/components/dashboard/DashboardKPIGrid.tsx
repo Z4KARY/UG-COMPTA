@@ -72,7 +72,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.avgInvoice")}</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>
@@ -90,7 +90,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.collectionRate")}</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>
@@ -108,7 +108,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Net Profit</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>
@@ -129,7 +129,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Invoices</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>

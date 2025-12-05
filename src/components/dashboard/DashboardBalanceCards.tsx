@@ -53,7 +53,7 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium opacity-80">{t("dashboard.balance.total")}</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 opacity-50 hover:opacity-100 transition-opacity" />
               </TooltipTrigger>
               <TooltipContent className="bg-primary-foreground text-primary">
@@ -75,7 +75,7 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.income")}</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>
@@ -97,7 +97,7 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.expenses")}</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>

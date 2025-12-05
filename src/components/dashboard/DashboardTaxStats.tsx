@@ -33,7 +33,7 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">TVA Collected</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>
@@ -53,7 +53,7 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">TVA Deductible</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>
@@ -73,7 +73,7 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Net TVA Payable</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>
@@ -95,7 +95,7 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Stamp Duty</CardTitle>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                 <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent>

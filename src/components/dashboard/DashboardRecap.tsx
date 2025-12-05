@@ -122,7 +122,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
                 {stat.title}
               </CardTitle>
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
                   <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
                 </TooltipTrigger>
                 <TooltipContent>
