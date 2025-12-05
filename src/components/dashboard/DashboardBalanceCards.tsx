@@ -4,9 +4,11 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router";
 
 export function DashboardBalanceCards({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const balance = useQuery(api.reports.getFinancialBalance, { businessId });
 
   if (!balance) {
@@ -41,7 +43,10 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <Card className="bg-primary text-primary-foreground">
+      <Card 
+        className="bg-primary text-primary-foreground cursor-pointer hover:opacity-90 transition-opacity"
+        onClick={() => navigate("/invoices")}
+      >
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium opacity-80">{t("dashboard.balance.total")}</CardTitle>
         </CardHeader>
@@ -50,7 +55,10 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
           <p className="text-xs opacity-80 mt-1">This Month</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card 
+        className="cursor-pointer hover:bg-muted/50 transition-colors"
+        onClick={() => navigate("/invoices")}
+      >
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.income")}</CardTitle>
         </CardHeader>
@@ -59,7 +67,10 @@ export function DashboardBalanceCards({ businessId }: { businessId: Id<"business
           <p className="text-xs text-muted-foreground mt-1">This Month</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card 
+        className="cursor-pointer hover:bg-muted/50 transition-colors"
+        onClick={() => navigate("/purchases")}
+      >
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.balance.expenses")}</CardTitle>
         </CardHeader>

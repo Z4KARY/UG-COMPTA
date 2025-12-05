@@ -4,9 +4,11 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router";
 
 export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   
   const now = new Date();
   const currentStats = useQuery(api.reports.getDashboardStats, { 
@@ -63,7 +65,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
+      <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate("/invoices")}>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.avgInvoice")}</CardTitle>
         </CardHeader>
@@ -71,7 +73,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
           <div className="text-2xl font-bold">{formatCurrency(currentStats.averageInvoiceValue)}</div>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate("/invoices")}>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.kpi.collectionRate")}</CardTitle>
         </CardHeader>
@@ -79,7 +81,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
           <div className="text-2xl font-bold">{collectionRate.toFixed(1)}%</div>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate("/declarations")}>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Net Profit</CardTitle>
         </CardHeader>
@@ -90,7 +92,7 @@ export function DashboardKPIGrid({ businessId }: { businessId: Id<"businesses"> 
           <p className="text-xs text-muted-foreground mt-1">Margin: {currentStats.netMargin.toFixed(1)}%</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate("/invoices")}>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Invoices</CardTitle>
         </CardHeader>

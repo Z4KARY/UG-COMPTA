@@ -5,9 +5,11 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calculator, Receipt, Scale, Stamp } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const now = new Date();
   const stats = useQuery(api.reports.getDashboardStats, { 
     businessId, 
@@ -21,9 +23,11 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
     return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD', maximumFractionDigits: 0 }).format(amount).replace('DZD', 'DA');
   };
 
+  const handleClick = () => navigate("/declarations");
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
+      <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">TVA Collected</CardTitle>
           <Receipt className="h-4 w-4 text-muted-foreground" />
@@ -33,7 +37,7 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
           <p className="text-xs text-muted-foreground mt-1">This Month</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">TVA Deductible</CardTitle>
           <Calculator className="h-4 w-4 text-muted-foreground" />
@@ -43,7 +47,7 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
           <p className="text-xs text-muted-foreground mt-1">This Month</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Net TVA Payable</CardTitle>
           <Scale className="h-4 w-4 text-muted-foreground" />
@@ -55,7 +59,7 @@ export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses">
           <p className="text-xs text-muted-foreground mt-1">This Month</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={handleClick}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Stamp Duty</CardTitle>
           <Stamp className="h-4 w-4 text-muted-foreground" />

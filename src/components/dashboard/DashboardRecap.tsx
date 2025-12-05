@@ -5,9 +5,11 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router";
 
 export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   
   const now = new Date();
   const currentMonth = now.getMonth();
@@ -73,6 +75,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       change: `${revenueChange > 0 ? '+' : ''}${revenueChange.toFixed(1)}%`,
       icon: DollarSign,
       trend: revenueChange >= 0 ? "up" : "down",
+      path: "/invoices",
     },
     {
       title: t("dashboard.recap.invoices"),
@@ -80,6 +83,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       change: `${invoiceChange > 0 ? '+' : ''}${invoiceChange.toFixed(1)}%`,
       icon: FileText,
       trend: invoiceChange >= 0 ? "up" : "down",
+      path: "/invoices",
     },
     {
       title: t("dashboard.recap.pending"),
@@ -87,6 +91,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       change: "Total", // Global stat
       icon: CreditCard,
       trend: "neutral",
+      path: "/invoices",
     },
     {
       title: t("dashboard.recap.customers"),
@@ -94,13 +99,18 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
       change: "Total", // Global stat
       icon: Users,
       trend: "neutral",
+      path: "/customers",
     },
   ];
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <Card key={stat.title}>
+        <Card 
+          key={stat.title}
+          className="cursor-pointer hover:bg-muted/50 transition-colors"
+          onClick={() => navigate(stat.path)}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {stat.title}
