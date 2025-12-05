@@ -109,6 +109,7 @@ const schema = defineSchema(
       autoEntrepreneurCardNumber: v.optional(v.string()),
       activityCodes: v.optional(v.array(v.string())),
       ssNumber: v.optional(v.string()), // CASNOS
+      ifuNumber: v.optional(v.string()), // Added for IFU (PP)
 
       // G50 Specific
       vatCreditCarriedForward: v.optional(v.number()),
@@ -319,6 +320,16 @@ const schema = defineSchema(
       newCredit: v.number(),
       vatPayable: v.number(),
       
+      // Page 1 & 2 - New Fields (Algerian Tax Module)
+      tap: v.optional(v.number()), // Taxe sur l'Activité Professionnelle (0%)
+      ibsAdvance: v.optional(v.number()), // Acomptes IBS
+      irgSalaries: v.optional(v.number()), // IRG Salaires
+      irgEmployees: v.optional(v.number()), // IRG Salariés / Prestataires
+      irgDividends: v.optional(v.number()), // IRG Dividendes
+      irgRcdc: v.optional(v.number()), // IRG RCDC
+      its: v.optional(v.number()), // Impôt Forfaitaire de Solidarité (1%)
+      tfp: v.optional(v.number()), // Taxe de Formation Professionnelle (1%)
+
       stampDutyTotal: v.number(),
       
       status: v.union(v.literal("DRAFT"), v.literal("FINALIZED")),

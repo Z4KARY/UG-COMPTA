@@ -150,6 +150,7 @@ export const create = mutation({
     autoEntrepreneurCardNumber: v.optional(v.string()),
     activityCodes: v.optional(v.array(v.string())),
     ssNumber: v.optional(v.string()),
+    ifuNumber: v.optional(v.string()), // Added IFU Number
 
     // Sequencing
     invoicePrefix: v.optional(v.string()),
@@ -171,6 +172,16 @@ export const create = mutation({
         finalFiscalRegime = "reel";
         // VAT is mandatory (19 or 9)
         if (finalTvaDefault === 0) finalTvaDefault = 19; // Default to 19 if 0 passed
+    } else if (args.type === "personne_physique") {
+        // Force IFU as per technical file for PP
+        finalFiscalRegime = "forfaitaire"; // Maps to IFU
+        finalTvaDefault = 0; // IFU -> VAT OFF
+        
+        // Legacy support or override if explicitly passed as VAT/reel (though technical file says PP -> IFU)
+        if (args.fiscalRegime === "reel" || args.fiscalRegime === "VAT") {
+             finalFiscalRegime = "reel";
+             if (finalTvaDefault === 0) finalTvaDefault = 19;
+        }
     } else if (args.type === "auto_entrepreneur") {
         finalFiscalRegime = "auto_entrepreneur";
         finalTvaDefault = 0; // Force VAT = 0
@@ -189,15 +200,6 @@ export const create = mutation({
                 throw new Error("This Auto-Entrepreneur Card Number is already registered.");
             }
         }
-    } else if (args.type === "personne_physique") {
-        // Can be reel or forfaitaire.
-        if (args.fiscalRegime === "IFU") finalFiscalRegime = "forfaitaire"; // Map legacy
-        if (args.fiscalRegime === "VAT") finalFiscalRegime = "reel"; // Map legacy
-        
-        if (finalFiscalRegime === "forfaitaire") {
-            finalTvaDefault = 0; // IFU -> VAT OFF
-        }
-        // If reel, we keep the passed tvaDefault (usually 19)
     }
 
     const businessId = await ctx.db.insert("businesses", {
@@ -293,6 +295,7 @@ export const update = mutation({
     autoEntrepreneurCardNumber: v.optional(v.string()),
     activityCodes: v.optional(v.array(v.string())),
     ssNumber: v.optional(v.string()),
+    ifuNumber: v.optional(v.string()), // Added IFU Number
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);

@@ -23,6 +23,17 @@ export function G50Declaration({ business, month, year, data }: G50DeclarationPr
     const [importVat, setImportVat] = useState("");
     const [importDesc, setImportDesc] = useState("");
 
+    // Manual Fields State
+    const [manualFields, setManualFields] = useState({
+        ibsAdvance: 0,
+        irgSalaries: 0,
+        irgEmployees: 0,
+        irgDividends: 0,
+        irgRcdc: 0,
+        its: 0,
+        tfp: 0
+    });
+
     const addImport = useMutation(api.declarations.addImportEntry);
     const deleteImport = useMutation(api.declarations.deleteImportEntry);
     const finalize = useMutation(api.declarations.finalizeG50);
@@ -56,6 +67,7 @@ export function G50Declaration({ business, month, year, data }: G50DeclarationPr
                 businessId: business._id,
                 month: parseInt(month),
                 year: parseInt(year),
+                ...manualFields
             });
             toast.success("Declaration finalized successfully");
         } catch (e: any) {
@@ -96,25 +108,82 @@ export function G50Declaration({ business, month, year, data }: G50DeclarationPr
     return (
         <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card>
-                    <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">VAT Collected</CardTitle></CardHeader>
-                    <CardContent><div className="text-2xl font-bold text-red-600">{data.vatCollectedTotal.toLocaleString()} {business.currency}</div></CardContent>
+                    <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">VAT Payable</CardTitle></CardHeader>
+                    <CardContent><div className="text-2xl font-bold text-red-600">{data.vatPayable.toLocaleString()} {business.currency}</div></CardContent>
                 </Card>
                 <Card>
-                    <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">VAT Deductible</CardTitle></CardHeader>
-                    <CardContent><div className="text-2xl font-bold text-green-600">{data.vatDeductibleTotal.toLocaleString()} {business.currency}</div></CardContent>
+                    <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">VAT Credit</CardTitle></CardHeader>
+                    <CardContent><div className="text-2xl font-bold text-green-600">{data.newCredit.toLocaleString()} {business.currency}</div></CardContent>
                 </Card>
                 <Card>
-                    <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Net VAT / Credit</CardTitle></CardHeader>
+                    <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">TAP (0%)</CardTitle></CardHeader>
+                    <CardContent><div className="text-2xl font-bold text-gray-600">0 {business.currency}</div></CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total to Pay</CardTitle></CardHeader>
                     <CardContent>
-                        <div className={`text-2xl font-bold ${data.vatPayable > 0 ? "text-red-600" : "text-blue-600"}`}>
-                            {data.vatPayable > 0 ? `Payable: ${data.vatPayable.toLocaleString()}` : `Credit: ${data.newCredit.toLocaleString()}`} {business.currency}
+                        <div className="text-2xl font-bold text-primary">
+                            {(data.vatPayable + data.stampDutyTotal + manualFields.ibsAdvance + manualFields.irgSalaries + manualFields.its + manualFields.tfp).toLocaleString()} {business.currency}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">Prev Credit: {data.previousCredit.toLocaleString()}</p>
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Manual Declarations (Page 1 & 2) */}
+            <Card>
+                <CardHeader><CardTitle>Other Taxes (G50 Page 1 & 2)</CardTitle></CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <Label>IBS Advance (Acomptes)</Label>
+                            <Input 
+                                type="number" 
+                                value={manualFields.ibsAdvance} 
+                                onChange={e => setManualFields({...manualFields, ibsAdvance: parseFloat(e.target.value) || 0})}
+                                disabled={data.isFinalized}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>IRG Salaries</Label>
+                            <Input 
+                                type="number" 
+                                value={manualFields.irgSalaries} 
+                                onChange={e => setManualFields({...manualFields, irgSalaries: parseFloat(e.target.value) || 0})}
+                                disabled={data.isFinalized}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>ITS (1%)</Label>
+                            <Input 
+                                type="number" 
+                                value={manualFields.its} 
+                                onChange={e => setManualFields({...manualFields, its: parseFloat(e.target.value) || 0})}
+                                disabled={data.isFinalized}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>TFP (1%)</Label>
+                            <Input 
+                                type="number" 
+                                value={manualFields.tfp} 
+                                onChange={e => setManualFields({...manualFields, tfp: parseFloat(e.target.value) || 0})}
+                                disabled={data.isFinalized}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>IRG Dividends</Label>
+                            <Input 
+                                type="number" 
+                                value={manualFields.irgDividends} 
+                                onChange={e => setManualFields({...manualFields, irgDividends: parseFloat(e.target.value) || 0})}
+                                disabled={data.isFinalized}
+                            />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Detailed Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

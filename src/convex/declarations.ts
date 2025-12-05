@@ -37,6 +37,15 @@ export const getG50Data = query({
             businessAi: business.ai,
             totalInvoicesCount: 0, // Could store this if needed
             totalPurchasesCount: 0,
+            // Ensure new fields are present even if old record
+            tap: existingDecl.tap || 0,
+            ibsAdvance: existingDecl.ibsAdvance || 0,
+            irgSalaries: existingDecl.irgSalaries || 0,
+            irgEmployees: existingDecl.irgEmployees || 0,
+            irgDividends: existingDecl.irgDividends || 0,
+            irgRcdc: existingDecl.irgRcdc || 0,
+            its: existingDecl.its || 0,
+            tfp: existingDecl.tfp || 0,
         };
     }
 
@@ -211,6 +220,16 @@ export const getG50Data = query({
       
       stampDutyTotal,
       
+      // New Fields Defaults (Manual Inputs)
+      tap: 0, // Force 0 as per LF 2024
+      ibsAdvance: existingDecl?.ibsAdvance || 0,
+      irgSalaries: existingDecl?.irgSalaries || 0,
+      irgEmployees: existingDecl?.irgEmployees || 0,
+      irgDividends: existingDecl?.irgDividends || 0,
+      irgRcdc: existingDecl?.irgRcdc || 0,
+      its: existingDecl?.its || 0,
+      tfp: existingDecl?.tfp || 0,
+      
       isFinalized: false,
       totalInvoicesCount: periodInvoices.length,
       totalPurchasesCount: periodPurchases.length,
@@ -229,9 +248,15 @@ export const finalizeG50 = mutation({
         businessId: v.id("businesses"),
         month: v.number(),
         year: v.number(),
-        // We pass the calculated values to ensure what the user saw is what is saved
-        // Or we recalculate. Recalculating is safer but might differ if data changed.
-        // We will recalculate to be safe and atomic.
+        // Additional Manual Fields
+        tap: v.optional(v.number()),
+        ibsAdvance: v.optional(v.number()),
+        irgSalaries: v.optional(v.number()),
+        irgEmployees: v.optional(v.number()),
+        irgDividends: v.optional(v.number()),
+        irgRcdc: v.optional(v.number()),
+        its: v.optional(v.number()),
+        tfp: v.optional(v.number()),
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
@@ -321,6 +346,17 @@ export const finalizeG50 = mutation({
             vatNetBeforeCredit, previousCredit,
             vatNetAfterCredit, newCredit, vatPayable,
             stampDutyTotal,
+            
+            // Save Manual Fields
+            tap: 0, // Force 0
+            ibsAdvance: args.ibsAdvance || 0,
+            irgSalaries: args.irgSalaries || 0,
+            irgEmployees: args.irgEmployees || 0,
+            irgDividends: args.irgDividends || 0,
+            irgRcdc: args.irgRcdc || 0,
+            its: args.its || 0,
+            tfp: args.tfp || 0,
+
             status: "FINALIZED" as const,
             finalizedAt: Date.now(),
         };
