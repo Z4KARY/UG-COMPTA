@@ -23,6 +23,7 @@ export const getDashboardStats = query({
       .first();
       
     const business = await ctx.db.get(args.businessId);
+    if (!business) return null;
     
     // Allow if owner (legacy check) or member
     if (!member && business.userId !== userId) {
