@@ -278,6 +278,7 @@ const schema = defineSchema(
         v.literal("OTHER")
       ),
       reference: v.optional(v.string()),
+      notes: v.optional(v.string()),
     }).index("by_invoice", ["invoiceId"]),
 
     fiscalParameters: defineTable({

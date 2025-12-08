@@ -670,6 +670,7 @@ export const markAsPaid = mutation({
     ),
     paymentDate: v.number(),
     reference: v.optional(v.string()),
+    notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -703,9 +704,15 @@ export const markAsPaid = mutation({
         paymentMethod: args.paymentMethod,
         paymentDate: args.paymentDate,
         reference: args.reference,
+        notes: args.notes,
     });
 
-    await ctx.db.patch(args.id, { status: "paid" });
+    const newAmountPaid = (invoice.amountPaid || 0) + args.amount;
+
+    await ctx.db.patch(args.id, { 
+        status: "paid",
+        amountPaid: newAmountPaid
+    });
 
     await ctx.scheduler.runAfter(0, internal.audit.log, {
         businessId: invoice.businessId,
@@ -713,8 +720,8 @@ export const markAsPaid = mutation({
         entityType: "INVOICE",
         entityId: args.id,
         action: "MARK_PAID",
-        payloadBefore: { status: invoice.status },
-        payloadAfter: { status: "paid", payment: args },
+        payloadBefore: { status: invoice.status, amountPaid: invoice.amountPaid },
+        payloadAfter: { status: "paid", amountPaid: newAmountPaid, payment: args },
     });
 
     // Trigger Webhook
@@ -727,6 +734,71 @@ export const markAsPaid = mutation({
             amount: args.amount,
             paymentDate: args.paymentDate,
         }
+    });
+  },
+});
+
+export const markAsUnpaid = mutation({
+  args: { id: v.id("invoices") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) {
+         const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
+            .first();
+         if (!member) throw new Error("Unauthorized");
+    }
+
+    // Check for closed period for any existing payments
+    const payments = await ctx.db
+        .query("payments")
+        .withIndex("by_invoice", (q) => q.eq("invoiceId", args.id))
+        .collect();
+
+    for (const payment of payments) {
+        const closure = await ctx.db.query("periodClosures")
+            .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+            .filter(q => q.and(q.lte(q.field("startDate"), payment.paymentDate), q.gte(q.field("endDate"), payment.paymentDate)))
+            .first();
+        
+        if (closure) {
+            throw new Error("Cannot remove payment from a closed period");
+        }
+    }
+
+    // Delete payments
+    for (const payment of payments) {
+        await ctx.db.delete(payment._id);
+    }
+
+    // Reset status
+    const now = Date.now();
+    let newStatus = "issued";
+    if (invoice.dueDate < now) {
+        newStatus = "overdue";
+    }
+    
+    await ctx.db.patch(args.id, { 
+        status: newStatus as any,
+        amountPaid: 0,
+        paymentMethod: undefined 
+    });
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: invoice.businessId,
+        userId,
+        entityType: "INVOICE",
+        entityId: args.id,
+        action: "UPDATE",
+        payloadBefore: { status: invoice.status, amountPaid: invoice.amountPaid },
+        payloadAfter: { status: newStatus, amountPaid: 0 },
     });
   },
 });
@@ -778,6 +850,7 @@ export const addPayment = mutation({
         paymentMethod: args.paymentMethod,
         paymentDate: args.paymentDate,
         reference: args.reference,
+        notes: args.notes,
     });
 
     // Update Invoice Status and Amount Paid
