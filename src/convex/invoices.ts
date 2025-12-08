@@ -107,8 +107,13 @@ export const get = query({
       .query("invoiceItems")
       .withIndex("by_invoice", (q) => q.eq("invoiceId", invoice._id))
       .collect();
+      
+    const payments = await ctx.db
+      .query("payments")
+      .withIndex("by_invoice", (q) => q.eq("invoiceId", invoice._id))
+      .collect();
 
-    return { ...invoice, customer, items, business };
+    return { ...invoice, customer, items, business, payments };
   },
 });
 
@@ -321,6 +326,7 @@ export const create = mutation({
       totalTva: calculatedTotalTva,
       stampDutyAmount: stampDutyAmount,
       totalTtc: finalTotalTtc,
+      amountPaid: 0, // Initialize amountPaid
       
       // Clear legacy fields if not needed or set them for compat
       timbre: stampDutyAmount > 0,
@@ -720,6 +726,97 @@ export const markAsPaid = mutation({
             invoiceNumber: invoice.invoiceNumber,
             amount: args.amount,
             paymentDate: args.paymentDate,
+        }
+    });
+  },
+});
+
+export const addPayment = mutation({
+  args: { 
+    id: v.id("invoices"),
+    amount: v.number(),
+    paymentMethod: v.union(
+        v.literal("CASH"),
+        v.literal("BANK_TRANSFER"),
+        v.literal("CHEQUE"),
+        v.literal("CARD"),
+        v.literal("OTHER")
+    ),
+    paymentDate: v.number(),
+    reference: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business || business.userId !== userId) {
+         const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
+            .first();
+         if (!member) throw new Error("Unauthorized");
+    }
+
+    // Check for closed period (Payment Date)
+    const closure = await ctx.db.query("periodClosures")
+        .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+        .filter(q => q.and(q.lte(q.field("startDate"), args.paymentDate), q.gte(q.field("endDate"), args.paymentDate)))
+        .first();
+    
+    if (closure) {
+        throw new Error("Cannot record payment in a closed period");
+    }
+
+    await ctx.db.insert("payments", {
+        invoiceId: args.id,
+        amount: args.amount,
+        paymentMethod: args.paymentMethod,
+        paymentDate: args.paymentDate,
+        reference: args.reference,
+    });
+
+    // Update Invoice Status and Amount Paid
+    const currentPaid = invoice.amountPaid || 0;
+    const newPaid = currentPaid + args.amount;
+    
+    let newStatus = invoice.status;
+    // Allow small floating point margin of error
+    if (newPaid >= (invoice.totalTtc - 0.01)) {
+        newStatus = "paid";
+    } else if (newPaid > 0) {
+        newStatus = "partial";
+    }
+
+    await ctx.db.patch(args.id, { 
+        status: newStatus,
+        amountPaid: newPaid
+    });
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        businessId: invoice.businessId,
+        userId,
+        entityType: "INVOICE",
+        entityId: args.id,
+        action: "MARK_PAID",
+        payloadBefore: { status: invoice.status, amountPaid: invoice.amountPaid },
+        payloadAfter: { status: newStatus, amountPaid: newPaid, payment: args },
+    });
+
+    // Trigger Webhook
+    await ctx.scheduler.runAfter(0, internal.webhookActions.trigger, {
+        businessId: invoice.businessId,
+        event: "invoice.paid",
+        payload: {
+            id: args.id,
+            invoiceNumber: invoice.invoiceNumber,
+            amount: args.amount,
+            paymentDate: args.paymentDate,
+            newStatus
         }
     });
   },

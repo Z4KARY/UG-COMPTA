@@ -92,10 +92,23 @@ export const getDashboardStats = query({
       turnover += inv.totalTtc || 0;
       tva += inv.totalTva || 0;
       totalStampDuty += inv.stampDutyAmount || 0;
-      if (inv.status === "paid") {
-        cashIn += inv.totalTtc;
-        if (inv.paymentMethod === "CASH") {
-            stampDuty += inv.stampDutyAmount || 0;
+      
+      // Use amountPaid for cashIn
+      const paidAmount = inv.amountPaid || 0;
+      if (paidAmount > 0) {
+        cashIn += paidAmount;
+        // Approximate stamp duty collection: if fully paid or partial? 
+        // Stamp duty is usually collected upfront or with payment. 
+        // For simplicity, if paidAmount > 0, we assume proportional stamp duty or just count it when fully paid?
+        // Let's stick to: if paymentMethod is CASH, stamp duty applies.
+        // But here we are aggregating.
+        // If inv.status is paid or partial, we have cash in.
+        
+        // For stamp duty specifically (which is only on CASH payments usually), 
+        // we should check the payments table, but that's expensive here.
+        // We'll stick to the existing logic but use amountPaid for cash flow.
+        if (inv.paymentMethod === "CASH" && inv.status === "paid") {
+             stampDuty += inv.stampDutyAmount || 0;
         }
       }
     }
@@ -119,8 +132,9 @@ export const getDashboardStats = query({
         totalTurnover += inv.totalTtc || 0;
       }
 
-      if (inv.status === "issued" || inv.status === "overdue") {
-        outstandingAmount += inv.totalTtc;
+      if (inv.status === "issued" || inv.status === "overdue" || inv.status === "partial") {
+        // Outstanding is Total - Paid
+        outstandingAmount += (inv.totalTtc - (inv.amountPaid || 0));
       }
       if (inv.status === "overdue") {
         overdueCount++;
@@ -128,17 +142,12 @@ export const getDashboardStats = query({
       if (inv._creationTime >= startOfDay) {
         invoicesCreatedToday++;
       }
-      
-      // Calculate average payment delay for paid invoices
-      // Note: We need a paymentDate field on invoices or payments table. 
-      // Assuming we might not have it on invoice object directly in all cases, skipping for now or using creation vs update if status changed.
-      // For now, we'll skip complex payment delay calc without a dedicated payment date field on invoice or join.
     }
 
     let expensesLoggedToday = 0;
     for (const pur of purchases) {
-        if (pur.status === "unpaid") {
-            accountsPayable += pur.totalTtc;
+        if (pur.status === "unpaid" || pur.status === "partial") {
+            accountsPayable += (pur.totalTtc - (pur.amountPaid || 0));
         }
         if (pur._creationTime >= startOfDay) {
             expensesLoggedToday++;
@@ -184,7 +193,7 @@ export const getDashboardStats = query({
     // We need to know paid expenses.
     let paidExpenses = 0;
     for (const pur of periodPurchases) {
-        if (pur.status === "paid") paidExpenses += pur.totalTtc;
+        paidExpenses += (pur.amountPaid || 0);
     }
     const cashFlow = cashIn - paidExpenses;
 
@@ -271,11 +280,9 @@ export const getFinancialBalance = query({
         let revenueCredit = 0;
 
         for (const inv of periodInvoices) {
-            if (inv.status === "paid") {
-                revenueCash += inv.totalTtc;
-            } else {
-                revenueCredit += inv.totalTtc;
-            }
+            const paid = inv.amountPaid || 0;
+            revenueCash += paid;
+            revenueCredit += (inv.totalTtc - paid);
         }
 
         const revenue = revenueCash + revenueCredit;
@@ -303,12 +310,9 @@ export const getFinancialBalance = query({
     let creditTotal = 0; 
 
     for (const inv of monthInvoices) {
-        if (inv.status === "paid") {
-            cashTotal += inv.totalTtc;
-        } else {
-            // issued, overdue -> Considered as Credit (Créance)
-            creditTotal += inv.totalTtc;
-        }
+        const paid = inv.amountPaid || 0;
+        cashTotal += paid;
+        creditTotal += (inv.totalTtc - paid);
     }
 
     return {
@@ -365,11 +369,10 @@ export const getRevenueTrend = query({
         if (monthlyData.has(key)) {
             const current = monthlyData.get(key)!;
             current.revenue += (inv.totalTtc || 0);
-            if (inv.status === "paid") {
-                current.revenueCash += (inv.totalTtc || 0);
-            } else {
-                current.revenueCredit += (inv.totalTtc || 0);
-            }
+            
+            const paid = inv.amountPaid || 0;
+            current.revenueCash += paid;
+            current.revenueCredit += (inv.totalTtc - paid);
         }
     }
 

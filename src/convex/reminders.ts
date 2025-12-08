@@ -39,7 +39,14 @@ export const processReminders = internalMutation({
             .withIndex("by_status", q => q.eq("status", "issued"))
             .collect();
         
-        for (const invoice of issuedInvoices) {
+        const partialInvoices = await ctx.db
+            .query("invoices")
+            .withIndex("by_status", q => q.eq("status", "partial"))
+            .collect();
+        
+        const invoicesToCheck = [...issuedInvoices, ...partialInvoices];
+        
+        for (const invoice of invoicesToCheck) {
             // If due date is in the past (and not today, to be safe/strict, or just strictly less than now)
             // Using end of due date day would be better, but simple comparison for now.
             if (now > invoice.dueDate) {

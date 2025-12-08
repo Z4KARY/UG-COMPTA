@@ -214,9 +214,11 @@ const schema = defineSchema(
         v.literal("draft"),
         v.literal("issued"), // Changed from sent
         v.literal("paid"),
+        v.literal("partial"),
         v.literal("overdue"),
         v.literal("cancelled")
       ),
+      amountPaid: v.optional(v.number()),
       notes: v.optional(v.string()),
       
       // Payment & Fiscal
@@ -380,7 +382,8 @@ const schema = defineSchema(
         v.literal("CARD"),
         v.literal("OTHER")
       )),
-      status: v.optional(v.union(v.literal("unpaid"), v.literal("paid"))), // Added status
+      status: v.optional(v.union(v.literal("unpaid"), v.literal("paid"), v.literal("partial"))), // Added status
+      amountPaid: v.optional(v.number()),
       category: v.optional(v.string()), // Added category
       description: v.optional(v.string()),
       subtotalHt: v.number(),
@@ -412,6 +415,21 @@ const schema = defineSchema(
       vatAmount: v.number(),
       lineTotalHt: v.number(),
       lineTotalTtc: v.number(),
+    }).index("by_purchase_invoice", ["purchaseInvoiceId"]),
+
+    purchasePayments: defineTable({
+      purchaseInvoiceId: v.id("purchaseInvoices"),
+      amount: v.number(),
+      paymentDate: v.number(),
+      paymentMethod: v.union(
+        v.literal("CASH"),
+        v.literal("BANK_TRANSFER"),
+        v.literal("CHEQUE"),
+        v.literal("CARD"),
+        v.literal("OTHER")
+      ),
+      reference: v.optional(v.string()),
+      notes: v.optional(v.string()),
     }).index("by_purchase_invoice", ["purchaseInvoiceId"]),
 
     importJobs: defineTable({

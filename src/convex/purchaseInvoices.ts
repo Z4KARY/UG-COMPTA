@@ -100,11 +100,17 @@ export const get = query({
         .query("purchaseInvoiceItems")
         .withIndex("by_purchase_invoice", (q) => q.eq("purchaseInvoiceId", invoice._id))
         .collect();
+        
+    const payments = await ctx.db
+        .query("purchasePayments")
+        .withIndex("by_purchase_invoice", (q) => q.eq("purchaseInvoiceId", invoice._id))
+        .collect();
 
     return {
         ...invoice,
         supplier,
         items,
+        payments,
         business
     };
   },
@@ -222,9 +228,11 @@ export const create = mutation({
     }
 
     // Determine status
-    let status: "paid" | "unpaid" = "unpaid";
+    let status: "paid" | "unpaid" | "partial" = "unpaid";
+    let amountPaid = 0;
     if (args.paymentDate) {
         status = "paid";
+        amountPaid = totalTtc;
     }
 
     const purchaseInvoiceId = await ctx.db.insert("purchaseInvoices", {
@@ -240,6 +248,7 @@ export const create = mutation({
         vatTotal,
         totalTtc,
         vatDeductible,
+        amountPaid,
     });
 
     for (const item of calculatedItems) {
@@ -340,10 +349,20 @@ export const markAsPaid = mutation({
             if (!member) throw new Error("Unauthorized");
         }
 
+        // Record payment in purchasePayments
+        await ctx.db.insert("purchasePayments", {
+            purchaseInvoiceId: args.id,
+            amount: invoice.totalTtc - (invoice.amountPaid || 0),
+            paymentDate: args.paymentDate,
+            paymentMethod: args.paymentMethod,
+            notes: "Marked as paid fully",
+        });
+
         await ctx.db.patch(args.id, {
             status: "paid",
             paymentDate: args.paymentDate,
             paymentMethod: args.paymentMethod,
+            amountPaid: invoice.totalTtc,
         });
     }
 });
@@ -368,10 +387,94 @@ export const markAsUnpaid = mutation({
             if (!member) throw new Error("Unauthorized");
         }
 
+        // Remove all payments
+        const payments = await ctx.db
+            .query("purchasePayments")
+            .withIndex("by_purchase_invoice", (q) => q.eq("purchaseInvoiceId", args.id))
+            .collect();
+        
+        for (const payment of payments) {
+            await ctx.db.delete(payment._id);
+        }
+
         await ctx.db.patch(args.id, {
             status: "unpaid",
             paymentDate: undefined,
             paymentMethod: undefined,
+            amountPaid: 0,
+        });
+    }
+});
+
+export const addPayment = mutation({
+    args: {
+        id: v.id("purchaseInvoices"),
+        amount: v.number(),
+        paymentDate: v.number(),
+        paymentMethod: v.union(
+            v.literal("CASH"),
+            v.literal("BANK_TRANSFER"),
+            v.literal("CHEQUE"),
+            v.literal("CARD"),
+            v.literal("OTHER")
+        ),
+        reference: v.optional(v.string()),
+        notes: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) throw new Error("Unauthorized");
+
+        const invoice = await ctx.db.get(args.id);
+        if (!invoice) throw new Error("Invoice not found");
+
+        const business = await ctx.db.get(invoice.businessId);
+        if (!business) throw new Error("Business not found");
+
+        if (business.userId !== userId) {
+            const member = await ctx.db
+                .query("businessMembers")
+                .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
+                .first();
+            if (!member) throw new Error("Unauthorized");
+        }
+        
+        // Check for closed period
+        const closure = await ctx.db.query("periodClosures")
+            .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+            .filter(q => q.and(q.lte(q.field("startDate"), args.paymentDate), q.gte(q.field("endDate"), args.paymentDate)))
+            .first();
+        
+        if (closure) {
+            throw new Error("Cannot record payment in a closed period");
+        }
+
+        await ctx.db.insert("purchasePayments", {
+            purchaseInvoiceId: args.id,
+            amount: args.amount,
+            paymentMethod: args.paymentMethod,
+            paymentDate: args.paymentDate,
+            reference: args.reference,
+            notes: args.notes,
+        });
+        
+        // Update Invoice Status and Amount Paid
+        const currentPaid = invoice.amountPaid || 0;
+        const newPaid = currentPaid + args.amount;
+        
+        let newStatus = invoice.status;
+        if (newPaid >= (invoice.totalTtc - 0.01)) {
+            newStatus = "paid";
+        } else if (newPaid > 0) {
+            newStatus = "partial";
+        }
+        
+        await ctx.db.patch(args.id, {
+            status: newStatus,
+            amountPaid: newPaid,
+            // Update legacy fields if needed, but we rely on payments table now
+            paymentDate: args.paymentDate, // Last payment date
+            paymentMethod: args.paymentMethod // Last payment method
         });
     }
 });
