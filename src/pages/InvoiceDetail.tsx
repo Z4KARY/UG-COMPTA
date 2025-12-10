@@ -52,6 +52,9 @@ export default function InvoiceDetail() {
   const primaryColor = business?.primaryColor || "#0f172a"; // Default to slate-900
   const secondaryColor = business?.secondaryColor || "#ffffff";
   const font = business?.font || "Inter";
+  const invoiceFontFamily = font.includes(" ")
+    ? `"${font}", Inter, sans-serif`
+    : `${font}, Inter, sans-serif`;
   const logoUrl = business?.logoUrl;
 
   const handleStatusChange = async (status: "issued" | "paid" | "cancelled") => {
@@ -137,8 +140,10 @@ export default function InvoiceDetail() {
 
       {/* Invoice Document */}
       <div className="w-full mx-auto print:w-full print:max-w-none">
-        <div className="print-container bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] relative flex flex-col"
-             style={{ fontFamily: font }}>
+        <div
+          className="print-container bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] relative flex flex-col"
+             style={{ fontFamily: invoiceFontFamily }}
+        >
           
           {/* Top Accent Line */}
           <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
