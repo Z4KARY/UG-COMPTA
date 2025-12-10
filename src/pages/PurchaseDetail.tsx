@@ -108,7 +108,7 @@ export default function PurchaseDetail() {
 
   const purchaseSummary = useMemo(() => {
     const lines: string[] = [];
-    const currency = invoice.currency || "DZD";
+    const currency = business?.currency || "DZD";
     lines.push(
       `Purchase Invoice #${invoice.invoiceNumber ?? "N/A"} - Status: ${status}`
     );
@@ -127,9 +127,7 @@ export default function PurchaseDetail() {
     lines.push(`Payment Method: ${invoice.paymentMethod ?? "Unspecified"}`);
     if (supplier?.name) {
       lines.push(
-        `Supplier: ${supplier.name}, ${supplier.address ?? ""}, ${
-          supplier.city ?? ""
-        }`
+        `Supplier: ${supplier.name}, ${supplier.address ?? ""}`
       );
       if (supplier.nif) lines.push(`Supplier NIF: ${supplier.nif}`);
       if (supplier.rc) lines.push(`Supplier RC: ${supplier.rc}`);

@@ -114,7 +114,7 @@ export default function InvoiceDetail() {
       lines.push(
         `Customer: ${invoice.customer.name}, ${
           invoice.customer.address ?? ""
-        }, ${invoice.customer.city ?? ""}`
+        }`
       );
       if (invoice.customer.taxId)
         lines.push(`Customer NIF: ${invoice.customer.taxId}`);
