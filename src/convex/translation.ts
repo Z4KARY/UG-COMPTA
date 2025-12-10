@@ -19,14 +19,47 @@ export const translateInvoice = action({
     console.log(`Translating ${args.documentType} "${args.documentTitle}" to ${args.targetLanguage}`);
 
     try {
-      // Use google-translate-api-x for free translation
-      // Note: This library acts as a free client for Google Translate.
       const res = await translate(args.invoiceText, { to: args.targetLanguage });
-      
       return { translation: res.text };
     } catch (error: any) {
       console.error("Translation Action Error:", error);
       throw new Error(error.message || "Unknown translation error");
+    }
+  },
+});
+
+export const translateInvoiceContent = action({
+  args: {
+    items: v.array(v.object({
+      description: v.string(),
+    })),
+    notes: v.optional(v.string()),
+    targetLanguage: v.string(),
+  },
+  handler: async (_ctx, args) => {
+    try {
+      // Translate items
+      const translatedItems = await Promise.all(
+        args.items.map(async (item) => {
+          const res = await translate(item.description, { to: args.targetLanguage });
+          return { ...item, description: res.text };
+        })
+      );
+
+      // Translate notes if present
+      let translatedNotes = args.notes;
+      if (args.notes) {
+        const res = await translate(args.notes, { to: args.targetLanguage });
+        translatedNotes = res.text;
+      }
+
+      return {
+        items: translatedItems,
+        notes: translatedNotes,
+      };
+    } catch (error: any) {
+      console.error("Content Translation Error:", error);
+      throw new Error(error.message || "Failed to translate content");
     }
   },
 });
