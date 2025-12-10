@@ -343,6 +343,8 @@ export default function InvoiceCreate() {
             notes={notes}
             setNotes={setNotes}
             onAction={handleSubmit}
+            language={formData.language}
+            setLanguage={(lang) => setFormData({ ...formData, language: lang })}
           />
         </div>
       </div>

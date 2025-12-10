@@ -5,6 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Info } from "lucide-react";
 import { useFormContext } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface InvoiceFormSummaryProps {
   business: any;
@@ -17,6 +24,8 @@ interface InvoiceFormSummaryProps {
   notes: string;
   setNotes: (notes: string) => void;
   onAction: (status: "draft" | "issued") => void;
+  language: string;
+  setLanguage: (lang: string) => void;
 }
 
 export function InvoiceFormSummary({
@@ -29,7 +38,9 @@ export function InvoiceFormSummary({
   stampDutyConfig,
   notes,
   setNotes,
-  onAction
+  onAction,
+  language,
+  setLanguage
 }: InvoiceFormSummaryProps) {
   const form = useFormContext();
 
@@ -73,6 +84,28 @@ export function InvoiceFormSummary({
               {totalTtc.toFixed(2)} {business.currency}
             </span>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Language Selection */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Document Language</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={language} onValueChange={(val) => { setLanguage(val); form.setValue("language", val); }}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fr">Français</SelectItem>
+              <SelectItem value="ar">العربية</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground mt-2">
+            This will determine the language of the generated invoice PDF.
+          </p>
         </CardContent>
       </Card>
 

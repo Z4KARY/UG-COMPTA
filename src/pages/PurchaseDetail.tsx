@@ -27,7 +27,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useState, useMemo } from "react";
-import { InvoiceTranslationPanel } from "@/components/invoice/InvoiceTranslationPanel";
 
 export default function PurchaseDetail() {
   const { id } = useParams<{ id: string }>();
@@ -266,12 +265,6 @@ export default function PurchaseDetail() {
           </Button>
         </div>
       </div>
-
-      <InvoiceTranslationPanel
-        content={purchaseSummary}
-        documentTitle={`Purchase Invoice ${invoice.invoiceNumber || ""}`}
-        documentType="purchase"
-      />
 
       {/* Invoice Document */}
       <div className="w-full mx-auto print:w-full print:max-w-none">
