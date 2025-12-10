@@ -43,24 +43,12 @@ export default function PurchaseDetail() {
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "BANK_TRANSFER" | "CHEQUE" | "CARD" | "OTHER">("CASH");
 
-  if (!invoice) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="animate-pulse flex flex-col items-center gap-4">
-            <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
-            <div className="h-4 w-48 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   const handlePrint = () => {
     window.print();
   };
 
   const handleDelete = async () => {
+    if (!invoice) return;
     if (confirm("Are you sure you want to delete this purchase invoice?")) {
       try {
         await deletePurchase({ id: invoice._id });
@@ -73,6 +61,7 @@ export default function PurchaseDetail() {
   };
 
   const handleMarkAsPaid = async () => {
+    if (!invoice) return;
     try {
         await markAsPaid({
             id: invoice._id,
@@ -87,6 +76,7 @@ export default function PurchaseDetail() {
   };
 
   const handleMarkAsUnpaid = async () => {
+      if (!invoice) return;
       if (confirm("Are you sure you want to mark this invoice as unpaid?")) {
           try {
               await markAsUnpaid({ id: invoice._id });
@@ -97,16 +87,17 @@ export default function PurchaseDetail() {
       }
   };
 
-  const business = invoice.business;
-  const supplier = invoice.supplier;
+  const business = invoice?.business;
+  const supplier = invoice?.supplier;
 
   // Design settings (using business settings for consistency, though this is an incoming invoice)
   const primaryColor = business?.primaryColor || "#0f172a"; 
   const font = business?.font || "Inter";
 
-  const status = invoice.status || (invoice.paymentDate ? "paid" : "unpaid");
+  const status = invoice?.status || (invoice?.paymentDate ? "paid" : "unpaid");
 
   const purchaseSummary = useMemo(() => {
+    if (!invoice) return "";
     const lines: string[] = [];
     const currency = business?.currency || "DZD";
     lines.push(
@@ -134,9 +125,7 @@ export default function PurchaseDetail() {
     }
     if (business?.name) {
       lines.push(
-        `Buyer: ${business.name}, ${business.address ?? ""}, ${
-          business.city ?? ""
-        }`
+        `Buyer: ${business.name}, ${business.address ?? ""}`
       );
       if (business.nif) lines.push(`Buyer NIF: ${business.nif}`);
       if (business.rc) lines.push(`Buyer RC: ${business.rc}`);
@@ -160,6 +149,19 @@ export default function PurchaseDetail() {
     }
     return lines.join("\n");
   }, [invoice, supplier, business, status]);
+
+  if (!invoice) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse flex flex-col items-center gap-4">
+            <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
+            <div className="h-4 w-48 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout breadcrumbOverrides={{ [invoice._id]: invoice.invoiceNumber || "Purchase" }}>

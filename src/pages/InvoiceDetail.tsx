@@ -20,35 +20,24 @@ export default function InvoiceDetail() {
   });
   const updateStatus = useMutation(api.invoices.updateStatus);
 
-  if (!invoice) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="animate-pulse flex flex-col items-center gap-4">
-            <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
-            <div className="h-4 w-48 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   const handlePrint = () => {
     window.print();
   };
 
-  const business = invoice.business;
+  const business = invoice?.business;
   const isAE = business?.type === "auto_entrepreneur";
 
   // Calculate payment terms
-  const issueDate = new Date(invoice.issueDate);
-  const dueDate = new Date(invoice.dueDate);
-  const diffTime = Math.abs(dueDate.getTime() - issueDate.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
   let paymentTerms = "Payment on receipt";
-  if (diffDays === 0) paymentTerms = "Immediate payment";
-  else if (diffDays > 0) paymentTerms = `${diffDays} days`;
+  if (invoice) {
+    const issueDate = new Date(invoice.issueDate);
+    const dueDate = new Date(invoice.dueDate);
+    const diffTime = Math.abs(dueDate.getTime() - issueDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) paymentTerms = "Immediate payment";
+    else if (diffDays > 0) paymentTerms = `${diffDays} days`;
+  }
 
   // Design settings
   const primaryColor = business?.primaryColor || "#0f172a"; // Default to slate-900
@@ -60,6 +49,7 @@ export default function InvoiceDetail() {
   const logoUrl = business?.logoUrl;
 
   const handleStatusChange = async (status: "issued" | "paid" | "cancelled") => {
+    if (!invoice) return;
     try {
       await updateStatus({ id: invoice._id, status });
       toast.success(`Invoice marked as ${status}`);
@@ -70,8 +60,8 @@ export default function InvoiceDetail() {
   };
 
   // Fallback for legacy invoices
-  const stampDuty = invoice.stampDutyAmount ?? (invoice.timbre ? 10 : 0);
-  const subtotalHt = invoice.subtotalHt ?? invoice.totalHt ?? 0;
+  const stampDuty = invoice?.stampDutyAmount ?? (invoice?.timbre ? 10 : 0);
+  const subtotalHt = invoice?.subtotalHt ?? invoice?.totalHt ?? 0;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -84,6 +74,7 @@ export default function InvoiceDetail() {
   };
 
   const invoiceSummary = useMemo(() => {
+    if (!invoice) return "";
     const lines: string[] = [];
     lines.push(
       `Invoice #${invoice.invoiceNumber ?? "N/A"} (${invoice.type}) - Status: ${
@@ -151,6 +142,19 @@ export default function InvoiceDetail() {
     }
     return lines.join("\n");
   }, [invoice, business, subtotalHt, stampDuty, isAE, paymentTerms]);
+
+  if (!invoice) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse flex flex-col items-center gap-4">
+            <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
+            <div className="h-4 w-48 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout breadcrumbOverrides={{ [invoice._id]: invoice.invoiceNumber || "Draft" }}>
