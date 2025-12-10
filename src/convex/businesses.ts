@@ -279,6 +279,13 @@ export const update = mutation({
     nis: v.optional(v.string()),
     capital: v.optional(v.number()),
     logoStorageId: v.optional(v.id("_storage")),
+    logoUrl: v.optional(v.string()),
+    
+    // Added missing fields for signature and stamp
+    signatureStorageId: v.optional(v.id("_storage")),
+    signatureUrl: v.optional(v.string()),
+    stampStorageId: v.optional(v.id("_storage")),
+    stampUrl: v.optional(v.string()),
     
     primaryColor: v.optional(v.string()),
     secondaryColor: v.optional(v.string()),
