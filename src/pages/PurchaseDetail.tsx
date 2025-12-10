@@ -26,7 +26,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { InvoiceTranslationPanel } from "@/components/invoice/InvoiceTranslationPanel";
 
 export default function PurchaseDetail() {
   const { id } = useParams<{ id: string }>();
@@ -104,6 +105,63 @@ export default function PurchaseDetail() {
   const font = business?.font || "Inter";
 
   const status = invoice.status || (invoice.paymentDate ? "paid" : "unpaid");
+
+  const purchaseSummary = useMemo(() => {
+    const lines: string[] = [];
+    const currency = invoice.currency || "DZD";
+    lines.push(
+      `Purchase Invoice #${invoice.invoiceNumber ?? "N/A"} - Status: ${status}`
+    );
+    lines.push(
+      `Invoice Date: ${new Date(
+        invoice.invoiceDate
+      ).toLocaleDateString("en-GB")}`
+    );
+    if (invoice.paymentDate) {
+      lines.push(
+        `Payment Date: ${new Date(
+          invoice.paymentDate
+        ).toLocaleDateString("en-GB")}`
+      );
+    }
+    lines.push(`Payment Method: ${invoice.paymentMethod ?? "Unspecified"}`);
+    if (supplier?.name) {
+      lines.push(
+        `Supplier: ${supplier.name}, ${supplier.address ?? ""}, ${
+          supplier.city ?? ""
+        }`
+      );
+      if (supplier.nif) lines.push(`Supplier NIF: ${supplier.nif}`);
+      if (supplier.rc) lines.push(`Supplier RC: ${supplier.rc}`);
+    }
+    if (business?.name) {
+      lines.push(
+        `Buyer: ${business.name}, ${business.address ?? ""}, ${
+          business.city ?? ""
+        }`
+      );
+      if (business.nif) lines.push(`Buyer NIF: ${business.nif}`);
+      if (business.rc) lines.push(`Buyer RC: ${business.rc}`);
+    }
+    invoice.items?.forEach((item, index) => {
+      lines.push(
+        `Line ${index + 1}: ${item.description} | Qty ${item.quantity} | Unit ${
+          item.unitPrice
+        } ${currency} | VAT ${item.vatRate}% | Total ${
+          item.lineTotalTtc
+        } ${currency}`
+      );
+    });
+    lines.push(
+      `Subtotal HT: ${invoice.subtotalHt.toFixed(2)} ${currency}`
+    );
+    lines.push(`VAT Total: ${invoice.vatTotal.toFixed(2)} ${currency}`);
+    lines.push(`Grand Total TTC: ${invoice.totalTtc.toFixed(2)} ${currency}`);
+    if (invoice.description) {
+      lines.push(`Notes: ${invoice.description}`);
+    }
+    return lines.join("\n");
+  }, [invoice, supplier, business, status]);
 
   return (
     <DashboardLayout breadcrumbOverrides={{ [invoice._id]: invoice.invoiceNumber || "Purchase" }}>
@@ -208,6 +266,12 @@ export default function PurchaseDetail() {
           </Button>
         </div>
       </div>
+
+      <InvoiceTranslationPanel
+        content={purchaseSummary}
+        documentTitle={`Purchase Invoice ${invoice.invoiceNumber || ""}`}
+        documentType="purchase"
+      />
 
       {/* Invoice Document */}
       <div className="w-full mx-auto print:w-full print:max-w-none">

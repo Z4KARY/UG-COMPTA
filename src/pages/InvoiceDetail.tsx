@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { numberToWords } from "@/lib/numberToWords";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useMemo } from "react";
+import { InvoiceTranslationPanel } from "@/components/invoice/InvoiceTranslationPanel";
 
 export default function InvoiceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -81,6 +83,75 @@ export default function InvoiceDetail() {
     }
   };
 
+  const invoiceSummary = useMemo(() => {
+    const lines: string[] = [];
+    lines.push(
+      `Invoice #${invoice.invoiceNumber ?? "N/A"} (${invoice.type}) - Status: ${
+        invoice.status
+      }`
+    );
+    lines.push(
+      `Issue Date: ${new Date(
+        invoice.issueDate
+      ).toLocaleDateString("en-GB")} | Due Date: ${new Date(
+        invoice.dueDate
+      ).toLocaleDateString("en-GB")}`
+    );
+    lines.push(`Payment Terms: ${paymentTerms}`);
+    lines.push(`Payment Method: ${invoice.paymentMethod ?? "Unspecified"}`);
+    lines.push(`Currency: ${invoice.currency}`);
+    if (business?.name) {
+      lines.push(
+        `Seller: ${business.name}, ${business.tradeName ?? ""}, ${
+          business.address ?? ""
+        }, ${business.city ?? ""}`
+      );
+      if (business.nif) lines.push(`Seller NIF: ${business.nif}`);
+      if (business.rc) lines.push(`Seller RC: ${business.rc}`);
+      if (business.ai) lines.push(`Seller AI: ${business.ai}`);
+    }
+    if (invoice.customer?.name) {
+      lines.push(
+        `Customer: ${invoice.customer.name}, ${
+          invoice.customer.address ?? ""
+        }, ${invoice.customer.city ?? ""}`
+      );
+      if (invoice.customer.taxId)
+        lines.push(`Customer NIF: ${invoice.customer.taxId}`);
+      if (invoice.customer.rc)
+        lines.push(`Customer RC: ${invoice.customer.rc}`);
+    }
+    invoice.items?.forEach((item, index) => {
+      lines.push(
+        `Item ${index + 1}: ${item.description} | Qty ${item.quantity} | Unit ${
+          item.unitPrice
+        } ${invoice.currency} | TVA ${item.tvaRate}% | Total ${
+          item.lineTotal
+        } ${invoice.currency}`
+      );
+    });
+    lines.push(
+      `Subtotal HT: ${subtotalHt.toFixed(2)} ${invoice.currency}`
+    );
+    if (!isAE) {
+      lines.push(
+        `VAT Total: ${(invoice.totalTva ?? 0).toFixed(2)} ${invoice.currency}`
+      );
+    }
+    if (stampDuty > 0) {
+      lines.push(
+        `Stamp Duty: ${stampDuty.toFixed(2)} ${invoice.currency}`
+      );
+    }
+    lines.push(
+      `Grand Total TTC: ${invoice.totalTtc.toFixed(2)} ${invoice.currency}`
+    );
+    if (invoice.notes) {
+      lines.push(`Notes: ${invoice.notes}`);
+    }
+    return lines.join("\n");
+  }, [invoice, business, subtotalHt, stampDuty, isAE, paymentTerms]);
+
   return (
     <DashboardLayout breadcrumbOverrides={{ [invoice._id]: invoice.invoiceNumber || "Draft" }}>
       <style type="text/css" media="print">
@@ -137,6 +208,12 @@ export default function InvoiceDetail() {
           </Button>
         </div>
       </div>
+
+      <InvoiceTranslationPanel
+        content={invoiceSummary}
+        documentTitle={`Invoice ${invoice.invoiceNumber || ""}`}
+        documentType="sales"
+      />
 
       {/* Invoice Document */}
       <div className="w-full mx-auto print:w-full print:max-w-none">
