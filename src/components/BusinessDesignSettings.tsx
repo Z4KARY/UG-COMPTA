@@ -18,10 +18,11 @@ import {
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { Palette, Upload, Image as ImageIcon, FileSignature, Stamp } from "lucide-react";
+import { Palette, Upload, Image as ImageIcon, FileSignature, Stamp, Wand2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { removeBackground } from "@imgly/background-removal";
 
 interface BusinessDesignSettingsProps {
   businessId: Id<"businesses">;
@@ -52,6 +53,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
   });
   
   const [isUploading, setIsUploading] = useState(false);
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
   const stampInputRef = useRef<HTMLInputElement>(null);
@@ -71,14 +73,32 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
 
     setIsUploading(true);
     try {
+      let fileToUpload = file;
+
+      // Auto-remove background for signature and stamp
+      if (type === "signature" || type === "stamp") {
+        setIsRemovingBg(true);
+        toast.info("Removing background...", { duration: 2000 });
+        try {
+          const blob = await removeBackground(file);
+          fileToUpload = new File([blob], file.name, { type: "image/png" });
+          toast.success("Background removed successfully");
+        } catch (bgError) {
+          console.error("Background removal failed:", bgError);
+          toast.warning("Could not remove background, uploading original image.");
+        } finally {
+          setIsRemovingBg(false);
+        }
+      }
+
       // 1. Get upload URL
       const postUrl = await generateUploadUrl();
       
       // 2. Upload file
       const result = await fetch(postUrl, {
         method: "POST",
-        headers: { "Content-Type": file.type },
-        body: file,
+        headers: { "Content-Type": fileToUpload.type },
+        body: fileToUpload,
       });
       
       if (!result.ok) throw new Error("Upload failed");
@@ -99,6 +119,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
       toast.error(t("settings.design.toast.saveError"));
     } finally {
       setIsUploading(false);
+      setIsRemovingBg(false);
     }
   };
 
@@ -190,10 +211,14 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
                 variant="outline" 
                 size="sm" 
                 onClick={() => signatureInputRef.current?.click()}
-                disabled={isUploading}
+                disabled={isUploading || isRemovingBg}
               >
-                <Upload className="mr-2 h-4 w-4" />
-                {isUploading ? "Uploading..." : "Upload Signature"}
+                {isRemovingBg ? (
+                  <Wand2 className="mr-2 h-4 w-4 animate-pulse" />
+                ) : (
+                  <Upload className="mr-2 h-4 w-4" />
+                )}
+                {isRemovingBg ? "Removing Background..." : isUploading ? "Uploading..." : "Upload Signature"}
               </Button>
               <input
                 type="file"
@@ -203,7 +228,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
                 onChange={(e) => handleUpload(e, "signature")}
               />
               <p className="text-xs text-muted-foreground">
-                Upload a transparent PNG of your signature.
+                Background will be automatically removed.
               </p>
             </div>
           </div>
@@ -229,10 +254,14 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
                 variant="outline" 
                 size="sm" 
                 onClick={() => stampInputRef.current?.click()}
-                disabled={isUploading}
+                disabled={isUploading || isRemovingBg}
               >
-                <Upload className="mr-2 h-4 w-4" />
-                {isUploading ? "Uploading..." : "Upload Stamp"}
+                {isRemovingBg ? (
+                  <Wand2 className="mr-2 h-4 w-4 animate-pulse" />
+                ) : (
+                  <Upload className="mr-2 h-4 w-4" />
+                )}
+                {isRemovingBg ? "Removing Background..." : isUploading ? "Uploading..." : "Upload Stamp"}
               </Button>
               <input
                 type="file"
@@ -242,7 +271,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
                 onChange={(e) => handleUpload(e, "stamp")}
               />
               <p className="text-xs text-muted-foreground">
-                Upload a transparent PNG of your company stamp.
+                Background will be automatically removed.
               </p>
             </div>
           </div>
