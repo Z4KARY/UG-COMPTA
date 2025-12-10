@@ -60,10 +60,10 @@ export function InvoiceTranslationPanel({
         LANGUAGE_OPTIONS.find((lang) => lang.value === targetLanguage)?.label ??
         targetLanguage;
       toast.success(`Translated to ${languageLabel}`);
-    } catch (error) {
-      console.error(error);
-      // Show the actual error message from the backend if available
-      const errorMessage = error instanceof Error ? error.message : "Failed to translate invoice.";
+    } catch (error: any) {
+      console.error("Translation error:", error);
+      // Improved error extraction to handle Convex errors and standard errors
+      const errorMessage = error?.message || (typeof error === 'string' ? error : "Failed to translate invoice.");
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
