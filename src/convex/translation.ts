@@ -25,7 +25,7 @@ export const translateInvoice = action({
       body: JSON.stringify({
         model: "gpt-4o-mini",
         temperature: 0.2,
-        max_tokens: 900,
+        // max_tokens: 900, // Removed max_tokens to avoid potential truncation issues if not needed, or keep it.
         messages: [
           {
             role: "system",
@@ -42,7 +42,20 @@ export const translateInvoice = action({
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Translation failed: ${errorText}`);
+      console.error("OpenAI API Error:", errorText);
+      
+      let errorMessage = `Translation failed (${response.status})`;
+      try {
+          const errorJson = JSON.parse(errorText);
+          if (errorJson.error && errorJson.error.message) {
+              errorMessage = `OpenAI Error: ${errorJson.error.message}`;
+          }
+      } catch (e) {
+          // Use raw text if not JSON
+          errorMessage = `OpenAI Error: ${errorText}`;
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const data = (await response.json()) as {

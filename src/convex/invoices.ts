@@ -156,6 +156,7 @@ export const create = mutation({
       v.literal("credit_note")
     ),
     fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))), // Added
+    language: v.optional(v.string()), // Added language
     issueDate: v.number(),
     dueDate: v.number(),
     currency: v.string(),
@@ -313,6 +314,7 @@ export const create = mutation({
       invoiceNumber: finalInvoiceNumber!,
       type: args.type,
       fiscalType: args.fiscalType, // Added
+      language: args.language || "fr", // Default to French if not specified
       issueDate: args.issueDate,
       dueDate: args.dueDate,
       currency: args.currency,
@@ -379,6 +381,7 @@ export const update = mutation({
       v.literal("credit_note")
     )),
     fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))), // Added
+    language: v.optional(v.string()), // Added language
     issueDate: v.optional(v.number()),
     dueDate: v.optional(v.number()),
     currency: v.optional(v.string()),

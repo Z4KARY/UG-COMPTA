@@ -62,7 +62,9 @@ export function InvoiceTranslationPanel({
       toast.success(`Translated to ${languageLabel}`);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to translate invoice.");
+      // Show the actual error message from the backend if available
+      const errorMessage = error instanceof Error ? error.message : "Failed to translate invoice.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

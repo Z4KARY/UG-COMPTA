@@ -75,6 +75,19 @@ export default function InvoiceCreate() {
 
   const [submitStatus, setSubmitStatus] = useState<"draft" | "issued">("draft");
 
+  const [formData, setFormData] = useState({
+    customerId: "",
+    type: "invoice" as "invoice" | "quote" | "credit_note",
+    fiscalType: "LOCAL" as "LOCAL" | "EXPORT" | "EXEMPT",
+    language: "fr", // Default language
+    issueDate: new Date(),
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // +30 days
+    currency: "DZD",
+    items: [] as any[],
+    notes: "",
+    paymentMethod: "BANK_TRANSFER" as any,
+  });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -210,14 +223,14 @@ export default function InvoiceCreate() {
     try {
       await createInvoice({
         businessId: business._id,
-        customerId: values.customerId as Id<"customers">,
-        invoiceNumber: values.invoiceNumber === "AUTO" || !values.invoiceNumber ? undefined : values.invoiceNumber, // Send undefined if AUTO
-        type: values.type,
-        fiscalType: values.fiscalType as "LOCAL" | "EXPORT" | "EXEMPT" | undefined,
-        issueDate: values.issueDate.getTime(),
-        dueDate: values.dueDate.getTime(),
-        currency: values.currency || "DZD",
-        status: submitStatus,
+        customerId: formData.customerId as Id<"customers">,
+        type: formData.type,
+        fiscalType: formData.fiscalType,
+        language: formData.language,
+        issueDate: formData.issueDate.getTime(),
+        dueDate: formData.dueDate.getTime(),
+        currency: formData.currency,
+        status: submitStatus === "draft" ? "draft" : "issued",
         notes: values.notes || "",
         paymentMethod: values.paymentMethod,
         subtotalHt,
@@ -259,7 +272,24 @@ export default function InvoiceCreate() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-            <InvoiceFormDetails />
+            <InvoiceFormDetails
+              issueDate={formData.issueDate}
+              dueDate={formData.dueDate}
+              currency={formData.currency}
+              language={formData.language}
+              onIssueDateChange={(date) =>
+                setFormData({ ...formData, issueDate: date || new Date() })
+              }
+              onDueDateChange={(date) =>
+                setFormData({ ...formData, dueDate: date || new Date() })
+              }
+              onCurrencyChange={(currency) =>
+                setFormData({ ...formData, currency })
+              }
+              onLanguageChange={(language) =>
+                setFormData({ ...formData, language })
+              }
+            />
 
             <InvoiceFormCustomer 
               customers={customers || []} 

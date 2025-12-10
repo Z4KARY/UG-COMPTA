@@ -207,6 +207,7 @@ const schema = defineSchema(
         v.literal("credit_note")
       ),
       fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))), // Added for G50
+      language: v.optional(v.string()), // Added language preference
       issueDate: v.number(), // timestamp
       dueDate: v.number(), // timestamp
       currency: v.string(),

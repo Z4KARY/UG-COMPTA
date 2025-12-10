@@ -1,170 +1,134 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useFormContext } from "react-hook-form";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export function InvoiceFormDetails() {
-  const form = useFormContext();
+interface InvoiceFormDetailsProps {
+  issueDate: Date;
+  dueDate: Date;
+  currency: string;
+  language?: string;
+  onIssueDateChange: (date: Date | undefined) => void;
+  onDueDateChange: (date: Date | undefined) => void;
+  onCurrencyChange: (currency: string) => void;
+  onLanguageChange?: (language: string) => void;
+}
 
+export function InvoiceFormDetails({
+  issueDate,
+  dueDate,
+  currency,
+  language = "fr",
+  onIssueDateChange,
+  onDueDateChange,
+  onCurrencyChange,
+  onLanguageChange,
+}: InvoiceFormDetailsProps) {
   return (
-    <Card className="md:col-span-2">
+    <Card>
       <CardHeader>
         <CardTitle>Invoice Details</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-6 md:grid-cols-2">
-        <FormField
-          control={form.control}
-          name="invoiceNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Invoice Number</FormLabel>
-              <FormControl>
-                <div className="flex gap-2">
-                  <Input {...field} placeholder="Leave as AUTO for automatic generation" />
-                </div>
-              </FormControl>
-              <FormDescription>
-                Set to "AUTO" to automatically generate the next number (e.g. INV-2024-001).
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="issueDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Issue Date</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                  onChange={(e) => field.onChange(new Date(e.target.value))}
-                />
-              </FormControl>
-              <FormDescription>
-                The date when the invoice is issued.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Due Date</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                  onChange={(e) => field.onChange(new Date(e.target.value))}
-                />
-              </FormControl>
-              <FormDescription>
-                The date by which the invoice must be paid.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Type</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="invoice">Invoice (Facture)</SelectItem>
-                  <SelectItem value="quote">Quote (Pro-forma/Devis)</SelectItem>
-                  <SelectItem value="credit_note">Credit Note (Avoir)</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                The type of document being created.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="fiscalType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fiscal Type</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="LOCAL">Local (TVA 19%)</SelectItem>
-                  <SelectItem value="EXPORT">Export (No TVA)</SelectItem>
-                  <SelectItem value="EXEMPT">Exempt (No TVA)</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                The fiscal regime for this invoice.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="currency"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Currency</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="DZD">Algerian Dinar (DZD)</SelectItem>
-                  <SelectItem value="USD">US Dollar (USD)</SelectItem>
-                  <SelectItem value="EUR">Euro (EUR)</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                The currency in which the invoice is issued.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="paymentMethod"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Payment Method</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CASH">Cash (Espèces)</SelectItem>
-                  <SelectItem value="BANK_TRANSFER">Bank Transfer (Virement)</SelectItem>
-                  <SelectItem value="CHEQUE">Cheque</SelectItem>
-                  <SelectItem value="CARD">Card (CIB/Edahabia)</SelectItem>
-                  <SelectItem value="OTHER">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                The method by which the customer will pay.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-2">
+          <Label>Issue Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !issueDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {issueDate ? format(issueDate, "PPP") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={issueDate}
+                onSelect={onIssueDateChange}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Due Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !dueDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={dueDate}
+                onSelect={onDueDateChange}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Currency</Label>
+          <Select value={currency} onValueChange={onCurrencyChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="DZD">Algerian Dinar (DZD)</SelectItem>
+              <SelectItem value="EUR">Euro (EUR)</SelectItem>
+              <SelectItem value="USD">US Dollar (USD)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Document Language</Label>
+          <Select value={language} onValueChange={onLanguageChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fr">Français</SelectItem>
+              <SelectItem value="ar">العربية</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardContent>
     </Card>
   );
