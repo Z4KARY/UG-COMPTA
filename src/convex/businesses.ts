@@ -51,6 +51,20 @@ export const getMyBusiness = query({
         }
     }
 
+    if (business && business.signatureStorageId) {
+        const url = await ctx.storage.getUrl(business.signatureStorageId);
+        if (url) {
+            business = { ...business, signatureUrl: url };
+        }
+    }
+
+    if (business && business.stampStorageId) {
+        const url = await ctx.storage.getUrl(business.stampStorageId);
+        if (url) {
+            business = { ...business, stampUrl: url };
+        }
+    }
+
     if (business) {
         // Inject Tax Configuration
         const taxConfig = configureTaxModules(business);
@@ -118,6 +132,10 @@ export const create = mutation({
     capital: v.optional(v.number()),
     logoUrl: v.optional(v.string()),
     logoStorageId: v.optional(v.id("_storage")),
+    signatureUrl: v.optional(v.string()),
+    signatureStorageId: v.optional(v.id("_storage")),
+    stampUrl: v.optional(v.string()),
+    stampStorageId: v.optional(v.id("_storage")),
     primaryColor: v.optional(v.string()),
     secondaryColor: v.optional(v.string()),
     font: v.optional(v.string()),

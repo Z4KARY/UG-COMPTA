@@ -20,6 +20,8 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
     ? `"${font}", Inter, sans-serif`
     : `${font}, Inter, sans-serif`;
   const logoUrl = business?.logoUrl;
+  const signatureUrl = business?.signatureUrl;
+  const stampUrl = business?.stampUrl;
 
   const isAE = business?.type === "auto_entrepreneur";
   const stampDuty = invoice?.stampDutyAmount ?? (invoice?.timbre ? 10 : 0);
@@ -223,6 +225,38 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             <p className={`text-gray-900 font-medium italic ${isRTL ? "border-r-4 pr-4" : "border-l-4 pl-4"} py-1`} style={{ borderColor: primaryColor }}>
               "{numberToWords(invoice.totalTtc, lang)}"
             </p>
+          </div>
+
+          {/* Signature & Stamp Section */}
+          <div className="flex justify-end mb-12 print:break-inside-avoid">
+            <div className="w-64 text-center relative">
+              <p className="text-sm font-semibold text-gray-900 mb-4">{labels.signature}</p>
+              
+              <div className="h-32 w-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
+                {/* Stamp Layer */}
+                {stampUrl && (
+                  <img 
+                    src={stampUrl} 
+                    alt="Stamp" 
+                    className="absolute right-4 top-2 w-24 h-24 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                  />
+                )}
+                
+                {/* Signature Layer */}
+                {signatureUrl && (
+                  <img 
+                    src={signatureUrl} 
+                    alt="Signature" 
+                    className="absolute inset-0 w-full h-full object-contain p-2 z-10" 
+                  />
+                )}
+                
+                {/* Placeholder if neither exists */}
+                {!stampUrl && !signatureUrl && (
+                  <span className="text-xs text-gray-300">Cachet et Signature</span>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Footer */}

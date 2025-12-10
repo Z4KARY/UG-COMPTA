@@ -50,6 +50,12 @@ const schema = defineSchema(
       logoUrl: v.optional(v.string()),
       logoStorageId: v.optional(v.id("_storage")), // Added for uploaded logos
       
+      // Digital Stamp & Signature
+      signatureUrl: v.optional(v.string()),
+      signatureStorageId: v.optional(v.id("_storage")),
+      stampUrl: v.optional(v.string()),
+      stampStorageId: v.optional(v.id("_storage")),
+      
       // Invoice Design Preferences
       primaryColor: v.optional(v.string()), // Hex code
       secondaryColor: v.optional(v.string()), // Hex code

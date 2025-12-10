@@ -18,7 +18,7 @@ import {
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { Palette, Upload, Image as ImageIcon } from "lucide-react";
+import { Palette, Upload, Image as ImageIcon, FileSignature, Stamp } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -32,6 +32,10 @@ interface BusinessDesignSettingsProps {
     template?: string;
     logoUrl?: string;
     logoStorageId?: Id<"_storage">;
+    signatureUrl?: string;
+    signatureStorageId?: Id<"_storage">;
+    stampUrl?: string;
+    stampStorageId?: Id<"_storage">;
   };
 }
 
@@ -49,6 +53,8 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
   
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const signatureInputRef = useRef<HTMLInputElement>(null);
+  const stampInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -59,7 +65,7 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "signature" | "stamp") => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -80,15 +86,17 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
       const { storageId } = await result.json();
       
       // 3. Update business with storage ID
+      const updateField = type === "logo" ? "logoStorageId" : type === "signature" ? "signatureStorageId" : "stampStorageId";
+      
       await updateBusiness({
         id: businessId,
-        logoStorageId: storageId,
+        [updateField]: storageId,
       });
       
-      toast.success(t("settings.design.toast.logoSuccess"));
+      toast.success(t("settings.design.toast.saveSuccess"));
     } catch (error) {
       console.error(error);
-      toast.error(t("settings.design.toast.logoError"));
+      toast.error(t("settings.design.toast.saveError"));
     } finally {
       setIsUploading(false);
     }
@@ -153,10 +161,88 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
                 ref={fileInputRef}
                 className="hidden"
                 accept="image/*"
-                onChange={handleLogoUpload}
+                onChange={(e) => handleUpload(e, "logo")}
               />
               <p className="text-xs text-muted-foreground">
                 {t("settings.design.recommended")}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Signature Section */}
+        <div className="space-y-4">
+          <Label>Digital Signature</Label>
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-40 rounded-lg border border-dashed flex items-center justify-center bg-muted/50 overflow-hidden relative">
+              {initialData.signatureUrl ? (
+                <img 
+                  src={initialData.signatureUrl} 
+                  alt="Signature" 
+                  className="h-full w-full object-contain" 
+                />
+              ) : (
+                <FileSignature className="h-8 w-8 text-muted-foreground" />
+              )}
+            </div>
+            <div className="space-y-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => signatureInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                {isUploading ? "Uploading..." : "Upload Signature"}
+              </Button>
+              <input
+                type="file"
+                ref={signatureInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => handleUpload(e, "signature")}
+              />
+              <p className="text-xs text-muted-foreground">
+                Upload a transparent PNG of your signature.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stamp Section */}
+        <div className="space-y-4">
+          <Label>Digital Stamp (Cachet)</Label>
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-20 rounded-lg border border-dashed flex items-center justify-center bg-muted/50 overflow-hidden relative">
+              {initialData.stampUrl ? (
+                <img 
+                  src={initialData.stampUrl} 
+                  alt="Stamp" 
+                  className="h-full w-full object-contain" 
+                />
+              ) : (
+                <Stamp className="h-8 w-8 text-muted-foreground" />
+              )}
+            </div>
+            <div className="space-y-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => stampInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                {isUploading ? "Uploading..." : "Upload Stamp"}
+              </Button>
+              <input
+                type="file"
+                ref={stampInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => handleUpload(e, "stamp")}
+              />
+              <p className="text-xs text-muted-foreground">
+                Upload a transparent PNG of your company stamp.
               </p>
             </div>
           </div>

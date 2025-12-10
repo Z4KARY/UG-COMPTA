@@ -29,6 +29,7 @@ export const INVOICE_LABELS = {
     sellerCapital: "Capital",
     tel: "Tel",
     email: "Email",
+    signature: "Signature",
   },
   fr: {
     invoice: "FACTURE",
@@ -60,6 +61,7 @@ export const INVOICE_LABELS = {
     sellerCapital: "Capital",
     tel: "Tél",
     email: "Email",
+    signature: "Signature",
   },
   ar: {
     invoice: "فاتورة",
@@ -91,6 +93,7 @@ export const INVOICE_LABELS = {
     sellerCapital: "رأس المال",
     tel: "هاتف",
     email: "بريد إلكتروني",
+    signature: "التوقيع",
   }
 } as const;
 
