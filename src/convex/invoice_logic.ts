@@ -46,8 +46,8 @@ export async function generateInvoiceNumber(
   return `${prefix}${year}-${paddedNumber}`;
 }
 
-export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: string) {
-    const business = await ctx.db.get(args.businessId);
+export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: Id<"users">) {
+    const business = await ctx.db.get(args.businessId as Id<"businesses">);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     // Generate Invoice Number if not provided
@@ -197,8 +197,8 @@ export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: st
     return invoiceId;
 }
 
-export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: string) {
-    const invoice = await ctx.db.get(args.id);
+export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id<"users">) {
+    const invoice = await ctx.db.get(args.id as Id<"invoices">);
     if (!invoice) throw new Error("Not found");
 
     const business = await ctx.db.get(invoice.businessId);
@@ -282,7 +282,7 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: st
     });
 }
 
-export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: string) {
+export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: Id<"users">) {
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
@@ -322,7 +322,7 @@ export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoi
     });
 }
 
-export async function updateInvoiceStatusLogic(ctx: MutationCtx, args: { id: Id<"invoices">, status: string }, userId: string) {
+export async function updateInvoiceStatusLogic(ctx: MutationCtx, args: { id: Id<"invoices">, status: string }, userId: Id<"users">) {
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
@@ -342,7 +342,7 @@ export async function updateInvoiceStatusLogic(ctx: MutationCtx, args: { id: Id<
     });
 }
 
-export async function issueInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices">, pdfHash?: string }, userId: string) {
+export async function issueInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices">, pdfHash?: string }, userId: Id<"users">) {
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
@@ -403,8 +403,8 @@ export async function issueInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoic
     });
 }
 
-export async function markInvoiceAsPaidLogic(ctx: MutationCtx, args: any, userId: string) {
-    const invoice = await ctx.db.get(args.id);
+export async function markInvoiceAsPaidLogic(ctx: MutationCtx, args: any, userId: Id<"users">) {
+    const invoice = await ctx.db.get(args.id as Id<"invoices">);
     if (!invoice) throw new Error("Not found");
 
     const business = await ctx.db.get(invoice.businessId);
@@ -465,7 +465,7 @@ export async function markInvoiceAsPaidLogic(ctx: MutationCtx, args: any, userId
     });
 }
 
-export async function markInvoiceAsUnpaidLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: string) {
+export async function markInvoiceAsUnpaidLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: Id<"users">) {
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
@@ -524,8 +524,8 @@ export async function markInvoiceAsUnpaidLogic(ctx: MutationCtx, args: { id: Id<
     });
 }
 
-export async function addInvoicePaymentLogic(ctx: MutationCtx, args: any, userId: string) {
-    const invoice = await ctx.db.get(args.id);
+export async function addInvoicePaymentLogic(ctx: MutationCtx, args: any, userId: Id<"users">) {
+    const invoice = await ctx.db.get(args.id as Id<"invoices">);
     if (!invoice) throw new Error("Not found");
 
     const business = await ctx.db.get(invoice.businessId);

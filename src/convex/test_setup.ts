@@ -19,7 +19,6 @@ export const createTestCustomer = mutation({
         address: "123 Test St",
         taxId: "000000000000000000",
         rc: "00/00-0000000",
-        nif: "000000000000000000",
         ai: "00000000000",
     });
   }
