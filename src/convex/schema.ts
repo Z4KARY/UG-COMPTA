@@ -504,6 +504,15 @@ const schema = defineSchema(
       isActive: v.boolean(),
     }).index("by_business", ["businessId"]),
 
+    contactRequests: defineTable({
+      name: v.string(),
+      email: v.string(),
+      companyName: v.optional(v.string()),
+      message: v.optional(v.string()),
+      status: v.union(v.literal("new"), v.literal("contacted"), v.literal("closed")),
+      submittedAt: v.number(),
+    }).index("by_status", ["status"]),
+
     subscriptions: defineTable({
       businessId: v.id("businesses"),
       planId: v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise")),

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ContactSalesDialog } from "@/components/ContactSalesDialog";
 
 const localizedPricing = {
   en: [
@@ -98,6 +99,27 @@ const localizedPricing = {
       userCount: "10 Users",
       storage: "4 GB Storage",
       cta: "Start Free Trial",
+      popular: false,
+    },
+    {
+      id: "enterprise",
+      name: "Enterprise",
+      description: "For large organizations with specific needs.",
+      price: "Custom",
+      originalPrice: undefined,
+      period: "/year",
+      billingNote: "Custom billing",
+      features: [
+        "Unlimited Users",
+        "Unlimited Storage",
+        "Custom Integrations",
+        "Dedicated Support",
+        "SLA",
+        "On-premise Option",
+      ],
+      userCount: "Unlimited Users",
+      storage: "Unlimited Storage",
+      cta: "Contact Sales",
       popular: false,
     },
   ],
@@ -194,6 +216,27 @@ const localizedPricing = {
       cta: "Essai gratuit",
       popular: false,
     },
+    {
+      id: "enterprise",
+      name: "Entreprise",
+      description: "Pour les grandes organisations avec des besoins spécifiques.",
+      price: "Sur mesure",
+      originalPrice: undefined,
+      period: "/an",
+      billingNote: "Facturation personnalisée",
+      features: [
+        "Utilisateurs illimités",
+        "Stockage illimité",
+        "Intégrations personnalisées",
+        "Support dédié",
+        "SLA",
+        "Option sur site",
+      ],
+      userCount: "Utilisateurs illimités",
+      storage: "Stockage illimité",
+      cta: "Contacter les ventes",
+      popular: false,
+    },
   ],
   ar: [
     {
@@ -288,6 +331,27 @@ const localizedPricing = {
       cta: "احصل على بريميوم",
       popular: false,
     },
+    {
+      id: "enterprise",
+      name: "مؤسسة",
+      description: "للمؤسسات الكبيرة ذات الاحتياجات الخاصة.",
+      price: "حسب الطلب",
+      originalPrice: undefined,
+      period: "/سنة",
+      billingNote: "فوترة مخصصة",
+      features: [
+        "مستخدمين غير محدودين",
+        "تخزين غير محدود",
+        "تكاملات مخصصة",
+        "دعم مخصص",
+        "اتفاقية مستوى الخدمة",
+        "خيار محلي",
+      ],
+      userCount: "مستخدمين غير محدودين",
+      storage: "تخزين غير محدود",
+      cta: "اتصل بالمبيعات",
+      popular: false,
+    },
   ],
 } as const;
 
@@ -362,17 +426,25 @@ export function LandingPricing({ fromDashboard = false }: LandingPricingProps) {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" variant={plan.popular ? "default" : "outline"} asChild>
-                    {fromDashboard ? (
-                      <Link to="/settings?tab=subscription">
-                        {t("settings.subscription.upgrade")}
-                      </Link>
-                    ) : (
-                      <Link to={`/auth?plan=${plan.id}`}>
+                  {plan.id === "enterprise" ? (
+                    <ContactSalesDialog planName={plan.name}>
+                      <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
                         {plan.cta}
-                      </Link>
-                    )}
-                  </Button>
+                      </Button>
+                    </ContactSalesDialog>
+                  ) : (
+                    <Button className="w-full" variant={plan.popular ? "default" : "outline"} asChild>
+                      {fromDashboard ? (
+                        <Link to="/settings?tab=subscription">
+                          {t("settings.subscription.upgrade")}
+                        </Link>
+                      ) : (
+                        <Link to={`/auth?plan=${plan.id}`}>
+                          {plan.cta}
+                        </Link>
+                      )}
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             </motion.div>
