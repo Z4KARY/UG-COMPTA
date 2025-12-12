@@ -41,6 +41,14 @@ export const listUsers = query({
   },
 });
 
+export const listContactRequests = query({
+  args: {},
+  handler: async (ctx) => {
+    await checkAdmin(ctx);
+    return await ctx.db.query("contactRequests").order("desc").take(100);
+  },
+});
+
 export const toggleBusinessSuspension = mutation({
   args: { id: v.id("businesses"), suspend: v.boolean() },
   handler: async (ctx, args) => {
@@ -57,6 +65,17 @@ export const toggleUserSuspension = mutation({
   handler: async (ctx, args) => {
     const admin = await checkAdmin(ctx);
     await ctx.db.patch(args.id, { isSuspended: args.suspend });
+  },
+});
+
+export const updateContactRequestStatus = mutation({
+  args: { 
+    id: v.id("contactRequests"), 
+    status: v.union(v.literal("new"), v.literal("contacted"), v.literal("closed")) 
+  },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    await ctx.db.patch(args.id, { status: args.status });
   },
 });
 
