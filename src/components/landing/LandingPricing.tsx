@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const localizedPricing = {
   en: [
     {
+      id: "free",
       name: "Auto-Entrepreneur",
       description: "Perfect for freelancers and consultants.",
       price: "12,000 DZD",
@@ -31,6 +32,7 @@ const localizedPricing = {
       popular: false,
     },
     {
+      id: "pro",
       name: "Small Business",
       description: "For growing businesses needing VAT workflows.",
       price: "39,000 DZD",
@@ -53,6 +55,7 @@ const localizedPricing = {
       popular: true,
     },
     {
+      id: "enterprise",
       name: "Enterprise",
       description: "For large organizations with specific needs.",
       price: "Custom",
@@ -77,6 +80,7 @@ const localizedPricing = {
   ],
   fr: [
     {
+      id: "free",
       name: "Auto-Entrepreneur",
       description: "Parfait pour les freelances et consultants.",
       price: "12 000 DZD",
@@ -99,6 +103,7 @@ const localizedPricing = {
       popular: false,
     },
     {
+      id: "pro",
       name: "Small Business",
       description: "Pour les entreprises en croissance nécessitant la TVA.",
       price: "39 000 DZD",
@@ -121,6 +126,7 @@ const localizedPricing = {
       popular: true,
     },
     {
+      id: "enterprise",
       name: "Enterprise",
       description: "Pour les grandes organisations aux besoins spécifiques.",
       price: "Sur mesure",
@@ -145,6 +151,7 @@ const localizedPricing = {
   ],
   ar: [
     {
+      id: "free",
       name: "مقاول ذاتي",
       description: "مثالي لأصحاب الأعمال الحرة والاستشاريين.",
       price: "12٬000 دج",
@@ -167,6 +174,7 @@ const localizedPricing = {
       popular: false,
     },
     {
+      id: "pro",
       name: "Small Business",
       description: "للشركات المتنامية التي تحتاج إلى إدارة ضريبة القيمة المضافة.",
       price: "39٬000 دج",
@@ -189,6 +197,7 @@ const localizedPricing = {
       popular: true,
     },
     {
+      id: "enterprise",
       name: "Enterprise",
       description: "للمؤسسات الكبيرة ذات الاحتياجات الخاصة.",
       price: "حسب الطلب",
@@ -292,7 +301,9 @@ export function LandingPricing({ fromDashboard = false }: LandingPricingProps) {
                           : t("settings.subscription.upgrade")}
                       </Link>
                     ) : (
-                      <Link to="/auth">{plan.cta}</Link>
+                      <Link to={`/auth?plan=${plan.id}`}>
+                        {plan.cta}
+                      </Link>
                     )}
                   </Button>
                 </CardFooter>

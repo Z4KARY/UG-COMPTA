@@ -17,7 +17,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, Mail, UserX } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AuthProps {
@@ -28,6 +28,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const { t } = useLanguage();
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,10 +36,20 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      const redirect = redirectAfterAuth || "/";
+      // Check for plan param
+      const params = new URLSearchParams(location.search);
+      const plan = params.get("plan");
+      
+      let redirect = redirectAfterAuth || "/";
+      
+      // If plan is present, override redirect to onboarding
+      if (plan) {
+        redirect = `/onboarding?plan=${plan}`;
+      }
+      
       navigate(redirect);
     }
-  }, [authLoading, isAuthenticated, navigate, redirectAfterAuth]);
+  }, [authLoading, isAuthenticated, navigate, redirectAfterAuth, location.search]);
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -88,7 +99,16 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       console.log("Attempting anonymous sign in...");
       await signIn("anonymous");
       console.log("Anonymous sign in successful");
-      const redirect = redirectAfterAuth || "/";
+      
+      // Check for plan param
+      const params = new URLSearchParams(location.search);
+      const plan = params.get("plan");
+      
+      let redirect = redirectAfterAuth || "/";
+      if (plan) {
+        redirect = `/onboarding?plan=${plan}`;
+      }
+      
       navigate(redirect);
     } catch (error) {
       console.error("Guest login error:", error);

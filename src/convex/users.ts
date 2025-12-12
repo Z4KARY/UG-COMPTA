@@ -20,6 +20,20 @@ export const currentUser = query({
   },
 });
 
+export const update = mutation({
+  args: {
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    image: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) throw new Error("Unauthenticated");
+    
+    await ctx.db.patch(user._id, args);
+  },
+});
+
 export const updateRole = mutation({
   args: { role: v.union(v.literal("NORMAL"), v.literal("ACCOUNTANT"), v.literal("ADMIN")) },
   handler: async (ctx, args) => {

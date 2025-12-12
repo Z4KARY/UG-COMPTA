@@ -1,26 +1,152 @@
-const localizedPricing = {
-  en: [
-    {
-      name: "Auto entrepreneur",
-      description: "Perfect for freelancers and consultants.",
-      price: "12,000 DZD",
-      originalPrice: "24,000 DZD",
-      period: "/year",
-      billingNote: "Billed annually",
-      features: [
-        "Billing automation",
-        "Transactions",
-        "Role management",
-        "Digital stamp & signature",
-        "Quote conversion",
-        "Expense management",
-        "Email sending",
-        "Online support",
-      ],
-      userCount: "1 user",
-      storage: "1 GB storage",
-      cta: "Start free",
-      popular: false,
-    },
-  ],
-};
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { ArrowRight, Loader2, Mail, UserX } from "lucide-react";
+import { Suspense, useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+interface AuthProps {
+  redirectAfterAuth?: string;
+}
+
+function Auth({ redirectAfterAuth }: AuthProps = {}) {
+  const { t } = useLanguage();
+  const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
+  const [otp, setOtp] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      const params = new URLSearchParams(location.search);
+      const plan = params.get("plan");
+      
+      let redirect = redirectAfterAuth || "/";
+      
+      if (plan) {
+        redirect = `/onboarding?plan=${plan}`;
+      }
+      
+      navigate(redirect);
+    }
+  }, [authLoading, isAuthenticated, navigate, redirectAfterAuth, location.search]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [authLoading, user, navigate]);
+
+  const handleGuestLogin = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      console.log("Attempting anonymous sign in...");
+      await signIn("anonymous");
+      console.log("Anonymous sign in successful");
+      
+      const params = new URLSearchParams(location.search);
+      const plan = params.get("plan");
+      let redirect = redirectAfterAuth || "/";
+      if (plan) {
+        redirect = `/onboarding?plan=${plan}`;
+      }
+      navigate(redirect);
+    } catch (error) {
+      console.error("Error during guest login:", error);
+      setError("Failed to sign in as guest. Please try again.");
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">{t("auth.title")}</h1>
+          <p className="mt-2 text-gray-600">{t("auth.subtitle")}</p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Button 
+                onClick={() => setStep("signIn")}
+                variant={step === "signIn" ? "default" : "outline"}
+                className="flex-1"
+              >
+                {t("auth.signIn")}
+              </Button>
+              <Button 
+                onClick={() => setStep({ email: "" })}
+                variant={step === { email: "" } ? "default" : "outline"}
+                className="flex-1"
+              >
+                {t("auth.signUp")}
+              </Button>
+            </div>
+          </div>
+
+          {step === "signIn" && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  {t("auth.email")}
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t("auth.emailPlaceholder")}
+                />
+              </div>
+              <Button 
+                onClick={handleGuestLogin}
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
+                {t("auth.guestLogin")}
+              </Button>
+            </div>
+          )}
+
+          {step === { email: "" } && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  {t("auth.email")}
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t("auth.emailPlaceholder")}
+                />
+              </div>
+              <Button 
+                onClick={handleGuestLogin}
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
+                {t("auth.guestLogin")}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {error && (
+          <div className="text-red-600 text-sm text-center">
+            {error}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default Auth;
