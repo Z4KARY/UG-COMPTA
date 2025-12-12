@@ -17,14 +17,11 @@ import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { useAction } from "convex/react";
-import { api } from "@/convex/_generated/api";
 
 export default function AdminAuth() {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
-  const verifyPassword = useAction(api.adminActions.verifyAdminPassword);
   const navigate = useNavigate();
-  const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
+  const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,45 +32,32 @@ export default function AdminAuth() {
     }
   }, [authLoading, isAuthenticated, navigate]);
 
-  const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
-    try {
-      const formData = new FormData(event.currentTarget);
-      const password = formData.get("password") as string;
-      
-      // Verify password first
-      const isValid = await verifyPassword({ password });
-      if (!isValid) {
-        setError("Invalid admin password");
+
+    if (otp.length !== 6) {
+        setError("Please enter a valid 6-digit code");
         setIsLoading(false);
         return;
-      }
-
-      await signIn("email-otp", formData);
-      setStep({ email: formData.get("email") as string });
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Email sign-in error:", error);
-      setError("Failed to send verification code");
-      setIsLoading(false);
     }
-  };
 
-  const handleOtpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setError(null);
     try {
-      const formData = new FormData(event.currentTarget);
-      await signIn("email-otp", formData);
-      navigate("/admin");
+      // Combine password and OTP for the custom provider
+      const combinedCredential = `${password}|${otp}`;
+      
+      await signIn("admin-password", { 
+        password: combinedCredential,
+        flow: "signIn" 
+      });
+      
+      // If successful, the useEffect will redirect
     } catch (error) {
-      console.error("OTP verification error:", error);
-      setError("Incorrect code");
+      console.error("Sign-in error:", error);
+      setError("Invalid password or verification code");
       setIsLoading(false);
-      setOtp("");
+      setOtp(""); // Clear OTP on failure
     }
   };
 
@@ -86,104 +70,61 @@ export default function AdminAuth() {
           </div>
           <CardTitle className="text-2xl font-bold text-destructive">Admin Portal</CardTitle>
           <CardDescription>
-            Restricted access. Please sign in to continue.
+            Enter your admin password and authenticator code.
           </CardDescription>
         </CardHeader>
-        {step === "signIn" ? (
-          <form onSubmit={handleEmailSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Input
-                  name="email"
-                  placeholder="admin@example.com"
-                  type="email"
-                  disabled={isLoading}
-                  required
-                  className="text-center"
-                />
-                <Input
-                  name="password"
-                  placeholder="Admin Password"
-                  type="password"
-                  disabled={isLoading}
-                  required
-                  className="text-center"
-                />
-              </div>
-              {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
-              )}
-            </CardContent>
-            <CardFooter>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                variant="destructive"
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Admin Password</label>
+              <Input
+                name="password"
+                placeholder="Enter admin password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2 flex flex-col items-center">
+              <label className="text-sm font-medium w-full text-left">Authenticator Code</label>
+              <InputOTP
+                value={otp}
+                onChange={setOtp}
+                maxLength={6}
                 disabled={isLoading}
               >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    Sign In <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </CardFooter>
-          </form>
-        ) : (
-          <form onSubmit={handleOtpSubmit}>
-            <CardContent className="space-y-4">
-              <input type="hidden" name="email" value={step.email} />
-              <input type="hidden" name="code" value={otp} />
-              
-              <div className="text-center text-sm text-muted-foreground mb-4">
-                Code sent to <span className="font-medium text-foreground">{step.email}</span>
-              </div>
+                <InputOTPGroup>
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <InputOTPSlot key={index} index={index} />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
 
-              <div className="flex justify-center">
-                <InputOTP
-                  value={otp}
-                  onChange={setOtp}
-                  maxLength={6}
-                  disabled={isLoading}
-                >
-                  <InputOTPGroup>
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <InputOTPSlot key={index} index={index} />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
-              {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
+            {error && (
+              <p className="text-sm text-destructive text-center font-medium">{error}</p>
+            )}
+          </CardContent>
+          <CardFooter>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              variant="destructive"
+              disabled={isLoading || !password || otp.length !== 6}
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  Verify & Sign In <ArrowRight className="ml-2 h-4 w-4" />
+                </>
               )}
-            </CardContent>
-            <CardFooter className="flex-col gap-2">
-              <Button
-                type="submit"
-                className="w-full"
-                variant="destructive"
-                disabled={isLoading || otp.length !== 6}
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Verify Access"
-                )}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setStep("signIn")}
-                disabled={isLoading}
-                className="w-full"
-              >
-                Back to Email
-              </Button>
-            </CardFooter>
-          </form>
-        )}
+            </Button>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );

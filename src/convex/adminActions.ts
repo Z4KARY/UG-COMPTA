@@ -2,6 +2,7 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { createHash } from "crypto";
+import { authenticator } from "otplib";
 
 export const verifyAdminPassword = action({
   args: { password: v.string() },
@@ -31,5 +32,13 @@ export const generateAdminPasswordHash = action({
   args: { password: v.string() },
   handler: async (ctx, args) => {
     return createHash("sha256").update(args.password).digest("hex");
+  },
+});
+
+export const generateTotpSecret = action({
+  args: {},
+  handler: async () => {
+    const secret = authenticator.generateSecret();
+    return secret;
   },
 });
