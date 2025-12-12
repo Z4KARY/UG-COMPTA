@@ -37,6 +37,8 @@ import type * as reports from "../reports.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as suppliers from "../suppliers.js";
 import type * as taxEngine from "../taxEngine.js";
+import type * as test_flow from "../test_flow.js";
+import type * as test_setup from "../test_setup.js";
 import type * as translation from "../translation.js";
 import type * as users from "../users.js";
 import type * as webhookActions from "../webhookActions.js";
@@ -78,6 +80,8 @@ declare const fullApi: ApiFromModules<{
   subscriptions: typeof subscriptions;
   suppliers: typeof suppliers;
   taxEngine: typeof taxEngine;
+  test_flow: typeof test_flow;
+  test_setup: typeof test_setup;
   translation: typeof translation;
   users: typeof users;
   webhookActions: typeof webhookActions;
