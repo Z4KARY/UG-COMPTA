@@ -56,6 +56,10 @@ export function ContactSalesDialog({ children, planName }: ContactSalesDialogPro
           <DialogTitle>Contact Sales</DialogTitle>
           <DialogDescription>
             Fill out the form below and our team will get back to you within 24 hours.
+            <br />
+            <span className="mt-2 block text-xs text-muted-foreground">
+              Or email us directly at <a href="mailto:contact@upgrowth.dz" className="text-primary hover:underline">contact@upgrowth.dz</a>
+            </span>
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
