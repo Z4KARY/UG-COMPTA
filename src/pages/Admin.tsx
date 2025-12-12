@@ -25,10 +25,12 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Admin() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   // We need to check if user is admin. 
   // Since we don't have a direct hook for role in context, we rely on the query failing or returning null if not authorized,
   // but ideally we check the user object.
@@ -45,11 +47,16 @@ export default function Admin() {
   const updateContactStatus = useMutation(api.admin.updateContactRequestStatus);
 
   useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+        navigate("/admin/auth");
+        return;
+    }
+
     if (user && user.role !== "admin") {
         toast.error(t("admin.toast.accessDenied") || "Access Denied: Admins only");
         navigate("/dashboard");
     }
-  }, [user, navigate, t]);
+  }, [user, navigate, t, authLoading, isAuthenticated]);
 
   if (!user || user.role !== "admin") {
       return (

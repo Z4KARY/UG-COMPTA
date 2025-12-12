@@ -27,6 +27,7 @@ import PurchaseDetail from "@/pages/PurchaseDetail.tsx";
 import Suppliers from "@/pages/Suppliers.tsx";
 import NotFound from "@/pages/NotFound.tsx";
 import Onboarding from "@/pages/Onboarding.tsx";
+import AdminAuth from "@/pages/AdminAuth.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -63,6 +64,7 @@ createRoot(document.getElementById("root")!).render(
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
+              <Route path="/admin/auth" element={<AdminAuth />} />
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/settings" element={<BusinessSettings />} />
