@@ -240,7 +240,7 @@ export default function InvoiceCreate() {
         totalTtc,
         items: items.map(item => ({
             ...item,
-            productId: item.productId as Id<"products"> | undefined,
+            productId: (item.productId && item.productId !== "") ? item.productId as Id<"products"> : undefined,
             lineTotalHt: item.lineTotal,
             lineTotalTtc: item.lineTotal * (1 + item.tvaRate/100)
         })),
@@ -250,7 +250,7 @@ export default function InvoiceCreate() {
       navigate("/invoices");
     } catch (error) {
       console.error(error);
-      toast.error(t("invoiceCreate.error.create"));
+      toast.error(error instanceof Error ? error.message : t("invoiceCreate.error.create"));
     }
   }
 

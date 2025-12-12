@@ -1,3 +1,46 @@
-// ...
+import { calculateStampDuty, calculateLineItem, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
+import { internal } from "./_generated/api";
+import { createInvoiceLogic, updateInvoiceLogic } from "./invoice_logic";
 
-// No changes made in this step. Proceeding with the plan.
+export const create = mutation({
+  args: {
+    // ... keep existing code
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    let finalInvoiceNumber = args.invoiceNumber;
+    if (!finalInvoiceNumber || finalInvoiceNumber === "AUTO") {
+        finalInvoiceNumber = await generateInvoiceNumber(...);
+    }
+
+    await ctx.scheduler.runAfter(0, internal.audit.log, {
+        // ...
+        payloadAfter: args,
+    });
+
+    return await createInvoiceLogic(ctx, args, userId);
+  },
+});
+
+export const update = mutation({
+  args: {
+    // ... keep existing code
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    await updateInvoiceLogic(ctx, args, userId);
+  },
+});
+
+productId: (item.productId && item.productId !== "") ? item.productId as Id<"products"> : undefined,
+payload: {
+    id: invoiceId,
+    invoiceNumber: finalInvoiceNumber,
+    totalTtc: finalTotalTtc,
+    customerId: args.customerId,
+    createdAt: Date.now(),
+}
