@@ -223,7 +223,7 @@ export default function InvoiceCreate() {
     try {
       await createInvoice({
         businessId: business._id,
-        customerId: formData.customerId as Id<"customers">,
+        customerId: values.customerId as Id<"customers">,
         type: formData.type,
         fiscalType: formData.fiscalType,
         language: formData.language,
@@ -277,6 +277,7 @@ export default function InvoiceCreate() {
               dueDate={formData.dueDate}
               currency={formData.currency}
               language={formData.language}
+              paymentMethod={paymentMethod}
               onIssueDateChange={(date) =>
                 setFormData({ ...formData, issueDate: date || new Date() })
               }
@@ -288,6 +289,9 @@ export default function InvoiceCreate() {
               }
               onLanguageChange={(language) =>
                 setFormData({ ...formData, language })
+              }
+              onPaymentMethodChange={(method) => 
+                form.setValue("paymentMethod", method as any)
               }
             />
 

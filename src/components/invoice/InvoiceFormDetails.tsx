@@ -28,10 +28,12 @@ interface InvoiceFormDetailsProps {
   dueDate: Date;
   currency: string;
   language?: string;
+  paymentMethod?: string;
   onIssueDateChange: (date: Date | undefined) => void;
   onDueDateChange: (date: Date | undefined) => void;
   onCurrencyChange: (currency: string) => void;
   onLanguageChange?: (language: string) => void;
+  onPaymentMethodChange?: (method: string) => void;
 }
 
 export function InvoiceFormDetails({
@@ -39,10 +41,12 @@ export function InvoiceFormDetails({
   dueDate,
   currency,
   language = "fr",
+  paymentMethod,
   onIssueDateChange,
   onDueDateChange,
   onCurrencyChange,
   onLanguageChange,
+  onPaymentMethodChange,
 }: InvoiceFormDetailsProps) {
   return (
     <Card>
@@ -112,6 +116,22 @@ export function InvoiceFormDetails({
               <SelectItem value="DZD">Algerian Dinar (DZD)</SelectItem>
               <SelectItem value="EUR">Euro (EUR)</SelectItem>
               <SelectItem value="USD">US Dollar (USD)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Payment Method</Label>
+          <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select payment method" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="CASH">Cash</SelectItem>
+              <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+              <SelectItem value="CHEQUE">Cheque</SelectItem>
+              <SelectItem value="CARD">Card</SelectItem>
+              <SelectItem value="OTHER">Other</SelectItem>
             </SelectContent>
           </Select>
         </div>
