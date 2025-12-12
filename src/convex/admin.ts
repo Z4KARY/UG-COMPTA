@@ -2,17 +2,6 @@ import { v } from "convex/values";
 import { mutation, query, action, QueryCtx, MutationCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-export const verifyAdminPassword = action({
-  args: { password: v.string() },
-  handler: async (ctx, args) => {
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    if (!adminPassword) {
-      throw new Error("ADMIN_PASSWORD environment variable is not set. Please set it in the Convex dashboard.");
-    }
-    return args.password === adminPassword;
-  },
-});
-
 async function checkAdmin(ctx: QueryCtx | MutationCtx) {
   const userId = await getAuthUserId(ctx);
   if (!userId) throw new Error("Unauthorized");

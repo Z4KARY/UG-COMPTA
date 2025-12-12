@@ -17,9 +17,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function AdminAuth() {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
+  const verifyPassword = useAction(api.adminActions.verifyAdminPassword);
   const navigate = useNavigate();
   const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
   const [otp, setOtp] = useState("");
@@ -38,6 +41,16 @@ export default function AdminAuth() {
     setError(null);
     try {
       const formData = new FormData(event.currentTarget);
+      const password = formData.get("password") as string;
+      
+      // Verify password first
+      const isValid = await verifyPassword({ password });
+      if (!isValid) {
+        setError("Invalid admin password");
+        setIsLoading(false);
+        return;
+      }
+
       await signIn("email-otp", formData);
       setStep({ email: formData.get("email") as string });
       setIsLoading(false);
