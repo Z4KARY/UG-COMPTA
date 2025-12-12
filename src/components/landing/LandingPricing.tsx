@@ -32,6 +32,27 @@ const localizedPricing = {
       popular: false,
     },
     {
+      id: "startup",
+      name: "Startup",
+      description: "For small teams getting started.",
+      price: "24,000 DZD",
+      originalPrice: "36,000 DZD",
+      period: "/year",
+      billingNote: "Billed annually",
+      features: [
+        "Everything in Auto-Entrepreneur",
+        "Up to 2 Users",
+        "Basic Reporting",
+        "Expense Tracking",
+        "Payment Reminders",
+        "Standard Support",
+      ],
+      userCount: "2 users",
+      storage: "2 GB storage",
+      cta: "Get Started",
+      popular: false,
+    },
+    {
       id: "pro",
       name: "Small Business",
       description: "For growing businesses needing VAT workflows.",
@@ -40,12 +61,11 @@ const localizedPricing = {
       period: "/year",
       billingNote: "Billed annually",
       features: [
-        "Everything in Auto-Entrepreneur",
+        "Everything in Startup",
         "G50 Declarations",
         "VAT Management",
         "Role management",
         "Transactions",
-        "Digital stamp & signature",
         "Priority Support",
         "Multi-user Access",
       ],
@@ -53,6 +73,27 @@ const localizedPricing = {
       storage: "5 GB storage",
       cta: "Free trial",
       popular: true,
+    },
+    {
+      id: "premium",
+      name: "Premium",
+      description: "Advanced tools for scaling companies.",
+      price: "69,000 DZD",
+      originalPrice: "89,000 DZD",
+      period: "/year",
+      billingNote: "Billed annually",
+      features: [
+        "Everything in Small Business",
+        "Up to 5 Users",
+        "Advanced Analytics",
+        "Inventory Management",
+        "Multi-currency",
+        "Dedicated Support",
+      ],
+      userCount: "5 users",
+      storage: "10 GB storage",
+      cta: "Get Premium",
+      popular: false,
     },
     {
       id: "enterprise",
@@ -103,6 +144,27 @@ const localizedPricing = {
       popular: false,
     },
     {
+      id: "startup",
+      name: "Startup",
+      description: "Pour les petites équipes qui démarrent.",
+      price: "24 000 DZD",
+      originalPrice: "36 000 DZD",
+      period: "/an",
+      billingNote: "Facturation annuelle",
+      features: [
+        "Tout dans Auto-Entrepreneur",
+        "Jusqu'à 2 utilisateurs",
+        "Rapports basiques",
+        "Suivi des dépenses",
+        "Rappels de paiement",
+        "Support standard",
+      ],
+      userCount: "2 utilisateurs",
+      storage: "2 Go de stockage",
+      cta: "Commencer",
+      popular: false,
+    },
+    {
       id: "pro",
       name: "Small Business",
       description: "Pour les entreprises en croissance nécessitant la TVA.",
@@ -111,12 +173,11 @@ const localizedPricing = {
       period: "/an",
       billingNote: "Facturation annuelle",
       features: [
-        "Tout dans Auto-Entrepreneur",
+        "Tout dans Startup",
         "Déclarations G50",
         "Gestion TVA",
         "Gestion des rôles",
         "Transactions",
-        "Cachet et signature numériques",
         "Support prioritaire",
         "Accès multi-utilisateurs",
       ],
@@ -124,6 +185,27 @@ const localizedPricing = {
       storage: "5 Go de stockage",
       cta: "Essai gratuit",
       popular: true,
+    },
+    {
+      id: "premium",
+      name: "Premium",
+      description: "Outils avancés pour les entreprises en expansion.",
+      price: "69 000 DZD",
+      originalPrice: "89 000 DZD",
+      period: "/an",
+      billingNote: "Facturation annuelle",
+      features: [
+        "Tout dans Small Business",
+        "Jusqu'à 5 utilisateurs",
+        "Analyses avancées",
+        "Gestion de stock",
+        "Multi-devises",
+        "Support dédié",
+      ],
+      userCount: "5 utilisateurs",
+      storage: "10 Go de stockage",
+      cta: "Obtenir Premium",
+      popular: false,
     },
     {
       id: "enterprise",
@@ -174,6 +256,27 @@ const localizedPricing = {
       popular: false,
     },
     {
+      id: "startup",
+      name: "ناشئة",
+      description: "للفرق الصغيرة التي تبدأ.",
+      price: "24٬000 دج",
+      originalPrice: "36٬000 دج",
+      period: "/سنة",
+      billingNote: "فوترة سنوية",
+      features: [
+        "كل شيء في المقاول الذاتي",
+        "ما يصل إلى 2 مستخدمين",
+        "تقارير أساسية",
+        "تتبع المصاريف",
+        "تذكيرات الدفع",
+        "دعم قياسي",
+      ],
+      userCount: "2 مستخدمين",
+      storage: "2 جيغابايت للتخزين",
+      cta: "ابدأ الآن",
+      popular: false,
+    },
+    {
       id: "pro",
       name: "Small Business",
       description: "للشركات المتنامية التي تحتاج إلى إدارة ضريبة القيمة المضافة.",
@@ -182,12 +285,11 @@ const localizedPricing = {
       period: "/سنة",
       billingNote: "فوترة سنوية",
       features: [
-        "كل شيء في المقاول الذاتي",
+        "كل شيء في الناشئة",
         "تصريحات G50",
         "إدارة ضريبة القيمة المضافة",
         "إدارة الصلاحيات",
         "المعاملات",
-        "الختم والتوقيع الرقمي",
         "دعم ذو أولوية",
         "وصول متعدد المستخدمين",
       ],
@@ -195,6 +297,27 @@ const localizedPricing = {
       storage: "5 جيغابايت للتخزين",
       cta: "جرّب مجانًا",
       popular: true,
+    },
+    {
+      id: "premium",
+      name: "Premium",
+      description: "أدوات متقدمة للشركات المتوسعة.",
+      price: "69٬000 دج",
+      originalPrice: "89٬000 دج",
+      period: "/سنة",
+      billingNote: "فوترة سنوية",
+      features: [
+        "كل شيء في Small Business",
+        "ما يصل إلى 5 مستخدمين",
+        "تحليلات متقدمة",
+        "إدارة المخزون",
+        "متعدد العملات",
+        "دعم مخصص",
+      ],
+      userCount: "5 مستخدمين",
+      storage: "10 جيغابايت للتخزين",
+      cta: "احصل على بريميوم",
+      popular: false,
     },
     {
       id: "enterprise",
@@ -242,7 +365,7 @@ export function LandingPricing({ fromDashboard = false }: LandingPricingProps) {
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+        <div className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto">
           {pricing.map((plan, index) => (
             <motion.div
               key={plan.name}
@@ -250,7 +373,7 @@ export function LandingPricing({ fromDashboard = false }: LandingPricingProps) {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`relative flex flex-col ${
+              className={`relative flex flex-col w-full md:w-[350px] ${
                 plan.popular ? "md:-mt-4 md:mb-4 z-10" : ""
               }`}
             >
