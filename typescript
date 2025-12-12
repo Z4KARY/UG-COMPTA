@@ -1,169 +1,26 @@
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { calculateStampDuty, calculateLineItem, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
-import { internal } from "./_generated/api";
-import { 
-  createInvoiceLogic, 
-  generateInvoiceNumber, 
-  updateInvoiceLogic,
-  deleteInvoiceLogic,
-  updateInvoiceStatusLogic,
-  issueInvoiceLogic,
-  markInvoiceAsPaidLogic,
-  markInvoiceAsUnpaidLogic,
-  addInvoicePaymentLogic
-} from "./invoice_logic";
-
-export const list = query({
-  // ... keep existing code
-});
-
-export const create = mutation({
-  args: {
-    // ... keep existing code
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
-
-    let finalInvoiceNumber = args.invoiceNumber;
-    if (!finalInvoiceNumber || finalInvoiceNumber === "AUTO") {
-        finalInvoiceNumber = await generateInvoiceNumber(...);
-    }
-
-    await ctx.scheduler.runAfter(0, internal.audit.log, {
-        // ...
-        payloadAfter: args,
-    });
-
-    // Server-side calculation to ensure fiscal compliance
-    let calculatedSubtotalHt = 0;
-    // ...
-
-    const stampDutyAmount = calculateStampDuty(
-      totalBeforeStamp, 
-      args.paymentMethod || "OTHER",
-      stampDutyConfig
-    );
-
-    return await createInvoiceLogic(ctx, args, userId);
-  },
-});
-
-export const update = mutation({
-  args: {
-    // ... keep existing code
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
-
-    const { id, items, ...fields } = args;
-
-    // Update invoice fields
-    await ctx.db.patch(id, fields);
-  },
-});
-
-export const remove = mutation({
-  args: { id: v.id("invoices") },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
-
-    await deleteInvoiceLogic(ctx, args, userId);
-  },
-});
-
-export const updateStatus = mutation({
-  args: {
-    id: v.id("invoices"),
-    status: v.union(
-      v.literal("draft"),
-      v.literal("issued"),
-      v.literal("paid"),
-      v.literal("overdue"),
-      v.literal("cancelled")
-    ),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
-
-    await updateInvoiceStatusLogic(ctx, args, userId);
-  },
-});
-
-export const issue = mutation({
-  args: { 
-    id: v.id("invoices"),
-    pdfHash: v.optional(v.string()), // Optional hash of the generated PDF
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
-
-    await issueInvoiceLogic(ctx, args, userId);
-  },
-});
-
-export const markAsPaid = mutation({
-  args: { 
-    id: v.id("invoices"),
-    amount: v.number(),
-    paymentMethod: v.union(
-        v.literal("CASH"),
-        v.literal("BANK_TRANSFER"),
-        v.literal("CHEQUE"),
-        v.literal("CARD"),
-        v.literal("OTHER")
-    ),
-    paymentDate: v.number(),
-    reference: v.optional(v.string()),
-    notes: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
-
-    await markInvoiceAsPaidLogic(ctx, args, userId);
-  },
-});
-
-export const markAsUnpaid = mutation({
-  args: { id: v.id("invoices") },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
-
-    await markInvoiceAsUnpaidLogic(ctx, args, userId);
-  },
-});
-
-export const addPayment = mutation({
-  args: { 
-    id: v.id("invoices"),
-    amount: v.number(),
-    paymentMethod: v.union(
-        v.literal("CASH"),
-        v.literal("BANK_TRANSFER"),
-        v.literal("CHEQUE"),
-        v.literal("CARD"),
-        v.literal("OTHER")
-    ),
-    paymentDate: v.number(),
-    reference: v.optional(v.string()),
-    notes: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
-
-    await addInvoicePaymentLogic(ctx, args, userId);
-  },
-});
-
-export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: string) {
-  // ... keep existing code
-}
+const localizedPricing = {
+  en: [
+    {
+      name: "Auto entrepreneur",
+      description: "Perfect for freelancers and consultants.",
+      price: "12,000 DZD",
+      originalPrice: "24,000 DZD",
+      period: "/year",
+      billingNote: "Billed annually",
+      features: [
+        "Billing automation",
+        "Transactions",
+        "Role management",
+        "Digital stamp & signature",
+        "Quote conversion",
+        "Expense management",
+        "Email sending",
+        "Online support",
+      ],
+      userCount: "1 user",
+      storage: "1 GB storage",
+      cta: "Start free",
+      popular: false,
+    },
+  ],
+};

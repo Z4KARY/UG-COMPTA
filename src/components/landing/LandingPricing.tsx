@@ -9,16 +9,16 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const localizedPricing = {
   en: [
     {
-      name: "Auto entrepreneur",
+      name: "Auto-Entrepreneur",
       description: "Perfect for freelancers and consultants.",
       price: "12,000 DZD",
       originalPrice: "24,000 DZD",
       period: "/year",
       billingNote: "Billed annually",
       features: [
-        "Billing automation",
-        "Transactions",
-        "Role management",
+        "Unlimited Invoices",
+        "G12 Reports",
+        "Client Management",
         "Digital stamp & signature",
         "Quote conversion",
         "Expense management",
@@ -31,48 +31,26 @@ const localizedPricing = {
       popular: false,
     },
     {
-      name: "Starter",
+      name: "Small Business",
       description: "For growing businesses needing VAT workflows.",
       price: "39,000 DZD",
       originalPrice: "54,000 DZD",
       period: "/year",
       billingNote: "Billed annually",
       features: [
-        "Billing automation",
-        "Transactions",
+        "Everything in Auto-Entrepreneur",
+        "G50 Declarations",
+        "VAT Management",
         "Role management",
+        "Transactions",
         "Digital stamp & signature",
-        "Quote conversion",
-        "Expense management",
-        "Email sending",
-        "Online support",
+        "Priority Support",
+        "Multi-user Access",
       ],
       userCount: "3 users",
-      storage: "1 GB storage",
+      storage: "5 GB storage",
       cta: "Free trial",
       popular: true,
-    },
-    {
-      name: "Basic",
-      description: "For structured teams automating daily flows.",
-      price: "49,000 DZD",
-      originalPrice: "69,000 DZD",
-      period: "/year",
-      billingNote: "Billed annually",
-      features: [
-        "Billing automation",
-        "Transactions",
-        "Role management",
-        "Digital stamp & signature",
-        "Quote conversion",
-        "Expense management",
-        "Email sending",
-        "Online support",
-      ],
-      userCount: "6 users",
-      storage: "2 GB storage",
-      cta: "Free trial",
-      popular: false,
     },
     {
       name: "Enterprise",
@@ -82,14 +60,14 @@ const localizedPricing = {
       period: "/year",
       billingNote: "Billed annually",
       features: [
-        "Billing automation",
-        "Transactions",
-        "Role management",
-        "Digital stamp & signature",
-        "Quote conversion",
-        "Expense management",
-        "Email sending",
-        "Online support",
+        "Unlimited users",
+        "Custom Integrations",
+        "Dedicated Account Manager",
+        "SLA Support",
+        "On-premise Options",
+        "Advanced Security",
+        "API Access",
+        "Training & Onboarding",
       ],
       userCount: "Unlimited users",
       storage: "Unlimited storage",
@@ -99,16 +77,16 @@ const localizedPricing = {
   ],
   fr: [
     {
-      name: "Auto entrepreneur",
+      name: "Auto-Entrepreneur",
       description: "Parfait pour les freelances et consultants.",
       price: "12 000 DZD",
       originalPrice: "24 000 DZD",
       period: "/an",
       billingNote: "Facturation annuelle",
       features: [
-        "Facturation",
-        "Transactions",
-        "Gestion des rôles",
+        "Factures illimitées",
+        "Rapports G12",
+        "Gestion clients",
         "Cachet et signature numériques",
         "Conversion de devis",
         "Gestion des dépenses",
@@ -121,48 +99,26 @@ const localizedPricing = {
       popular: false,
     },
     {
-      name: "Starter",
+      name: "Small Business",
       description: "Pour les entreprises en croissance nécessitant la TVA.",
       price: "39 000 DZD",
       originalPrice: "54 000 DZD",
       period: "/an",
       billingNote: "Facturation annuelle",
       features: [
-        "Facturation",
-        "Transactions",
+        "Tout dans Auto-Entrepreneur",
+        "Déclarations G50",
+        "Gestion TVA",
         "Gestion des rôles",
+        "Transactions",
         "Cachet et signature numériques",
-        "Conversion de devis",
-        "Gestion des dépenses",
-        "Envoi par email",
-        "Support en ligne",
+        "Support prioritaire",
+        "Accès multi-utilisateurs",
       ],
       userCount: "3 utilisateurs",
-      storage: "1 Go de stockage",
+      storage: "5 Go de stockage",
       cta: "Essai gratuit",
       popular: true,
-    },
-    {
-      name: "Basic",
-      description: "Pour les équipes structurées qui automatisent leurs flux.",
-      price: "49 000 DZD",
-      originalPrice: "69 000 DZD",
-      period: "/an",
-      billingNote: "Facturation annuelle",
-      features: [
-        "Facturation",
-        "Transactions",
-        "Gestion des rôles",
-        "Cachet et signature numériques",
-        "Conversion de devis",
-        "Gestion des dépenses",
-        "Envoi par email",
-        "Support en ligne",
-      ],
-      userCount: "6 utilisateurs",
-      storage: "2 Go de stockage",
-      cta: "Essai gratuit",
-      popular: false,
     },
     {
       name: "Enterprise",
@@ -172,14 +128,14 @@ const localizedPricing = {
       period: "/an",
       billingNote: "Facturation annuelle",
       features: [
-        "Facturation",
-        "Transactions",
-        "Gestion des rôles",
-        "Cachet et signature numériques",
-        "Conversion de devis",
-        "Gestion des dépenses",
-        "Envoi par email",
-        "Support en ligne",
+        "Utilisateurs illimités",
+        "Intégrations personnalisées",
+        "Gestionnaire de compte dédié",
+        "Support SLA",
+        "Options sur site",
+        "Sécurité avancée",
+        "Accès API",
+        "Formation et intégration",
       ],
       userCount: "Utilisateurs illimités",
       storage: "Stockage illimité",
@@ -196,9 +152,9 @@ const localizedPricing = {
       period: "/سنة",
       billingNote: "فوترة سنوية",
       features: [
-        "الفوترة",
-        "المعاملات",
-        "إدارة الصلاحيات",
+        "فواتير غير محدودة",
+        "تقارير G12",
+        "إدارة العملاء",
         "الختم والتوقيع الرقمي",
         "تحويل عروض الأسعار",
         "إدارة المصاريف",
@@ -211,48 +167,26 @@ const localizedPricing = {
       popular: false,
     },
     {
-      name: "Starter",
+      name: "Small Business",
       description: "للشركات المتنامية التي تحتاج إلى إدارة ضريبة القيمة المضافة.",
       price: "39٬000 دج",
       originalPrice: "54٬000 دج",
       period: "/سنة",
       billingNote: "فوترة سنوية",
       features: [
-        "الفوترة",
-        "المعاملات",
+        "كل شيء في المقاول الذاتي",
+        "تصريحات G50",
+        "إدارة ضريبة القيمة المضافة",
         "إدارة الصلاحيات",
+        "المعاملات",
         "الختم والتوقيع الرقمي",
-        "تحويل عروض الأسعار",
-        "إدارة المصاريف",
-        "إرسال عبر البريد الإلكتروني",
-        "دعم عبر الإنترنت",
+        "دعم ذو أولوية",
+        "وصول متعدد المستخدمين",
       ],
       userCount: "3 مستخدمين",
-      storage: "1 جيغابايت للتخزين",
+      storage: "5 جيغابايت للتخزين",
       cta: "جرّب مجانًا",
       popular: true,
-    },
-    {
-      name: "Basic",
-      description: "للفرق المنظمة التي ترغب في أتمتة سير العمل.",
-      price: "49٬000 دج",
-      originalPrice: "69٬000 دج",
-      period: "/سنة",
-      billingNote: "فوترة سنوية",
-      features: [
-        "الفوترة",
-        "المعاملات",
-        "إدارة الصلاحيات",
-        "الختم والتوقيع الرقمي",
-        "تحويل عروض الأسعار",
-        "إدارة المصاريف",
-        "إرسال عبر البريد الإلكتروني",
-        "دعم عبر الإنترنت",
-      ],
-      userCount: "6 مستخدمين",
-      storage: "2 جيغابايت للتخزين",
-      cta: "جرّب مجانًا",
-      popular: false,
     },
     {
       name: "Enterprise",
@@ -262,14 +196,14 @@ const localizedPricing = {
       period: "/سنة",
       billingNote: "فوترة سنوية",
       features: [
-        "الفوترة",
-        "المعاملات",
-        "إدارة الصلاحيات",
-        "الختم والتوقيع الرقمي",
-        "تحويل عروض الأسعار",
-        "إدارة المصاريف",
-        "إرسال عبر البريد الإلكتروني",
-        "دعم عبر الإنترنت",
+        "مستخدمين غير محدودين",
+        "تكاملات مخصصة",
+        "مدير حساب مخصص",
+        "دعم SLA",
+        "خيارات في الموقع",
+        "أمان متقدم",
+        "وصول API",
+        "تدريب وتأهيل",
       ],
       userCount: "مستخدمين غير محدودين",
       storage: "تخزين غير محدود",
@@ -279,12 +213,16 @@ const localizedPricing = {
   ],
 } as const;
 
-export function LandingPricing() {
+interface LandingPricingProps {
+  fromDashboard?: boolean;
+}
+
+export function LandingPricing({ fromDashboard = false }: LandingPricingProps) {
   const { t, language } = useLanguage();
   const pricing = localizedPricing[language] ?? localizedPricing.en;
 
   return (
-    <section id="pricing" className="py-24 bg-muted/30">
+    <section id="pricing" className={`py-24 ${fromDashboard ? "" : "bg-muted/30"}`}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
@@ -295,7 +233,7 @@ export function LandingPricing() {
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
+        <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
           {pricing.map((plan, index) => (
             <motion.div
               key={plan.name}
@@ -326,8 +264,10 @@ export function LandingPricing() {
                       <span className="text-muted-foreground text-sm">{plan.period}</span>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      <span className="line-through opacity-70">{plan.originalPrice}</span>
-                      <span className="ml-2">{plan.billingNote}</span>
+                      {plan.originalPrice && (
+                        <span className="line-through opacity-70 mr-2">{plan.originalPrice}</span>
+                      )}
+                      <span>{plan.billingNote}</span>
                     </div>
                   </div>
                   <ul className="space-y-3 text-sm">
@@ -345,7 +285,15 @@ export function LandingPricing() {
                 </CardContent>
                 <CardFooter>
                   <Button className="w-full" variant={plan.popular ? "default" : "outline"} asChild>
-                    <Link to="/auth">{plan.cta}</Link>
+                    {fromDashboard ? (
+                      <Link to="/settings?tab=subscription">
+                        {plan.price === "Custom" || plan.price === "Sur mesure" || plan.price === "حسب الطلب" 
+                          ? t("landing.pricing.enterprise.cta") 
+                          : t("settings.subscription.upgrade")}
+                      </Link>
+                    ) : (
+                      <Link to="/auth">{plan.cta}</Link>
+                    )}
                   </Button>
                 </CardFooter>
               </Card>
