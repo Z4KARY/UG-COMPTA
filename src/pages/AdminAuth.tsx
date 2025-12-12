@@ -88,6 +88,14 @@ export default function AdminAuth() {
                   required
                   className="text-center"
                 />
+                <Input
+                  name="password"
+                  placeholder="Admin Password"
+                  type="password"
+                  disabled={isLoading}
+                  required
+                  className="text-center"
+                />
               </div>
               {error && (
                 <p className="text-sm text-destructive text-center">{error}</p>
