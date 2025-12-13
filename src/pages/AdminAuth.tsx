@@ -42,9 +42,9 @@ export default function AdminAuth() {
       console.log("Signing in anonymously...");
       await signIn("anonymous");
       
-      // Wait a moment for auth state to settle
+      // Wait longer for auth state to fully propagate
       console.log("Waiting for auth state to settle...");
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Then verify password and set admin role
       console.log("Setting admin role with password...");
