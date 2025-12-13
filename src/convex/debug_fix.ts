@@ -1,8 +1,8 @@
-import { internalQuery } from "./_generated/server";
+import { query } from "./_generated/server";
 import { v } from "convex/values";
 import { checkBusinessAccess } from "./permissions";
 
-export const checkUserInvoices = internalQuery({
+export const checkUserInvoices = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {
     const user = await ctx.db
