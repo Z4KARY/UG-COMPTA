@@ -46,11 +46,27 @@ export default function AdminAuth() {
       if (!isAuthenticated) {
         console.log("Signing in anonymously...");
         await signIn("anonymous");
+        // Small delay to ensure token propagation
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
-      // 2. Call mutation immediately
+      // 2. Call mutation with retry logic
       console.log("Setting admin role...");
-      await setAdminRole({ password: trimmedPassword });
+      try {
+        await setAdminRole({ password: trimmedPassword });
+      } catch (err: any) {
+        // If not authenticated, try signing in again and retrying
+        // This handles cases where isAuthenticated was true but the token was invalid/expired
+        // or if the initial sign-in didn't propagate fast enough
+        if (err.message && err.message.includes("Not authenticated")) {
+           console.log("Caught 'Not authenticated', retrying with fresh sign-in...");
+           await signIn("anonymous");
+           await new Promise(resolve => setTimeout(resolve, 1000)); // Wait a bit longer for propagation
+           await setAdminRole({ password: trimmedPassword });
+        } else {
+           throw err;
+        }
+      }
       
       toast.success("Admin access granted");
       navigate("/admin");
