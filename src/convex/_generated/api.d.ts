@@ -31,6 +31,7 @@ import type * as invoices from "../invoices.js";
 import type * as members from "../members.js";
 import type * as notifications from "../notifications.js";
 import type * as periods from "../periods.js";
+import type * as permissions from "../permissions.js";
 import type * as products from "../products.js";
 import type * as purchaseInvoices from "../purchaseInvoices.js";
 import type * as reminders from "../reminders.js";
@@ -79,6 +80,7 @@ declare const fullApi: ApiFromModules<{
   members: typeof members;
   notifications: typeof notifications;
   periods: typeof periods;
+  permissions: typeof permissions;
   products: typeof products;
   purchaseInvoices: typeof purchaseInvoices;
   reminders: typeof reminders;

@@ -14,6 +14,7 @@ import {
   markInvoiceAsUnpaidLogic,
   addInvoicePaymentLogic
 } from "./invoice_logic";
+import { checkBusinessAccess } from "./permissions";
 
 export const list = query({
   args: { businessId: v.id("businesses") },
@@ -21,8 +22,8 @@ export const list = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
 
-    const business = await ctx.db.get(args.businessId);
-    if (!business || business.userId !== userId) return [];
+    const business = await checkBusinessAccess(ctx, args.businessId, userId);
+    if (!business) return [];
 
     const invoices = await ctx.db
       .query("invoices")
@@ -51,8 +52,8 @@ export const get = query({
     const invoice = await ctx.db.get(args.id);
     if (!invoice) return null;
 
-    const businessDoc = await ctx.db.get(invoice.businessId);
-    if (!businessDoc || businessDoc.userId !== userId) return null;
+    const businessDoc = await checkBusinessAccess(ctx, invoice.businessId, userId);
+    if (!businessDoc) return null;
 
     let business = businessDoc;
     if (business.logoStorageId) {
@@ -86,17 +87,9 @@ export const listByCustomer = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
 
-    const business = await ctx.db.get(args.businessId);
+    const business = await checkBusinessAccess(ctx, args.businessId, userId);
     if (!business) return [];
     
-    if (business.userId !== userId) {
-        const member = await ctx.db
-            .query("businessMembers")
-            .withIndex("by_business_and_user", (q) => q.eq("businessId", args.businessId).eq("userId", userId))
-            .first();
-        if (!member) return [];
-    }
-
     return await ctx.db
       .query("invoices")
       .withIndex("by_customer", (q) => q.eq("customerId", args.customerId))

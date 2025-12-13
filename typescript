@@ -1,130 +1,66 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/use-auth";
-import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
+import { v } from "convex/values";
+import { MutationCtx } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
+import { calculateLineItem, calculateStampDuty, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
+import { internal } from "./_generated/api";
+import { requireBusinessAccess } from "./permissions";
 
-export default function AdminAuth() {
-  const { isLoading: authLoading, isAuthenticated, signIn, signOut } = useAuth();
-  const navigate = useNavigate();
-  const setAdminRole = useMutation(api.adminAuth.setAdminRole);
-  const user = useQuery(api.users.currentUser);
+// Helper to generate next invoice number
+export async function generateInvoiceNumber(
+// ... keep existing code
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [shouldUpgrade, setShouldUpgrade] = useState(false);
-  
-  useEffect(() => {
-    // Only redirect if the user is actually an admin
-    if (!authLoading && isAuthenticated && user?.role === "admin") {
-      navigate("/admin");
-    }
-  }, [authLoading, isAuthenticated, user, navigate]);
+export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: Id<"users">) {
+  const userId = getAuthUserId(ctx);
+  const invoice = await ctx.db.get(args.id as Id<"invoices">);
+  if (!invoice) return null;
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
+  if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
-    try {
-      if (!isAuthenticated) {
-        console.log("Signing in anonymously...");
-        await signIn("anonymous");
-        // Trigger upgrade after auth state updates
-        setShouldUpgrade(true);
-      } else {
-        // Already authenticated, trigger upgrade immediately
-        setShouldUpgrade(true);
-      }
-    } catch (error) {
-      console.error("Sign-in error:", error);
-      setError("Failed to sign in");
-      setIsLoading(false);
-    }
-  };
+  const businessDoc = await checkBusinessAccess(ctx, invoice.businessId, userId);
+  if (!businessDoc) return null;
 
-  useEffect(() => {
-    const performUpgrade = async () => {
-      if (shouldUpgrade && isAuthenticated) {
-        try {
-          console.log("Setting admin role...");
-          await setAdminRole({ password });
-          // Success is handled by the redirect useEffect when user role updates
-        } catch (error) {
-          console.error("Upgrade error:", error);
-          const errorMessage = error instanceof Error ? error.message : "Invalid password";
-          setError(errorMessage);
-          setIsLoading(false);
-          setShouldUpgrade(false);
-        }
-      }
-    };
+  if (!businessDoc || businessDoc.userId !== userId) return null;
 
-    performUpgrade();
-  }, [shouldUpgrade, isAuthenticated, password, setAdminRole]);
+  if (!businessDoc) return [];
 
-  return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Admin Authentication</CardTitle>
-          <CardDescription>
-            {isAuthenticated ? "Welcome back!" : "Sign in to access admin panel"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="text-sm font-medium text-muted-foreground">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="admin@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <Button
-              onClick={() => {
-                if (email) {
-                  setAdminRole({ email });
-                }
-              }}
-              disabled={!email || isLoading}
-              className="w-full"
-            >
-              {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <ShieldCheck className="mr-2 h-4 w-4" />
-              )}
-              {isLoading ? "Processing..." : "Set Admin Role"}
-            </Button>
-          </div>
-        </CardContent>
-        <CardFooter className="text-center">
-          <p className="text-sm text-muted-foreground">
-            {isAuthenticated ? "You're already logged in as admin." : "Enter admin email to set role."}
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
-  );
+  if (businessDoc === undefined) {
+    // loading
+  }
+  if (businessDoc === null || !businessDoc.type) {
+    return <SetupRequired />;
+  }
+}
+
+export async function issueInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices">, pdfHash?: string }, userId: Id<"users">)
+
+export async function updateInvoiceStatusLogic(ctx: MutationCtx, args: { id: Id<"invoices">, status: string }, userId: Id<"users">)
+
+export async function markInvoiceAsPaidLogic(ctx: MutationCtx, args: any, userId: Id<"users">)
+
+export async function markInvoiceAsUnpaidLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: Id<"users">)
+
+export async function addInvoicePaymentLogic(ctx: MutationCtx, args: any, userId: Id<"users">)
+
+export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: Id<"users">) {
+  const userId = getAuthUserId(ctx);
+  const invoice = await ctx.db.get(args.id as Id<"invoices">);
+  if (!invoice) return null;
+
+  const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
+  if (!business || business.userId !== userId) throw new Error("Unauthorized");
+
+  const businessDoc = await checkBusinessAccess(ctx, invoice.businessId, userId);
+  if (!businessDoc) return null;
+
+  if (!businessDoc || businessDoc.userId !== userId) return null;
+
+  if (!businessDoc) return [];
+
+  if (businessDoc === undefined) {
+    // loading
+  }
+  if (businessDoc === null || !businessDoc.type) {
+    return <SetupRequired />;
+  }
 }

@@ -3,6 +3,7 @@ import { MutationCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { calculateLineItem, calculateStampDuty, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
 import { internal } from "./_generated/api";
+import { requireBusinessAccess } from "./permissions";
 
 // Helper to generate next invoice number
 export async function generateInvoiceNumber(
@@ -47,7 +48,7 @@ export async function generateInvoiceNumber(
 }
 
 export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: Id<"users">) {
-    const business = await ctx.db.get(args.businessId as Id<"businesses">);
+    const business = await requireBusinessAccess(ctx, args.businessId as Id<"businesses">, userId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     // Generate Invoice Number if not provided
@@ -201,7 +202,7 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     const invoice = await ctx.db.get(args.id as Id<"invoices">);
     if (!invoice) throw new Error("Not found");
 
-    const business = await ctx.db.get(invoice.businessId);
+    const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     // Prevent editing if paid or cancelled
@@ -286,7 +287,7 @@ export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoi
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
-    const business = await ctx.db.get(invoice.businessId);
+    const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     // Check for closed period
@@ -326,7 +327,7 @@ export async function updateInvoiceStatusLogic(ctx: MutationCtx, args: { id: Id<
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
-    const business = await ctx.db.get(invoice.businessId);
+    const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     await ctx.db.patch(args.id, { status: args.status as any });
@@ -346,7 +347,7 @@ export async function issueInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoic
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
-    const business = await ctx.db.get(invoice.businessId);
+    const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
     if (!business || business.userId !== userId) {
          // Check member role
          const member = await ctx.db
@@ -407,7 +408,7 @@ export async function markInvoiceAsPaidLogic(ctx: MutationCtx, args: any, userId
     const invoice = await ctx.db.get(args.id as Id<"invoices">);
     if (!invoice) throw new Error("Not found");
 
-    const business = await ctx.db.get(invoice.businessId);
+    const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
     if (!business || business.userId !== userId) {
          const member = await ctx.db
             .query("businessMembers")
@@ -469,7 +470,7 @@ export async function markInvoiceAsUnpaidLogic(ctx: MutationCtx, args: { id: Id<
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
-    const business = await ctx.db.get(invoice.businessId);
+    const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
     if (!business || business.userId !== userId) {
          const member = await ctx.db
             .query("businessMembers")
@@ -528,7 +529,7 @@ export async function addInvoicePaymentLogic(ctx: MutationCtx, args: any, userId
     const invoice = await ctx.db.get(args.id as Id<"invoices">);
     if (!invoice) throw new Error("Not found");
 
-    const business = await ctx.db.get(invoice.businessId);
+    const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
     if (!business || business.userId !== userId) {
          const member = await ctx.db
             .query("businessMembers")
