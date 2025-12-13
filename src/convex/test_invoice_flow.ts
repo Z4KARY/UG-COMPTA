@@ -95,3 +95,10 @@ export const testCreate = mutation({
     }
   }
 });
+
+export const getInvoice = query({
+  args: { invoiceId: v.id("invoices") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.invoiceId);
+  }
+});
