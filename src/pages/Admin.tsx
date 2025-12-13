@@ -15,6 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/convex/_generated/api";
@@ -44,6 +51,7 @@ export default function Admin() {
   
   const toggleBusiness = useMutation(api.admin.toggleBusinessSuspension);
   const toggleUser = useMutation(api.admin.toggleUserSuspension);
+  const updateUserRole = useMutation(api.admin.updateUserRole);
   const updateContactStatus = useMutation(api.admin.updateContactRequestStatus);
 
   useEffect(() => {
@@ -84,6 +92,15 @@ export default function Admin() {
       } catch (e) {
           toast.error(t("admin.toast.userError") || "Error updating user status");
       }
+  };
+
+  const handleRoleChange = async (id: Id<"users">, newRole: "NORMAL" | "ACCOUNTANT" | "ADMIN") => {
+    try {
+      await updateUserRole({ id, role: newRole });
+      toast.success(t("admin.toast.roleUpdated") || "User role updated");
+    } catch (e) {
+      toast.error(t("admin.toast.roleError") || "Error updating user role");
+    }
   };
 
   const handleUpdateContactStatus = async (id: Id<"contactRequests">, newStatus: "new" | "contacted" | "closed") => {
@@ -185,7 +202,20 @@ export default function Admin() {
                       <TableCell className="font-medium">{u.name || "Anonymous"}</TableCell>
                       <TableCell>{u.email}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{u.role || "user"}</Badge>
+                        <Select
+                          defaultValue={u.roleGlobal || (u.role === "admin" ? "ADMIN" : "NORMAL")}
+                          onValueChange={(value: "NORMAL" | "ACCOUNTANT" | "ADMIN") => handleRoleChange(u._id, value)}
+                          disabled={u._id === user?._id} // Prevent changing own role to avoid locking self out
+                        >
+                          <SelectTrigger className="w-[130px] h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="NORMAL">NORMAL</SelectItem>
+                            <SelectItem value="ACCOUNTANT">ACCOUNTANT</SelectItem>
+                            <SelectItem value="ADMIN">ADMIN</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell>
                         {u.isSuspended ? (

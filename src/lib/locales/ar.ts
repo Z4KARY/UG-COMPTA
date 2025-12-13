@@ -152,6 +152,8 @@ export const ar = {
     "admin.toast.userSuspended": "تم تعليق المستخدم",
     "admin.toast.userActivated": "تم تفعيل المستخدم",
     "admin.toast.userError": "فشل تحديث حالة المستخدم",
+    "admin.toast.roleUpdated": "تم تحديث دور المستخدم",
+    "admin.toast.roleError": "خطأ في تحديث دور المستخدم",
 
     // Invoices
     "invoices.title": "الفواتير وعروض الأسعار",

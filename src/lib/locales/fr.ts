@@ -152,6 +152,8 @@ export const fr = {
     "admin.toast.userSuspended": "Utilisateur suspendu",
     "admin.toast.userActivated": "Utilisateur activé",
     "admin.toast.userError": "Échec de la mise à jour du statut de l'utilisateur",
+    "admin.toast.roleUpdated": "Rôle utilisateur mis à jour",
+    "admin.toast.roleError": "Erreur lors de la mise à jour du rôle",
 
     // Invoices
     "invoices.title": "Factures & Devis",

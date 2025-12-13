@@ -152,6 +152,8 @@ export const en = {
     "admin.toast.userSuspended": "User suspended",
     "admin.toast.userActivated": "User activated",
     "admin.toast.userError": "Failed to update user status",
+    "admin.toast.roleUpdated": "User role updated",
+    "admin.toast.roleError": "Failed to update user role",
 
     // Invoices
     "invoices.title": "Invoices & Quotes",

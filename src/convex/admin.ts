@@ -68,6 +68,27 @@ export const toggleUserSuspension = mutation({
   },
 });
 
+export const updateUserRole = mutation({
+  args: { 
+    id: v.id("users"), 
+    role: v.union(v.literal("NORMAL"), v.literal("ACCOUNTANT"), v.literal("ADMIN")) 
+  },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    
+    const updates: any = { roleGlobal: args.role };
+    
+    // Sync legacy/auth role field for compatibility
+    if (args.role === "ADMIN") {
+      updates.role = "admin";
+    } else {
+      updates.role = "user";
+    }
+    
+    await ctx.db.patch(args.id, updates);
+  },
+});
+
 export const updateContactRequestStatus = mutation({
   args: { 
     id: v.id("contactRequests"), 
