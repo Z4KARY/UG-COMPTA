@@ -1,152 +1,130 @@
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowRight, Loader2, Mail, UserX } from "lucide-react";
-import { Suspense, useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 
-interface AuthProps {
-  redirectAfterAuth?: string;
-}
-
-function Auth({ redirectAfterAuth }: AuthProps = {}) {
-  const { t } = useLanguage();
-  const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
+export default function AdminAuth() {
+  const { isLoading: authLoading, isAuthenticated, signIn, signOut } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
-  const [otp, setOtp] = useState("");
+  const setAdminRole = useMutation(api.adminAuth.setAdminRole);
+  const user = useQuery(api.users.currentUser);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [shouldUpgrade, setShouldUpgrade] = useState(false);
+  
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      const params = new URLSearchParams(location.search);
-      const plan = params.get("plan");
-      
-      let redirect = redirectAfterAuth || "/";
-      
-      if (plan) {
-        redirect = `/onboarding?plan=${plan}`;
-      }
-      
-      navigate(redirect);
+    // Only redirect if the user is actually an admin
+    if (!authLoading && isAuthenticated && user?.role === "admin") {
+      navigate("/admin");
     }
-  }, [authLoading, isAuthenticated, navigate, redirectAfterAuth, location.search]);
+  }, [authLoading, isAuthenticated, user, navigate]);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [authLoading, user, navigate]);
-
-  const handleGuestLogin = async () => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsLoading(true);
     setError(null);
+
     try {
-      console.log("Attempting anonymous sign in...");
-      await signIn("anonymous");
-      console.log("Anonymous sign in successful");
-      
-      const params = new URLSearchParams(location.search);
-      const plan = params.get("plan");
-      let redirect = redirectAfterAuth || "/";
-      if (plan) {
-        redirect = `/onboarding?plan=${plan}`;
+      if (!isAuthenticated) {
+        console.log("Signing in anonymously...");
+        await signIn("anonymous");
+        // Trigger upgrade after auth state updates
+        setShouldUpgrade(true);
+      } else {
+        // Already authenticated, trigger upgrade immediately
+        setShouldUpgrade(true);
       }
-      navigate(redirect);
     } catch (error) {
-      console.error("Error during guest login:", error);
-      setError("Failed to sign in as guest. Please try again.");
+      console.error("Sign-in error:", error);
+      setError("Failed to sign in");
       setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    const performUpgrade = async () => {
+      if (shouldUpgrade && isAuthenticated) {
+        try {
+          console.log("Setting admin role...");
+          await setAdminRole({ password });
+          // Success is handled by the redirect useEffect when user role updates
+        } catch (error) {
+          console.error("Upgrade error:", error);
+          const errorMessage = error instanceof Error ? error.message : "Invalid password";
+          setError(errorMessage);
+          setIsLoading(false);
+          setShouldUpgrade(false);
+        }
+      }
+    };
+
+    performUpgrade();
+  }, [shouldUpgrade, isAuthenticated, password, setAdminRole]);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">{t("auth.title")}</h1>
-          <p className="mt-2 text-gray-600">{t("auth.subtitle")}</p>
-        </div>
-
-        <div className="space-y-6">
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Admin Authentication</CardTitle>
+          <CardDescription>
+            {isAuthenticated ? "Welcome back!" : "Sign in to access admin panel"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Button 
-                onClick={() => setStep("signIn")}
-                variant={step === "signIn" ? "default" : "outline"}
-                className="flex-1"
-              >
-                {t("auth.signIn")}
-              </Button>
-              <Button 
-                onClick={() => setStep({ email: "" })}
-                variant={step === { email: "" } ? "default" : "outline"}
-                className="flex-1"
-              >
-                {t("auth.signUp")}
-              </Button>
+            <div>
+              <label htmlFor="email" className="text-sm font-medium text-muted-foreground">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1"
+              />
             </div>
+            <Button
+              onClick={() => {
+                if (email) {
+                  setAdminRole({ email });
+                }
+              }}
+              disabled={!email || isLoading}
+              className="w-full"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ShieldCheck className="mr-2 h-4 w-4" />
+              )}
+              {isLoading ? "Processing..." : "Set Admin Role"}
+            </Button>
           </div>
-
-          {step === "signIn" && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  {t("auth.email")}
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder={t("auth.emailPlaceholder")}
-                />
-              </div>
-              <Button 
-                onClick={handleGuestLogin}
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
-                {t("auth.guestLogin")}
-              </Button>
-            </div>
-          )}
-
-          {step === { email: "" } && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  {t("auth.email")}
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder={t("auth.emailPlaceholder")}
-                />
-              </div>
-              <Button 
-                onClick={handleGuestLogin}
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
-                {t("auth.guestLogin")}
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {error && (
-          <div className="text-red-600 text-sm text-center">
-            {error}
-          </div>
-        )}
-      </div>
+        </CardContent>
+        <CardFooter className="text-center">
+          <p className="text-sm text-muted-foreground">
+            {isAuthenticated ? "You're already logged in as admin." : "Enter admin email to set role."}
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
-
-export default Auth;

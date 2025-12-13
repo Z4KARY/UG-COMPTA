@@ -12,23 +12,27 @@ import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 export default function AdminAuth() {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
   const navigate = useNavigate();
   const setAdminRole = useMutation(api.adminAuth.setAdminRole);
+  const user = useQuery(api.users.currentUser);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shouldUpgrade, setShouldUpgrade] = useState(false);
   
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
+    // Only redirect if the user is actually an admin
+    if (!authLoading && isAuthenticated && user?.role === "admin") {
       navigate("/admin");
     }
-  }, [authLoading, isAuthenticated, navigate]);
+  }, [authLoading, isAuthenticated, user, navigate]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -36,33 +40,41 @@ export default function AdminAuth() {
     setError(null);
 
     try {
-      console.log("Starting admin authentication...");
-      
-      // First, sign in anonymously
-      console.log("Signing in anonymously...");
-      await signIn("anonymous");
-      
-      // Wait longer for auth state to fully propagate
-      console.log("Waiting for auth state to settle...");
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Then verify password and set admin role
-      console.log("Setting admin role with password...");
-      await setAdminRole({ password });
-      
-      console.log("Admin role set successfully!");
-      // If successful, the useEffect will redirect to /admin
+      if (!isAuthenticated) {
+        console.log("Signing in anonymously...");
+        await signIn("anonymous");
+        // Trigger upgrade after auth state updates
+        setShouldUpgrade(true);
+      } else {
+        // Already authenticated, trigger upgrade immediately
+        setShouldUpgrade(true);
+      }
     } catch (error) {
       console.error("Sign-in error:", error);
-      console.error("Error type:", typeof error);
-      console.error("Error details:", JSON.stringify(error, null, 2));
-      
-      // Show more specific error message
-      const errorMessage = error instanceof Error ? error.message : "Invalid email or password";
-      setError(errorMessage);
+      setError("Failed to sign in");
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const performUpgrade = async () => {
+      if (shouldUpgrade && isAuthenticated) {
+        try {
+          console.log("Setting admin role...");
+          await setAdminRole({ password });
+          // Success is handled by the redirect useEffect when user role updates
+        } catch (error) {
+          console.error("Upgrade error:", error);
+          const errorMessage = error instanceof Error ? error.message : "Invalid password";
+          setError(errorMessage);
+          setIsLoading(false);
+          setShouldUpgrade(false);
+        }
+      }
+    };
+
+    performUpgrade();
+  }, [shouldUpgrade, isAuthenticated, password, setAdminRole]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30">
