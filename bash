@@ -1,1 +1,1 @@
-cat src/components/BusinessDesignSettings.tsx
+pnpm add oslo axios

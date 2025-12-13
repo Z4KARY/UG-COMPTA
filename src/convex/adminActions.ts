@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
-import * as OTPAuth from "otpauth";
 
 export const verifyAdminPassword = action({
   args: { password: v.string() },
@@ -35,13 +34,5 @@ export const generateAdminPasswordHash = action({
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  },
-});
-
-export const generateTotpSecret = action({
-  args: {},
-  handler: async () => {
-    const secret = new OTPAuth.Secret({ size: 20 });
-    return secret.base32;
   },
 });

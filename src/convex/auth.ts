@@ -7,5 +7,5 @@ import { AdminPassword } from "./auth/admin";
 
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [emailOtp, Anonymous, AdminPassword],
+  providers: [emailOtp, Anonymous(), AdminPassword],
 });

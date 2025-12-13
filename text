@@ -1,3 +1,3 @@
-1. Verify the TeamSettings component is correctly imported and used in BusinessSettings.
-2. Check if the backend functions in src/convex/members.ts are correctly defined and exported.
-3. Ensure the user role management UI is intuitive and functional.
+1. Verify that the admin authentication works with email and password.
+2. Ensure that the admin password environment variable is correctly set and used.
+3. Check for any remaining errors in the Convex deployment.

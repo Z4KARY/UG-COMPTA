@@ -1,30 +1,32 @@
 import { Password } from "@convex-dev/auth/providers/Password";
-import { DataModel } from "../_generated/dataModel";
-import * as OTPAuth from "otpauth";
 
-export const AdminPassword = Password<DataModel>({
+const adminPasswordProvider = Password({
   id: "admin-password",
   name: "Admin",
   profile(params) {
     return {
-      email: process.env.ADMIN_EMAIL || "admin@ugcompta.com",
+      email: params.email as string,
       role: "admin",
       roleGlobal: "ADMIN",
     };
   },
   verify: async (params, ctx) => {
-    const { password } = params.params;
-    // Expected format: "password|totp"
-    const parts = password.split("|");
-    if (parts.length !== 2) return null;
-    const [inputPassword, inputTotp] = parts;
-
+    // params contains the credentials directly
+    const { password, email } = params as any;
+    
+    const adminEmailEnv = process.env.ADMIN_EMAIL;
     const adminPasswordEnv = process.env.ADMIN_PASSWORD;
-    const adminTotpSecret = process.env.ADMIN_TOTP_SECRET;
 
     if (!adminPasswordEnv) {
       console.error("ADMIN_PASSWORD env var not set");
       return null;
+    }
+
+    // Verify Email if provided
+    if (adminEmailEnv && email) {
+        if (email.toLowerCase() !== adminEmailEnv.toLowerCase()) {
+            return null;
+        }
     }
 
     // Verify Password
@@ -33,45 +35,26 @@ export const AdminPassword = Password<DataModel>({
     
     if (isHash) {
         const encoder = new TextEncoder();
-        const data = encoder.encode(inputPassword);
+        const data = encoder.encode(password);
         const hashBuffer = await crypto.subtle.digest("SHA-256", data);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         passwordValid = inputHash === adminPasswordEnv;
     } else {
-        passwordValid = inputPassword === adminPasswordEnv;
+        passwordValid = password === adminPasswordEnv;
     }
 
     if (!passwordValid) return null;
 
-    // Verify TOTP if secret is set
-    if (adminTotpSecret) {
-        try {
-            const totp = new OTPAuth.TOTP({
-                issuer: "UGCOMPTA",
-                label: "Admin",
-                algorithm: "SHA1",
-                digits: 6,
-                period: 30,
-                secret: OTPAuth.Secret.fromBase32(adminTotpSecret)
-            });
-            
-            const delta = totp.validate({ token: inputTotp, window: 1 });
-            
-            if (delta === null) {
-                return null;
-            }
-        } catch (e) {
-            console.error("TOTP check error", e);
-            return null;
-        }
-    } else {
-        console.error("ADMIN_TOTP_SECRET env var not set");
-        return null;
-    }
-
     return {
-        email: process.env.ADMIN_EMAIL || "admin@ugcompta.com",
+        email: email,
     };
   },
 });
+
+// Ensure ID is set (workaround for potential bug where ID is not propagated)
+if (!(adminPasswordProvider as any).id) {
+    (adminPasswordProvider as any).id = "admin-password";
+}
+
+export const AdminPassword = adminPasswordProvider;
