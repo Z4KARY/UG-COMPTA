@@ -38,7 +38,7 @@ const formSchema = z.object({
     description: z.string(),
     quantity: z.number(),
     unitPrice: z.number(),
-    discountRate: z.number().optional(),
+    discountRate: z.number().min(0).max(100).optional(),
     tvaRate: z.number(),
     lineTotal: z.number(),
     productType: z.enum(["goods", "service"]).optional(),

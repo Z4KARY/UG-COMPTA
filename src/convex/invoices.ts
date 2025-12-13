@@ -4,10 +4,16 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { calculateStampDuty, calculateLineItem, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
 import { internal } from "./_generated/api";
 import { 
-  createInvoiceLogic, 
-  generateInvoiceNumber, 
+  createInvoiceLogic 
+} from "./invoice_create";
+import { 
+  generateInvoiceNumber 
+} from "./invoice_utils";
+import { 
   updateInvoiceLogic,
-  deleteInvoiceLogic,
+  deleteInvoiceLogic
+} from "./invoice_update";
+import { 
   updateInvoiceStatusLogic,
   issueInvoiceLogic,
   markInvoiceAsPaidLogic,

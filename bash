@@ -1,1 +1,1 @@
-rm src/convex/auth/admin.ts src/convex/auth/emailOtp.ts
+npx convex run debug_fix:checkUserInvoices '{"email": "zackazeb@gmail.com"}'
