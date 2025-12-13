@@ -18,6 +18,7 @@ import type * as businesses from "../businesses.js";
 import type * as contact from "../contact.js";
 import type * as crons from "../crons.js";
 import type * as customers from "../customers.js";
+import type * as debug from "../debug.js";
 import type * as declarations from "../declarations.js";
 import type * as emails from "../emails.js";
 import type * as exportActions from "../exportActions.js";
@@ -67,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   contact: typeof contact;
   crons: typeof crons;
   customers: typeof customers;
+  debug: typeof debug;
   declarations: typeof declarations;
   emails: typeof emails;
   exportActions: typeof exportActions;
