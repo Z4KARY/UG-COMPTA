@@ -1,13 +1,13 @@
-import Password from "@convex-dev/auth/providers/Password";
+import { Password } from "@convex-dev/auth/providers/Password";
 import { DataModel } from "../_generated/dataModel";
-import { authenticator } from "otplib";
+import * as OTPAuth from "otpauth";
 
 export const AdminPassword = Password<DataModel>({
   id: "admin-password",
   name: "Admin",
   profile(params) {
     return {
-      email: "admin@ugcompta.com",
+      email: process.env.ADMIN_EMAIL || "admin@ugcompta.com",
       role: "admin",
       roleGlobal: "ADMIN",
     };
@@ -47,7 +47,18 @@ export const AdminPassword = Password<DataModel>({
     // Verify TOTP if secret is set
     if (adminTotpSecret) {
         try {
-            if (!authenticator.check(inputTotp, adminTotpSecret)) {
+            const totp = new OTPAuth.TOTP({
+                issuer: "UGCOMPTA",
+                label: "Admin",
+                algorithm: "SHA1",
+                digits: 6,
+                period: 30,
+                secret: OTPAuth.Secret.fromBase32(adminTotpSecret)
+            });
+            
+            const delta = totp.validate({ token: inputTotp, window: 1 });
+            
+            if (delta === null) {
                 return null;
             }
         } catch (e) {
@@ -55,17 +66,12 @@ export const AdminPassword = Password<DataModel>({
             return null;
         }
     } else {
-        // If no TOTP secret is set, we fail because the requirement is "external otp"
-        // However, for initial setup, we might want to allow it? 
-        // The user said "only admin password and external otp". 
-        // I will enforce it. If they haven't set the secret, they can't login.
-        // But I'll log it.
         console.error("ADMIN_TOTP_SECRET env var not set");
         return null;
     }
 
     return {
-        email: "admin@ugcompta.com",
+        email: process.env.ADMIN_EMAIL || "admin@ugcompta.com",
     };
   },
 });

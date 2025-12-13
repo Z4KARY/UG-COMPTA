@@ -17,6 +17,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function AdminAuth() {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
@@ -25,6 +27,8 @@ export default function AdminAuth() {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const verifyPassword = useAction(api.adminActions.verifyAdminPassword);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -44,6 +48,14 @@ export default function AdminAuth() {
     }
 
     try {
+      // First verify password to give better feedback
+      const isPasswordValid = await verifyPassword({ password });
+      if (!isPasswordValid) {
+        setError("Invalid password");
+        setIsLoading(false);
+        return;
+      }
+
       // Combine password and OTP for the custom provider
       const combinedCredential = `${password}|${otp}`;
       
