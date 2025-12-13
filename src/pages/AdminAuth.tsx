@@ -39,6 +39,9 @@ export default function AdminAuth() {
       // First, sign in anonymously
       await signIn("anonymous");
       
+      // Wait a moment for auth state to settle
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // Then verify password and set admin role
       await setAdminRole({ password });
       
