@@ -12,10 +12,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { useAction, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function AdminAuth() {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
   const navigate = useNavigate();
+  const setAdminRole = useMutation(api.adminAuth.setAdminRole);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -33,11 +36,26 @@ export default function AdminAuth() {
     setError(null);
 
     try {
-      await signIn("admin-password", { 
-        email,
-        password,
-        flow: "signIn" 
-      });
+      // Verify admin credentials using the action
+      const { verifyAdminPassword } = await import("@/convex/_generated/api").then(m => m.api.adminActions);
+      const isValid = await fetch(`${import.meta.env.VITE_CONVEX_URL}/api/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "adminActions:verifyAdminPassword",
+          args: { password },
+          format: "json"
+        })
+      }).then(r => r.json());
+
+      if (!isValid) {
+        setError("Invalid email or password");
+        setIsLoading(false);
+        return;
+      }
+
+      // Sign in anonymously and set admin role
+      await signIn("anonymous");
       
       // If successful, the useEffect will redirect
     } catch (error) {
