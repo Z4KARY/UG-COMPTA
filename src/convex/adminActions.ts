@@ -4,7 +4,7 @@ import { action } from "./_generated/server";
 export const verifyAdminPassword = action({
   args: { password: v.string() },
   handler: async (ctx, args) => {
-    const adminPasswordEnv = process.env.ADMIN_PASSWORD;
+    const adminPasswordEnv = typeof process !== "undefined" ? process.env.ADMIN_PASSWORD : undefined;
     if (!adminPasswordEnv) {
       throw new Error("ADMIN_PASSWORD environment variable is not set. Please set it in the Convex dashboard.");
     }

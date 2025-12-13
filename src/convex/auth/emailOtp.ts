@@ -9,12 +9,14 @@ function generateOTP(length: number = 6): string {
 export const emailOtp = Email({
   id: "email-otp",
   maxAge: 60 * 15, // 15 minutes
-  // This function can be asynchronous
   generateVerificationToken() {
     return generateOTP(6);
   },
   async sendVerificationRequest({ identifier: email, provider, token }) {
     try {
+      // Safe process.env access
+      const appName = (typeof process !== "undefined" ? process.env.VLY_APP_NAME : undefined) || "a vly.ai application";
+      
       const response = await fetch("https://email.vly.ai/send_otp", {
         method: "POST",
         headers: {
@@ -24,7 +26,7 @@ export const emailOtp = Email({
         body: JSON.stringify({
           to: email,
           otp: token,
-          appName: process.env.VLY_APP_NAME || "a vly.ai application",
+          appName: appName,
         }),
       });
 

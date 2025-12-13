@@ -1,6 +1,6 @@
 import { Password } from "@convex-dev/auth/providers/Password";
 
-const adminPasswordProvider = Password({
+export const AdminPassword = Password({
   id: "admin-password",
   name: "Admin",
   profile(params) {
@@ -11,11 +11,11 @@ const adminPasswordProvider = Password({
     };
   },
   verify: async (params, ctx) => {
-    // params contains the credentials directly
     const { password, email } = params as any;
     
-    const adminEmailEnv = process.env.ADMIN_EMAIL;
-    const adminPasswordEnv = process.env.ADMIN_PASSWORD;
+    // Safe process.env access
+    const adminEmailEnv = typeof process !== "undefined" ? process.env.ADMIN_EMAIL : undefined;
+    const adminPasswordEnv = typeof process !== "undefined" ? process.env.ADMIN_PASSWORD : undefined;
 
     if (!adminPasswordEnv) {
       console.error("ADMIN_PASSWORD env var not set");
@@ -51,10 +51,3 @@ const adminPasswordProvider = Password({
     };
   },
 });
-
-// Ensure ID is set (workaround for potential bug where ID is not propagated)
-if (!(adminPasswordProvider as any).id) {
-    (adminPasswordProvider as any).id = "admin-password";
-}
-
-export const AdminPassword = adminPasswordProvider;
