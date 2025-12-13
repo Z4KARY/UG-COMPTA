@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
 
 export default function AdminAuth() {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
@@ -25,7 +26,6 @@ export default function AdminAuth() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [shouldUpgrade, setShouldUpgrade] = useState(false);
   
   useEffect(() => {
     // Only redirect if the user is actually an admin
@@ -39,42 +39,36 @@ export default function AdminAuth() {
     setIsLoading(true);
     setError(null);
 
+    const trimmedPassword = password.trim();
+
     try {
+      // 1. Ensure authenticated (anonymous if needed)
       if (!isAuthenticated) {
         console.log("Signing in anonymously...");
         await signIn("anonymous");
-        // Trigger upgrade after auth state updates
-        setShouldUpgrade(true);
-      } else {
-        // Already authenticated, trigger upgrade immediately
-        setShouldUpgrade(true);
       }
+
+      // 2. Call mutation immediately
+      console.log("Setting admin role...");
+      await setAdminRole({ password: trimmedPassword });
+      
+      toast.success("Admin access granted");
+      navigate("/admin");
     } catch (error) {
-      console.error("Sign-in error:", error);
-      setError("Failed to sign in");
+      console.error("Admin login error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
+      
+      // Handle specific error messages if needed, or just show what the backend sent
+      if (errorMessage.includes("Invalid password")) {
+        setError("Invalid password provided.");
+      } else {
+        setError(errorMessage);
+      }
+      toast.error(errorMessage);
+    } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    const performUpgrade = async () => {
-      if (shouldUpgrade && isAuthenticated) {
-        try {
-          console.log("Setting admin role...");
-          await setAdminRole({ password });
-          // Success is handled by the redirect useEffect when user role updates
-        } catch (error) {
-          console.error("Upgrade error:", error);
-          const errorMessage = error instanceof Error ? error.message : "Invalid password";
-          setError(errorMessage);
-          setIsLoading(false);
-          setShouldUpgrade(false);
-        }
-      }
-    };
-
-    performUpgrade();
-  }, [shouldUpgrade, isAuthenticated, password, setAdminRole]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30">
@@ -91,7 +85,7 @@ export default function AdminAuth() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Email Address</label>
+              <label className="text-sm font-medium">Email Address (Optional)</label>
               <Input
                 name="email"
                 placeholder="admin@example.com"
@@ -99,7 +93,6 @@ export default function AdminAuth() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                required
               />
             </div>
             <div className="space-y-2">
@@ -124,7 +117,7 @@ export default function AdminAuth() {
               type="submit" 
               className="w-full" 
               variant="destructive"
-              disabled={isLoading || !email || !password}
+              disabled={isLoading || !password}
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
