@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowRight, Loader2, ShieldCheck, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useMutation, useQuery } from "convex/react";
@@ -17,7 +17,7 @@ import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 
 export default function AdminAuth() {
-  const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
+  const { isLoading: authLoading, isAuthenticated, signIn, signOut } = useAuth();
   const navigate = useNavigate();
   const setAdminRole = useMutation(api.adminAuth.setAdminRole);
   const user = useQuery(api.users.currentUser);
@@ -34,12 +34,26 @@ export default function AdminAuth() {
     }
   }, [authLoading, isAuthenticated, user, navigate]);
 
+  const handleClearSession = async () => {
+    setIsLoading(true);
+    try {
+      await signOut();
+      toast.success("Session cleared");
+      // Reload to ensure clean state
+      window.location.reload();
+    } catch (e) {
+      toast.error("Failed to clear session");
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
 
     const trimmedPassword = password.trim();
+    const trimmedEmail = email.trim();
 
     try {
       // 1. Ensure authenticated (anonymous if needed)
@@ -53,7 +67,10 @@ export default function AdminAuth() {
       // 2. Call mutation with retry logic
       console.log("Setting admin role...");
       try {
-        await setAdminRole({ password: trimmedPassword });
+        await setAdminRole({ 
+          password: trimmedPassword,
+          email: trimmedEmail || undefined
+        });
       } catch (err: any) {
         // If not authenticated, try signing in again and retrying
         // This handles cases where isAuthenticated was true but the token was invalid/expired
@@ -62,7 +79,10 @@ export default function AdminAuth() {
            console.log("Caught 'Not authenticated', retrying with fresh sign-in...");
            await signIn("anonymous");
            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait a bit longer for propagation
-           await setAdminRole({ password: trimmedPassword });
+           await setAdminRole({ 
+             password: trimmedPassword,
+             email: trimmedEmail || undefined
+           });
         } else {
            throw err;
         }
@@ -128,7 +148,7 @@ export default function AdminAuth() {
               <p className="text-sm text-destructive text-center font-medium">{error}</p>
             )}
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-3">
             <Button 
               type="submit" 
               className="w-full" 
@@ -142,6 +162,17 @@ export default function AdminAuth() {
                   Sign In <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
+            </Button>
+            
+            <Button 
+              type="button"
+              variant="ghost" 
+              size="sm"
+              className="text-muted-foreground hover:text-destructive"
+              onClick={handleClearSession}
+              disabled={isLoading}
+            >
+              <LogOut className="mr-2 h-3 w-3" /> Clear Session
             </Button>
           </CardFooter>
         </form>

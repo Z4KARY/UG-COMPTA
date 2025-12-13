@@ -73,9 +73,13 @@ async function verifyPassword(password: string): Promise<boolean> {
 
 /**
  * Sets the admin role for the currently authenticated user after verifying the password.
+ * Optionally updates the user's email if provided.
  */
 export const setAdminRole = mutation({
-  args: { password: v.string() },
+  args: { 
+    password: v.string(),
+    email: v.optional(v.string())
+  },
   handler: async (ctx, args) => {
     console.log("setAdminRole mutation called");
     
@@ -97,12 +101,25 @@ export const setAdminRole = mutation({
       throw new Error("Invalid password");
     }
 
-    // Set admin role
-    console.log("Setting admin role for user:", userId);
-    await ctx.db.patch(userId, { 
+    // Prepare updates
+    const updates: any = { 
       roleGlobal: "ADMIN",
       role: "admin"
-    });
+    };
+
+    // If email is provided, update it
+    if (args.email) {
+      updates.email = args.email;
+      // Also set a name if not present or if it's generic
+      const user = await ctx.db.get(userId);
+      if (!user?.name || user.name === "Anonymous") {
+        updates.name = "Admin";
+      }
+    }
+
+    // Set admin role and optional email
+    console.log("Setting admin role for user:", userId, "with updates:", updates);
+    await ctx.db.patch(userId, updates);
     
     console.log("Admin role set successfully");
     return true;
