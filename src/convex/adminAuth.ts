@@ -77,22 +77,34 @@ async function verifyPassword(password: string): Promise<boolean> {
 export const setAdminRole = mutation({
   args: { password: v.string() },
   handler: async (ctx, args) => {
+    console.log("setAdminRole mutation called");
+    
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    console.log("User ID:", userId);
+    
+    if (!userId) {
+      console.error("No user ID found - not authenticated");
+      throw new Error("Not authenticated");
+    }
 
     // Verify password using the helper function
+    console.log("Verifying password...");
     const isValid = await verifyPassword(args.password);
+    console.log("Password valid:", isValid);
     
     if (!isValid) {
+      console.error("Password verification failed");
       throw new Error("Invalid password");
     }
 
     // Set admin role
+    console.log("Setting admin role for user:", userId);
     await ctx.db.patch(userId, { 
       roleGlobal: "ADMIN",
       role: "admin"
     });
     
+    console.log("Admin role set successfully");
     return true;
   },
 });

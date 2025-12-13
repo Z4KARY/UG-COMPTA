@@ -36,19 +36,30 @@ export default function AdminAuth() {
     setError(null);
 
     try {
+      console.log("Starting admin authentication...");
+      
       // First, sign in anonymously
+      console.log("Signing in anonymously...");
       await signIn("anonymous");
       
       // Wait a moment for auth state to settle
+      console.log("Waiting for auth state to settle...");
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Then verify password and set admin role
+      console.log("Setting admin role with password...");
       await setAdminRole({ password });
       
+      console.log("Admin role set successfully!");
       // If successful, the useEffect will redirect to /admin
     } catch (error) {
       console.error("Sign-in error:", error);
-      setError("Invalid email or password");
+      console.error("Error type:", typeof error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+      
+      // Show more specific error message
+      const errorMessage = error instanceof Error ? error.message : "Invalid email or password";
+      setError(errorMessage);
       setIsLoading(false);
     }
   };
