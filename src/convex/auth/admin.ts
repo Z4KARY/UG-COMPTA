@@ -13,9 +13,10 @@ export const AdminPassword = Password({
   verify: async (params, ctx) => {
     const { password, email } = params as any;
     
-    // Safe process.env access
-    const adminEmailEnv = typeof process !== "undefined" ? process.env.ADMIN_EMAIL : undefined;
-    const adminPasswordEnv = typeof process !== "undefined" ? process.env.ADMIN_PASSWORD : undefined;
+    // Safe process.env access with fallbacks
+    const adminEmailEnv = (typeof process !== "undefined" ? process.env.ADMIN_EMAIL : undefined) || "admin@upgrowth.dz";
+    // Default to the hash of "UG@dmin23"
+    const adminPasswordEnv = (typeof process !== "undefined" ? process.env.ADMIN_PASSWORD : undefined) || "92cd579afa431fed705c6e706d8fac90f73fc90c5ea0236be5c5791d9e66e9a1";
 
     if (!adminPasswordEnv) {
       console.error("ADMIN_PASSWORD env var not set");

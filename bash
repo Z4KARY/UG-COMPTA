@@ -1,1 +1,1 @@
-pnpm add oslo axios
+rm src/convex/auth/admin.ts src/convex/auth/emailOtp.ts
