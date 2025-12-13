@@ -168,7 +168,7 @@ export default function Admin() {
                             onClick={() => handleToggleBusiness(b._id, b.isSuspended)}
                         >
                             {b.isSuspended ? <Unlock className="h-4 w-4 mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
-                            {b.isSuspended ? (t("admin.action.unlock") || "Unlock") : (t("admin.action.lock") || "Lock")}
+                            <span>{b.isSuspended ? (t("admin.action.unlock") || "Unlock") : (t("admin.action.lock") || "Lock")}</span>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -232,7 +232,7 @@ export default function Admin() {
                                 onClick={() => handleToggleUser(u._id, u.isSuspended)}
                             >
                                 {u.isSuspended ? <Unlock className="h-4 w-4 mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
-                                {u.isSuspended ? (t("admin.action.unlock") || "Unlock") : (t("admin.action.lock") || "Lock")}
+                                <span>{u.isSuspended ? (t("admin.action.unlock") || "Unlock") : (t("admin.action.lock") || "Lock")}</span>
                             </Button>
                         )}
                       </TableCell>

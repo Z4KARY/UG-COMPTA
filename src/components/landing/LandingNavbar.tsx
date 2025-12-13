@@ -52,15 +52,15 @@ export function LandingNavbar() {
           <LanguageSelector />
           {isAuthenticated ? (
             <Button asChild>
-              <Link to="/dashboard">{t("landing.nav.dashboard")}</Link>
+              <Link to="/dashboard"><span>{t("landing.nav.dashboard")}</span></Link>
             </Button>
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link to="/auth">{t("landing.nav.signIn")}</Link>
+                <Link to="/auth"><span>{t("landing.nav.signIn")}</span></Link>
               </Button>
               <Button asChild>
-                <Link to="/auth">{t("landing.nav.getStarted")}</Link>
+                <Link to="/auth"><span>{t("landing.nav.getStarted")}</span></Link>
               </Button>
             </>
           )}
@@ -98,15 +98,15 @@ export function LandingNavbar() {
               <div className="h-px bg-border my-2" />
               {isAuthenticated ? (
                 <Button asChild className="w-full">
-                  <Link to="/dashboard">{t("landing.nav.dashboard")}</Link>
+                  <Link to="/dashboard"><span>{t("landing.nav.dashboard")}</span></Link>
                 </Button>
               ) : (
                 <>
                   <Button variant="ghost" asChild className="w-full justify-start">
-                    <Link to="/auth">{t("landing.nav.signIn")}</Link>
+                    <Link to="/auth"><span>{t("landing.nav.signIn")}</span></Link>
                   </Button>
                   <Button asChild className="w-full">
-                    <Link to="/auth">{t("landing.nav.getStarted")}</Link>
+                    <Link to="/auth"><span>{t("landing.nav.getStarted")}</span></Link>
                   </Button>
                 </>
               )}

@@ -26,22 +26,22 @@ export function LandingHero() {
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent max-w-4xl mx-auto">
-            {t("landing.hero.title")}
+            <span>{t("landing.hero.title")}</span>
           </h1>
           
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            {t("landing.hero.description")}
+            <span>{t("landing.hero.description")}</span>
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button size="lg" className="h-12 px-8 text-base w-full sm:w-auto" asChild>
               <Link to={isAuthenticated ? "/dashboard" : "/auth"}>
-                {t("landing.hero.startFree")} <ArrowRight className="ml-2 h-4 w-4" />
+                <span>{t("landing.hero.startFree")}</span> <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="h-12 px-8 text-base w-full sm:w-auto" asChild>
               <Link to="/auth">
-                <PlayCircle className="mr-2 h-4 w-4" /> {t("landing.hero.viewDemo")}
+                <PlayCircle className="mr-2 h-4 w-4" /> <span>{t("landing.hero.viewDemo")}</span>
               </Link>
             </Button>
           </div>
