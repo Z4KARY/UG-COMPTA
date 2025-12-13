@@ -96,6 +96,57 @@ export const testCreate = mutation({
   }
 });
 
+export const simulateFrontendLoad = mutation({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.query("users").withIndex("email", q => q.eq("email", args.email)).first();
+    if (!user) return { error: "User not found" };
+
+    // 1. Simulate getMyBusiness (Default behavior)
+    let business = await ctx.db
+        .query("businesses")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .first();
+
+    if (!business) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_user", (q) => q.eq("userId", user._id))
+            .first();
+        
+        if (member) {
+            business = await ctx.db.get(member.businessId);
+        }
+    }
+
+    if (!business) return { error: "No business found for user" };
+
+    // 2. Simulate invoices.list for this business
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_business", (q) => q.eq("businessId", business._id))
+      .order("desc")
+      .collect();
+
+    return {
+        user: user.email,
+        selectedBusiness: {
+            id: business._id,
+            name: business.name,
+            type: business.type
+        },
+        invoicesFound: invoices.length,
+        invoices: invoices.map(i => ({ 
+            id: i._id,
+            number: i.invoiceNumber, 
+            total: i.totalTtc, 
+            status: i.status,
+            date: new Date(i.issueDate).toISOString()
+        }))
+    };
+  }
+});
+
 export const getInvoice = query({
   args: { invoiceId: v.id("invoices") },
   handler: async (ctx, args) => {
