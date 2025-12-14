@@ -19,6 +19,7 @@ import type * as contact from "../contact.js";
 import type * as crons from "../crons.js";
 import type * as customers from "../customers.js";
 import type * as debug from "../debug.js";
+import type * as debug_env from "../debug_env.js";
 import type * as debug_fix from "../debug_fix.js";
 import type * as declarations from "../declarations.js";
 import type * as emails from "../emails.js";
@@ -75,6 +76,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   customers: typeof customers;
   debug: typeof debug;
+  debug_env: typeof debug_env;
   debug_fix: typeof debug_fix;
   declarations: typeof declarations;
   emails: typeof emails;
