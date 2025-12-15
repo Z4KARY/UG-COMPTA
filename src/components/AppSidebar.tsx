@@ -23,13 +23,14 @@ import {
   Users,
   FileSpreadsheet,
   ShoppingCart,
-  ChevronRight,
+  ChevronsUpDown,
+  Plus,
   Truck,
+  ScrollText,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { ChevronsUpDown, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,49 +42,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const items = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Invoices",
-    url: "/invoices",
-    icon: FileText,
-  },
-  {
-    title: "Purchases",
-    url: "/purchases",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Customers",
-    url: "/customers",
-    icon: Users,
-  },
-  {
-    title: "Suppliers",
-    url: "/suppliers",
-    icon: Truck,
-  },
-  {
-    title: "Products",
-    url: "/products",
-    icon: Package,
-  },
-  {
-    title: "Declarations",
-    url: "/declarations",
-    icon: FileSpreadsheet,
-  },
-  {
-    title: "Business Settings",
-    url: "/settings",
-    icon: Building2,
-  },
-];
 
 export function AppSidebar() {
   const location = useLocation();
@@ -129,6 +87,11 @@ export function AppSidebar() {
       title: t("sidebar.declarations"),
       url: "/declarations",
       icon: FileSpreadsheet,
+    },
+    {
+      title: t("sidebar.legalDocuments"),
+      url: "/legal-documents",
+      icon: ScrollText,
     },
     {
       title: t("sidebar.settings"),

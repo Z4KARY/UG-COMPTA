@@ -82,6 +82,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/purchases/:id" element={<PurchaseDetail />} />
               <Route path="/suppliers" element={<Suppliers />} />
               <Route path="/declarations" element={<Declarations />} />
+              <Route path="/legal-documents" element={<LegalDocumentSettings />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

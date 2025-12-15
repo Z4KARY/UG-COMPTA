@@ -13,6 +13,7 @@ export const common = {
     "sidebar.suppliers": "Fournisseurs",
     "sidebar.products": "Produits",
     "sidebar.declarations": "Déclarations",
+    "sidebar.legalDocuments": "Documents Juridiques",
     "sidebar.settings": "Paramètres",
     "sidebar.myBusinesses": "Mes entreprises",
     "sidebar.addBusiness": "Ajouter une entreprise",

@@ -20,6 +20,7 @@ export const en = {
     "sidebar.suppliers": "Suppliers",
     "sidebar.products": "Products",
     "sidebar.declarations": "Declarations",
+    "sidebar.legalDocuments": "Legal Documents",
     "sidebar.settings": "Business Settings",
     "sidebar.myBusinesses": "My Businesses",
     "sidebar.addBusiness": "Add Business",
