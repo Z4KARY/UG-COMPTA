@@ -68,6 +68,20 @@ export const get = query({
             business = { ...business, logoUrl: url };
         }
     }
+    
+    if (business.signatureStorageId) {
+        const url = await ctx.storage.getUrl(business.signatureStorageId);
+        if (url) {
+            business = { ...business, signatureUrl: url };
+        }
+    }
+
+    if (business.stampStorageId) {
+        const url = await ctx.storage.getUrl(business.stampStorageId);
+        if (url) {
+            business = { ...business, stampUrl: url };
+        }
+    }
 
     const customer = await ctx.db.get(invoice.customerId);
     const items = await ctx.db
