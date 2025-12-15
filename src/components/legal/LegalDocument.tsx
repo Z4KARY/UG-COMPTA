@@ -1,5 +1,4 @@
 import { Separator } from "@/components/ui/separator";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LegalDocumentProps {
   business: any;
@@ -8,7 +7,6 @@ interface LegalDocumentProps {
 }
 
 export function LegalDocument({ business, content, title }: LegalDocumentProps) {
-  const { t, language } = useLanguage();
   const primaryColor = business?.primaryColor || "#0f172a";
   const font = business?.font || "Inter";
   const fontFamily = font.includes(" ")
@@ -20,13 +18,8 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
 
   const isAE = business?.type === "auto_entrepreneur";
 
-  // Format date based on current language
-  const formattedDate = new Date().toLocaleDateString(
-    language === 'ar' ? 'ar-DZ' : language === 'en' ? 'en-US' : 'fr-FR'
-  );
-
   return (
-    <div className="w-full mx-auto print:w-full print:max-w-none" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="w-full mx-auto print:w-full print:max-w-none">
       <div
         className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] relative flex flex-col"
         style={{ fontFamily: fontFamily }}
@@ -65,10 +58,10 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
 
             <div className="w-full md:w-1/2 text-right">
               <h1 className="text-3xl font-light tracking-tight mb-2 uppercase text-gray-900">
-                {title || t("legal.defaultTitle")}
+                {title || "DOCUMENT JURIDIQUE"}
               </h1>
               <p className="text-sm text-gray-500">
-                {t("legal.date")}: {formattedDate}
+                Date: {new Date().toLocaleDateString("fr-FR")}
               </p>
             </div>
           </div>
@@ -84,7 +77,7 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
           {/* Signature & Stamp Section */}
           <div className="flex justify-end mb-12 print:break-inside-avoid">
             <div className="w-[300px] text-center relative">
-              <p className="text-sm font-semibold text-gray-900 mb-4">{t("legal.signatureAndStamp")}</p>
+              <p className="text-sm font-semibold text-gray-900 mb-4">Signature et Cachet</p>
               
               <div className="h-48 w-full flex items-center justify-center relative overflow-hidden">
                 {/* Stamp Layer */}
@@ -110,7 +103,7 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
                 {/* Placeholder if neither exists */}
                 {!stampUrl && !signatureUrl && (
                   <div className="w-full h-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
-                    <span className="text-xs text-gray-300">{t("legal.stampAndSignaturePlaceholder")}</span>
+                    <span className="text-xs text-gray-300">Cachet et Signature</span>
                   </div>
                 )}
               </div>
@@ -140,7 +133,7 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
                   </>
                 )}
             </div>
-            <p className="mt-2">{t("legal.generatedBy")}</p>
+            <p className="mt-2">Document généré par UGCOMPTA</p>
           </div>
         </div>
       </div>

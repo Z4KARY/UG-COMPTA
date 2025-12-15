@@ -37,7 +37,6 @@ export const common = {
     "common.nif": "NIF",
     "common.rc": "RC",
     "common.actions": "Actions",
-    "common.cancel": "Annuler",
     "status.paid": "Payé",
     "status.unpaid": "Impayé",
     "auth.getStarted": "Commencer",

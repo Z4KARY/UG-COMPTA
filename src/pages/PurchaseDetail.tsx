@@ -96,11 +96,6 @@ export default function PurchaseDetail() {
 
   const status = invoice?.status || (invoice?.paymentDate ? "paid" : "unpaid");
 
-  // Dynamic Title
-  if (invoice && supplier) {
-    document.title = `Purchase - ${supplier.name} - ${invoice.invoiceNumber}`;
-  }
-
   if (!invoice) {
     return (
       <DashboardLayout>
@@ -132,7 +127,7 @@ export default function PurchaseDetail() {
               width: 100% !important;
               max-width: none !important;
               margin: 0 !important;
-              padding: 0 !important;
+              padding: 20mm !important;
               box-shadow: none !important;
               border: none !important;
               background: white !important;
@@ -230,7 +225,6 @@ export default function PurchaseDetail() {
         invoice={invoice} 
         business={business} 
         supplier={supplier} 
-        language="fr" // Default to French for now as it's standard in Algeria, or could be dynamic
       />
     </DashboardLayout>
   );
