@@ -3,6 +3,7 @@ import { Id } from "./_generated/dataModel";
 import { calculateLineItem } from "./fiscal";
 import { internal } from "./_generated/api";
 import { requireBusinessAccess } from "./permissions";
+import { decrementInvoiceCounterIfLast } from "./invoice_utils";
 
 export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id<"users">) {
     const invoice = await ctx.db.get(args.id as Id<"invoices">);
@@ -118,6 +119,15 @@ export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoi
 
     // Delete invoice
     await ctx.db.delete(args.id);
+
+    // Try to decrement counter if this was the last invoice
+    await decrementInvoiceCounterIfLast(
+        ctx, 
+        invoice.businessId, 
+        invoice.type, 
+        invoice.invoiceNumber, 
+        invoice.issueDate
+    );
 
     await ctx.scheduler.runAfter(0, internal.audit.log, {
         businessId: invoice.businessId,
