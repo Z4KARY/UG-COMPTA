@@ -38,8 +38,8 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
         <div className="p-8 md:p-12 print:p-0 flex-grow flex flex-col">
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
-            <div className="w-full md:w-1/2">
+          <div className="flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12">
+            <div className="w-full md:w-1/2 print:w-1/2">
               {logoUrl ? (
                 <img src={logoUrl} alt="Business Logo" className="h-20 object-contain mb-6" />
               ) : (
@@ -79,8 +79,8 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
               </div>
             </div>
 
-            <div className={`w-full md:w-1/2 ${isRTL ? "md:text-left" : "md:text-right"}`}>
-              <div className={`inline-block ${isRTL ? "text-right md:text-left" : "text-left md:text-right"}`}>
+            <div className={`w-full md:w-1/2 print:w-1/2 ${isRTL ? "md:text-left print:text-left" : "md:text-right print:text-right"}`}>
+              <div className={`inline-block ${isRTL ? "text-right md:text-left print:text-left" : "text-left md:text-right print:text-right"}`}>
                 <h1 className="text-4xl font-light tracking-tight mb-2 uppercase text-gray-900">
                   {invoice.type === "quote" ? labels.quote : invoice.type === "credit_note" ? labels.credit_note : labels.invoice}
                 </h1>
