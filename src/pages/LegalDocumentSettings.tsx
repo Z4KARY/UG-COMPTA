@@ -8,9 +8,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Loader2, Save, Eye } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { LegalDocument } from "@/components/legal/LegalDocument";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { LegalDocument } from "@/components/legal/LegalDocument";
+import { LEGAL_TEMPLATES, LegalTemplate } from "@/lib/legal-templates";
+import { FileText, Check } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function LegalDocumentSettings() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
@@ -19,6 +32,7 @@ export default function LegalDocumentSettings() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<LegalTemplate | null>(null);
 
   useEffect(() => {
     if (data?.document) {
@@ -26,6 +40,12 @@ export default function LegalDocumentSettings() {
       setContent(data.document.content || "");
     }
   }, [data]);
+
+  const handleTemplateSelect = (template: LegalTemplate) => {
+    setTitle(template.title);
+    setContent(template.content);
+    toast.success("Modèle appliqué avec succès");
+  };
 
   const handleSave = async () => {
     if (!data?.business) return;
@@ -78,6 +98,59 @@ export default function LegalDocumentSettings() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Modèles
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Choisir un modèle</DialogTitle>
+                  <DialogDescription>
+                    Sélectionnez un modèle de document pour commencer. Attention, cela remplacera le contenu actuel.
+                  </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    {LEGAL_TEMPLATES.map((template) => (
+                      <div 
+                        key={template.id} 
+                        className="border rounded-lg p-4 hover:border-primary cursor-pointer transition-all hover:bg-muted/50 flex flex-col gap-3"
+                        onClick={() => setSelectedTemplate(template)}
+                      >
+                        <div className="flex justify-between items-start">
+                          <Badge variant="secondary" className="capitalize">{template.category}</Badge>
+                          {selectedTemplate?.id === template.id && (
+                            <div className="bg-primary text-primary-foreground rounded-full p-1">
+                              <Check className="h-3 w-3" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-1">{template.title}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{template.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Annuler</Button>
+                  </DialogClose>
+                  <DialogClose asChild>
+                    <Button 
+                      disabled={!selectedTemplate} 
+                      onClick={() => selectedTemplate && handleTemplateSelect(selectedTemplate)}
+                    >
+                      Appliquer le modèle
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline">
