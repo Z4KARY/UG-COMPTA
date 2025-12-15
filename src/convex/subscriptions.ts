@@ -9,24 +9,42 @@ export const PLANS = {
     price: 0,
     features: ["Unlimited Invoices", "Client Management", "G12 Reports"],
   },
+  startup: {
+    id: "startup",
+    name: "Startup",
+    price: 39000,
+    features: ["Everything in Free", "G50 Declarations", "VAT Management", "Multi-user Access (3)"],
+  },
   pro: {
     id: "pro",
     name: "Small Business",
-    price: 2000,
-    features: ["Everything in Free", "G50 Declarations", "VAT Management", "Multi-user Access"],
+    price: 49000,
+    features: ["Everything in Startup", "Multi-user Access (6)", "Priority Support"],
+  },
+  premium: {
+    id: "premium",
+    name: "Premium",
+    price: 69000,
+    features: ["Everything in Pro", "Multi-user Access (10)", "Advanced Reporting"],
   },
   enterprise: {
     id: "enterprise",
     name: "Enterprise",
     price: null, // Custom
-    features: ["Everything in Pro", "Custom Integrations", "Dedicated Support"],
+    features: ["Everything in Premium", "Custom Integrations", "Dedicated Support"],
   },
 };
 
 export const upgradeSubscription = mutation({
   args: {
     businessId: v.id("businesses"),
-    planId: v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise")),
+    planId: v.union(
+      v.literal("free"), 
+      v.literal("startup"), 
+      v.literal("pro"), 
+      v.literal("premium"), 
+      v.literal("enterprise")
+    ),
     interval: v.union(v.literal("month"), v.literal("year")),
     paymentMethod: v.optional(v.string()),
   },

@@ -4,42 +4,44 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, CreditCard, Zap, Shield, Star, LucideIcon } from "lucide-react";
+import { Check, Loader2, CreditCard, Zap, Shield, Star, LucideIcon, Rocket, Crown } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PRICING_PLANS, PlanId } from "@/lib/pricing";
 
 interface SubscriptionSettingsProps {
   businessId: Id<"businesses">;
-  currentPlan?: "free" | "pro" | "enterprise";
+  currentPlan?: PlanId;
   subscriptionEndsAt?: number;
 }
 
-interface Plan {
-  id: "free" | "pro" | "enterprise";
-  name: string;
-  price: string;
-  period?: string;
-  description: string;
-  features: string[];
-  icon: LucideIcon;
-  popular?: boolean;
-}
+// Helper to map plan IDs to icons
+const getPlanIcon = (id: string): LucideIcon => {
+  switch (id) {
+    case "free": return Star;
+    case "startup": return Rocket;
+    case "pro": return Zap;
+    case "premium": return Crown;
+    case "enterprise": return Shield;
+    default: return Star;
+  }
+};
 
 export function SubscriptionSettings({ businessId, currentPlan = "free", subscriptionEndsAt }: SubscriptionSettingsProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const upgrade = useMutation(api.subscriptions.upgradeSubscription);
   const history = useQuery(api.subscriptions.getSubscriptionHistory, { businessId });
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
-  const handleUpgrade = async (planId: "free" | "pro" | "enterprise") => {
+  const handleUpgrade = async (planId: PlanId) => {
     setIsLoading(planId);
     try {
       await upgrade({
         businessId,
         planId,
-        interval: "month",
+        interval: "year", // Default to year as per pricing
         paymentMethod: "simulated_card",
       });
       toast.success(t("settings.subscription.toast.success").replace("{plan}", planId.toUpperCase()));
@@ -51,42 +53,15 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
     }
   };
 
-  const plans: Plan[] = [
-    {
-      id: "free",
-      name: t("settings.subscription.plans.free.name"),
-      price: "Free",
-      description: t("settings.subscription.plans.free.desc"),
-      features: ["Unlimited Invoices", "Client Management", "G12 Reports", "Basic Support"],
-      icon: Star,
-    },
-    {
-      id: "pro",
-      name: t("settings.subscription.plans.pro.name"),
-      price: "2000 DA",
-      period: "/month",
-      description: t("settings.subscription.plans.pro.desc"),
-      features: ["Everything in Free", "G50 Declarations", "VAT Management", "Multi-user Access", "Priority Support"],
-      icon: Zap,
-      popular: true,
-    },
-    {
-      id: "enterprise",
-      name: t("settings.subscription.plans.enterprise.name"),
-      price: "Custom",
-      description: t("settings.subscription.plans.enterprise.desc"),
-      features: ["Everything in Pro", "Custom Integrations", "Dedicated Account Manager", "SLA Support"],
-      icon: Shield,
-    },
-  ];
+  const pricing = PRICING_PLANS[language as keyof typeof PRICING_PLANS] ?? PRICING_PLANS.en;
 
   return (
     <div className="space-y-8">
-      <div className="grid gap-6 lg:grid-cols-3">
-        {plans.map((plan) => {
+      <div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-5">
+        {pricing.map((plan) => {
           const isCurrent = currentPlan === plan.id;
           const isPopular = plan.popular;
-          const Icon = plan.icon;
+          const Icon = getPlanIcon(plan.id);
 
           return (
             <Card 
@@ -115,22 +90,32 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
                   </div>
                 </div>
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
+                <CardDescription className="min-h-[40px]">{plan.description}</CardDescription>
               </CardHeader>
               
               <CardContent className="flex-1 space-y-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold">{plan.price}</span>
+                  </div>
+                  {plan.period && <span className="text-xs text-muted-foreground">{plan.period}</span>}
+                  {plan.originalPrice && (
+                     <span className="text-xs line-through text-muted-foreground/70">{plan.originalPrice}</span>
+                  )}
                 </div>
 
-                <ul className="space-y-3 text-sm">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <ul className="space-y-3 text-xs">
+                  {plan.features.slice(0, 5).map((feature, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="h-3 w-3 text-primary shrink-0 mt-0.5" />
                       <span className="text-muted-foreground">{feature}</span>
                     </li>
                   ))}
+                  {plan.features.length > 5 && (
+                    <li className="text-muted-foreground italic pt-1">
+                      + {plan.features.length - 5} more...
+                    </li>
+                  )}
                 </ul>
               </CardContent>
               
@@ -139,7 +124,7 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
                   className="w-full" 
                   variant={isCurrent ? "outline" : isPopular ? "default" : "secondary"}
                   disabled={isCurrent || isLoading !== null}
-                  onClick={() => handleUpgrade(plan.id)}
+                  onClick={() => handleUpgrade(plan.id as PlanId)}
                 >
                   {isLoading === plan.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

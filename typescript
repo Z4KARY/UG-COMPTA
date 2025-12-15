@@ -1,66 +1,7 @@
-import { v } from "convex/values";
-import { MutationCtx } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
-import { calculateLineItem, calculateStampDuty, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
-import { internal } from "./_generated/api";
-import { requireBusinessAccess } from "./permissions";
-
-// Helper to generate next invoice number
-export async function generateInvoiceNumber(
-// ... keep existing code
-
-export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: Id<"users">) {
-  const userId = getAuthUserId(ctx);
-  const invoice = await ctx.db.get(args.id as Id<"invoices">);
-  if (!invoice) return null;
-
-  const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
-  if (!business || business.userId !== userId) throw new Error("Unauthorized");
-
-  const businessDoc = await checkBusinessAccess(ctx, invoice.businessId, userId);
-  if (!businessDoc) return null;
-
-  if (!businessDoc || businessDoc.userId !== userId) return null;
-
-  if (!businessDoc) return [];
-
-  if (businessDoc === undefined) {
-    // loading
-  }
-  if (businessDoc === null || !businessDoc.type) {
-    return <SetupRequired />;
-  }
-}
-
-export async function issueInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices">, pdfHash?: string }, userId: Id<"users">)
-
-export async function updateInvoiceStatusLogic(ctx: MutationCtx, args: { id: Id<"invoices">, status: string }, userId: Id<"users">)
-
-export async function markInvoiceAsPaidLogic(ctx: MutationCtx, args: any, userId: Id<"users">)
-
-export async function markInvoiceAsUnpaidLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: Id<"users">)
-
-export async function addInvoicePaymentLogic(ctx: MutationCtx, args: any, userId: Id<"users">)
-
-export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: Id<"users">) {
-  const userId = getAuthUserId(ctx);
-  const invoice = await ctx.db.get(args.id as Id<"invoices">);
-  if (!invoice) return null;
-
-  const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
-  if (!business || business.userId !== userId) throw new Error("Unauthorized");
-
-  const businessDoc = await checkBusinessAccess(ctx, invoice.businessId, userId);
-  if (!businessDoc) return null;
-
-  if (!businessDoc || businessDoc.userId !== userId) return null;
-
-  if (!businessDoc) return [];
-
-  if (businessDoc === undefined) {
-    // loading
-  }
-  if (businessDoc === null || !businessDoc.type) {
-    return <SetupRequired />;
-  }
-}
+      planId: v.union(
+        v.literal("free"), 
+        v.literal("startup"), 
+        v.literal("pro"), 
+        v.literal("premium"), 
+        v.literal("enterprise")
+      ),

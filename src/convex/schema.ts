@@ -127,7 +127,13 @@ const schema = defineSchema(
       vatCreditCarriedForward: v.optional(v.number()),
       
       // SaaS Subscription Fields
-      plan: v.optional(v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise"))),
+      plan: v.optional(v.union(
+        v.literal("free"), 
+        v.literal("startup"), 
+        v.literal("pro"), 
+        v.literal("premium"), 
+        v.literal("enterprise")
+      )),
       subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial"))),
       subscriptionEndsAt: v.optional(v.number()),
     }).index("by_user", ["userId"])
@@ -515,7 +521,13 @@ const schema = defineSchema(
 
     subscriptions: defineTable({
       businessId: v.id("businesses"),
-      planId: v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise")),
+      planId: v.union(
+        v.literal("free"), 
+        v.literal("startup"), 
+        v.literal("pro"), 
+        v.literal("premium"), 
+        v.literal("enterprise")
+      ),
       status: v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial")),
       amount: v.number(),
       currency: v.string(),

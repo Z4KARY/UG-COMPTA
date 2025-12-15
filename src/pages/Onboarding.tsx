@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2, CheckCircle2, Building2, User, CreditCard } from "lucide-react";
 import { toast } from "sonner";
+import { PlanId } from "@/lib/pricing";
 
 export default function Onboarding() {
   const location = useLocation();
@@ -21,7 +22,7 @@ export default function Onboarding() {
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [planId, setPlanId] = useState<"free" | "pro" | "enterprise">("free");
+  const [planId, setPlanId] = useState<PlanId>("free");
 
   // Form States
   const [fullName, setFullName] = useState("");
@@ -32,8 +33,8 @@ export default function Onboarding() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const plan = params.get("plan");
-    if (plan === "pro" || plan === "enterprise") {
-      setPlanId(plan);
+    if (plan && ["free", "startup", "pro", "premium", "enterprise"].includes(plan)) {
+      setPlanId(plan as PlanId);
     }
   }, [location]);
 
@@ -220,7 +221,7 @@ export default function Onboarding() {
               </div>
               <CardTitle className="text-center">Payment Successful!</CardTitle>
               <CardDescription className="text-center">
-                Your subscription to the <strong>{planId === "pro" ? "Small Business" : "Enterprise"}</strong> plan is active.
+                Your subscription to the <strong>{planId}</strong> plan is active.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -231,7 +232,12 @@ export default function Onboarding() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Amount Paid</span>
-                  <span className="font-medium">{planId === "pro" ? "39,000 DZD" : "Custom"}</span>
+                  <span className="font-medium">
+                    {planId === "free" ? "0 DZD" : 
+                     planId === "startup" ? "39,000 DZD" :
+                     planId === "pro" ? "49,000 DZD" :
+                     planId === "premium" ? "69,000 DZD" : "Custom"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Billing Cycle</span>
