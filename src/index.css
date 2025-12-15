@@ -3,7 +3,6 @@
 
 /* DO NOT CHANGE */
 @import "tailwindcss";
-@import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
 
 /* DO NOT CHANGE */
