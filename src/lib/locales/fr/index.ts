@@ -3,6 +3,7 @@ import { dashboard } from "./dashboard";
 import { documents } from "./documents";
 import { entities } from "./entities";
 import { landing } from "./landing";
+import { invoiceForm } from "./invoiceForm";
 // import { settings } from "./settings"; // Uncomment if settings exists
 
 export const fr = {
@@ -11,5 +12,6 @@ export const fr = {
   ...documents,
   ...entities,
   ...landing,
+  ...invoiceForm,
   // ...settings,
 };
