@@ -9,6 +9,8 @@ export async function generateInvoiceNumber(
 ) {
   const date = new Date(dateTimestamp);
   const year = date.getFullYear();
+  const startOfYear = new Date(year, 0, 1).getTime();
+  const endOfYear = new Date(year + 1, 0, 1).getTime();
   
   // Get business settings for prefixes
   const business = await ctx.db.get(businessId);
@@ -16,6 +18,36 @@ export async function generateInvoiceNumber(
   if (type === "invoice") prefix = business?.invoicePrefix || "INV-";
   if (type === "quote") prefix = business?.quotePrefix || "DEV-";
   if (type === "credit_note") prefix = business?.creditNotePrefix || "AV-";
+
+  // Find the actual last invoice to ensure counter sync
+  // This makes the system self-healing if counters get out of sync
+  const lastInvoice = await ctx.db
+    .query("invoices")
+    .withIndex("by_business", (q) => q.eq("businessId", businessId))
+    .order("desc")
+    .filter((q) => 
+      q.and(
+        q.eq(q.field("type"), type),
+        q.gte(q.field("issueDate"), startOfYear),
+        q.lt(q.field("issueDate"), endOfYear)
+      )
+    )
+    .first();
+
+  let maxCount = 0;
+  if (lastInvoice && lastInvoice.invoiceNumber.startsWith(prefix)) {
+    // Extract the number part
+    // Format: PREFIX-YEAR-NNN
+    const withoutPrefix = lastInvoice.invoiceNumber.substring(prefix.length);
+    const yearPrefix = `${year}-`;
+    if (withoutPrefix.startsWith(yearPrefix)) {
+        const numberPart = withoutPrefix.substring(yearPrefix.length);
+        const parsed = parseInt(numberPart, 10);
+        if (!isNaN(parsed)) {
+            maxCount = parsed;
+        }
+    }
+  }
 
   // Get current counter
   const counter = await ctx.db
@@ -25,9 +57,9 @@ export async function generateInvoiceNumber(
     )
     .first();
 
-  let nextCount = 1;
+  const nextCount = maxCount + 1;
+
   if (counter) {
-    nextCount = counter.count + 1;
     await ctx.db.patch(counter._id, { count: nextCount });
   } else {
     await ctx.db.insert("invoiceCounters", {
