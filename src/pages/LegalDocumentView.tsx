@@ -7,6 +7,7 @@ import { useReactToPrint } from "react-to-print";
 import { useRef, useState } from "react";
 // @ts-ignore
 import html2pdf from "html2pdf.js";
+import { toast } from "sonner";
 
 export default function LegalDocumentView() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
@@ -16,25 +17,38 @@ export default function LegalDocumentView() {
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: data?.document?.title || "Document Juridique",
+    onAfterPrint: () => console.log("Print finished"),
+    onPrintError: (error) => {
+      console.error("Print error:", error);
+      toast.error("Erreur lors de l'impression");
+    },
   });
 
   const handleExportPdf = async () => {
-    if (!componentRef.current) return;
+    if (!componentRef.current) {
+      console.error("Component ref is missing");
+      return;
+    }
     
     setIsExporting(true);
+    console.log("Starting PDF export...");
     const element = componentRef.current;
     const opt = {
       margin: 0,
       filename: `${data?.document?.title || 'document-juridique'}.pdf`,
       image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0, logging: true },
       jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
     };
 
     try {
+      // @ts-ignore
       await html2pdf().set(opt).from(element).save();
+      console.log("PDF export successful");
+      toast.success("PDF téléchargé avec succès");
     } catch (error) {
       console.error("PDF Export Error:", error);
+      toast.error("Erreur lors de l'export PDF. Vérifiez la console.");
     } finally {
       setIsExporting(false);
     }

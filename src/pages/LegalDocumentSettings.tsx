@@ -43,27 +43,38 @@ export default function LegalDocumentSettings() {
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: title || "Document Juridique",
+    onAfterPrint: () => console.log("Print finished"),
+    onPrintError: (error) => {
+      console.error("Print error:", error);
+      toast.error("Erreur lors de l'impression");
+    },
   });
 
   const handleExportPdf = async () => {
-    if (!printRef.current) return;
+    if (!printRef.current) {
+      console.error("Print ref is missing");
+      return;
+    }
     
     setIsExporting(true);
+    console.log("Starting PDF export...");
     const element = printRef.current;
     const opt = {
       margin: 0,
       filename: `${title || 'document-juridique'}.pdf`,
       image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0, logging: true },
       jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
     };
 
     try {
+      // @ts-ignore
       await html2pdf().set(opt).from(element).save();
+      console.log("PDF export successful");
       toast.success("PDF téléchargé avec succès");
     } catch (error) {
       console.error("PDF Export Error:", error);
-      toast.error("Erreur lors de l'export PDF");
+      toast.error("Erreur lors de l'export PDF. Vérifiez la console.");
     } finally {
       setIsExporting(false);
     }
