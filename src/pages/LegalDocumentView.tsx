@@ -5,8 +5,6 @@ import { Loader2, Printer, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactToPrint } from "react-to-print";
 import { useRef, useState } from "react";
-// @ts-ignore
-import html2pdf from "html2pdf.js";
 import { toast } from "sonner";
 
 export default function LegalDocumentView() {
@@ -37,12 +35,13 @@ export default function LegalDocumentView() {
       margin: 0,
       filename: `${data?.document?.title || 'document-juridique'}.pdf`,
       image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, scrollY: 0, logging: true },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0, logging: true, letterRendering: true },
       jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
     };
 
     try {
       // @ts-ignore
+      const html2pdf = (await import("html2pdf.js")).default;
       await html2pdf().set(opt).from(element).save();
       console.log("PDF export successful");
       toast.success("PDF téléchargé avec succès");
@@ -88,7 +87,7 @@ export default function LegalDocumentView() {
           </div>
         </div>
         
-        <div style={{ position: "fixed", top: 0, left: 0, zIndex: -100, opacity: 0, pointerEvents: "none" }}>
+        <div style={{ position: "absolute", left: "-9999px", top: 0, width: "210mm" }}>
           <div ref={componentRef}>
             <LegalDocument 
               business={data.business} 
