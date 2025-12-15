@@ -1,0 +1,5 @@
+Chargily e-payment gateway integration for Algeria.
+- Needs to support creating checkout sessions for subscription plans (Free, Startup, Pro, Premium).
+- Needs to handle webhooks for payment success/failure to update subscription status in the database.
+- The currency is DZD.
+- We need to be able to redirect the user to the payment page and handle the return.
