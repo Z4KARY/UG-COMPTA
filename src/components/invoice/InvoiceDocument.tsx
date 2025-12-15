@@ -31,7 +31,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
     <div className="w-full mx-auto print:w-full print:max-w-none">
       <style type="text/css" media="print">
         {`
-          @page { size: auto; margin: 5mm; }
+          @page { size: A4; margin: 5mm; }
           body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
         `}
       </style>
@@ -235,16 +235,16 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
           {/* Signature & Stamp Section */}
           <div className="flex justify-end mb-8 print:mb-0 print:break-inside-avoid">
-            <div className="w-[400px] print:w-[400px] text-center relative">
-              <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-1 print:text-xs">{labels.signature}</p>
+            <div className="w-[400px] print:w-[600px] text-center relative">
+              <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-2 print:text-sm">{labels.signature}</p>
               
-              <div className="h-48 print:h-60 w-full flex items-center justify-center relative overflow-hidden">
+              <div className="h-48 print:h-96 w-full flex items-center justify-center relative overflow-hidden">
                 {/* Stamp Layer */}
                 {stampUrl && (
                   <img 
                     src={stampUrl} 
                     alt="Stamp" 
-                    className="absolute right-0 top-0 w-48 h-48 print:w-60 print:h-60 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                    className="absolute right-0 top-0 w-48 h-48 print:w-96 print:h-96 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
                   />
                 )}
                 
