@@ -1,3 +1,3 @@
 {
-  "plan": "1. Review the frontend components (InvoiceDocument.tsx, InvoiceTranslationPanel.tsx) for responsiveness and UI/UX. 2. Check the AI translation logic in translation.ts. 3. Finalize the review and report back to the user."
+  "plan": "1. Verify PDF export functionality on both pages.\n2. Check for any layout issues in the generated PDF.\n3. Ensure images (logo, signature, stamp) are correctly included in the PDF (CORS issues might arise if not handled, but useCORS: true is set)."
 }

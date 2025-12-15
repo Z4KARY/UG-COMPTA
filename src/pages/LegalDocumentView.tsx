@@ -1,19 +1,44 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { LegalDocument } from "@/components/legal/LegalDocument";
-import { Loader2 } from "lucide-react";
+import { Loader2, Printer, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReactToPrint } from "react-to-print";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+// @ts-ignore
+import html2pdf from "html2pdf.js";
 
 export default function LegalDocumentView() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
   const componentRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: data?.document?.title || "Document Juridique",
   });
+
+  const handleExportPdf = async () => {
+    if (!componentRef.current) return;
+    
+    setIsExporting(true);
+    const element = componentRef.current;
+    const opt = {
+      margin: 0,
+      filename: `${data?.document?.title || 'document-juridique'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+      await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error("PDF Export Error:", error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   if (data === undefined) {
     return (
@@ -37,7 +62,16 @@ export default function LegalDocumentView() {
       <div className="container mx-auto px-4">
         <div className="mb-6 flex justify-between items-center max-w-[210mm] mx-auto">
           <h1 className="text-2xl font-bold text-gray-900">{data.document.title}</h1>
-          <Button onClick={() => handlePrint()}>Imprimer / PDF</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => handlePrint()}>
+              <Printer className="mr-2 h-4 w-4" />
+              Imprimer
+            </Button>
+            <Button variant="outline" onClick={handleExportPdf} disabled={isExporting}>
+              {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              PDF
+            </Button>
+          </div>
         </div>
         
         <div ref={componentRef}>
