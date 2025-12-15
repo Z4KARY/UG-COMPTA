@@ -22,8 +22,16 @@ export default function InvoiceDetail() {
   const updateStatus = useMutation(api.invoices.updateStatus);
 
   const handlePrint = () => {
+    const originalTitle = document.title;
+    if (invoice) {
+      const clientName = invoice.customer?.name || "Client";
+      const invoiceNum = invoice.invoiceNumber || "Draft";
+      document.title = `UGCOMPTA - ${clientName} - ${invoiceNum}`;
+    }
+
     setTimeout(() => {
       window.print();
+      document.title = originalTitle;
     }, 100);
   };
 
