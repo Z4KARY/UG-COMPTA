@@ -62,21 +62,6 @@ createRoot(document.getElementById("root")!).render(
           <BrowserRouter>
             <RouteSyncer />
             <Routes>
->>>>>>> REPLACE
-<<<<<<< SEARCH
-            </Routes>
-          </BrowserRouter>
-          <Toaster />
-        </ConvexAuthProvider>
-      </InstrumentationProvider>
-    </LanguageProvider>
-=======
-            </Routes>
-          </BrowserRouter>
-          <Toaster />
-        </LanguageProvider>
-      </ConvexAuthProvider>
-    </InstrumentationProvider>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
               <Route path="/admin/auth" element={<AdminAuth />} />
@@ -98,8 +83,8 @@ createRoot(document.getElementById("root")!).render(
             </Routes>
           </BrowserRouter>
           <Toaster />
-        </ConvexAuthProvider>
-      </InstrumentationProvider>
-    </LanguageProvider>
+        </LanguageProvider>
+      </ConvexAuthProvider>
+    </InstrumentationProvider>
   </StrictMode>,
 );
