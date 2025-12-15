@@ -663,7 +663,24 @@ export const ar = {
     "settings.subscription.plans.enterprise.name": "مؤسسة",
     "settings.subscription.plans.enterprise.desc": "للمؤسسات الكبيرة ذات الاحتياجات الخاصة.",
 
-    // Remove duplicated keys starting here
+    // Landing Previews
+    "landing.nav.previews": "معاينات",
+    "landing.previews.title": "شاهد UGCOMPTA في العمل",
+    "landing.previews.subtitle": "استكشف الميزات القوية التي تجعل إدارة عملك الجزائري بسيطة ومتوافقة.",
+    "landing.previews.dashboard.title": "لوحة تحكم في الوقت الفعلي",
+    "landing.previews.dashboard.desc": "راقب إيراداتك ونفقاتك وتدفقاتك النقدية بمخططات تفاعلية ومؤشرات أداء.",
+    "landing.previews.invoicing.title": "فوترة احترافية",
+    "landing.previews.invoicing.desc": "أنشئ فواتير متوافقة مع حساب تلقائي لضريبة القيمة المضافة والطابع الجبائي.",
+    "landing.previews.customers.title": "إدارة العملاء",
+    "landing.previews.customers.desc": "تتبع عملائك وسجل مدفوعاتهم والأرصدة المستحقة.",
+    "landing.previews.purchases.title": "تتبع المصاريف",
+    "landing.previews.purchases.desc": "سجل المشتريات وأدر خصومات ضريبة القيمة المضافة بسهولة.",
+    "landing.previews.declarations.title": "التصريحات الضريبية",
+    "landing.previews.declarations.desc": "أنشئ تصريحات G50 و G12 تلقائيًا من بياناتك.",
+    "landing.previews.products.title": "كتالوج المنتجات",
+    "landing.previews.products.desc": "أدر سلعك وخدماتك مع الأسعار ومعدلات ضريبة القيمة المضافة.",
+    "landing.previews.badge.compliant": "متوافق 100٪ مع الجزائر",
+    "landing.previews.badge.realtime": "تحديثات في الوقت الفعلي",
 };
 
 export const landing = {

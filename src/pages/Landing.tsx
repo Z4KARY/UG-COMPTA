@@ -2,6 +2,7 @@ import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingTrustedBy } from "@/components/landing/LandingTrustedBy";
 import { LandingFeatures } from "@/components/landing/LandingFeatures";
+import { LandingDashboardPreviews } from "@/components/landing/LandingDashboardPreviews";
 import { LandingPricing } from "@/components/landing/LandingPricing";
 import { LandingTestimonials } from "@/components/landing/LandingTestimonials";
 import { LandingFAQ } from "@/components/landing/LandingFAQ";
@@ -16,6 +17,7 @@ export default function Landing() {
         <LandingHero />
         <LandingTrustedBy />
         <LandingFeatures />
+        <LandingDashboardPreviews />
         <LandingPricing />
         <LandingTestimonials />
         <LandingFAQ />
