@@ -4,9 +4,9 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { 
   createInvoiceLogic 
 } from "./invoice_create";
-import { 
-  generateInvoiceNumber 
-} from "./invoice_utils";
+// import { 
+//   generateInvoiceNumber 
+// } from "./invoice_utils";
 import { 
   updateInvoiceLogic,
   deleteInvoiceLogic

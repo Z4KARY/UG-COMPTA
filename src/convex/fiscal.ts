@@ -158,7 +158,7 @@ export function calculateStampDuty(
         // But simpler: we just take the chunk that fits in this bracket.
         
         let bracketCap = bracket.up_to === null ? Infinity : bracket.up_to;
-        let amountInBracket = 0;
+        // let amountInBracket = 0;
         
         // If we are past this bracket (shouldn't happen if we iterate correctly and subtract)
         // Actually, let's use the logic:
@@ -181,6 +181,8 @@ export function calculateStampDuty(
         
         let applicableAmount = Math.min(remaining, bracketSize);
         
+        // let amountInBracket = 0; // Unused
+
         if (applicableAmount > 0) {
             let units_100da = Math.ceil(applicableAmount / 100);
             duty += units_100da * bracket.rate_per_100da;

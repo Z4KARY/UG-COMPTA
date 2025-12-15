@@ -2,9 +2,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { Percent, DollarSign, Building, Scale } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function DashboardProfitability({ data }: { data: any }) {
-  if (!data) return null;
+export function DashboardProfitability({ businessId }: { businessId: Id<"businesses"> }) {
+  const now = new Date();
+  const data = useQuery(api.reports.getDashboardStats, { 
+    businessId, 
+    month: now.getMonth(), 
+    year: now.getFullYear() 
+  });
+
+  if (!data) return <Skeleton className="h-[300px] w-full" />;
 
   return (
     <div className="space-y-4">

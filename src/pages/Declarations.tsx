@@ -21,7 +21,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Link } from "react-router";
+// import { Link } from "react-router";
 import { G50Declaration } from "@/components/G50Declaration";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SetupRequired } from "@/components/SetupRequired";

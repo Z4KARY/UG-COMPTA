@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLanguage } from "@/contexts/LanguageContext";
+// import { useLanguage } from "@/contexts/LanguageContext";
 import { Info, Receipt, Calculator, Stamp, CalendarClock, Scale } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,7 +9,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses"> }) {
-  const { t } = useLanguage();
+  // const { t } = useLanguage();
   const navigate = useNavigate();
   const now = new Date();
   const stats = useQuery(api.reports.getDashboardStats, { 

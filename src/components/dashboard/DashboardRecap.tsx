@@ -57,8 +57,8 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
 
   const revenueChange = calculateChange(currentStats.turnover, prevStats?.turnover || 0);
   const invoiceChange = calculateChange(currentStats.invoiceCount, prevStats?.invoiceCount || 0);
-  const outstandingChange = 0; // TODO: Calculate change
-  const overdueChange = 0; // TODO: Calculate change;
+  // const outstandingChange = 0; // TODO: Calculate change
+  // const overdueChange = 0; // TODO: Calculate change;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(amount).replace('DZD', 'DA');
