@@ -50,7 +50,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             {/* LEFT COLUMN: Business Info */}
             <div className="flex flex-col items-start">
               {logoUrl ? (
-                <img src={logoUrl} alt="Business Logo" className="h-20 object-contain mb-4 print:h-12 print:mb-1" />
+                <img src={logoUrl} alt="Business Logo" className="h-40 object-contain mb-4 print:h-24 print:mb-2" />
               ) : (
                 <div className="h-20 flex items-center mb-4 print:mb-1 print:h-12">
                   <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>
