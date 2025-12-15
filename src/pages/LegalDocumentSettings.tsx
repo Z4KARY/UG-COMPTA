@@ -278,7 +278,7 @@ export default function LegalDocumentSettings() {
         </div>
 
         {/* Hidden Print Component */}
-        <div className="absolute left-[-9999px] top-[-9999px]">
+        <div style={{ position: "fixed", top: 0, left: 0, zIndex: -100, opacity: 0, pointerEvents: "none" }}>
             <div ref={printRef}>
                 <LegalDocument 
                   business={data.business} 

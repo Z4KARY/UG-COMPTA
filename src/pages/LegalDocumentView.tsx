@@ -88,12 +88,14 @@ export default function LegalDocumentView() {
           </div>
         </div>
         
-        <div ref={componentRef}>
-          <LegalDocument 
-            business={data.business} 
-            content={data.document.content} 
-            title={data.document.title} 
-          />
+        <div style={{ position: "fixed", top: 0, left: 0, zIndex: -100, opacity: 0, pointerEvents: "none" }}>
+          <div ref={componentRef}>
+            <LegalDocument 
+              business={data.business} 
+              content={data.document.content} 
+              title={data.document.title} 
+            />
+          </div>
         </div>
       </div>
     </div>
