@@ -1,3 +1,3 @@
 {
-  "plan": "1. Verify that the TypeScript errors are resolved.\n2. Review the AI translation logic in `src/convex/translation.ts` and `src/components/invoice/InvoiceTranslationPanel.tsx`.\n3. If the user wants to 'refine' it, I will ensure it handles errors gracefully and perhaps improve the prompt or method if using an LLM, but currently it uses Google Translate. I will check if I should switch to OpenAI for better quality if requested or implied by 'AI'.\n4. Since the user mentioned 'AI invoice translation', and the current implementation uses `google-translate-api-x` (which is machine translation, not necessarily 'AI' in the modern LLM sense), I will check if I should implement an LLM-based translation for better context."
+  "plan": "1. Run the test_ui_flow:testUpdateWithExistingItems action.\n2. If it fails due to validation errors, modify InvoiceTranslationPanel.tsx to sanitize items before sending.\n3. If it succeeds, confirm the UI is robust."
 }
