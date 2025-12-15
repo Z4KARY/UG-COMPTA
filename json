@@ -1,3 +1,1 @@
-{
-  "plan": "1. Verify PDF export functionality on both pages.\n2. Check for any layout issues in the generated PDF.\n3. Ensure images (logo, signature, stamp) are correctly included in the PDF (CORS issues might arise if not handled, but useCORS: true is set)."
-}
+{"plan":["Visually verify the invoice print layout to ensure single-page fitting and correct element sizing."]}

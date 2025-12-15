@@ -51,9 +51,9 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             {/* LEFT COLUMN: Business Info */}
             <div className="flex flex-col items-start">
               {logoUrl ? (
-                <img src={logoUrl} alt="Business Logo" className="h-40 object-contain mb-4 print:h-32 print:mb-1" />
+                <img src={logoUrl} alt="Business Logo" className="h-40 object-contain mb-4 print:h-20 print:mb-1" />
               ) : (
-                <div className="h-20 flex items-center mb-4 print:mb-1 print:h-16">
+                <div className="h-20 flex items-center mb-4 print:mb-1 print:h-12">
                   <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>
                     {business?.name}
                   </h2>
@@ -227,9 +227,9 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Amount in Words */}
-          <div className="mb-8 print:mb-1 print:break-inside-avoid">
+          <div className={`mb-8 print:mb-2 print:break-inside-avoid flex flex-col ${isRTL ? "items-start text-right" : "items-end text-right"}`}>
             <p className="text-sm text-gray-500 mb-1 print:text-[10px]">{labels.amountInWords}:</p>
-            <p className={`text-gray-900 font-medium italic ${isRTL ? "border-r-4 pr-4" : "border-l-4 pl-4"} py-1 print:text-xs`} style={{ borderColor: primaryColor }}>
+            <p className={`text-gray-900 font-medium italic ${isRTL ? "border-r-4 pr-4" : "border-r-4 pr-4"} py-1 print:text-xs`} style={{ borderColor: primaryColor }}>
               "{numberToWords(invoice.totalTtc, lang)}"
             </p>
           </div>
@@ -239,14 +239,14 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             <div className="w-[400px] print:w-[600px] text-center relative">
               <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-1 print:text-xs">{labels.signature}</p>
               
-              {/* Reduced container height for print to save space, but allow stamp to overflow */}
-              <div className="h-48 print:h-40 w-full flex items-center justify-center relative">
+              {/* Increased height for print as requested (2x) */}
+              <div className="h-48 print:h-64 w-full flex items-center justify-center relative">
                 {/* Stamp Layer */}
                 {stampUrl && (
                   <img 
                     src={stampUrl} 
                     alt="Stamp" 
-                    className="absolute right-0 top-0 w-48 h-48 print:w-64 print:h-64 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                    className="absolute right-0 top-0 w-48 h-48 print:w-72 print:h-72 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
                   />
                 )}
                 
