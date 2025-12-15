@@ -173,10 +173,8 @@ export default function InvoiceDetail() {
       <style>
         {`
           @media print {
-            @page { size: A4; margin: 0; }
             body { 
               visibility: hidden; 
-              -webkit-print-color-adjust: exact;
             }
             .print-container { 
               visibility: visible;
@@ -186,7 +184,7 @@ export default function InvoiceDetail() {
               width: 100% !important;
               max-width: none !important;
               margin: 0 !important;
-              padding: 20mm !important;
+              padding: 0 !important;
               box-shadow: none !important;
               border: none !important;
               background: white !important;
