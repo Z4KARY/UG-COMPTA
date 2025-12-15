@@ -229,16 +229,16 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
           {/* Signature & Stamp Section */}
           <div className="flex justify-end mb-12 print:break-inside-avoid">
-            <div className="w-96 text-center relative">
+            <div className="w-[500px] text-center relative">
               <p className="text-sm font-semibold text-gray-900 mb-4">{labels.signature}</p>
               
-              <div className="h-52 w-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
+              <div className="h-96 w-full flex items-center justify-center relative overflow-hidden">
                 {/* Stamp Layer */}
                 {stampUrl && (
                   <img 
                     src={stampUrl} 
                     alt="Stamp" 
-                    className="absolute right-4 top-2 w-48 h-48 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                    className="absolute right-0 top-0 w-96 h-96 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
                   />
                 )}
                 
@@ -253,7 +253,9 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                 
                 {/* Placeholder if neither exists */}
                 {!stampUrl && !signatureUrl && (
-                  <span className="text-xs text-gray-300">Cachet et Signature</span>
+                  <div className="w-full h-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
+                    <span className="text-xs text-gray-300">Cachet et Signature</span>
+                  </div>
                 )}
               </div>
             </div>
