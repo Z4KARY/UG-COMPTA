@@ -10,7 +10,22 @@ export const get = query({
       .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
       .first();
     
-    const business = await ctx.db.get(args.businessId);
+    let business = await ctx.db.get(args.businessId);
+
+    if (business) {
+      if (business.logoStorageId) {
+        const url = await ctx.storage.getUrl(business.logoStorageId);
+        if (url) business = { ...business, logoUrl: url };
+      }
+      if (business.signatureStorageId) {
+        const url = await ctx.storage.getUrl(business.signatureStorageId);
+        if (url) business = { ...business, signatureUrl: url };
+      }
+      if (business.stampStorageId) {
+        const url = await ctx.storage.getUrl(business.stampStorageId);
+        if (url) business = { ...business, stampUrl: url };
+      }
+    }
 
     return { document, business };
   },
@@ -22,12 +37,25 @@ export const getMyLegalDocument = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
 
-    const business = await ctx.db
+    let business = await ctx.db
       .query("businesses")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
     if (!business) return null;
+
+    if (business.logoStorageId) {
+      const url = await ctx.storage.getUrl(business.logoStorageId);
+      if (url) business = { ...business, logoUrl: url };
+    }
+    if (business.signatureStorageId) {
+      const url = await ctx.storage.getUrl(business.signatureStorageId);
+      if (url) business = { ...business, signatureUrl: url };
+    }
+    if (business.stampStorageId) {
+      const url = await ctx.storage.getUrl(business.stampStorageId);
+      if (url) business = { ...business, stampUrl: url };
+    }
 
     const document = await ctx.db
       .query("legalDocuments")
