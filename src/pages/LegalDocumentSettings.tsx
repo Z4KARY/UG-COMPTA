@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +10,7 @@ import { Loader2, Save, Eye } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { LegalDocument } from "@/components/legal/LegalDocument";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 export default function LegalDocumentSettings() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
@@ -120,16 +120,11 @@ export default function LegalDocumentSettings() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="content">Contenu</Label>
-                <Textarea
-                  id="content"
-                  placeholder="Saisissez le contenu de votre document ici..."
-                  className="min-h-[500px] font-mono text-sm"
+                <RichTextEditor
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={setContent}
+                  placeholder="Saisissez le contenu de votre document ici..."
                 />
-                <p className="text-xs text-muted-foreground">
-                  Le contenu respectera les sauts de ligne.
-                </p>
               </div>
             </CardContent>
           </Card>

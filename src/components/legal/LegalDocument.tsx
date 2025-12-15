@@ -64,9 +64,10 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
           <Separator className="mb-8" />
 
           {/* Content Body */}
-          <div className="flex-grow mb-12 whitespace-pre-wrap text-gray-800 leading-relaxed">
-            {content || "Aucun contenu disponible."}
-          </div>
+          <div 
+            className="flex-grow mb-12 text-gray-800 leading-relaxed tiptap-content"
+            dangerouslySetInnerHTML={{ __html: content || "<p>Aucun contenu disponible.</p>" }}
+          />
 
           {/* Signature & Stamp Section */}
           <div className="flex justify-end mb-12 print:break-inside-avoid">
