@@ -40,10 +40,24 @@ export const testUpdateWithExistingItems = action({
 
     console.log("Items to send (simulating UI):", uiItems[0]);
 
+    // Sanitize items as the UI should
+    const sanitizedItems = uiItems.map((item: any) => ({
+        productId: item.productId,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discountRate: item.discountRate,
+        tvaRate: item.tvaRate,
+        lineTotal: item.lineTotal,
+        lineTotalHt: item.lineTotalHt,
+        lineTotalTtc: item.lineTotalTtc,
+        productType: item.productType,
+    }));
+
     try {
         await ctx.runMutation(api.invoices.update, {
             id: invoiceId,
-            items: uiItems,
+            items: sanitizedItems,
             language: "fr"
         });
         console.log("Update successful!");

@@ -65,10 +65,24 @@ export function InvoiceTranslationPanel({
         updatedNotes = result.notes;
       }
 
+      // Sanitize items to match mutation validator (remove system fields like _id, _creationTime)
+      const sanitizedItems = (updatedItems || items).map(item => ({
+        productId: item.productId,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discountRate: item.discountRate,
+        tvaRate: item.tvaRate,
+        lineTotal: item.lineTotal,
+        lineTotalHt: item.lineTotalHt,
+        lineTotalTtc: item.lineTotalTtc,
+        productType: item.productType,
+      }));
+
       await updateInvoice({
         id: invoiceId,
         language: targetLanguage,
-        items: updatedItems,
+        items: sanitizedItems,
         notes: updatedNotes,
       });
 
