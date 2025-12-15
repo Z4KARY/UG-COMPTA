@@ -94,6 +94,8 @@ export default function InvoiceCreate() {
     items: [] as any[],
     notes: "",
     paymentMethod: "BANK_TRANSFER" as any,
+    invoiceNumber: "AUTO",
+    isAutoNumber: true,
   });
 
   const form = useForm<FormValues>({
@@ -161,8 +163,10 @@ export default function InvoiceCreate() {
         dueDate: new Date(existingInvoice.dueDate),
         currency: existingInvoice.currency,
         items: existingInvoice.items,
-        notes: existingInvoice.notes || "",
+        notes: existingInvoice.notes || "1",
         paymentMethod: existingInvoice.paymentMethod as any || "CASH",
+        invoiceNumber: existingInvoice.invoiceNumber,
+        isAutoNumber: false, // Always manual/fixed when editing
       });
 
       setItems(existingInvoice.items.map((item: any) => ({
@@ -288,6 +292,7 @@ export default function InvoiceCreate() {
       const invoiceData = {
         businessId: business._id,
         customerId: values.customerId as Id<"customers">,
+        invoiceNumber: formData.isAutoNumber ? "AUTO" : formData.invoiceNumber,
         type: formData.type,
         fiscalType: formData.fiscalType,
         language: formData.language,
@@ -354,6 +359,8 @@ export default function InvoiceCreate() {
               currency={formData.currency}
               language={formData.language}
               paymentMethod={paymentMethod}
+              invoiceNumber={formData.invoiceNumber}
+              isAutoNumber={formData.isAutoNumber}
               onIssueDateChange={(date) =>
                 setFormData({ ...formData, issueDate: date || new Date() })
               }
@@ -368,6 +375,12 @@ export default function InvoiceCreate() {
               }
               onPaymentMethodChange={(method) => 
                 form.setValue("paymentMethod", method as any)
+              }
+              onInvoiceNumberChange={(number) =>
+                setFormData({ ...formData, invoiceNumber: number })
+              }
+              onAutoNumberChange={(isAuto) =>
+                setFormData({ ...formData, isAutoNumber: isAuto, invoiceNumber: isAuto ? "AUTO" : "" })
               }
             />
 

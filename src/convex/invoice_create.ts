@@ -20,6 +20,17 @@ export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     let finalInvoiceNumber = args.invoiceNumber;
     if (!finalInvoiceNumber || finalInvoiceNumber === "AUTO") {
         finalInvoiceNumber = await generateInvoiceNumber(ctx, args.businessId, args.type, args.issueDate);
+    } else {
+        // Check for uniqueness if manually entered
+        const existing = await ctx.db
+            .query("invoices")
+            .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+            .filter((q) => q.eq(q.field("invoiceNumber"), finalInvoiceNumber))
+            .first();
+        
+        if (existing) {
+            throw new Error(`Invoice number ${finalInvoiceNumber} already exists`);
+        }
     }
 
     // Auto-Entrepreneur Logic Enforcement: NO VAT

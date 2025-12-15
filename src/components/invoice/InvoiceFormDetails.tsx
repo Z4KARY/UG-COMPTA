@@ -22,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface InvoiceFormDetailsProps {
@@ -30,11 +32,15 @@ interface InvoiceFormDetailsProps {
   currency: string;
   language?: string;
   paymentMethod?: string;
+  invoiceNumber?: string;
+  isAutoNumber?: boolean;
   onIssueDateChange: (date: Date | undefined) => void;
   onDueDateChange: (date: Date | undefined) => void;
   onCurrencyChange: (currency: string) => void;
   onLanguageChange?: (language: string) => void;
   onPaymentMethodChange?: (method: string) => void;
+  onInvoiceNumberChange?: (number: string) => void;
+  onAutoNumberChange?: (isAuto: boolean) => void;
 }
 
 export function InvoiceFormDetails({
@@ -43,11 +49,15 @@ export function InvoiceFormDetails({
   currency,
   language = "fr",
   paymentMethod,
+  invoiceNumber,
+  isAutoNumber = true,
   onIssueDateChange,
   onDueDateChange,
   onCurrencyChange,
   onLanguageChange,
   onPaymentMethodChange,
+  onInvoiceNumberChange,
+  onAutoNumberChange,
 }: InvoiceFormDetailsProps) {
   const { t } = useLanguage();
   
@@ -57,6 +67,29 @@ export function InvoiceFormDetails({
         <CardTitle>{t("invoiceForm.details.title")}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-2 col-span-2 md:col-span-2">
+          <div className="flex items-center justify-between">
+            <Label>{t("invoiceForm.details.invoiceNumber")}</Label>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="auto-mode" className="text-sm font-normal text-muted-foreground">
+                {isAutoNumber ? t("invoiceForm.details.autoNumber") : t("invoiceForm.details.manualNumber")}
+              </Label>
+              <Switch
+                id="auto-mode"
+                checked={isAutoNumber}
+                onCheckedChange={onAutoNumberChange}
+              />
+            </div>
+          </div>
+          <Input
+            value={isAutoNumber ? "AUTO" : invoiceNumber}
+            onChange={(e) => onInvoiceNumberChange?.(e.target.value)}
+            disabled={isAutoNumber}
+            placeholder={t("invoiceForm.details.numberPlaceholder")}
+            className={isAutoNumber ? "bg-muted text-muted-foreground font-mono" : "font-mono"}
+          />
+        </div>
+
         <div className="space-y-2">
           <Label>{t("invoiceForm.details.issueDate")}</Label>
           <Popover>
