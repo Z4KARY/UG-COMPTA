@@ -32,7 +32,12 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
           <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
             <div className="w-full md:w-1/2">
               {logoUrl ? (
-                <img src={logoUrl} alt="Business Logo" className="h-20 object-contain mb-6" />
+                <img 
+                  src={logoUrl} 
+                  alt="Business Logo" 
+                  className="h-20 object-contain mb-6" 
+                  crossOrigin="anonymous" 
+                />
               ) : (
                 <div className="h-20 flex items-center mb-6">
                   <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>
@@ -81,6 +86,7 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
                     src={stampUrl} 
                     alt="Stamp" 
                     className="absolute right-0 top-0 w-40 h-40 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                    crossOrigin="anonymous"
                   />
                 )}
                 
@@ -90,6 +96,7 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
                     src={signatureUrl} 
                     alt="Signature" 
                     className="absolute inset-0 w-full h-full object-contain z-10" 
+                    crossOrigin="anonymous"
                   />
                 )}
                 
