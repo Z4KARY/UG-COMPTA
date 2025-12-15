@@ -176,7 +176,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Totals & Notes */}
-          <div className="flex flex-col md:flex-row gap-8 print:gap-2 mb-8 print:mb-1 print:break-inside-avoid">
+          <div className="flex flex-col md:flex-row print:flex-row gap-8 print:gap-2 mb-8 print:mb-1 print:break-inside-avoid">
             <div className="flex-1">
               {invoice.notes && (
                 <div className="bg-yellow-50/50 border border-yellow-100 rounded-lg p-3 text-sm text-yellow-800 print:bg-transparent print:border-gray-200 print:text-gray-800 print:p-1 print:text-[10px]">
@@ -186,7 +186,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
               )}
             </div>
 
-            <div className="w-full md:w-72 print:w-64">
+            <div className="w-full md:w-72 print:w-64 print:ml-auto">
               <div className="space-y-2 print:space-y-0.5">
                 <div className="flex justify-between text-sm text-gray-600 print:text-[10px]">
                   <span>{labels.subtotal}</span>
