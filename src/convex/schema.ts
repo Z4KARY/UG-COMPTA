@@ -139,6 +139,14 @@ const schema = defineSchema(
     }).index("by_user", ["userId"])
       .index("by_ae_card", ["autoEntrepreneurCardNumber"]),
 
+    // New table for Legal Documents
+    legalDocuments: defineTable({
+      businessId: v.id("businesses"),
+      title: v.optional(v.string()),
+      content: v.string(),
+      updatedAt: v.number(),
+    }).index("by_business", ["businessId"]),
+
     // New table for multi-user access to businesses
     businessMembers: defineTable({
       businessId: v.id("businesses"),

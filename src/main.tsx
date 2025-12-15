@@ -28,6 +28,8 @@ import Suppliers from "@/pages/Suppliers.tsx";
 import NotFound from "@/pages/NotFound.tsx";
 import Onboarding from "@/pages/Onboarding.tsx";
 import AdminAuth from "@/pages/AdminAuth.tsx";
+import LegalDocumentSettings from "@/pages/LegalDocumentSettings.tsx";
+import LegalDocumentView from "@/pages/LegalDocumentView.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -68,6 +70,8 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/settings" element={<BusinessSettings />} />
+              <Route path="/settings/legal-document" element={<LegalDocumentSettings />} />
+              <Route path="/legal-document/view" element={<LegalDocumentView />} />
               <Route path="/customers" element={<Customers />} />
               <Route path="/products" element={<Products />} />
               <Route path="/invoices" element={<Invoices />} />

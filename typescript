@@ -1,7 +1,11 @@
-      planId: v.union(
-        v.literal("free"), 
-        v.literal("startup"), 
-        v.literal("pro"), 
-        v.literal("premium"), 
-        v.literal("enterprise")
-      ),
+import { authTables } from "@convex-dev/auth/server";
+import { defineSchema, defineTable } from "convex/server";
+import { Infer, v } from "convex/values";
+// ...
+const schema = defineSchema(
+  {
+    // default auth tables using convex auth.
+    ...authTables, // do not remove or modify
+
+    // the users table is the default users table that is brought in by the authTables
+    users: defineTable({

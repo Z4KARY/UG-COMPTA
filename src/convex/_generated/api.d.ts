@@ -38,6 +38,7 @@ import type * as invoice_status from "../invoice_status.js";
 import type * as invoice_update from "../invoice_update.js";
 import type * as invoice_utils from "../invoice_utils.js";
 import type * as invoices from "../invoices.js";
+import type * as legalDocuments from "../legalDocuments.js";
 import type * as members from "../members.js";
 import type * as notifications from "../notifications.js";
 import type * as periods from "../periods.js";
@@ -100,6 +101,7 @@ declare const fullApi: ApiFromModules<{
   invoice_update: typeof invoice_update;
   invoice_utils: typeof invoice_utils;
   invoices: typeof invoices;
+  legalDocuments: typeof legalDocuments;
   members: typeof members;
   notifications: typeof notifications;
   periods: typeof periods;
