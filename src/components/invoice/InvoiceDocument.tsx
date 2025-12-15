@@ -30,20 +30,20 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
   return (
     <div className="w-full mx-auto print:w-full print:max-w-none">
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] relative flex flex-col"
+        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col"
         style={{ fontFamily: invoiceFontFamily, direction: isRTL ? "rtl" : "ltr" }}
       >
         {/* Top Accent Line */}
         <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
-        <div className="p-8 md:p-12 print:p-6 flex-grow flex flex-col">
+        <div className="p-8 md:p-12 print:p-4 flex-grow print:flex-grow-0 flex flex-col">
           {/* Header */}
           <div className="flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 print:gap-4 mb-12 print:mb-2">
             <div className="w-full md:w-1/2 print:w-1/2">
               {logoUrl ? (
-                <img src={logoUrl} alt="Business Logo" className="h-20 object-contain mb-6 print:h-12 print:mb-2" />
+                <img src={logoUrl} alt="Business Logo" className="h-20 object-contain mb-6 print:h-10 print:mb-1" />
               ) : (
-                <div className="h-20 flex items-center mb-6 print:mb-2 print:h-12">
+                <div className="h-20 flex items-center mb-6 print:mb-1 print:h-10">
                   <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>
                     {business?.name}
                   </h2>
@@ -219,7 +219,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Amount in Words */}
-          <div className="mb-12 print:mb-4 print:break-inside-avoid">
+          <div className="mb-12 print:mb-2 print:break-inside-avoid">
             <p className="text-sm text-gray-500 mb-1">{labels.amountInWords}:</p>
             <p className={`text-gray-900 font-medium italic ${isRTL ? "border-r-4 pr-4" : "border-l-4 pl-4"} py-1`} style={{ borderColor: primaryColor }}>
               "{numberToWords(invoice.totalTtc, lang)}"
@@ -229,15 +229,15 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           {/* Signature & Stamp Section */}
           <div className="flex justify-end mb-12 print:mb-0 print:break-inside-avoid">
             <div className="w-[500px] text-center relative">
-              <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-1">{labels.signature}</p>
+              <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-0">{labels.signature}</p>
               
-              <div className="h-96 print:h-24 w-full flex items-center justify-center relative overflow-hidden">
+              <div className="h-96 print:h-16 w-full flex items-center justify-center relative overflow-hidden">
                 {/* Stamp Layer */}
                 {stampUrl && (
                   <img 
                     src={stampUrl} 
                     alt="Stamp" 
-                    className="absolute right-0 top-0 w-96 h-96 print:w-24 print:h-24 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                    className="absolute right-0 top-0 w-96 h-96 print:w-16 print:h-16 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
                   />
                 )}
                 
@@ -261,7 +261,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Footer */}
-          <div className="mt-auto pt-8 print:pt-2 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
+          <div className="mt-auto print:mt-4 pt-8 print:pt-2 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
             <p className="mb-1">{labels.legalFooter}</p>
             {isAE ? (
               <p>{labels.autoEntrepreneur}</p>
