@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { ArrowLeft, Printer, CheckCircle, Send, XCircle } from "lucide-react";
+import { ArrowLeft, Printer, CheckCircle, Send, XCircle, Pencil } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { toast } from "sonner";
 import { numberToWords } from "@/lib/numberToWords";
@@ -208,6 +208,13 @@ export default function InvoiceDetail() {
           {invoice.status === "draft" && (
             <Button onClick={() => handleStatusChange("issued")} className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700">
               <Send className="mr-2 h-4 w-4" /> Issue Invoice
+            </Button>
+          )}
+          {invoice.status === "draft" && (
+            <Button variant="outline" asChild className="flex-1 md:flex-none">
+              <Link to={`/invoices/${invoice._id}/edit`}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Link>
             </Button>
           )}
           {invoice.status === "issued" && (

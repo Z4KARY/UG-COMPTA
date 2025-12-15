@@ -4,7 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,7 +56,14 @@ type FormValues = z.infer<typeof formSchema>;
 export default function InvoiceCreate() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = !!id;
+
   const business = useQuery(api.businesses.getMyBusiness, {});
+  
+  // Fetch existing invoice if in edit mode
+  const existingInvoice = useQuery(api.invoices.get, id ? { id: id as Id<"invoices"> } : "skip");
+
   const customers = useQuery(
     api.customers.list,
     business ? { businessId: business._id } : "skip"
@@ -72,6 +79,7 @@ export default function InvoiceCreate() {
   );
 
   const createInvoice = useMutation(api.invoices.create);
+  const updateInvoice = useMutation(api.invoices.update);
 
   const [submitStatus, setSubmitStatus] = useState<"draft" | "issued">("draft");
 
@@ -117,6 +125,62 @@ export default function InvoiceCreate() {
   ]);
   const [notes, setNotes] = useState("");
 
+  // Populate form when existing invoice loads
+  useEffect(() => {
+    if (existingInvoice && isEditMode) {
+      // Set form values
+      form.reset({
+        invoiceNumber: existingInvoice.invoiceNumber,
+        issueDate: new Date(existingInvoice.issueDate),
+        dueDate: new Date(existingInvoice.dueDate),
+        items: existingInvoice.items.map((item: any) => ({
+          productId: item.productId,
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          discountRate: item.discountRate || 0,
+          tvaRate: item.tvaRate,
+          lineTotal: item.lineTotal,
+          productType: item.productType || "service",
+        })),
+        notes: existingInvoice.notes || "",
+        currency: existingInvoice.currency,
+        type: existingInvoice.type as any,
+        fiscalType: existingInvoice.fiscalType as any || "LOCAL",
+        paymentMethod: existingInvoice.paymentMethod as any || "CASH",
+        customerId: existingInvoice.customerId,
+      });
+
+      // Set state values
+      setFormData({
+        customerId: existingInvoice.customerId,
+        type: existingInvoice.type as any,
+        fiscalType: existingInvoice.fiscalType as any || "LOCAL",
+        language: existingInvoice.language || "fr",
+        issueDate: new Date(existingInvoice.issueDate),
+        dueDate: new Date(existingInvoice.dueDate),
+        currency: existingInvoice.currency,
+        items: existingInvoice.items,
+        notes: existingInvoice.notes || "",
+        paymentMethod: existingInvoice.paymentMethod as any || "CASH",
+      });
+
+      setItems(existingInvoice.items.map((item: any) => ({
+        productId: item.productId,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discountRate: item.discountRate || 0,
+        tvaRate: item.tvaRate,
+        lineTotal: item.lineTotal,
+        productType: item.productType || "service",
+      })));
+      
+      setNotes(existingInvoice.notes || "");
+      setSubmitStatus(existingInvoice.status as "draft" | "issued");
+    }
+  }, [existingInvoice, isEditMode, form]);
+
   // Watch form values for calculations
   const paymentMethod = form.watch("paymentMethod");
   const type = form.watch("type");
@@ -135,13 +199,13 @@ export default function InvoiceCreate() {
     })));
   }, [items, form]);
 
-  // Update default TVA when business loads
+  // Update default TVA when business loads (only for new invoices)
   useEffect(() => {
-    if (business && items.length === 1 && items[0].description === "" && items[0].unitPrice === 0) {
+    if (!isEditMode && business && items.length === 1 && items[0].description === "" && items[0].unitPrice === 0) {
         const defaultTva = (business.fiscalRegime === "IFU" || business.type === "auto_entrepreneur") ? 0 : (business.tvaDefault || 19);
         setItems([{ ...items[0], tvaRate: defaultTva }]);
     }
-  }, [business]);
+  }, [business, isEditMode]);
 
   // Calculations
   const calculateTotals = () => {
@@ -221,7 +285,7 @@ export default function InvoiceCreate() {
     if (!business) return;
     
     try {
-      await createInvoice({
+      const invoiceData = {
         businessId: business._id,
         customerId: values.customerId as Id<"customers">,
         type: formData.type,
@@ -244,13 +308,24 @@ export default function InvoiceCreate() {
             lineTotalHt: item.lineTotal,
             lineTotalTtc: item.lineTotal * (1 + item.tvaRate/100)
         })),
-      });
+      };
 
-      toast.success(submitStatus === 'draft' ? t("invoiceCreate.success.draft") : t("invoiceCreate.success.issued"));
+      if (isEditMode && id) {
+        await updateInvoice({
+          id: id as Id<"invoices">,
+          ...invoiceData,
+          status: submitStatus === "draft" ? "draft" : "issued", // Ensure status is passed correctly
+        });
+        toast.success(t("invoiceCreate.success.updated") || "Invoice updated successfully");
+      } else {
+        await createInvoice(invoiceData as any);
+        toast.success(submitStatus === 'draft' ? t("invoiceCreate.success.draft") : t("invoiceCreate.success.issued"));
+      }
+
       navigate("/invoices");
     } catch (error) {
       console.error(error);
-      toast.error(error instanceof Error ? error.message : t("invoiceCreate.error.create"));
+      toast.error(error instanceof Error ? error.message : (isEditMode ? "Failed to update invoice" : t("invoiceCreate.error.create")));
     }
   }
 
@@ -260,12 +335,13 @@ export default function InvoiceCreate() {
   };
 
   if (!business) return null;
+  if (isEditMode && !existingInvoice) return <DashboardLayout><div>Loading...</div></DashboardLayout>;
 
   return (
     <DashboardLayout>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h1 className="text-3xl font-bold tracking-tight">
-            {type === "quote" ? t("invoiceCreate.title.quote") : type === "credit_note" ? t("invoiceCreate.title.creditNote") : t("invoiceCreate.title.invoice")}
+            {isEditMode ? "Edit Invoice" : (type === "quote" ? t("invoiceCreate.title.quote") : type === "credit_note" ? t("invoiceCreate.title.creditNote") : t("invoiceCreate.title.invoice"))}
         </h1>
       </div>
 

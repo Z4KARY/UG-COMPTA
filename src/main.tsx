@@ -76,6 +76,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/products" element={<Products />} />
               <Route path="/invoices" element={<Invoices />} />
               <Route path="/invoices/new" element={<InvoiceCreate />} />
+              <Route path="/invoices/:id/edit" element={<InvoiceCreate />} />
               <Route path="/invoices/:id" element={<InvoiceDetail />} />
               <Route path="/purchases" element={<Purchases />} />
               <Route path="/purchases/new" element={<PurchaseCreate />} />
