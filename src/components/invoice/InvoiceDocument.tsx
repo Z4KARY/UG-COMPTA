@@ -28,15 +28,15 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
   const subtotalHt = invoice?.subtotalHt ?? invoice?.totalHt ?? 0;
 
   return (
-    <div className="w-full mx-auto print:w-full print:max-w-none print:h-auto print:overflow-visible">
+    <div className="w-full mx-auto print:w-full print:max-w-none">
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:block print:shadow-none print:border-none"
+        className="print-container bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100 w-full max-w-[210mm] mx-auto relative flex flex-col print:shadow-none print:border-none print:m-0 print:w-full print:max-w-none"
         style={{ fontFamily: invoiceFontFamily, direction: isRTL ? "rtl" : "ltr" }}
       >
         {/* Top Accent Line */}
         <div className="h-2 w-full" style={{ backgroundColor: primaryColor }}></div>
 
-        <div className="p-8 md:p-12 flex-grow print:flex-grow-0 flex flex-col">
+        <div className="p-8 md:p-12 flex-grow flex flex-col">
           
           {/* COMPACT HEADER GRID: Left (Business) | Right (Invoice + Customer) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -169,7 +169,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Totals & Notes */}
-          <div className="flex flex-col md:flex-row gap-8 mb-8 print:break-inside-avoid">
+          <div className="flex flex-col md:flex-row gap-8 mb-8 break-inside-avoid">
             <div className="flex-1">
               {invoice.notes && (
                 <div className="bg-yellow-50/50 border border-yellow-100 rounded-lg p-3 text-sm text-yellow-800">
@@ -179,7 +179,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
               )}
             </div>
 
-            <div className="w-full md:w-72 print:ml-auto">
+            <div className="w-full md:w-72 ml-auto">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>{labels.subtotal}</span>
@@ -220,7 +220,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Amount in Words */}
-          <div className={`mb-8 print:break-inside-avoid flex flex-col ${isRTL ? "items-end text-right" : "items-start text-left"}`}>
+          <div className={`mb-8 break-inside-avoid flex flex-col ${isRTL ? "items-end text-right" : "items-start text-left"}`}>
             <p className="text-sm text-gray-500 mb-1">{labels.amountInWords}:</p>
             <p className={`text-gray-900 font-medium italic ${isRTL ? "border-r-4 pr-4" : "border-l-4 pl-4"} py-1`} style={{ borderColor: primaryColor }}>
               "{numberToWords(invoice.totalTtc, lang)}"
@@ -228,12 +228,12 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Signature & Stamp Section */}
-          <div className="flex justify-end mb-8 print:mb-0 print:break-inside-avoid">
+          <div className="flex justify-end mb-8 break-inside-avoid">
             <div className="w-[400px] text-center relative">
               <p className="text-sm font-semibold text-gray-900 mb-4">{labels.signature}</p>
               
               {/* Adjusted height for print */}
-              <div className="h-48 w-full flex items-center justify-center relative">
+              <div className="h-64 w-full flex items-center justify-center relative">
                 {/* Stamp Layer */}
                 {stampUrl && (
                   <img 
@@ -263,7 +263,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Footer */}
-          <div className="mt-auto pt-6 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
+          <div className="mt-auto pt-6 border-t border-gray-100 text-center text-xs text-gray-400 break-inside-avoid">
             <p className="mb-1">{labels.legalFooter}</p>
             {isAE ? (
               <p>{labels.autoEntrepreneur}</p>
