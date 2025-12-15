@@ -187,6 +187,38 @@ export function PurchaseInvoiceDocument({ invoice, business, supplier }: Purchas
               "{numberToWords(invoice.totalTtc)}"
             </p>
           </div>
+
+          {/* Signature & Stamp Section */}
+          <div className="flex justify-end mb-12 print:break-inside-avoid">
+            <div className="w-96 text-center relative">
+              <p className="text-sm font-semibold text-gray-900 mb-4">Signature</p>
+              
+              <div className="h-52 w-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
+                {/* Stamp Layer */}
+                {business?.stampUrl && (
+                  <img 
+                    src={business.stampUrl} 
+                    alt="Stamp" 
+                    className="absolute right-4 top-2 w-48 h-48 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                  />
+                )}
+                
+                {/* Signature Layer */}
+                {business?.signatureUrl && (
+                  <img 
+                    src={business.signatureUrl} 
+                    alt="Signature" 
+                    className="absolute inset-0 w-full h-full object-contain z-10" 
+                  />
+                )}
+                
+                {/* Placeholder if neither exists */}
+                {!business?.stampUrl && !business?.signatureUrl && (
+                  <span className="text-xs text-gray-300">Cachet et Signature</span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

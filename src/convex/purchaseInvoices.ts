@@ -83,16 +83,30 @@ export const get = query({
     const invoice = await ctx.db.get(args.id);
     if (!invoice) return null;
 
-    const business = await ctx.db.get(invoice.businessId);
-    if (!business) return null;
+    const businessDoc = await ctx.db.get(invoice.businessId);
+    if (!businessDoc) return null;
 
     // Auth check
-    if (business.userId !== userId) {
+    if (businessDoc.userId !== userId) {
         const member = await ctx.db
             .query("businessMembers")
             .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
             .first();
         if (!member) return null;
+    }
+
+    let business = businessDoc;
+    if (business.logoStorageId) {
+        const url = await ctx.storage.getUrl(business.logoStorageId);
+        if (url) business = { ...business, logoUrl: url };
+    }
+    if (business.signatureStorageId) {
+        const url = await ctx.storage.getUrl(business.signatureStorageId);
+        if (url) business = { ...business, signatureUrl: url };
+    }
+    if (business.stampStorageId) {
+        const url = await ctx.storage.getUrl(business.stampStorageId);
+        if (url) business = { ...business, stampUrl: url };
     }
 
     const supplier = await ctx.db.get(invoice.supplierId);
