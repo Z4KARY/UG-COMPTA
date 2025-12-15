@@ -216,6 +216,7 @@ export const en = {
     "common.nif": "NIF",
     "common.rc": "RC",
     "common.actions": "Actions",
+    "common.cancel": "Cancel",
     "status.paid": "Paid",
     "status.unpaid": "Unpaid",
 

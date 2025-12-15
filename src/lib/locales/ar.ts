@@ -215,6 +215,7 @@ export const ar = {
     "common.nif": "الرقم الجبائي",
     "common.rc": "السجل التجاري",
     "common.actions": "إجراءات",
+    "common.cancel": "إلغاء",
     "status.paid": "مدفوع",
     "status.unpaid": "غير مدفوع",
 
