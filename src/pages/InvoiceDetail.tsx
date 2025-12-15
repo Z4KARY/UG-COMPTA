@@ -22,7 +22,9 @@ export default function InvoiceDetail() {
   const updateStatus = useMutation(api.invoices.updateStatus);
 
   const handlePrint = () => {
-    window.print();
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   const business = invoice?.business;
@@ -159,22 +161,32 @@ export default function InvoiceDetail() {
 
   return (
     <DashboardLayout breadcrumbOverrides={{ [invoice._id]: invoice.invoiceNumber || "Draft" }}>
-      <style type="text/css" media="print">
+      <style>
         {`
-          @page { size: A4; margin: 0; }
-          body { -webkit-print-color-adjust: exact; }
           @media print {
-            .no-print { display: none !important; }
-            .print-break-inside-avoid { break-inside: avoid; }
-            html, body { width: 100%; height: auto; margin: 0; padding: 0; overflow: visible; }
-            .print-container { 
-                box-shadow: none !important; 
-                border: none !important; 
-                margin: 0 !important; 
-                width: 100% !important; 
-                max-width: none !important;
-                padding: 20mm !important;
+            @page { size: A4; margin: 0; }
+            body { 
+              visibility: hidden; 
+              -webkit-print-color-adjust: exact;
             }
+            .print-container { 
+              visibility: visible;
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100% !important;
+              max-width: none !important;
+              margin: 0 !important;
+              padding: 20mm !important;
+              box-shadow: none !important;
+              border: none !important;
+              background: white !important;
+            }
+            .print-container * {
+              visibility: visible;
+            }
+            /* Ensure no other elements interfere */
+            nav, header, aside, .no-print { display: none !important; }
           }
         `}
       </style>

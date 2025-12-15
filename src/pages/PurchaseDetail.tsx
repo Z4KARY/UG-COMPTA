@@ -6,8 +6,6 @@ import { useMutation, useQuery } from "convex/react";
 import { ArrowLeft, Printer, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-import { numberToWords } from "@/lib/numberToWords";
-import { Separator } from "@/components/ui/separator";
 import {
     Dialog,
     DialogContent,
@@ -26,7 +24,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { PurchaseInvoiceDocument } from "@/components/invoice/PurchaseInvoiceDocument";
 
 export default function PurchaseDetail() {
@@ -44,7 +42,9 @@ export default function PurchaseDetail() {
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "BANK_TRANSFER" | "CHEQUE" | "CARD" | "OTHER">("CASH");
 
   const handlePrint = () => {
-    window.print();
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   const handleDelete = async () => {
@@ -96,60 +96,6 @@ export default function PurchaseDetail() {
 
   const status = invoice?.status || (invoice?.paymentDate ? "paid" : "unpaid");
 
-  const purchaseSummary = useMemo(() => {
-    if (!invoice) return "";
-    const lines: string[] = [];
-    const currency = business?.currency || "DZD";
-    lines.push(
-      `Purchase Invoice #${invoice.invoiceNumber ?? "N/A"} - Status: ${status}`
-    );
-    lines.push(
-      `Invoice Date: ${new Date(
-        invoice.invoiceDate
-      ).toLocaleDateString("en-GB")}`
-    );
-    if (invoice.paymentDate) {
-      lines.push(
-        `Payment Date: ${new Date(
-          invoice.paymentDate
-        ).toLocaleDateString("en-GB")}`
-      );
-    }
-    lines.push(`Payment Method: ${invoice.paymentMethod ?? "Unspecified"}`);
-    if (supplier?.name) {
-      lines.push(
-        `Supplier: ${supplier.name}, ${supplier.address ?? ""}`
-      );
-      if (supplier.nif) lines.push(`Supplier NIF: ${supplier.nif}`);
-      if (supplier.rc) lines.push(`Supplier RC: ${supplier.rc}`);
-    }
-    if (business?.name) {
-      lines.push(
-        `Buyer: ${business.name}, ${business.address ?? ""}`
-      );
-      if (business.nif) lines.push(`Buyer NIF: ${business.nif}`);
-      if (business.rc) lines.push(`Buyer RC: ${business.rc}`);
-    }
-    invoice.items?.forEach((item, index) => {
-      lines.push(
-        `Line ${index + 1}: ${item.description} | Qty ${item.quantity} | Unit ${
-          item.unitPrice
-        } ${currency} | VAT ${item.vatRate}% | Total ${
-          item.lineTotalTtc
-        } ${currency}`
-      );
-    });
-    lines.push(
-      `Subtotal HT: ${invoice.subtotalHt.toFixed(2)} ${currency}`
-    );
-    lines.push(`VAT Total: ${invoice.vatTotal.toFixed(2)} ${currency}`);
-    lines.push(`Grand Total TTC: ${invoice.totalTtc.toFixed(2)} ${currency}`);
-    if (invoice.description) {
-      lines.push(`Notes: ${invoice.description}`);
-    }
-    return lines.join("\n");
-  }, [invoice, supplier, business, status]);
-
   if (!invoice) {
     return (
       <DashboardLayout>
@@ -165,25 +111,32 @@ export default function PurchaseDetail() {
 
   return (
     <DashboardLayout breadcrumbOverrides={{ [invoice._id]: invoice.invoiceNumber || "Purchase" }}>
-      <style type="text/css" media="print">
+      <style>
         {`
-          @page { size: A4; margin: 0; }
-          body { -webkit-print-color-adjust: exact; }
           @media print {
-            .no-print { display: none !important; }
-            .print-break-inside-avoid { break-inside: avoid; }
-            html, body { width: 100%; height: auto; margin: 0; padding: 0; overflow: visible; }
-            .print-container { 
-                box-shadow: none !important; 
-                border: none !important; 
-                margin: 0 !important; 
-                width: 100% !important; 
-                max-width: 100% !important;
-                padding: 20mm !important;
-                min-height: auto !important;
-                overflow: visible !important;
-                border-radius: 0 !important;
+            @page { size: A4; margin: 0; }
+            body { 
+              visibility: hidden; 
+              -webkit-print-color-adjust: exact;
             }
+            .print-container { 
+              visibility: visible;
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100% !important;
+              max-width: none !important;
+              margin: 0 !important;
+              padding: 20mm !important;
+              box-shadow: none !important;
+              border: none !important;
+              background: white !important;
+            }
+            .print-container * {
+              visibility: visible;
+            }
+            /* Ensure no other elements interfere */
+            nav, header, aside, .no-print { display: none !important; }
           }
         `}
       </style>
