@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const PLANS = {
@@ -97,6 +97,47 @@ export const upgradeSubscription = mutation({
     });
 
     return { success: true, message: `Upgraded to ${plan.name}` };
+  },
+});
+
+export const processPaymentWebhook = internalMutation({
+  args: {
+    businessId: v.id("businesses"),
+    planId: v.string(),
+    interval: v.union(v.literal("month"), v.literal("year")),
+    status: v.string(),
+    transactionId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const plan = PLANS[args.planId as keyof typeof PLANS];
+    if (!plan) throw new Error("Invalid plan");
+
+    if (args.status === "paid") {
+        const now = Date.now();
+        const duration = args.interval === "year" ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+        const endDate = now + duration;
+
+        // Create subscription record
+        await ctx.db.insert("subscriptions", {
+            businessId: args.businessId,
+            planId: args.planId as any,
+            status: "active",
+            amount: plan.price || 0,
+            currency: "DZD",
+            interval: args.interval,
+            startDate: now,
+            endDate: endDate,
+            paymentMethod: "chargily",
+            transactionId: args.transactionId,
+        });
+
+        // Update business status
+        await ctx.db.patch(args.businessId, {
+            plan: args.planId as any,
+            subscriptionStatus: "active",
+            subscriptionEndsAt: endDate,
+        });
+    }
   },
 });
 

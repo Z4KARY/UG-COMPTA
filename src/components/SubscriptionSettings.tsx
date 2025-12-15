@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
@@ -31,20 +31,24 @@ const getPlanIcon = (id: string): LucideIcon => {
 
 export function SubscriptionSettings({ businessId, currentPlan = "free", subscriptionEndsAt }: SubscriptionSettingsProps) {
   const { t, language } = useLanguage();
-  const upgrade = useMutation(api.subscriptions.upgradeSubscription);
+  const createCheckout = useAction(api.chargilyActions.createCheckoutSession);
   const history = useQuery(api.subscriptions.getSubscriptionHistory, { businessId });
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
   const handleUpgrade = async (planId: PlanId) => {
     setIsLoading(planId);
     try {
-      await upgrade({
+      const result = await createCheckout({
         businessId,
         planId,
         interval: "year", // Default to year as per pricing
-        paymentMethod: "simulated_card",
       });
-      toast.success(t("settings.subscription.toast.success").replace("{plan}", planId.toUpperCase()));
+      
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
+        toast.error(t("settings.subscription.toast.error"));
+      }
     } catch (error) {
       toast.error(t("settings.subscription.toast.error"));
       console.error(error);

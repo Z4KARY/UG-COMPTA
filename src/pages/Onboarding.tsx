@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ export default function Onboarding() {
   const { user, isLoading: authLoading } = useAuth();
   const updateUser = useMutation(api.users.update);
   const createBusiness = useMutation(api.businesses.create);
-  const upgradeSubscription = useMutation(api.subscriptions.upgradeSubscription);
+  const createCheckout = useAction(api.chargilyActions.createCheckoutSession);
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,29 +71,29 @@ export default function Onboarding() {
         phone: phoneNumber,
       });
 
-      // If plan is free, we are done. If paid, go to payment step (or simulate it here for now)
+      // If plan is free, we are done. If paid, go to payment step
       if (planId === "free") {
         toast.success("Setup complete!");
         navigate("/dashboard");
       } else {
-        // For this demo, we'll simulate payment in step 3 or just do it here
-        // Let's go to step 3 for "Payment"
-        // Store businessId in state or just pass it? 
-        // Since we can't easily persist state across reloads without local storage, 
-        // and we want to keep it simple, let's just do the upgrade here if it's a simple flow.
-        // But the prompt asked for "Pay" step. Let's show a payment confirmation step.
-        
-        // We need to pass businessId to the next step.
-        // For simplicity, we'll just upgrade immediately and show a success message in step 3.
-        
-        await upgradeSubscription({
-            businessId,
-            planId: planId,
-            interval: "year",
-            paymentMethod: "simulated_card"
-        });
-        
-        setStep(3);
+        // Initiate Chargily Checkout
+        try {
+            const result = await createCheckout({
+                businessId,
+                planId: planId,
+                interval: "year",
+            });
+            
+            if (result.checkoutUrl) {
+                window.location.href = result.checkoutUrl;
+            } else {
+                toast.error("Failed to start payment");
+                // Optionally stay on this step or show error
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Payment initiation failed");
+        }
       }
     } catch (error) {
       console.error(error);
