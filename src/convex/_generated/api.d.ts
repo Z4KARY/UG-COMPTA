@@ -53,6 +53,7 @@ import type * as taxEngine from "../taxEngine.js";
 import type * as test_flow from "../test_flow.js";
 import type * as test_invoice_flow from "../test_invoice_flow.js";
 import type * as test_setup from "../test_setup.js";
+import type * as test_translation_flow from "../test_translation_flow.js";
 import type * as translation from "../translation.js";
 import type * as users from "../users.js";
 import type * as webhookActions from "../webhookActions.js";
@@ -110,6 +111,7 @@ declare const fullApi: ApiFromModules<{
   test_flow: typeof test_flow;
   test_invoice_flow: typeof test_invoice_flow;
   test_setup: typeof test_setup;
+  test_translation_flow: typeof test_translation_flow;
   translation: typeof translation;
   users: typeof users;
   webhookActions: typeof webhookActions;
