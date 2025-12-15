@@ -56,12 +56,27 @@ function RouteSyncer() {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <LanguageProvider>
-      <InstrumentationProvider>
-        <ConvexAuthProvider client={convex}>
+    <InstrumentationProvider>
+      <ConvexAuthProvider client={convex}>
+        <LanguageProvider>
           <BrowserRouter>
             <RouteSyncer />
             <Routes>
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+        </ConvexAuthProvider>
+      </InstrumentationProvider>
+    </LanguageProvider>
+=======
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+        </LanguageProvider>
+      </ConvexAuthProvider>
+    </InstrumentationProvider>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
               <Route path="/admin/auth" element={<AdminAuth />} />
