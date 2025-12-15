@@ -36,7 +36,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
         `}
       </style>
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col"
+        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:block print:shadow-none print:border-none"
         style={{ fontFamily: invoiceFontFamily, direction: isRTL ? "rtl" : "ltr" }}
       >
         {/* Top Accent Line */}
@@ -50,9 +50,9 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             {/* LEFT COLUMN: Business Info */}
             <div className="flex flex-col items-start">
               {logoUrl ? (
-                <img src={logoUrl} alt="Business Logo" className="h-40 object-contain mb-4 print:h-24 print:mb-2" />
+                <img src={logoUrl} alt="Business Logo" className="h-40 object-contain mb-4 print:h-48 print:mb-2" />
               ) : (
-                <div className="h-20 flex items-center mb-4 print:mb-1 print:h-12">
+                <div className="h-20 flex items-center mb-4 print:mb-1 print:h-24">
                   <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>
                     {business?.name}
                   </h2>
@@ -92,7 +92,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             <div className={`flex flex-col ${isRTL ? "items-start text-right" : "items-end text-right"}`}>
               {/* Invoice Title & Number */}
               <div className="mb-6 print:mb-2 w-full">
-                <h1 className="text-4xl font-light tracking-tight mb-1 uppercase text-gray-900 print:text-xl">
+                <h1 className="text-4xl font-light tracking-tight mb-1 uppercase text-gray-900 print:text-4xl print:font-bold">
                   {invoice.type === "quote" ? labels.quote : invoice.type === "credit_note" ? labels.credit_note : labels.invoice}
                 </h1>
                 <p className="text-lg font-medium text-gray-500 mb-4 print:mb-1 print:text-sm">#{invoice.invoiceNumber}</p>
