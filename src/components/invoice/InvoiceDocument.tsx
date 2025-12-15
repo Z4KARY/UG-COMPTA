@@ -1,3 +1,14 @@
+/*
+ * -----------------------------------------------------------------------------
+ * ⚠️ CRITICAL DESIGN CONSISTENCY WARNING ⚠️
+ * -----------------------------------------------------------------------------
+ * 1. Maintain the exact layout and design consistency for this component.
+ * 2. Any proposed changes to the design or layout must undergo explicit approval
+ *    from a lead developer or product owner.
+ * 3. Strict code review processes are in place to enforce this consistency.
+ * -----------------------------------------------------------------------------
+ */
+
 import { INVOICE_LABELS, InvoiceLanguage } from "@/lib/invoice-templates";
 import { numberToWords } from "@/lib/numberToWords";
 import { Separator } from "@/components/ui/separator";
