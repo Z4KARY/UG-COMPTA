@@ -36,6 +36,14 @@ export default function Onboarding() {
     if (plan && ["free", "startup", "pro", "premium", "enterprise"].includes(plan)) {
       setPlanId(plan as PlanId);
     }
+    
+    // Pre-fill phone from signup if available
+    const signupPhone = localStorage.getItem("signup_phone");
+    if (signupPhone) {
+      setPhoneNumber(signupPhone);
+      // Optional: Clear it so it doesn't persist forever
+      // localStorage.removeItem("signup_phone"); 
+    }
   }, [location]);
 
   useEffect(() => {
