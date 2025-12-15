@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Save, Eye } from "lucide-react";
+import { Loader2, Save, Eye, Printer } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { LegalDocument } from "@/components/legal/LegalDocument";
@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useReactToPrint } from "react-to-print";
+import { useRef } from "react";
 
 export default function LegalDocumentSettings() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
@@ -33,6 +35,12 @@ export default function LegalDocumentSettings() {
   const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<LegalTemplate | null>(null);
+
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: title || "Document Juridique",
+  });
 
   useEffect(() => {
     if (data?.document) {
@@ -151,6 +159,12 @@ export default function LegalDocumentSettings() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            
+            <Button variant="outline" onClick={() => handlePrint()}>
+              <Printer className="mr-2 h-4 w-4" />
+              Imprimer
+            </Button>
+
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline">
@@ -218,6 +232,17 @@ export default function LegalDocumentSettings() {
                 </CardContent>
              </Card>
           </div>
+        </div>
+
+        {/* Hidden Print Component */}
+        <div className="absolute left-[-9999px] top-[-9999px]">
+            <div ref={printRef}>
+                <LegalDocument 
+                  business={data.business} 
+                  content={content} 
+                  title={title} 
+                />
+            </div>
         </div>
       </div>
     </DashboardLayout>
