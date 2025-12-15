@@ -4,6 +4,7 @@ import { documents } from "./documents";
 import { entities } from "./entities";
 import { landing } from "./landing";
 import { invoiceForm } from "./invoiceForm";
+import { legal } from "./legal";
 // import { settings } from "./settings"; // Uncomment if settings exists
 
 export const fr = {
@@ -13,5 +14,6 @@ export const fr = {
   ...entities,
   ...landing,
   ...invoiceForm,
+  ...legal,
   // ...settings,
 };

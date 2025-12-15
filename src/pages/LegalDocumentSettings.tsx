@@ -26,10 +26,12 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 // @ts-ignore
 import html2pdf from "html2pdf.js";
 
 export default function LegalDocumentSettings() {
+  const { t } = useLanguage();
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
   const saveDocument = useMutation(api.legalDocuments.save);
 
@@ -42,11 +44,11 @@ export default function LegalDocumentSettings() {
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
-    documentTitle: title || "Document Juridique",
+    documentTitle: title || t("legal.title"),
     onAfterPrint: () => console.log("Print finished"),
     onPrintError: (error) => {
       console.error("Print error:", error);
-      toast.error("Erreur lors de l'impression");
+      toast.error(t("legal.toast.printError"));
     },
     pageStyle: `
       @page { size: auto; margin: 0mm; }
@@ -78,10 +80,10 @@ export default function LegalDocumentSettings() {
       const html2pdf = (await import("html2pdf.js")).default;
       await html2pdf().set(opt).from(element).save();
       console.log("PDF export successful");
-      toast.success("PDF téléchargé avec succès");
+      toast.success(t("legal.toast.pdfSuccess"));
     } catch (error) {
       console.error("PDF Export Error:", error);
-      toast.error("Erreur lors de l'export PDF. Vérifiez la console.");
+      toast.error(t("legal.toast.pdfError"));
     } finally {
       setIsExporting(false);
     }
@@ -97,7 +99,7 @@ export default function LegalDocumentSettings() {
   const handleTemplateSelect = (template: LegalTemplate) => {
     setTitle(template.title);
     setContent(template.content);
-    toast.success("Modèle appliqué avec succès");
+    toast.success(t("legal.toast.templateApplied"));
   };
 
   const handleSave = async () => {
@@ -110,10 +112,10 @@ export default function LegalDocumentSettings() {
         content,
         title,
       });
-      toast.success("Document sauvegardé avec succès");
+      toast.success(t("legal.toast.saveSuccess"));
     } catch (error) {
       console.error(error);
-      toast.error("Erreur lors de la sauvegarde");
+      toast.error(t("legal.toast.saveError"));
     } finally {
       setIsSaving(false);
     }
@@ -145,9 +147,9 @@ export default function LegalDocumentSettings() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Document Juridique</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("legal.title")}</h1>
             <p className="text-muted-foreground">
-              Configurez votre document juridique personnalisé (CGV, Contrat, etc.)
+              {t("legal.subtitle")}
             </p>
           </div>
           <div className="flex gap-2">
@@ -155,14 +157,14 @@ export default function LegalDocumentSettings() {
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2">
                   <FileText className="h-4 w-4" />
-                  Modèles
+                  {t("legal.templates")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-3xl">
                 <DialogHeader>
-                  <DialogTitle>Choisir un modèle</DialogTitle>
+                  <DialogTitle>{t("legal.chooseTemplate")}</DialogTitle>
                   <DialogDescription>
-                    Sélectionnez un modèle de document pour commencer. Attention, cela remplacera le contenu actuel.
+                    {t("legal.templateWarning")}
                   </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="h-[400px] pr-4">
@@ -191,14 +193,14 @@ export default function LegalDocumentSettings() {
                 </ScrollArea>
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button variant="outline">Annuler</Button>
+                    <Button variant="outline">{t("common.cancel") || "Annuler"}</Button>
                   </DialogClose>
                   <DialogClose asChild>
                     <Button 
                       disabled={!selectedTemplate} 
                       onClick={() => selectedTemplate && handleTemplateSelect(selectedTemplate)}
                     >
-                      Appliquer le modèle
+                      {t("legal.applyTemplate")}
                     </Button>
                   </DialogClose>
                 </DialogFooter>
@@ -207,7 +209,7 @@ export default function LegalDocumentSettings() {
             
             <Button variant="outline" onClick={() => handlePrint()}>
               <Printer className="mr-2 h-4 w-4" />
-              Imprimer
+              {t("declarations.print") || "Imprimer"}
             </Button>
 
             <Button variant="outline" onClick={handleExportPdf} disabled={isExporting}>
@@ -219,7 +221,7 @@ export default function LegalDocumentSettings() {
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Eye className="mr-2 h-4 w-4" />
-                  Aperçu
+                  {t("invoices.view") || "Aperçu"}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -232,7 +234,7 @@ export default function LegalDocumentSettings() {
             </Dialog>
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              Enregistrer
+              {t("settings.save") || "Enregistrer"}
             </Button>
           </div>
         </div>
@@ -240,27 +242,27 @@ export default function LegalDocumentSettings() {
         <div className="grid gap-6 lg:grid-cols-2">
           <Card className="lg:col-span-1 h-fit">
             <CardHeader>
-              <CardTitle>Éditeur</CardTitle>
+              <CardTitle>{t("legal.editor")}</CardTitle>
               <CardDescription>
-                Rédigez le contenu de votre document.
+                {t("legal.editorDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Titre du document</Label>
+                <Label htmlFor="title">{t("legal.documentTitle")}</Label>
                 <Input
                   id="title"
-                  placeholder="Ex: Conditions Générales de Vente"
+                  placeholder={t("legal.titlePlaceholder")}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="content">Contenu</Label>
+                <Label htmlFor="content">{t("legal.content")}</Label>
                 <RichTextEditor
                   value={content}
                   onChange={setContent}
-                  placeholder="Saisissez le contenu de votre document ici..."
+                  placeholder={t("legal.contentPlaceholder")}
                 />
               </div>
             </CardContent>
@@ -269,7 +271,7 @@ export default function LegalDocumentSettings() {
           <div className="hidden lg:block lg:col-span-1">
              <Card className="h-full">
                 <CardHeader>
-                  <CardTitle>Aperçu en direct</CardTitle>
+                  <CardTitle>{t("legal.livePreview")}</CardTitle>
                 </CardHeader>
                 <CardContent className="bg-gray-100/50 p-4 rounded-lg overflow-hidden">
                    <div className="scale-[0.65] origin-top-left w-[150%] h-[150%]">
