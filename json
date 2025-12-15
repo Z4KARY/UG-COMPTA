@@ -1,1 +1,3 @@
-{"plan":["Visually verify the invoice print layout to ensure single-page fitting and correct element sizing."]}
+{
+  "command": "npm test"
+}

@@ -1,0 +1,703 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Invoice Design Consistency (Snapshot Tests) > InvoiceDocument matches snapshot 1`] = `
+<div>
+  <div
+    class="w-full mx-auto print:w-full print:max-w-none print:h-auto print:overflow-visible"
+  >
+    <style
+      media="print"
+      type="text/css"
+    >
+      
+          @page { size: A4; margin: 5mm; }
+          body { print-color-adjust: exact; -webkit-print-color-adjust: exact; height: auto !important; }
+          html { height: auto !important; }
+        
+    </style>
+    <div
+      class="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:block print:shadow-none print:border-none"
+      style="font-family: Inter, Inter, sans-serif; direction: ltr;"
+    >
+      <div
+        class="h-2 w-full print:hidden"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="p-8 md:p-12 print:p-2 flex-grow print:flex-grow-0 flex flex-col"
+      >
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8 print:gap-1 mb-8 print:mb-1"
+        >
+          <div
+            class="flex flex-col items-start"
+          >
+            <div
+              class="h-20 flex items-center mb-4 print:mb-1 print:h-12"
+            >
+              <h2
+                class="text-2xl font-bold uppercase tracking-tight"
+                style="color: rgb(0, 0, 0);"
+              >
+                Test Business
+              </h2>
+            </div>
+            <div
+              class="text-sm text-gray-600 space-y-1 print:text-[10px] print:leading-tight print:space-y-0"
+            >
+              <p
+                class="font-semibold text-gray-900 text-base print:text-xs mb-1 print:mb-0"
+              >
+                Test Business
+              </p>
+              <p
+                class="whitespace-pre-line"
+              >
+                123 Test St
+              </p>
+              <p>
+                Test City
+                , Algeria
+              </p>
+              <p>
+                Tél
+                : 
+                123456789
+              </p>
+              <p>
+                Email
+                : 
+                test@business.com
+              </p>
+              <div
+                class="mt-4 pt-2 text-xs text-gray-500 space-y-0.5 border-t border-gray-100 print:mt-1 print:pt-1 print:border-gray-200"
+              >
+                <p>
+                  RC
+                  : 
+                  12/3456789
+                </p>
+                <p>
+                  NIF
+                  : 
+                  123456789012345
+                   | 
+                  NIS
+                  : 
+                  123456789
+                </p>
+                <p>
+                  AI
+                  : 
+                  123456789
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-col items-end text-right"
+          >
+            <div
+              class="mb-6 print:mb-1 w-full"
+            >
+              <h1
+                class="text-4xl font-light tracking-tight mb-1 uppercase text-gray-900 print:text-5xl print:font-bold print:mb-0"
+              >
+                FACTURE
+              </h1>
+              <p
+                class="text-lg font-medium text-gray-500 mb-4 print:mb-1 print:text-sm"
+              >
+                #
+                INV-001
+              </p>
+              <div
+                class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600 print:text-[10px] print:leading-tight text-right"
+              >
+                <div
+                  class="text-gray-400"
+                >
+                  Date d'émission
+                </div>
+                <div
+                  class="font-medium text-gray-900"
+                >
+                  01/01/2024
+                </div>
+                <div
+                  class="text-gray-400"
+                >
+                  Date d'échéance
+                </div>
+                <div
+                  class="font-medium text-gray-900"
+                >
+                  01/02/2024
+                </div>
+              </div>
+            </div>
+            <div
+              class="w-full bg-gray-50/50 rounded-lg p-4 border border-gray-100 print:p-1 print:bg-transparent print:border-gray-200 text-left text-left"
+            >
+              <h3
+                class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 print:mb-0.5"
+              >
+                Facturé à
+              </h3>
+              <h2
+                class="font-bold text-lg text-gray-900 mb-1 print:text-sm print:mb-0"
+              >
+                Test Customer
+              </h2>
+              <div
+                class="text-sm text-gray-600 space-y-1 print:text-[10px] print:leading-tight print:space-y-0"
+              >
+                <p
+                  class="whitespace-pre-line"
+                >
+                  456 Customer Ave
+                </p>
+                <div
+                  class="grid grid-cols-1 gap-y-0.5 mt-2 text-xs text-gray-500 border-t border-gray-200 pt-2 print:mt-1 print:pt-1 print:text-[9px]"
+                >
+                  <span>
+                    NIF
+                    : 
+                    987654321
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="mb-8 mt-8 print:mb-1 print:mt-4"
+        >
+          <table
+            class="w-full text-sm print:text-[10px]"
+          >
+            <thead>
+              <tr
+                class="border-b-2 border-gray-100"
+              >
+                <th
+                  class="text-left py-3 print:py-1 pl-2 font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50"
+                >
+                  Désignation
+                </th>
+                <th
+                  class="text-right py-3 print:py-1 font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50 w-16"
+                >
+                  Qté
+                </th>
+                <th
+                  class="text-right py-3 print:py-1 font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50 w-24"
+                >
+                  Prix U.
+                </th>
+                <th
+                  class="text-right py-3 print:py-1 font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50 w-16"
+                >
+                  TVA
+                </th>
+                <th
+                  class="text-right py-3 print:py-1 pr-2 font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50 w-24"
+                >
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="divide-y divide-gray-50"
+            >
+              <tr>
+                <td
+                  class="py-3 print:py-0.5 pl-2 text-gray-900 font-medium"
+                >
+                  Test Item
+                </td>
+                <td
+                  class="py-3 print:py-0.5 text-right text-gray-600"
+                >
+                  1
+                </td>
+                <td
+                  class="py-3 print:py-0.5 text-right text-gray-600"
+                >
+                  1,000.00
+                </td>
+                <td
+                  class="py-3 print:py-0.5 text-right text-gray-600"
+                >
+                  19
+                  %
+                </td>
+                <td
+                  class="py-3 print:py-0.5 pr-2 text-right text-gray-900 font-medium"
+                >
+                  1,190.00
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="flex flex-col md:flex-row print:flex-row gap-8 print:gap-2 mb-8 print:mb-1 print:break-inside-avoid"
+        >
+          <div
+            class="flex-1"
+          />
+          <div
+            class="w-full md:w-72 print:w-64 print:ml-auto"
+          >
+            <div
+              class="space-y-2 print:space-y-0.5"
+            >
+              <div
+                class="flex justify-between text-sm text-gray-600 print:text-[10px]"
+              >
+                <span>
+                  Sous-total
+                </span>
+                <span
+                  class="font-medium text-gray-900"
+                >
+                  1,000.00
+                   
+                  DZD
+                </span>
+              </div>
+              <div
+                class="flex justify-between text-sm text-gray-600 print:text-[10px]"
+              >
+                <span>
+                  Total TVA
+                </span>
+                <span
+                  class="font-medium text-gray-900"
+                >
+                  190.00
+                   
+                  DZD
+                </span>
+              </div>
+              <div
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px my-2 print:my-1"
+                data-orientation="horizontal"
+                data-slot="separator"
+                role="none"
+              />
+              <div
+                class="flex justify-between items-end"
+              >
+                <span
+                  class="font-bold text-lg text-gray-900 print:text-sm"
+                >
+                  Total TTC
+                </span>
+                <div
+                  class="text-right"
+                >
+                  <span
+                    class="block font-bold text-xl text-gray-900 print:text-lg"
+                    style="color: rgb(0, 0, 0);"
+                  >
+                    1,190.00
+                     
+                    <span
+                      class="text-sm font-medium text-gray-500 print:text-[10px]"
+                    >
+                      DZD
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="mb-8 print:mb-2 print:break-inside-avoid flex flex-col items-start text-left"
+        >
+          <p
+            class="text-sm text-gray-500 mb-1 print:text-[10px]"
+          >
+            Arrêté la présente facture à la somme de
+            :
+          </p>
+          <p
+            class="text-gray-900 font-medium italic border-l-4 pl-4 py-1 print:text-xs"
+            style="border-color: rgb(0, 0, 0);"
+          >
+            "
+            mille cent quatre-vingt-dix Dinars Algériens (TTC)
+            "
+          </p>
+        </div>
+        <div
+          class="flex justify-end mb-8 print:mb-0 print:break-inside-avoid"
+        >
+          <div
+            class="w-[400px] print:w-[600px] text-center relative"
+          >
+            <p
+              class="text-sm font-semibold text-gray-900 mb-4 print:mb-1 print:text-xs"
+            >
+              Signature
+            </p>
+            <div
+              class="h-48 print:h-80 w-full flex items-center justify-center relative"
+            >
+              <div
+                class="w-full h-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center"
+              >
+                <span
+                  class="text-xs text-gray-300"
+                >
+                  Cachet et Signature
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="mt-auto print:mt-1 pt-6 print:pt-1 border-t border-gray-100 text-center text-xs text-gray-400 print:text-[9px] print:break-inside-avoid"
+        >
+          <p
+            class="mb-1 print:mb-0"
+          />
+          <p
+            class="mt-2 print:mt-0.5"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Invoice Design Consistency (Snapshot Tests) > PurchaseInvoiceDocument matches snapshot 1`] = `
+<div>
+  <div
+    class="w-full mx-auto print:w-full print:max-w-none"
+  >
+    <div
+      class="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] relative flex flex-col"
+      style="font-family: Inter;"
+    >
+      <div
+        class="h-2 w-full print:hidden"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="p-8 md:p-12 print:p-0 flex-grow flex flex-col"
+      >
+        <div
+          class="flex flex-col md:flex-row justify-between items-start gap-8 mb-12 print:mb-6 print:gap-4"
+        >
+          <div
+            class="w-full md:w-1/2"
+          >
+            <div
+              class="h-20 flex items-center mb-6"
+            >
+              <h2
+                class="text-2xl font-bold uppercase tracking-tight text-gray-900"
+              >
+                Test Supplier
+              </h2>
+            </div>
+            <div
+              class="text-sm text-gray-600 space-y-1"
+            >
+              <p
+                class="font-semibold text-gray-900 text-base mb-1"
+              >
+                Test Supplier
+              </p>
+              <p
+                class="whitespace-pre-line"
+              >
+                789 Supplier Blvd
+              </p>
+              <div
+                class="flex gap-4 mt-2 text-xs text-gray-500"
+              >
+                <span>
+                  NIF: 
+                  111222333
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="w-full md:w-1/2 text-left md:text-right"
+          >
+            <div
+              class="inline-block text-left md:text-right"
+            >
+              <h1
+                class="text-4xl font-light tracking-tight mb-2 uppercase text-gray-900"
+              >
+                Purchase Invoice
+              </h1>
+              <p
+                class="text-lg font-medium text-gray-500 mb-6"
+              >
+                #
+                PINV-001
+              </p>
+              <div
+                class="grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-gray-600 text-left"
+              >
+                <div
+                  class="text-gray-400"
+                >
+                  Invoice Date
+                </div>
+                <div
+                  class="font-medium text-gray-900 text-right"
+                >
+                  01/01/2024
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="flex flex-col md:flex-row gap-8 mb-12 print:mb-6"
+        >
+          <div
+            class="w-full md:w-1/2"
+          >
+            <h3
+              class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3"
+            >
+              Bill To
+            </h3>
+            <div
+              class="bg-gray-50/50 rounded-lg p-4 border border-gray-100"
+            >
+              <h2
+                class="font-bold text-lg text-gray-900 mb-1"
+              >
+                Test Business
+              </h2>
+              <div
+                class="text-sm text-gray-600 space-y-1"
+              >
+                <p
+                  class="whitespace-pre-line"
+                >
+                  123 Test St
+                </p>
+                <p>
+                  Test City
+                  , Algeria
+                </p>
+                <div
+                  class="flex gap-4 mt-2 text-xs text-gray-500"
+                >
+                  <span>
+                    NIF: 
+                    123456789012345
+                  </span>
+                  <span>
+                    RC: 
+                    12/3456789
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="mb-8 print:mb-4"
+        >
+          <table
+            class="w-full text-sm"
+          >
+            <thead>
+              <tr
+                class="border-b-2 border-gray-100"
+              >
+                <th
+                  class="text-left py-3 pl-4 font-semibold text-gray-900 bg-gray-50/50 rounded-l-lg"
+                >
+                  Description
+                </th>
+                <th
+                  class="text-right py-3 font-semibold text-gray-900 bg-gray-50/50 w-24"
+                >
+                  Qty
+                </th>
+                <th
+                  class="text-right py-3 font-semibold text-gray-900 bg-gray-50/50 w-32"
+                >
+                  Price
+                </th>
+                <th
+                  class="text-right py-3 font-semibold text-gray-900 bg-gray-50/50 w-24"
+                >
+                  VAT
+                </th>
+                <th
+                  class="text-right py-3 pr-4 font-semibold text-gray-900 bg-gray-50/50 rounded-r-lg w-32"
+                >
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="divide-y divide-gray-50"
+            >
+              <tr>
+                <td
+                  class="py-4 pl-4 text-gray-900 font-medium"
+                >
+                  Purchase Item
+                </td>
+                <td
+                  class="py-4 text-right text-gray-600"
+                >
+                  1
+                </td>
+                <td
+                  class="py-4 text-right text-gray-600"
+                >
+                  1,000.00
+                </td>
+                <td
+                  class="py-4 text-right text-gray-600"
+                >
+                  19
+                  %
+                </td>
+                <td
+                  class="py-4 pr-4 text-right text-gray-900 font-medium"
+                >
+                  1,190.00
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="flex flex-col md:flex-row gap-12 mb-12 print:mb-6 print:break-inside-avoid"
+        >
+          <div
+            class="flex-1"
+          />
+          <div
+            class="w-full md:w-80"
+          >
+            <div
+              class="space-y-3"
+            >
+              <div
+                class="flex justify-between text-sm text-gray-600"
+              >
+                <span>
+                  Subtotal HT
+                </span>
+                <span
+                  class="font-medium text-gray-900"
+                >
+                  1,000.00
+                   DZD
+                </span>
+              </div>
+              <div
+                class="flex justify-between text-sm text-gray-600"
+              >
+                <span>
+                  VAT Total
+                </span>
+                <span
+                  class="font-medium text-gray-900"
+                >
+                  190.00
+                   DZD
+                </span>
+              </div>
+              <div
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px my-2"
+                data-orientation="horizontal"
+                data-slot="separator"
+                role="none"
+              />
+              <div
+                class="flex justify-between items-end"
+              >
+                <span
+                  class="font-bold text-lg text-gray-900"
+                >
+                  Total TTC
+                </span>
+                <div
+                  class="text-right"
+                >
+                  <span
+                    class="block font-bold text-2xl text-gray-900"
+                    style="color: rgb(0, 0, 0);"
+                  >
+                    1,190.00
+                     
+                    <span
+                      class="text-sm font-medium text-gray-500"
+                    >
+                      DZD
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="mb-12 print:mb-0 print:break-inside-avoid"
+        >
+          <p
+            class="text-sm text-gray-500 mb-1"
+          >
+            Amount in words:
+          </p>
+          <p
+            class="text-gray-900 font-medium italic border-l-4 pl-4 py-1"
+            style="border-color: rgb(0, 0, 0);"
+          >
+            "
+            one thousand one hundred ninety Algerian Dinars (Incl. Tax)
+            "
+          </p>
+        </div>
+        <div
+          class="flex justify-end mb-12 print:break-inside-avoid"
+        >
+          <div
+            class="w-[500px] text-center relative"
+          >
+            <p
+              class="text-sm font-semibold text-gray-900 mb-4"
+            >
+              Signature
+            </p>
+            <div
+              class="h-96 w-full flex items-center justify-center relative overflow-hidden"
+            >
+              <div
+                class="w-full h-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center"
+              >
+                <span
+                  class="text-xs text-gray-300"
+                >
+                  Cachet et Signature
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

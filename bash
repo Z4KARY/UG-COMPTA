@@ -1,1 +1,1 @@
-pnpm add html2pdf.js
+ls -F && pnpm add -D @testing-library/jest-dom

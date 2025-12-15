@@ -1,12 +1,4 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,7 +16,7 @@ import {
 } from "@/components/ui/input-otp";
 
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowRight, Loader2, Mail, UserX, Quote, Check } from "lucide-react";
+import { Loader2, Quote } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useLanguage } from "@/contexts/LanguageContext";

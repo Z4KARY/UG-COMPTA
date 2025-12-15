@@ -29,6 +29,13 @@ The convex server has a separate set of environment variables that are accessibl
 
 Currently, these variables include auth-specific keys: JWKS, JWT_PRIVATE_KEY, and SITE_URL.
 
+# Invoice Design Policy
+
+**CRITICAL:** This project enforces a strict Invoice Design Consistency Policy.
+All changes to invoice documents (`InvoiceDocument.tsx` and `PurchaseInvoiceDocument.tsx`) must adhere to the guidelines in [INVOICE_DESIGN_POLICY.md](./INVOICE_DESIGN_POLICY.md).
+
+- **Do not modify** the layout or design of these files without explicit approval.
+- Automated checks run during the build process to ensure compliance.
 
 # Using Authentication (Important!)
 

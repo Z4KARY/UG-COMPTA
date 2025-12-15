@@ -19,38 +19,36 @@ const REQUIRED_HEADER = `/*
 
 let hasError = false;
 
-console.log('🔍 Verifying Invoice Design Consistency Headers...');
+console.log('🔍 Checking invoice design consistency headers...');
 
 FILES_TO_CHECK.forEach(filePath => {
-  try {
-    const fullPath = path.join(process.cwd(), filePath);
-    if (!fs.existsSync(fullPath)) {
-      console.error(`❌ File not found: ${filePath}`);
-      hasError = true;
-      return;
-    }
-
-    const content = fs.readFileSync(fullPath, 'utf8');
-    // Normalize line endings for comparison
-    const normalizedContent = content.replace(/\r\n/g, '\n');
-    const normalizedHeader = REQUIRED_HEADER.replace(/\r\n/g, '\n');
-
-    if (!normalizedContent.includes(normalizedHeader)) {
-      console.error(`❌ Missing Critical Design Warning in: ${filePath}`);
-      hasError = true;
-    } else {
-      console.log(`✅ Verified: ${filePath}`);
-    }
-  } catch (err) {
-    console.error(`❌ Error checking ${filePath}:`, err.message);
+  const fullPath = path.join(process.cwd(), filePath);
+  
+  if (!fs.existsSync(fullPath)) {
+    console.error(`❌ File not found: ${filePath}`);
     hasError = true;
+    return;
+  }
+
+  const content = fs.readFileSync(fullPath, 'utf8');
+  
+  // Normalize line endings for comparison
+  const normalizedContent = content.replace(/\r\n/g, '\n');
+  const normalizedHeader = REQUIRED_HEADER.replace(/\r\n/g, '\n');
+
+  if (!normalizedContent.includes(normalizedHeader)) {
+    console.error(`❌ Missing or modified design consistency header in: ${filePath}`);
+    console.error('   Please restore the critical warning header exactly as defined in INVOICE_DESIGN_POLICY.md');
+    hasError = true;
+  } else {
+    console.log(`✅ Verified: ${filePath}`);
   }
 });
 
 if (hasError) {
-  console.error('\nFAILED: One or more invoice components are missing the required design consistency warning.');
+  console.error('\n💥 Invoice design consistency check failed!');
   process.exit(1);
 } else {
-  console.log('\nSUCCESS: All invoice components have the required design consistency warning.');
+  console.log('\n✨ All invoice documents passed design consistency check.');
   process.exit(0);
 }
