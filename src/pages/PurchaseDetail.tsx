@@ -90,10 +90,6 @@ export default function PurchaseDetail() {
   const business = invoice?.business;
   const supplier = invoice?.supplier;
 
-  // Design settings (using business settings for consistency, though this is an incoming invoice)
-  const primaryColor = business?.primaryColor || "#0f172a"; 
-  const font = business?.font || "Inter";
-
   const status = invoice?.status || (invoice?.paymentDate ? "paid" : "unpaid");
 
   if (!invoice) {

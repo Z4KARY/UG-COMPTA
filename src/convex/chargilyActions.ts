@@ -9,7 +9,7 @@ export const createCheckoutSession = action({
     planId: v.string(),
     interval: v.union(v.literal("month"), v.literal("year")),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const plan = PLANS[args.planId as keyof typeof PLANS];
     if (!plan) throw new Error("Invalid plan");
 

@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
-import { Network, Plus, Trash2, Copy, Check } from "lucide-react";
+import { useQuery, useMutation } from "convex/react";
+import { Copy, RefreshCw, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
@@ -39,7 +39,8 @@ const AVAILABLE_EVENTS = [
 
 export function WebhookSettings({ businessId }: WebhookSettingsProps) {
   const { t } = useLanguage();
-  const subscriptions = useQuery(api.webhooks.list, { businessId });
+  const webhooks = useQuery(api.webhooks.list, { businessId });
+  const generateSecret = useMutation(api.webhooks.generateSecret);
   const createSubscription = useMutation(api.webhooks.create);
   const deleteSubscription = useMutation(api.webhooks.remove);
   const updateSubscription = useMutation(api.webhooks.update);
@@ -158,7 +159,7 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {subscriptions?.map(sub => (
+                    {webhooks?.map(sub => (
                         <TableRow key={sub._id}>
                             <TableCell className="font-mono text-xs">{sub.targetUrl}</TableCell>
                             <TableCell>
@@ -177,7 +178,7 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
                                     className="h-6 text-xs"
                                     onClick={() => copyToClipboard(sub.secret, sub._id)}
                                 >
-                                    {copiedSecret === sub._id ? <Check className="h-3 w-3 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
+                                    {copiedSecret === sub._id ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
                                     {t("settings.webhooks.copy")}
                                 </Button>
                             </TableCell>
@@ -193,7 +194,7 @@ export function WebhookSettings({ businessId }: WebhookSettingsProps) {
                             </TableCell>
                         </TableRow>
                     ))}
-                    {subscriptions?.length === 0 && (
+                    {webhooks?.length === 0 && (
                         <TableRow>
                             <TableCell colSpan={4} className="text-center text-muted-foreground text-sm">
                                 {t("settings.webhooks.empty")}

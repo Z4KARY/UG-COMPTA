@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ContactSalesDialogProps {
   children: React.ReactNode;
@@ -19,7 +18,6 @@ export function ContactSalesDialog({ children, planName }: ContactSalesDialogPro
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const submitRequest = useMutation(api.contact.submitRequest);
-  const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
     name: "",

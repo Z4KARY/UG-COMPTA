@@ -8,7 +8,7 @@ export const sendContactNotification = action({
     companyName: v.optional(v.string()),
     message: v.optional(v.string()),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     // Since we are using a "no API / fully free" approach, we log the email details 
     // to the Convex dashboard logs instead of sending a real email via a provider like Resend.
     // You can view these logs in your Convex Dashboard > Logs.

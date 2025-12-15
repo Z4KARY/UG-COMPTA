@@ -3,7 +3,7 @@ import { action } from "./_generated/server";
 
 export const listEnv = action({
   args: {},
-  handler: async (ctx) => {
+  handler: async (_ctx) => {
     return {
       CONVEX_SITE_URL: process.env.CONVEX_SITE_URL,
       SITE_URL: process.env.SITE_URL,

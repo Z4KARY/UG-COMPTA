@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query, action, QueryCtx, MutationCtx } from "./_generated/server";
+import { mutation, query, QueryCtx, MutationCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 async function checkAdmin(ctx: QueryCtx | MutationCtx) {
@@ -52,7 +52,7 @@ export const listContactRequests = query({
 export const toggleBusinessSuspension = mutation({
   args: { id: v.id("businesses"), suspend: v.boolean() },
   handler: async (ctx, args) => {
-    const admin = await checkAdmin(ctx);
+    await checkAdmin(ctx);
     await ctx.db.patch(args.id, { isSuspended: args.suspend });
     
     // Log action?
@@ -63,7 +63,7 @@ export const toggleBusinessSuspension = mutation({
 export const toggleUserSuspension = mutation({
   args: { id: v.id("users"), suspend: v.boolean() },
   handler: async (ctx, args) => {
-    const admin = await checkAdmin(ctx);
+    await checkAdmin(ctx);
     await ctx.db.patch(args.id, { isSuspended: args.suspend });
   },
 });

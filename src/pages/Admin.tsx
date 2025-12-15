@@ -26,7 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { ShieldAlert, ShieldCheck, Lock, Unlock, CheckCircle, XCircle, Mail } from "lucide-react";
+import { Lock, Unlock, Mail, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useNavigate } from "react-router";

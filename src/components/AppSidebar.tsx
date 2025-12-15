@@ -1,4 +1,21 @@
 import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  Package,
+  CreditCard,
+  Building2,
+  LogOut,
+  ChevronUp,
+  User2,
+  ShieldCheck,
+  HelpCircle,
+  FileSpreadsheet,
+  ShoppingCart,
+  Truck,
+  Scale,
+} from "lucide-react";
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -12,22 +29,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  BarChart3,
-  Building2,
-  FileText,
-  Home,
-  LogOut,
-  Package,
-  Settings,
-  Users,
-  FileSpreadsheet,
-  ShoppingCart,
-  ChevronsUpDown,
-  Plus,
-  Truck,
-  ScrollText,
-} from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -56,7 +57,7 @@ export function AppSidebar() {
     {
       title: t("sidebar.dashboard"),
       url: "/dashboard",
-      icon: Home,
+      icon: LayoutDashboard,
     },
     {
       title: t("sidebar.invoices"),
@@ -91,7 +92,7 @@ export function AppSidebar() {
     {
       title: t("sidebar.legalDocuments"),
       url: "/legal-documents",
-      icon: ScrollText,
+      icon: Scale,
     },
     {
       title: t("sidebar.settings"),
@@ -126,7 +127,7 @@ export function AppSidebar() {
                           : "Business"}
                       </span>
                     </div>
-                    <ChevronsUpDown className="ml-auto size-4" />
+                    <ChevronUp className="ml-auto size-4" />
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" align="start" side="bottom" sideOffset={4}>
@@ -143,7 +144,7 @@ export function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer gap-2 p-2" onClick={() => navigate("/settings")}>
                     <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                      <Plus className="size-4" />
+                      <User2 className="size-4" />
                     </div>
                     <div className="font-medium text-muted-foreground">{t("sidebar.addBusiness")}</div>
                 </DropdownMenuItem>
@@ -197,7 +198,7 @@ export function AppSidebar() {
                     <span className="truncate font-semibold">{user?.name || "User"}</span>
                     <span className="truncate text-xs">{user?.email}</span>
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4" />
+                  <ChevronUp className="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent

@@ -1,26 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, TrendingDown, DollarSign, Percent, Building, Scale } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { formatCurrency } from "@/lib/utils";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-export function DashboardProfitability({ businessId }: { businessId: Id<"businesses"> }) {
-  const { t } = useLanguage();
-  const now = new Date();
-  const stats = useQuery(api.reports.getDashboardStats, { 
-    businessId, 
-    month: now.getMonth(), 
-    year: now.getFullYear() 
-  });
+export function DashboardProfitability({ data }: { data: any }) {
+  const { language } = useLanguage();
 
-  if (!stats) return <Skeleton className="h-[300px] w-full" />;
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD', maximumFractionDigits: 0 }).format(amount).replace('DZD', 'DA');
-  };
+  if (!data) return null;
 
   return (
     <div className="space-y-4">
@@ -33,10 +19,10 @@ export function DashboardProfitability({ businessId }: { businessId: Id<"busines
             </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold tracking-tight ${stats.netMargin >= 20 ? 'text-emerald-600' : stats.netMargin > 0 ? 'text-primary' : 'text-red-600'}`}>
-              {stats.netMargin.toFixed(1)}%
+            <div className={`text-2xl font-bold tracking-tight ${data.netMargin >= 20 ? 'text-emerald-600' : data.netMargin > 0 ? 'text-primary' : 'text-red-600'}`}>
+              {data.netMargin.toFixed(1)}%
             </div>
-            <Progress value={Math.max(0, Math.min(100, stats.netMargin))} className="h-2 mt-2" />
+            <Progress value={Math.max(0, Math.min(100, data.netMargin))} className="h-2 mt-2" />
             <p className="text-xs text-muted-foreground mt-2 font-medium">Target: &gt;20%</p>
           </CardContent>
         </Card>
@@ -49,8 +35,8 @@ export function DashboardProfitability({ businessId }: { businessId: Id<"busines
             </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold tracking-tight ${stats.cashFlow >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-              {stats.cashFlow >= 0 ? '+' : ''}{formatCurrency(stats.cashFlow)}
+            <div className={`text-2xl font-bold tracking-tight ${data.cashFlow >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              {data.cashFlow >= 0 ? '+' : ''}{formatCurrency(data.cashFlow)}
             </div>
             <p className="text-xs text-muted-foreground mt-1 font-medium">Net Cash Movement</p>
           </CardContent>
@@ -64,8 +50,8 @@ export function DashboardProfitability({ businessId }: { businessId: Id<"busines
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold tracking-tight text-orange-600">{formatCurrency(stats.ibsEstimate)}</div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">Estimated at {stats.ibsRate}% of Profit</p>
+            <div className="text-2xl font-bold tracking-tight text-orange-600">{formatCurrency(data.ibsEstimate)}</div>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">Estimated at {data.ibsRate}% of Profit</p>
           </CardContent>
         </Card>
 
@@ -77,7 +63,7 @@ export function DashboardProfitability({ businessId }: { businessId: Id<"busines
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold tracking-tight text-orange-600">{formatCurrency(stats.tapEstimate)}</div>
+            <div className="text-2xl font-bold tracking-tight text-orange-600">{formatCurrency(data.tapEstimate)}</div>
             <p className="text-xs text-muted-foreground mt-1 font-medium">Estimated at 0% of Turnover</p>
           </CardContent>
         </Card>
@@ -91,15 +77,15 @@ export function DashboardProfitability({ businessId }: { businessId: Id<"busines
             <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">New Customers</span>
-                    <span className="text-sm font-bold bg-primary/10 text-primary px-2 py-1 rounded">{stats.newCustomers}</span>
+                    <span className="text-sm font-bold bg-primary/10 text-primary px-2 py-1 rounded">{data.newCustomers}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Invoices Created</span>
-                    <span className="text-sm font-bold">{stats.invoiceCount}</span>
+                    <span className="text-sm font-bold">{data.invoiceCount}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Avg. Invoice Value</span>
-                    <span className="text-sm font-bold">{formatCurrency(stats.averageInvoiceValue)}</span>
+                    <span className="text-sm font-bold">{formatCurrency(data.averageInvoiceValue)}</span>
                 </div>
             </CardContent>
          </Card>
@@ -111,16 +97,16 @@ export function DashboardProfitability({ businessId }: { businessId: Id<"busines
             <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Invoices Created Today</span>
-                    <span className="text-sm font-bold">{stats.invoicesCreatedToday}</span>
+                    <span className="text-sm font-bold">{data.invoicesCreatedToday}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Expenses Logged Today</span>
-                    <span className="text-sm font-bold">{stats.expensesLoggedToday}</span>
+                    <span className="text-sm font-bold">{data.expensesLoggedToday}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <span className="text-sm font-medium">Working Capital</span>
-                    <span className={`text-sm font-bold ${stats.workingCapital > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {formatCurrency(stats.workingCapital)}
+                    <span className={`text-sm font-bold ${data.workingCapital > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {formatCurrency(data.workingCapital)}
                     </span>
                 </div>
             </CardContent>

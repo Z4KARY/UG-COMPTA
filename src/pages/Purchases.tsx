@@ -17,22 +17,10 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { Plus, ShoppingCart, Trash2, Users, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Plus, Trash2, Users, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SetupRequired } from "@/components/SetupRequired";
 

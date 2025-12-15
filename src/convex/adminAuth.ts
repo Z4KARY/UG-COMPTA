@@ -8,7 +8,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
  */
 export const verifyAdminPassword = action({
   args: { password: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const adminPasswordEnv = (typeof process !== "undefined" ? process.env.ADMIN_PASSWORD : undefined) || "92cd579afa431fed705c6e706d8fac90f73fc90c5ea0236be5c5791d9e66e9a1";
     
     const encoder = new TextEncoder();
@@ -33,7 +33,7 @@ export const verifyAdminPassword = action({
  */
 export const generateAdminPasswordHash = action({
   args: { password: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(args.password);
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);

@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
-import { internal } from "./_generated/api";
 
 export const createDefaults = internalMutation({
   args: { invoiceId: v.id("invoices") },

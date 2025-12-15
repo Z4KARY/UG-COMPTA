@@ -57,8 +57,8 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
 
   const revenueChange = calculateChange(currentStats.turnover, prevStats?.turnover || 0);
   const invoiceChange = calculateChange(currentStats.invoiceCount, prevStats?.invoiceCount || 0);
-  const pendingChange = 0; 
-  const customerChange = calculateChange(currentStats.customerCount, prevStats?.customerCount || 0);
+  const outstandingChange = 0; // TODO: Calculate change
+  const overdueChange = 0; // TODO: Calculate change;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(amount).replace('DZD', 'DA');
@@ -112,7 +112,7 @@ export function DashboardRecap({ businessId }: { businessId: Id<"businesses"> })
   ];
 
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
         <Card 
           key={stat.title}

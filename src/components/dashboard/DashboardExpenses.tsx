@@ -57,20 +57,21 @@ export function DashboardExpenses({ businessId }: { businessId: Id<"businesses">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={stats.byCategory}
+                  data={data.byCategory}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
+                  innerRadius={60}
                   outerRadius={80}
-                  fill="#8884d8"
+                  paddingAngle={5}
                   dataKey="value"
                 >
-                  {stats.byCategory.map((entry, index) => (
+                  {data.byCategory.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                <Legend />
+                <Tooltip 
+                  formatter={(value: number) => formatCurrency(value)}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>

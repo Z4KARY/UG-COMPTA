@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, internalQuery } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { internal } from "./_generated/api";
 import { configureTaxModules } from "./taxEngine";
 
 export const getMyBusiness = query({

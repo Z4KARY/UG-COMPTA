@@ -114,8 +114,6 @@ export const getDashboardStatsHandler = async (ctx: QueryCtx, args: DashboardSta
     let totalTurnover = 0;
     let accountsPayable = 0;
     let invoicesCreatedToday = 0;
-    let totalPaymentDelay = 0;
-    let paidInvoiceCount = 0;
 
     for (const inv of invoices) {
       if (inv.status !== "cancelled" && inv.status !== "draft") {

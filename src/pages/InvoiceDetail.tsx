@@ -1,16 +1,12 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { ArrowLeft, Printer, CheckCircle, Send, XCircle, Pencil } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { toast } from "sonner";
-import { numberToWords } from "@/lib/numberToWords";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { useMemo, useEffect } from "react";
+import { useEffect } from "react";
 import { InvoiceTranslationPanel } from "@/components/invoice/InvoiceTranslationPanel";
 import { InvoiceDocument } from "@/components/invoice/InvoiceDocument";
 
@@ -37,28 +33,6 @@ export default function InvoiceDetail() {
   };
 
   const business = invoice?.business;
-  const isAE = business?.type === "auto_entrepreneur";
-
-  // Calculate payment terms
-  let paymentTerms = "Payment on receipt";
-  if (invoice) {
-    const issueDate = new Date(invoice.issueDate);
-    const dueDate = new Date(invoice.dueDate);
-    const diffTime = Math.abs(dueDate.getTime() - issueDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) paymentTerms = "Immediate payment";
-    else if (diffDays > 0) paymentTerms = `${diffDays} days`;
-  }
-
-  // Design settings
-  const primaryColor = business?.primaryColor || "#0f172a"; // Default to slate-900
-  const secondaryColor = business?.secondaryColor || "#ffffff";
-  const font = business?.font || "Inter";
-  const invoiceFontFamily = font.includes(" ")
-    ? `"${font}", Inter, sans-serif`
-    : `${font}, Inter, sans-serif`;
-  const logoUrl = business?.logoUrl;
 
   const handleStatusChange = async (status: "issued" | "paid" | "cancelled") => {
     if (!invoice) return;
@@ -71,10 +45,6 @@ export default function InvoiceDetail() {
     }
   };
 
-  // Fallback for legacy invoices
-  const stampDuty = invoice?.stampDutyAmount ?? (invoice?.timbre ? 10 : 0);
-  const subtotalHt = invoice?.subtotalHt ?? invoice?.totalHt ?? 0;
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "paid": return "bg-emerald-100 text-emerald-700 border-emerald-200";
@@ -84,76 +54,6 @@ export default function InvoiceDetail() {
       default: return "bg-slate-100 text-slate-700 border-slate-200";
     }
   };
-
-  const invoiceSummary = useMemo(() => {
-    if (!invoice) return "";
-    const lines: string[] = [];
-    lines.push(
-      `Invoice #${invoice.invoiceNumber ?? "N/A"} (${invoice.type}) - Status: ${
-        invoice.status
-      }`
-    );
-    lines.push(
-      `Issue Date: ${new Date(
-        invoice.issueDate
-      ).toLocaleDateString("en-GB")} | Due Date: ${new Date(
-        invoice.dueDate
-      ).toLocaleDateString("en-GB")}`
-    );
-    lines.push(`Payment Terms: ${paymentTerms}`);
-    lines.push(`Payment Method: ${invoice.paymentMethod ?? "Unspecified"}`);
-    lines.push(`Currency: ${invoice.currency}`);
-    if (business?.name) {
-      lines.push(
-        `Seller: ${business.name}, ${business.tradeName ?? ""}, ${
-          business.address ?? ""
-        }, ${business.city ?? ""}`
-      );
-      if (business.nif) lines.push(`Seller NIF: ${business.nif}`);
-      if (business.rc) lines.push(`Seller RC: ${business.rc}`);
-      if (business.ai) lines.push(`Seller AI: ${business.ai}`);
-    }
-    if (invoice.customer?.name) {
-      lines.push(
-        `Customer: ${invoice.customer.name}, ${
-          invoice.customer.address ?? ""
-        }`
-      );
-      if (invoice.customer.taxId)
-        lines.push(`Customer NIF: ${invoice.customer.taxId}`);
-      if (invoice.customer.rc)
-        lines.push(`Customer RC: ${invoice.customer.rc}`);
-    }
-    invoice.items?.forEach((item, index) => {
-      lines.push(
-        `Item ${index + 1}: ${item.description} | Qty ${item.quantity} | Unit ${
-          item.unitPrice
-        } ${invoice.currency} | TVA ${item.tvaRate}% | Total ${
-          item.lineTotal
-        } ${invoice.currency}`
-      );
-    });
-    lines.push(
-      `Subtotal HT: ${subtotalHt.toFixed(2)} ${invoice.currency}`
-    );
-    if (!isAE) {
-      lines.push(
-        `VAT Total: ${(invoice.totalTva ?? 0).toFixed(2)} ${invoice.currency}`
-      );
-    }
-    if (stampDuty > 0) {
-      lines.push(
-        `Stamp Duty: ${stampDuty.toFixed(2)} ${invoice.currency}`
-      );
-    }
-    lines.push(
-      `Grand Total TTC: ${invoice.totalTtc.toFixed(2)} ${invoice.currency}`
-    );
-    if (invoice.notes) {
-      lines.push(`Notes: ${invoice.notes}`);
-    }
-    return lines.join("\n");
-  }, [invoice, business, subtotalHt, stampDuty, isAE, paymentTerms]);
 
   if (!invoice) {
     return (

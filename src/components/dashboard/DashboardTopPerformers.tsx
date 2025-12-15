@@ -1,19 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
-import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency } from "@/lib/utils";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-export function DashboardTopPerformers({ businessId }: { businessId: Id<"businesses"> }) {
+export function DashboardTopPerformers({ data }: { data: any }) {
   const { t } = useLanguage();
-  const data = useQuery(api.reports.getTopPerformers, { businessId });
-
-  if (!data) return <Skeleton className="h-[300px] w-full" />;
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD', maximumFractionDigits: 0 }).format(amount).replace('DZD', 'DA');
-  };
 
   return (
     <div className="grid gap-4 md:grid-cols-2">

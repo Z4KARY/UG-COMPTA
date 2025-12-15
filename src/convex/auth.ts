@@ -20,7 +20,7 @@ const emailOtp = Email({
   generateVerificationToken() {
     return generateOTP(6);
   },
-  async sendVerificationRequest({ identifier: email, provider, token }) {
+  async sendVerificationRequest({ identifier: email, token }) {
     try {
       // Safe process.env access
       const appName = (typeof process !== "undefined" ? process.env.VLY_APP_NAME : undefined) || "a vly.ai application";

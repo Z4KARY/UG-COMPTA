@@ -63,14 +63,49 @@ export function DashboardSales({ businessId }: { businessId: Id<"businesses"> })
             <CardContent>
             <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.chartData}>
-                    <XAxis dataKey="day" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value / 1000}k`} />
-                    <Tooltip 
-                        formatter={(value: number) => [formatCurrency(value), 'Sales']}
-                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                    />
-                    <Bar dataKey="amount" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
+                <BarChart data={data.chartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis 
+                    dataKey="day" 
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={10}
+                    fontSize={12}
+                  />
+                  <YAxis 
+                    tickFormatter={(value) => `${value / 1000}k`}
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                  />
+                  <Tooltip 
+                    cursor={{ fill: 'transparent' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  Sales
+                                </span>
+                                <span className="font-bold text-muted-foreground">
+                                  {formatCurrency(payload[0].value as number)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }
+                      return null
+                    }}
+                  />
+                  <Bar
+                    dataKey="amount"
+                    fill="currentColor"
+                    radius={[4, 4, 0, 0]}
+                    className="fill-primary"
+                  />
                 </BarChart>
                 </ResponsiveContainer>
             </div>

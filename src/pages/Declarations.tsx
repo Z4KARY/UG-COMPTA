@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { FileText, Download, Printer, Save, Settings, Loader2 } from "lucide-react";
+import { FileText, Download, Printer, Save, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
