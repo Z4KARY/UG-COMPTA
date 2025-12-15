@@ -57,7 +57,7 @@ export function DashboardExpenses({ businessId }: { businessId: Id<"businesses">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={data.byCategory}
+                  data={stats.byCategory}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -65,7 +65,7 @@ export function DashboardExpenses({ businessId }: { businessId: Id<"businesses">
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {data.byCategory.map((_entry, index) => (
+                  {stats.byCategory.map((_entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

@@ -1,12 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { formatCurrency } from "@/lib/utils";
-import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Info, Receipt, Calculator, Stamp, CalendarClock, Scale } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function DashboardTaxStats({ data }: { data: any }) {
+export function DashboardTaxStats({ businessId }: { businessId: Id<"businesses"> }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const now = new Date();

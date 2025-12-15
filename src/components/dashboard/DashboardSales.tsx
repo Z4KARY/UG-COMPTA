@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart, Pie, Legend } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart, Pie, Legend, CartesianGrid } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardSales({ businessId }: { businessId: Id<"businesses"> }) {
@@ -63,7 +63,7 @@ export function DashboardSales({ businessId }: { businessId: Id<"businesses"> })
             <CardContent>
             <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.chartData}>
+                <BarChart data={stats.chartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis 
                     dataKey="day" 
@@ -129,7 +129,7 @@ export function DashboardSales({ businessId }: { businessId: Id<"businesses"> })
                                 paddingAngle={5}
                                 dataKey="amount"
                             >
-                                {stats.paymentMethods.map((entry, index) => (
+                                {stats.paymentMethods.map((entry: any, index: number) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>

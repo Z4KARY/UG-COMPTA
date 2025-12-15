@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/utils";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Percent, DollarSign, Building, Scale } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 export function DashboardProfitability({ data }: { data: any }) {
   const { language } = useLanguage();
