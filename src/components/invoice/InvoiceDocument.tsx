@@ -142,7 +142,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Items Table */}
-          <div className="mb-8 print:mb-1">
+          <div className="mb-8 mt-8 print:mb-1 print:mt-4">
             <table className="w-full text-sm print:text-[10px]">
               <thead>
                 <tr className="border-b-2 border-gray-100">
