@@ -36,14 +36,14 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
         {/* Top Accent Line */}
         <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
-        <div className="p-8 md:p-12 print:p-8 flex-grow flex flex-col">
+        <div className="p-8 md:p-12 print:p-6 flex-grow flex flex-col">
           {/* Header */}
-          <div className="flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-6">
+          <div className="flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 print:gap-4 mb-12 print:mb-2">
             <div className="w-full md:w-1/2 print:w-1/2">
               {logoUrl ? (
-                <img src={logoUrl} alt="Business Logo" className="h-20 object-contain mb-6 print:mb-4" />
+                <img src={logoUrl} alt="Business Logo" className="h-20 object-contain mb-6 print:h-12 print:mb-2" />
               ) : (
-                <div className="h-20 flex items-center mb-6 print:mb-4">
+                <div className="h-20 flex items-center mb-6 print:mb-2 print:h-12">
                   <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>
                     {business?.name}
                   </h2>
@@ -81,10 +81,10 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
             <div className={`w-full md:w-1/2 print:w-1/2 flex flex-col ${isRTL ? "items-start" : "items-end"}`}>
               <div className={`inline-block ${isRTL ? "text-right md:text-left print:text-left" : "text-left md:text-right print:text-right"}`}>
-                <h1 className="text-4xl font-light tracking-tight mb-2 uppercase text-gray-900">
+                <h1 className="text-4xl font-light tracking-tight mb-2 uppercase text-gray-900 print:text-3xl">
                   {invoice.type === "quote" ? labels.quote : invoice.type === "credit_note" ? labels.credit_note : labels.invoice}
                 </h1>
-                <p className={`text-lg font-medium text-gray-500 mb-6 print:mb-4 ${isRTL ? "text-left" : "text-right"}`}>#{invoice.invoiceNumber}</p>
+                <p className={`text-lg font-medium text-gray-500 mb-6 print:mb-2 ${isRTL ? "text-left" : "text-right"}`}>#{invoice.invoiceNumber}</p>
 
                 <div className={`grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-gray-600 ${isRTL ? "text-right" : "text-left"}`}>
                   <div className="text-gray-400">{labels.issueDate}</div>
@@ -111,18 +111,18 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Bill To Section */}
-          <div className="flex flex-col md:flex-row gap-8 mb-12 print:mb-6">
+          <div className="flex flex-col md:flex-row gap-8 mb-12 print:mb-2">
             <div className="w-full">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 print:mb-2">{labels.billTo}</h3>
-              <div className="bg-gray-50/50 rounded-lg p-4 border border-gray-100 print:p-3 print:border-gray-200">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 print:mb-1">{labels.billTo}</h3>
+              <div className="bg-gray-50/50 rounded-lg p-4 border border-gray-100 print:p-2 print:border-gray-200">
                 <h2 className="font-bold text-lg text-gray-900 mb-1">{invoice.customer?.name}</h2>
                 {invoice.customer?.contactPerson && (
-                  <p className="text-sm text-gray-600 mb-2">Attn: {invoice.customer.contactPerson}</p>
+                  <p className="text-sm text-gray-600 mb-2 print:mb-1">Attn: {invoice.customer.contactPerson}</p>
                 )}
 
                 <div className="text-sm text-gray-600 space-y-1">
                   <p className="whitespace-pre-line">{invoice.customer?.address}</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 mt-3 text-xs text-gray-500 border-t border-gray-200 pt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 mt-3 text-xs text-gray-500 border-t border-gray-200 pt-2 print:mt-1 print:pt-1">
                     {invoice.customer?.taxId && <span>{labels.sellerNif}: {invoice.customer.taxId}</span>}
                     {invoice.customer?.rc && <span>{labels.sellerRc}: {invoice.customer.rc}</span>}
                     {invoice.customer?.ai && <span>{labels.sellerAi}: {invoice.customer.ai}</span>}
@@ -134,17 +134,17 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Items Table */}
-          <div className="mb-8 print:mb-4">
+          <div className="mb-8 print:mb-2">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b-2 border-gray-100">
-                  <th className={`text-left py-3 ${isRTL ? "pr-4 rounded-r-lg" : "pl-4 rounded-l-lg"} font-semibold text-gray-900 bg-gray-50/50`}>
+                  <th className={`text-left py-3 print:py-1 ${isRTL ? "pr-4 rounded-r-lg" : "pl-4 rounded-l-lg"} font-semibold text-gray-900 bg-gray-50/50`}>
                     {labels.description}
                   </th>
-                  <th className="text-right py-3 font-semibold text-gray-900 bg-gray-50/50 w-24">{labels.qty}</th>
-                  <th className="text-right py-3 font-semibold text-gray-900 bg-gray-50/50 w-32">{labels.price}</th>
-                  {!isAE && <th className="text-right py-3 font-semibold text-gray-900 bg-gray-50/50 w-24">{labels.vat}</th>}
-                  <th className={`text-right py-3 ${isRTL ? "pl-4 rounded-l-lg" : "pr-4 rounded-r-lg"} font-semibold text-gray-900 bg-gray-50/50 w-32`}>
+                  <th className="text-right py-3 print:py-1 font-semibold text-gray-900 bg-gray-50/50 w-24">{labels.qty}</th>
+                  <th className="text-right py-3 print:py-1 font-semibold text-gray-900 bg-gray-50/50 w-32">{labels.price}</th>
+                  {!isAE && <th className="text-right py-3 print:py-1 font-semibold text-gray-900 bg-gray-50/50 w-24">{labels.vat}</th>}
+                  <th className={`text-right py-3 print:py-1 ${isRTL ? "pl-4 rounded-l-lg" : "pr-4 rounded-r-lg"} font-semibold text-gray-900 bg-gray-50/50 w-32`}>
                     {labels.total}
                   </th>
                 </tr>
@@ -152,13 +152,13 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
               <tbody className="divide-y divide-gray-50">
                 {items?.map((item, index) => (
                   <tr key={index}>
-                    <td className={`py-4 print:py-2 ${isRTL ? "pr-4" : "pl-4"} text-gray-900 font-medium`}>{item.description}</td>
-                    <td className="py-4 print:py-2 text-right text-gray-600">{item.quantity}</td>
-                    <td className="py-4 print:py-2 text-right text-gray-600">
+                    <td className={`py-4 print:py-1 ${isRTL ? "pr-4" : "pl-4"} text-gray-900 font-medium`}>{item.description}</td>
+                    <td className="py-4 print:py-1 text-right text-gray-600">{item.quantity}</td>
+                    <td className="py-4 print:py-1 text-right text-gray-600">
                       {item.unitPrice.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </td>
-                    {!isAE && <td className="py-4 print:py-2 text-right text-gray-600">{item.tvaRate}%</td>}
-                    <td className={`py-4 print:py-2 ${isRTL ? "pl-4" : "pr-4"} text-right text-gray-900 font-medium`}>
+                    {!isAE && <td className="py-4 print:py-1 text-right text-gray-600">{item.tvaRate}%</td>}
+                    <td className={`py-4 print:py-1 ${isRTL ? "pl-4" : "pr-4"} text-right text-gray-900 font-medium`}>
                       {item.lineTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </td>
                   </tr>
@@ -168,10 +168,10 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Totals & Notes */}
-          <div className="flex flex-col md:flex-row gap-12 mb-12 print:mb-6 print:break-inside-avoid">
+          <div className="flex flex-col md:flex-row gap-12 mb-12 print:mb-2 print:break-inside-avoid">
             <div className="flex-1">
               {invoice.notes && (
-                <div className="bg-yellow-50/50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-800 print:bg-transparent print:border-gray-200 print:text-gray-800">
+                <div className="bg-yellow-50/50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-800 print:bg-transparent print:border-gray-200 print:text-gray-800 print:p-2">
                   <p className="font-semibold mb-1 text-yellow-900 print:text-gray-900">{labels.notes}</p>
                   <p>{invoice.notes}</p>
                 </div>
@@ -179,7 +179,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             </div>
 
             <div className="w-full md:w-80">
-              <div className="space-y-3 print:space-y-2">
+              <div className="space-y-3 print:space-y-1">
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>{labels.subtotal}</span>
                   <span className="font-medium text-gray-900">
@@ -219,7 +219,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Amount in Words */}
-          <div className="mb-12 print:mb-6 print:break-inside-avoid">
+          <div className="mb-12 print:mb-4 print:break-inside-avoid">
             <p className="text-sm text-gray-500 mb-1">{labels.amountInWords}:</p>
             <p className={`text-gray-900 font-medium italic ${isRTL ? "border-r-4 pr-4" : "border-l-4 pl-4"} py-1`} style={{ borderColor: primaryColor }}>
               "{numberToWords(invoice.totalTtc, lang)}"
@@ -229,15 +229,15 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           {/* Signature & Stamp Section */}
           <div className="flex justify-end mb-12 print:mb-0 print:break-inside-avoid">
             <div className="w-[500px] text-center relative">
-              <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-2">{labels.signature}</p>
+              <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-1">{labels.signature}</p>
               
-              <div className="h-96 print:h-48 w-full flex items-center justify-center relative overflow-hidden">
+              <div className="h-96 print:h-24 w-full flex items-center justify-center relative overflow-hidden">
                 {/* Stamp Layer */}
                 {stampUrl && (
                   <img 
                     src={stampUrl} 
                     alt="Stamp" 
-                    className="absolute right-0 top-0 w-96 h-96 print:w-48 print:h-48 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                    className="absolute right-0 top-0 w-96 h-96 print:w-24 print:h-24 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
                   />
                 )}
                 
@@ -261,7 +261,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Footer */}
-          <div className="mt-auto pt-8 print:pt-4 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
+          <div className="mt-auto pt-8 print:pt-2 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
             <p className="mb-1">{labels.legalFooter}</p>
             {isAE ? (
               <p>{labels.autoEntrepreneur}</p>
