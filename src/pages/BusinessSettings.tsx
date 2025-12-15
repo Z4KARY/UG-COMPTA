@@ -92,6 +92,10 @@ export default function BusinessSettings() {
                     template: business.template,
                     logoUrl: business.logoUrl,
                     logoStorageId: business.logoStorageId,
+                    signatureUrl: business.signatureUrl,
+                    signatureStorageId: business.signatureStorageId,
+                    stampUrl: business.stampUrl,
+                    stampStorageId: business.stampStorageId,
                   }}
                 />
               ) : (
