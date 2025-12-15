@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Trash2 } from "lucide-react";
 import { InvoiceItem } from "@/types/invoice";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface InvoiceFormItemsProps {
   items: InvoiceItem[];
@@ -15,6 +16,7 @@ interface InvoiceFormItemsProps {
 }
 
 export function InvoiceFormItems({ items, setItems, products, business }: InvoiceFormItemsProps) {
+  const { t } = useLanguage();
   
   const handleItemChange = (
     index: number,
@@ -88,17 +90,17 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Items</CardTitle>
+        <CardTitle>{t("invoiceForm.items.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Desktop Header - Hidden on Mobile */}
         <div className="hidden md:grid grid-cols-12 gap-2 font-medium text-sm text-muted-foreground mb-2 px-2">
-            <div className="col-span-4">Description</div>
-            <div className="col-span-2">Type</div>
-            <div className="col-span-1">Qty</div>
-            <div className="col-span-2">Price</div>
-            <div className="col-span-1">TVA</div>
-            <div className="col-span-2 text-right">Total</div>
+            <div className="col-span-4">{t("invoiceForm.items.description")}</div>
+            <div className="col-span-2">{t("invoiceForm.items.type")}</div>
+            <div className="col-span-1">{t("invoiceForm.items.quantity")}</div>
+            <div className="col-span-2">{t("invoiceForm.items.price")}</div>
+            <div className="col-span-1">{t("invoiceForm.items.tva")}</div>
+            <div className="col-span-2 text-right">{t("invoiceForm.items.total")}</div>
         </div>
 
         {items.map((item, index) => (
@@ -114,11 +116,11 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
           >
             {/* Description */}
             <div className="md:col-span-4 space-y-1.5 md:space-y-0">
-              <Label className="md:hidden text-xs text-muted-foreground">Description</Label>
+              <Label className="md:hidden text-xs text-muted-foreground">{t("invoiceForm.items.description")}</Label>
               <div className="flex gap-2">
                 <Select onValueChange={(val) => handleProductSelect(index, val)}>
-                  <SelectTrigger className="w-[40px] px-2 shrink-0 text-muted-foreground" title="Select Product">
-                    <span className="sr-only">Select Product</span>
+                  <SelectTrigger className="w-[40px] px-2 shrink-0 text-muted-foreground" title={t("invoiceForm.items.selectProduct")}>
+                    <span className="sr-only">{t("invoiceForm.items.selectProduct")}</span>
                     <Plus className="h-4 w-4" />
                   </SelectTrigger>
                   <SelectContent>
@@ -134,7 +136,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
                   onChange={(e) =>
                     handleItemChange(index, "description", e.target.value)
                   }
-                  placeholder="Item description"
+                  placeholder={t("invoiceForm.items.placeholder")}
                   className="w-full"
                 />
               </div>
@@ -142,7 +144,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
             
             {/* Type */}
             <div className="md:col-span-2 space-y-1.5 md:space-y-0">
-                <Label className="md:hidden text-xs text-muted-foreground">Type</Label>
+                <Label className="md:hidden text-xs text-muted-foreground">{t("invoiceForm.items.type")}</Label>
                 <Select 
                     value={item.productType || "service"} 
                     onValueChange={(val) => handleItemChange(index, "productType", val)}
@@ -151,15 +153,15 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="service">Service</SelectItem>
-                        <SelectItem value="goods">Goods</SelectItem>
+                        <SelectItem value="service">{t("invoiceForm.type.service")}</SelectItem>
+                        <SelectItem value="goods">{t("invoiceForm.type.goods")}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
 
             {/* Qty */}
             <div className="md:col-span-1 space-y-1.5 md:space-y-0">
-                <Label className="md:hidden text-xs text-muted-foreground">Qty</Label>
+                <Label className="md:hidden text-xs text-muted-foreground">{t("invoiceForm.items.quantity")}</Label>
                 <Input
                     type="number"
                     min="0"
@@ -172,7 +174,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
 
             {/* Price */}
             <div className="md:col-span-2 space-y-1.5 md:space-y-0">
-                <Label className="md:hidden text-xs text-muted-foreground">Price</Label>
+                <Label className="md:hidden text-xs text-muted-foreground">{t("invoiceForm.items.price")}</Label>
                 <Input
                     type="number"
                     min="0"
@@ -186,7 +188,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
 
             {/* TVA */}
             <div className="md:col-span-1 space-y-1.5 md:space-y-0">
-                <Label className="md:hidden text-xs text-muted-foreground">TVA %</Label>
+                <Label className="md:hidden text-xs text-muted-foreground">{t("invoiceForm.items.tva")}</Label>
                 <Input
                     type="number"
                     min="0"
@@ -203,7 +205,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
             {/* Total & Delete */}
             <div className="md:col-span-2 flex items-center justify-between md:justify-end gap-2 pt-2 md:pt-0 border-t md:border-t-0 mt-2 md:mt-0">
                 <div className="md:hidden">
-                    <span className="text-xs text-muted-foreground mr-2">Total:</span>
+                    <span className="text-xs text-muted-foreground mr-2">{t("invoiceForm.items.total")}:</span>
                     <span className="font-medium">{item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div className="hidden md:block text-sm font-medium text-right w-full pr-2">

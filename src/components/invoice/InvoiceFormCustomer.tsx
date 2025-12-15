@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreateCustomerDialog } from "@/components/CreateCustomerDialog";
 import { useFormContext } from "react-hook-form";
 import { Id } from "@/convex/_generated/dataModel";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface InvoiceFormCustomerProps {
   customers: any[];
@@ -13,11 +14,12 @@ interface InvoiceFormCustomerProps {
 
 export function InvoiceFormCustomer({ customers, businessId, onCustomerSelect }: InvoiceFormCustomerProps) {
   const form = useFormContext();
+  const { t } = useLanguage();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Customer</CardTitle>
+        <CardTitle>{t("invoiceForm.customer.title")}</CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
@@ -25,7 +27,7 @@ export function InvoiceFormCustomer({ customers, businessId, onCustomerSelect }:
           name="customerId"
           render={({ field }) => (
             <FormItem className="col-span-2">
-              <FormLabel>Customer</FormLabel>
+              <FormLabel>{t("invoiceForm.customer.title")}</FormLabel>
               <div className="flex gap-2">
                 <Select 
                   value={field.value} 
@@ -35,7 +37,7 @@ export function InvoiceFormCustomer({ customers, businessId, onCustomerSelect }:
                   }}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select customer" />
+                    <SelectValue placeholder={t("invoiceForm.customer.select")} />
                   </SelectTrigger>
                   <SelectContent>
                     {customers?.map((c) => (

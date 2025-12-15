@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface InvoiceFormDetailsProps {
   issueDate: Date;
@@ -48,14 +49,16 @@ export function InvoiceFormDetails({
   onLanguageChange,
   onPaymentMethodChange,
 }: InvoiceFormDetailsProps) {
+  const { t } = useLanguage();
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Invoice Details</CardTitle>
+        <CardTitle>{t("invoiceForm.details.title")}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <Label>Issue Date</Label>
+          <Label>{t("invoiceForm.details.issueDate")}</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -66,7 +69,7 @@ export function InvoiceFormDetails({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {issueDate ? format(issueDate, "PPP") : <span>Pick a date</span>}
+                {issueDate ? format(issueDate, "PPP") : <span>{t("invoiceForm.details.pickDate")}</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
@@ -81,7 +84,7 @@ export function InvoiceFormDetails({
         </div>
 
         <div className="space-y-2">
-          <Label>Due Date</Label>
+          <Label>{t("invoiceForm.details.dueDate")}</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -92,7 +95,7 @@ export function InvoiceFormDetails({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
+                {dueDate ? format(dueDate, "PPP") : <span>{t("invoiceForm.details.pickDate")}</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
@@ -107,45 +110,45 @@ export function InvoiceFormDetails({
         </div>
 
         <div className="space-y-2">
-          <Label>Currency</Label>
+          <Label>{t("invoiceForm.details.currency")}</Label>
           <Select value={currency} onValueChange={onCurrencyChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Select currency" />
+              <SelectValue placeholder={t("invoiceForm.details.selectCurrency")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="DZD">Algerian Dinar (DZD)</SelectItem>
-              <SelectItem value="EUR">Euro (EUR)</SelectItem>
-              <SelectItem value="USD">US Dollar (USD)</SelectItem>
+              <SelectItem value="DZD">{t("invoiceForm.currency.dzd")}</SelectItem>
+              <SelectItem value="EUR">{t("invoiceForm.currency.eur")}</SelectItem>
+              <SelectItem value="USD">{t("invoiceForm.currency.usd")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label>Payment Method</Label>
+          <Label>{t("invoiceForm.details.paymentMethod")}</Label>
           <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Select payment method" />
+              <SelectValue placeholder={t("invoiceForm.details.selectPayment")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="CASH">Cash</SelectItem>
-              <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
-              <SelectItem value="CHEQUE">Cheque</SelectItem>
-              <SelectItem value="CARD">Card</SelectItem>
-              <SelectItem value="OTHER">Other</SelectItem>
+              <SelectItem value="CASH">{t("invoiceForm.payment.cash")}</SelectItem>
+              <SelectItem value="BANK_TRANSFER">{t("invoiceForm.payment.bankTransfer")}</SelectItem>
+              <SelectItem value="CHEQUE">{t("invoiceForm.payment.cheque")}</SelectItem>
+              <SelectItem value="CARD">{t("invoiceForm.payment.card")}</SelectItem>
+              <SelectItem value="OTHER">{t("invoiceForm.payment.other")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label>Document Language</Label>
+          <Label>{t("invoiceForm.details.language")}</Label>
           <Select value={language} onValueChange={onLanguageChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Select language" />
+              <SelectValue placeholder={t("invoiceForm.details.selectLanguage")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="fr">Français</SelectItem>
-              <SelectItem value="ar">العربية</SelectItem>
-              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="fr">{t("invoiceForm.language.fr")}</SelectItem>
+              <SelectItem value="ar">{t("invoiceForm.language.ar")}</SelectItem>
+              <SelectItem value="en">{t("invoiceForm.language.en")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
