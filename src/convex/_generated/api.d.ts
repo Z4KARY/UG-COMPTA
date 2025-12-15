@@ -22,6 +22,8 @@ import type * as debug from "../debug.js";
 import type * as debug_env from "../debug_env.js";
 import type * as debug_fix from "../debug_fix.js";
 import type * as declarations from "../declarations.js";
+import type * as declarations_logic_g12 from "../declarations_logic/g12.js";
+import type * as declarations_logic_g50 from "../declarations_logic/g50.js";
 import type * as emails from "../emails.js";
 import type * as exportActions from "../exportActions.js";
 import type * as fiscal from "../fiscal.js";
@@ -81,6 +83,8 @@ declare const fullApi: ApiFromModules<{
   debug_env: typeof debug_env;
   debug_fix: typeof debug_fix;
   declarations: typeof declarations;
+  "declarations_logic/g12": typeof declarations_logic_g12;
+  "declarations_logic/g50": typeof declarations_logic_g50;
   emails: typeof emails;
   exportActions: typeof exportActions;
   fiscal: typeof fiscal;
