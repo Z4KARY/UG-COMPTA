@@ -20,6 +20,12 @@ export default function LegalDocumentView() {
       console.error("Print error:", error);
       toast.error("Erreur lors de l'impression");
     },
+    pageStyle: `
+      @page { size: auto; margin: 0mm; }
+      @media print {
+        body { -webkit-print-color-adjust: exact; }
+      }
+    `,
   });
 
   const handleExportPdf = async () => {
