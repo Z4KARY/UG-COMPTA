@@ -57,6 +57,25 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                 <p>{business?.city}, Algeria</p>
                 {business?.phone && <p>{labels.tel}: {business.phone}</p>}
                 {business?.email && <p>{labels.email}: {business.email}</p>}
+
+                <div className="mt-4 pt-2 text-xs text-gray-500 space-y-0.5">
+                  {isAE ? (
+                    <>
+                      <p>Auto-Entrepreneur: {business?.autoEntrepreneurCardNumber || "N/A"}</p>
+                      <p>{labels.sellerNif}: {business?.nif || "N/A"} | {labels.sellerNis}: {business?.nis || "N/A"}</p>
+                      <p>CASNOS: {business?.ssNumber || "N/A"}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>{labels.sellerRc}: {business?.rc || "N/A"}</p>
+                      <p>{labels.sellerNif}: {business?.nif || "N/A"} | {labels.sellerNis}: {business?.nis || "N/A"}</p>
+                      <p>{labels.sellerAi}: {business?.ai || "N/A"}</p>
+                      {business?.capital && (
+                        <p>{labels.sellerCapital}: {business.capital.toLocaleString()} {business.currency}</p>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -93,7 +112,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
           {/* Bill To Section */}
           <div className="flex flex-col md:flex-row gap-8 mb-12">
-            <div className="w-full md:w-1/2">
+            <div className="w-full">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">{labels.billTo}</h3>
               <div className="bg-gray-50/50 rounded-lg p-4 border border-gray-100">
                 <h2 className="font-bold text-lg text-gray-900 mb-1">{invoice.customer?.name}</h2>
@@ -103,33 +122,13 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
                 <div className="text-sm text-gray-600 space-y-1">
                   <p className="whitespace-pre-line">{invoice.customer?.address}</p>
-                  <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 mt-3 text-xs text-gray-500 border-t border-gray-200 pt-2">
                     {invoice.customer?.taxId && <span>{labels.sellerNif}: {invoice.customer.taxId}</span>}
                     {invoice.customer?.rc && <span>{labels.sellerRc}: {invoice.customer.rc}</span>}
+                    {invoice.customer?.ai && <span>{labels.sellerAi}: {invoice.customer.ai}</span>}
+                    {invoice.customer?.nis && <span>{labels.sellerNis}: {invoice.customer.nis}</span>}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Business Legal IDs (Compact) */}
-            <div className={`w-full md:w-1/2 flex flex-col justify-end ${isRTL ? "md:text-left" : "md:text-right"}`}>
-              <div className="text-xs text-gray-400 space-y-1">
-                {isAE ? (
-                  <>
-                    <p>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</p>
-                    <p>{labels.sellerNif}: {business?.nif || "N/A"} | {labels.sellerNis}: {business?.nis || "N/A"}</p>
-                    <p>CASNOS: {business?.ssNumber || "N/A"}</p>
-                  </>
-                ) : (
-                  <>
-                    <p>{labels.sellerRc}: {business?.rc || "N/A"}</p>
-                    <p>{labels.sellerNif}: {business?.nif || "N/A"} | {labels.sellerNis}: {business?.nis || "N/A"}</p>
-                    <p>{labels.sellerAi}: {business?.ai || "N/A"}</p>
-                    {business?.capital && (
-                      <p>{labels.sellerCapital}: {business.capital.toLocaleString()} {business.currency}</p>
-                    )}
-                  </>
-                )}
               </div>
             </div>
           </div>
