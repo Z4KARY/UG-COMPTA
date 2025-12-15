@@ -166,7 +166,7 @@ export default function InvoiceDetail() {
           @media print {
             .no-print { display: none !important; }
             .print-break-inside-avoid { break-inside: avoid; }
-            html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: visible; }
+            html, body { width: 100%; height: auto; margin: 0; padding: 0; overflow: visible; }
             .print-container { 
                 box-shadow: none !important; 
                 border: none !important; 

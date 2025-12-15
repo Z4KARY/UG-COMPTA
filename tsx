@@ -1,5 +1,14 @@
-const revenueTrend = useQuery(api.reports.getRevenueTrend,
-  business ? { businessId: business._id } : "skip"
-);
+interface PurchaseInvoiceDocumentProps {
+  invoice: any;
+  business: any;
+  supplier: any;
+}
 
-<div className={`text-2xl font-bold ${rStyles.color}`}>{receivablesRatio}%</div>
+const purchaseSummary = useMemo(() => {
+  // ...
+}, [invoice.invoiceDate, supplier, business, status]);
+
+{invoice.items?.map((item, index) => (
+
+{new Date(invoice.invoiceDate).toLocaleDateString("en-GB")}
+</initial_code>

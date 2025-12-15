@@ -30,13 +30,13 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
   return (
     <div className="w-full mx-auto print:w-full print:max-w-none">
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] relative flex flex-col"
+        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] relative flex flex-col"
         style={{ fontFamily: invoiceFontFamily, direction: isRTL ? "rtl" : "ltr" }}
       >
         {/* Top Accent Line */}
         <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
-        <div className="p-8 md:p-12 flex-grow flex flex-col">
+        <div className="p-8 md:p-12 print:p-0 flex-grow flex flex-col">
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
             <div className="w-full md:w-1/2">
