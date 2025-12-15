@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { numberToWords } from "@/lib/numberToWords";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { InvoiceTranslationPanel } from "@/components/invoice/InvoiceTranslationPanel";
 import { InvoiceDocument } from "@/components/invoice/InvoiceDocument";
 
@@ -21,18 +21,19 @@ export default function InvoiceDetail() {
   });
   const updateStatus = useMutation(api.invoices.updateStatus);
 
-  const handlePrint = () => {
-    const originalTitle = document.title;
+  useEffect(() => {
     if (invoice) {
       const clientName = invoice.customer?.name || "Client";
       const invoiceNum = invoice.invoiceNumber || "Draft";
       document.title = `UGCOMPTA - ${clientName} - ${invoiceNum}`;
     }
+    return () => {
+      document.title = "UGCOMPTA";
+    };
+  }, [invoice]);
 
-    setTimeout(() => {
-      window.print();
-      document.title = originalTitle;
-    }, 100);
+  const handlePrint = () => {
+    window.print();
   };
 
   const business = invoice?.business;
