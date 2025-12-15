@@ -240,13 +240,13 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
               <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-1 print:text-xs">{labels.signature}</p>
               
               {/* Increased height for print as requested (2x scaling) */}
-              <div className="h-48 print:h-64 w-full flex items-center justify-center relative">
+              <div className="h-48 print:h-80 w-full flex items-center justify-center relative">
                 {/* Stamp Layer */}
                 {stampUrl && (
                   <img 
                     src={stampUrl} 
                     alt="Stamp" 
-                    className="absolute right-0 top-0 w-48 h-48 print:w-80 print:h-80 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                    className="absolute right-0 top-0 w-48 h-48 print:w-96 print:h-96 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
                   />
                 )}
                 
