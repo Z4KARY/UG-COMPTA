@@ -227,9 +227,9 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           </div>
 
           {/* Amount in Words */}
-          <div className={`mb-8 print:mb-2 print:break-inside-avoid flex flex-col ${isRTL ? "items-start text-right" : "items-end text-right"}`}>
+          <div className={`mb-8 print:mb-2 print:break-inside-avoid flex flex-col ${isRTL ? "items-end text-right" : "items-start text-left"}`}>
             <p className="text-sm text-gray-500 mb-1 print:text-[10px]">{labels.amountInWords}:</p>
-            <p className={`text-gray-900 font-medium italic ${isRTL ? "border-r-4 pr-4" : "border-r-4 pr-4"} py-1 print:text-xs`} style={{ borderColor: primaryColor }}>
+            <p className={`text-gray-900 font-medium italic ${isRTL ? "border-r-4 pr-4" : "border-l-4 pl-4"} py-1 print:text-xs`} style={{ borderColor: primaryColor }}>
               "{numberToWords(invoice.totalTtc, lang)}"
             </p>
           </div>
@@ -239,14 +239,14 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             <div className="w-[400px] print:w-[600px] text-center relative">
               <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-1 print:text-xs">{labels.signature}</p>
               
-              {/* Increased height for print as requested (2x) */}
-              <div className="h-48 print:h-64 w-full flex items-center justify-center relative">
+              {/* Increased height for print as requested (1.2x from previous) */}
+              <div className="h-48 print:h-40 w-full flex items-center justify-center relative">
                 {/* Stamp Layer */}
                 {stampUrl && (
                   <img 
                     src={stampUrl} 
                     alt="Stamp" 
-                    className="absolute right-0 top-0 w-48 h-48 print:w-72 print:h-72 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                    className="absolute right-0 top-0 w-48 h-48 print:w-60 print:h-60 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
                   />
                 )}
                 
