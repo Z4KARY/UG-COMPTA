@@ -80,7 +80,17 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
       console.log("signed in");
 
-      const redirect = redirectAfterAuth || "/";
+      // Check for plan param
+      const params = new URLSearchParams(location.search);
+      const plan = params.get("plan");
+
+      let redirect = redirectAfterAuth || "/";
+      
+      // If plan is present, override redirect to onboarding
+      if (plan) {
+        redirect = `/onboarding?plan=${plan}`;
+      }
+
       navigate(redirect);
     } catch (error) {
       console.error("OTP verification error:", error);

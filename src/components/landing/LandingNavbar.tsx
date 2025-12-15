@@ -61,7 +61,7 @@ export function LandingNavbar() {
                 <Link to="/auth"><span>{t("landing.nav.signIn")}</span></Link>
               </Button>
               <Button asChild>
-                <Link to="/auth"><span>{t("landing.nav.getStarted")}</span></Link>
+                <a href="#pricing"><span>{t("landing.nav.getStarted")}</span></a>
               </Button>
             </>
           )}
@@ -107,7 +107,7 @@ export function LandingNavbar() {
                     <Link to="/auth"><span>{t("landing.nav.signIn")}</span></Link>
                   </Button>
                   <Button asChild className="w-full">
-                    <Link to="/auth"><span>{t("landing.nav.getStarted")}</span></Link>
+                    <a href="#pricing"><span>{t("landing.nav.getStarted")}</span></a>
                   </Button>
                 </>
               )}

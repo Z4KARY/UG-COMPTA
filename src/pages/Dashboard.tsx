@@ -17,11 +17,20 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const business = useQuery(api.businesses.getMyBusiness, {});
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (business === null) {
+      navigate("/onboarding");
+    }
+  }, [business, navigate]);
 
   if (business === undefined) {
     return (
