@@ -26,7 +26,7 @@ interface RichTextEditorProps {
   className?: string
 }
 
-export function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, className }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -69,7 +69,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
   }
 
   return (
-    <div className="border rounded-md overflow-hidden bg-background flex flex-col">
+    <div className={`border rounded-md overflow-hidden bg-background flex flex-col ${className || ''}`}>
       <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/50">
         <Toggle
           size="sm"

@@ -129,7 +129,7 @@ export function DashboardSales({ businessId }: { businessId: Id<"businesses"> })
                                 paddingAngle={5}
                                 dataKey="amount"
                             >
-                                {stats.paymentMethods.map((entry: any, index: number) => (
+                                {stats.paymentMethods.map((_entry: any, index: number) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>

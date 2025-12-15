@@ -255,14 +255,10 @@ export const getSummaryHandler = async (ctx: QueryCtx, args: SummaryArgs) => {
     let turnover = 0;
     let tva = 0;
     let stampDuty = 0;
-    let totalStampDuty = 0;
-    let expenses = 0;
-    let tvaDeductible = 0;
 
     for (const inv of periodInvoices) {
       turnover += inv.totalTtc || 0;
       tva += inv.totalTva || 0;
-      totalStampDuty += inv.stampDutyAmount || 0;
       stampDuty += inv.stampDutyAmount || 0;
     }
 

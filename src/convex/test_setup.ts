@@ -49,7 +49,7 @@ export const setupTestInvoice = mutation({
     });
 
     // Create items
-    const itemId = await ctx.db.insert("invoiceItems", {
+    await ctx.db.insert("invoiceItems", {
         invoiceId,
         description: "Test Item",
         quantity: 1,

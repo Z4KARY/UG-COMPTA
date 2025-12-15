@@ -20,7 +20,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { Copy, RefreshCw, CheckCircle2, Network, Plus, Trash2 } from "lucide-react";
+import { Copy, CheckCircle2, Network, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
@@ -40,10 +40,8 @@ const AVAILABLE_EVENTS = [
 export function WebhookSettings({ businessId }: WebhookSettingsProps) {
   const { t } = useLanguage();
   const webhooks = useQuery(api.webhooks.list, { businessId });
-  const generateSecret = useMutation(api.webhooks.generateSecret);
   const createSubscription = useMutation(api.webhooks.create);
   const deleteSubscription = useMutation(api.webhooks.remove);
-  const updateSubscription = useMutation(api.webhooks.update);
 
   const [newUrl, setNewUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);

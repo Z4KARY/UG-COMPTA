@@ -1,11 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function DashboardTopPerformers({ data }: { data: any }) {
-  const { t } = useLanguage();
-
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card>
@@ -14,7 +10,7 @@ export function DashboardTopPerformers({ data }: { data: any }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {data.customers.map((customer, i) => (
+            {data.customers.map((customer: any, i: number) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs">
@@ -35,7 +31,7 @@ export function DashboardTopPerformers({ data }: { data: any }) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {data.products.map((product, i) => (
+            {data.products.map((product: any, i: number) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs">

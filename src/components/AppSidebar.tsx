@@ -3,13 +3,10 @@ import {
   FileText,
   Users,
   Package,
-  CreditCard,
   Building2,
   LogOut,
   ChevronUp,
   User2,
-  ShieldCheck,
-  HelpCircle,
   FileSpreadsheet,
   ShoppingCart,
   Truck,
@@ -40,7 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 

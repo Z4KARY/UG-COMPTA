@@ -2,7 +2,7 @@ import { action } from "./_generated/server";
 
 export const testInvoiceFlow = action({
   args: {},
-  handler: async (ctx) => {
+  handler: async () => {
     console.log("Starting invoice flow test...");
     
     // Note: This test assumes there is at least one business and one customer in the DB
