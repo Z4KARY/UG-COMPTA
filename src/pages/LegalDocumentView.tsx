@@ -33,15 +33,9 @@ export default function LegalDocumentView() {
       <style>
         {`
           @media print {
-            @page { size: A4; margin: 35mm 25mm 25mm 25mm; }
+            @page { size: A4; margin: 0; }
             body { 
               visibility: hidden; 
->>>>>>> REPLACE
-<<<<<<< SEARCH
-              margin: 0 !important;
-              padding: 20mm !important;
-              box-shadow: none !important;
-=======
               margin: 0 !important;
               padding: 0 !important;
               box-shadow: none !important;
@@ -55,7 +49,7 @@ export default function LegalDocumentView() {
               width: 100% !important;
               max-width: none !important;
               margin: 0 !important;
-              padding: 20mm !important;
+              padding: 0 !important;
               box-shadow: none !important;
               border: none !important;
               background: white !important;

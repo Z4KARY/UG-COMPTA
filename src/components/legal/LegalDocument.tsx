@@ -28,121 +28,137 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
     <div className="w-full mx-auto print:w-full print:max-w-none">
       <style type="text/css" media="print">
         {`
-          @page { size: A4; margin: 35mm 25mm 35mm 25mm; }
-          body { print-color-adjust: exact; -webkit-print-color-adjust: exact; height: auto !important; }
-          html { height: auto !important; }
+          @page { size: A4; margin: 0; }
+          body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          a { text-decoration: none !important; color: inherit !important; }
+          a[href]:after { content: none !important; }
         `}
       </style>
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:shadow-none print:border-none"
+        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:block print:shadow-none print:border-none"
         style={{ fontFamily: fontFamily }}
       >
-        {/* Top Accent Line */}
+        {/* Top Accent Line - Hide in print as we use table spacers */}
         <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
-        <div className="p-8 md:p-12 print:p-0 flex-grow print:flex-grow-0 flex flex-col">
-          {/* Header */}
-          <div className="legal-document-header flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-8">
-            <div className="w-full md:w-1/2 print:flex-1">
-              {logoUrl ? (
-                <img 
-                  src={logoUrl} 
-                  alt="Business Logo" 
-                  className="h-20 object-contain mb-6 print:h-20 print:mb-4" 
-                  crossOrigin="anonymous" 
-                />
-              ) : (
-                <div className="h-20 flex items-center mb-6 print:h-16 print:mb-4">
-                  <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>
-                    {business?.name}
-                  </h2>
-                </div>
-              )}
+        {/* Table wrapper for print margins */}
+        <table className="w-full print:w-full">
+          <thead className="hidden print:table-header-group">
+            <tr><td><div className="h-[35mm]"></div></td></tr>
+          </thead>
+          <tfoot className="hidden print:table-footer-group">
+            <tr><td><div className="h-[35mm]"></div></td></tr>
+          </tfoot>
+          <tbody>
+            <tr>
+              <td className="print:px-[25mm] print:align-top w-full">
+                <div className="p-8 md:p-12 print:p-0 flex flex-col">
+                  {/* Header */}
+                  <div className="legal-document-header flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-8">
+                    <div className="w-full md:w-1/2 print:flex-1">
+                      {logoUrl ? (
+                        <img 
+                          src={logoUrl} 
+                          alt="Business Logo" 
+                          className="h-20 object-contain mb-6 print:h-20 print:mb-4" 
+                          crossOrigin="anonymous" 
+                        />
+                      ) : (
+                        <div className="h-20 flex items-center mb-6 print:h-16 print:mb-4">
+                          <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>
+                            {business?.name}
+                          </h2>
+                        </div>
+                      )}
 
-              <div className="text-sm text-gray-600 space-y-1 print:text-xs">
-                <p className="font-semibold text-gray-900 text-base mb-1 print:text-sm">{business?.name}</p>
-                {business?.tradeName && <p>{business.tradeName}</p>}
-                <p className="whitespace-pre-line">{business?.address}</p>
-                <p>{business?.city}, Algeria</p>
-                {business?.phone && <p>Tel: {business.phone}</p>}
-                {business?.email && <p>Email: {business.email}</p>}
-              </div>
-            </div>
+                      <div className="text-sm text-gray-600 space-y-1 print:text-xs">
+                        <p className="font-semibold text-gray-900 text-base mb-1 print:text-sm">{business?.name}</p>
+                        {business?.tradeName && <p>{business.tradeName}</p>}
+                        <p className="whitespace-pre-line">{business?.address}</p>
+                        <p>{business?.city}, Algeria</p>
+                        {business?.phone && <p>Tel: {business.phone}</p>}
+                        {business?.email && <p>Email: {business.email}</p>}
+                      </div>
+                    </div>
 
-            <div className="w-full md:w-1/2 print:flex-1 text-right">
-              <h1 className={`${sizeClass} ${weightClass} tracking-tight mb-2 uppercase text-gray-900 break-words`}>
-                {title || "DOCUMENT JURIDIQUE"}
-              </h1>
-              <p className="text-sm text-gray-500">
-                Date: {new Date().toLocaleDateString("fr-FR")}
-              </p>
-            </div>
-          </div>
-
-          <Separator className="mb-8" />
-
-          {/* Content Body */}
-          <div 
-            className="flex-grow mb-12 text-gray-800 leading-relaxed tiptap-content text-justify"
-            dangerouslySetInnerHTML={{ __html: content || "<p>Aucun contenu disponible.</p>" }}
-          />
-
-          {/* Signature & Stamp Section */}
-          <div className="flex justify-end mb-12 print:mb-8 print:break-inside-avoid">
-            <div className="w-[300px] text-center relative">
-              <p className="text-sm font-semibold text-gray-900 mb-4">Signature et Cachet</p>
-              
-              <div className="h-48 w-full flex items-center justify-center relative overflow-hidden">
-                {/* Stamp Layer */}
-                {stampUrl && (
-                  <img 
-                    src={stampUrl} 
-                    alt="Stamp" 
-                    className="absolute right-0 top-0 w-40 h-40 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
-                    crossOrigin="anonymous"
-                  />
-                )}
-                
-                {/* Signature Layer */}
-                {signatureUrl && (
-                  <img 
-                    src={signatureUrl} 
-                    alt="Signature" 
-                    className="absolute inset-0 w-full h-full object-contain z-10" 
-                    crossOrigin="anonymous"
-                  />
-                )}
-                
-                {/* Placeholder if neither exists */}
-                {!stampUrl && !signatureUrl && (
-                  <div className="w-full h-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
-                    <span className="text-xs text-gray-300">Cachet et Signature</span>
+                    <div className="w-full md:w-1/2 print:flex-1 text-right">
+                      <h1 className={`${sizeClass} ${weightClass} tracking-tight mb-2 uppercase text-gray-900 break-words`}>
+                        {title || "DOCUMENT JURIDIQUE"}
+                      </h1>
+                      <p className="text-sm text-gray-500">
+                        Date: {new Date().toLocaleDateString("fr-FR")}
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
 
-          {/* Footer */}
-          <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
-            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 px-4">
-                {isAE ? (
-                  <>
-                    <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
-                    <span>NIF: {business?.nif || "N/A"}</span>
-                    <span>NIS: {business?.nis || "N/A"}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>RC: {business?.rc || "N/A"}</span>
-                    <span>NIF: {business?.nif || "N/A"}</span>
-                    <span>NIS: {business?.nis || "N/A"}</span>
-                    <span>AI: {business?.ai || "N/A"}</span>
-                  </>
-                )}
-            </div>
-          </div>
-        </div>
+                  <Separator className="mb-8" />
+
+                  {/* Content Body */}
+                  <div 
+                    className="flex-grow mb-12 text-gray-800 leading-relaxed tiptap-content text-justify"
+                    dangerouslySetInnerHTML={{ __html: content || "<p>Aucun contenu disponible.</p>" }}
+                  />
+
+                  {/* Signature & Stamp Section */}
+                  <div className="flex justify-end mb-12 print:mb-8 print:break-inside-avoid">
+                    <div className="w-[300px] text-center relative">
+                      <p className="text-sm font-semibold text-gray-900 mb-4">Signature et Cachet</p>
+                      
+                      <div className="h-48 w-full flex items-center justify-center relative overflow-hidden">
+                        {/* Stamp Layer */}
+                        {stampUrl && (
+                          <img 
+                            src={stampUrl} 
+                            alt="Stamp" 
+                            className="absolute right-0 top-0 w-40 h-40 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                            crossOrigin="anonymous"
+                          />
+                        )}
+                        
+                        {/* Signature Layer */}
+                        {signatureUrl && (
+                          <img 
+                            src={signatureUrl} 
+                            alt="Signature" 
+                            className="absolute inset-0 w-full h-full object-contain z-10" 
+                            crossOrigin="anonymous"
+                          />
+                        )}
+                        
+                        {/* Placeholder if neither exists */}
+                        {!stampUrl && !signatureUrl && (
+                          <div className="w-full h-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
+                            <span className="text-xs text-gray-300">Cachet et Signature</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
+                    <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 px-4">
+                        {isAE ? (
+                          <>
+                            <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
+                            <span>NIF: {business?.nif || "N/A"}</span>
+                            <span>NIS: {business?.nis || "N/A"}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>RC: {business?.rc || "N/A"}</span>
+                            <span>NIF: {business?.nif || "N/A"}</span>
+                            <span>NIS: {business?.nis || "N/A"}</span>
+                            <span>AI: {business?.ai || "N/A"}</span>
+                          </>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );

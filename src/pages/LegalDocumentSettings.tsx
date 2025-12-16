@@ -291,6 +291,7 @@ export default function LegalDocumentSettings() {
         <style>
           {`
             @media print {
+              @page { size: A4; margin: 0; }
               #root {
                 display: none !important;
               }
