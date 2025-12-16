@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Save, Eye, Printer, Download } from "lucide-react";
+import { Loader2, Save, Eye, Printer } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { LegalDocument } from "@/components/legal/LegalDocument";
@@ -26,8 +26,6 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
-// @ts-ignore
-import html2pdf from "html2pdf.js";
 
 export default function LegalDocumentSettings() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
@@ -36,7 +34,6 @@ export default function LegalDocumentSettings() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<LegalTemplate | null>(null);
 
   const printRef = useRef<HTMLDivElement>(null);
@@ -48,44 +45,8 @@ export default function LegalDocumentSettings() {
       console.error("Print error:", error);
       toast.error("Erreur lors de l'impression");
     },
-    pageStyle: `
-      @page { size: auto; margin: 0mm; }
-      @media print {
-        body { -webkit-print-color-adjust: exact; }
-      }
-    `,
+    // Removing pageStyle to allow the component's internal styles to take precedence
   });
-
-  const handleExportPdf = async () => {
-    if (!printRef.current) {
-      console.error("Print ref is missing");
-      return;
-    }
-    
-    setIsExporting(true);
-    console.log("Starting PDF export...");
-    const element = printRef.current;
-    const opt = {
-      margin: 0,
-      filename: `${title || 'document-juridique'}.pdf`,
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, scrollY: 0, logging: true, letterRendering: true },
-      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-    };
-
-    try {
-      // @ts-ignore
-      const html2pdf = (await import("html2pdf.js")).default;
-      await html2pdf().set(opt).from(element).save();
-      console.log("PDF export successful");
-      toast.success("PDF téléchargé avec succès");
-    } catch (error) {
-      console.error("PDF Export Error:", error);
-      toast.error("Erreur lors de l'export PDF. Vérifiez la console.");
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   useEffect(() => {
     if (data?.document) {
@@ -207,12 +168,7 @@ export default function LegalDocumentSettings() {
             
             <Button variant="outline" onClick={() => handlePrint()}>
               <Printer className="mr-2 h-4 w-4" />
-              Imprimer
-            </Button>
-
-            <Button variant="outline" onClick={handleExportPdf} disabled={isExporting}>
-              {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-              PDF
+              Imprimer / PDF
             </Button>
 
             <Dialog>
