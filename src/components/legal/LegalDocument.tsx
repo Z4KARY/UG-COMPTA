@@ -28,7 +28,7 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
     <div className="w-full mx-auto print:w-full print:max-w-none">
       <style type="text/css" media="print">
         {`
-          @page { size: A4; margin: 5mm; }
+          @page { size: A4; margin: 20mm; }
           body { print-color-adjust: exact; -webkit-print-color-adjust: exact; height: auto !important; }
           html { height: auto !important; }
 

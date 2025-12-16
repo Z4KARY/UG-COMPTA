@@ -25,6 +25,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { createPortal } from "react-dom";
+
 export default function LegalDocumentSettings() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
   const saveDocument = useMutation(api.legalDocuments.save);
@@ -272,8 +274,9 @@ export default function LegalDocumentSettings() {
           </div>
         </div>
 
-        {/* Hidden Print Component */}
-        <div id="print-area" style={{ position: "absolute", left: "-9999px", top: 0, width: "210mm" }}>
+        {/* Portal for Print Component - Renders outside root to avoid layout issues */}
+        {createPortal(
+          <div id="print-area" className="hidden print:block">
             <LegalDocument 
               business={data.business} 
               content={content} 
@@ -281,26 +284,25 @@ export default function LegalDocumentSettings() {
               titleSize={titleSize}
               titleWeight={titleWeight}
             />
-        </div>
+          </div>,
+          document.body
+        )}
 
         <style>
           {`
             @media print {
-              body * {
-                visibility: hidden;
-              }
-              #print-area, #print-area * {
-                visibility: visible;
+              #root {
+                display: none !important;
               }
               #print-area {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                overflow: visible !important;
+                display: block !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: auto;
                 z-index: 9999;
+                background: white;
               }
             }
           `}
