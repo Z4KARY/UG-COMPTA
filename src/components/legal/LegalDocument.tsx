@@ -36,6 +36,31 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
           [class*="vly"], [id*="vly"] { display: none !important; }
         `}
       </style>
+      
+      {/* Fixed Footer for Print - Ensures positioning at the absolute bottom of the page */}
+      <div className="hidden print:block fixed bottom-0 left-0 w-full z-50 bg-white">
+        <div className="h-[20mm] flex items-end justify-center pb-4">
+          <div className="text-center text-xs text-gray-400 w-full px-8">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                {isAE ? (
+                  <>
+                    <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
+                    <span>NIF: {business?.nif || "N/A"}</span>
+                    <span>NIS: {business?.nis || "N/A"}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>RC: {business?.rc || "N/A"}</span>
+                    <span>NIF: {business?.nif || "N/A"}</span>
+                    <span>NIS: {business?.nis || "N/A"}</span>
+                    <span>AI: {business?.ai || "N/A"}</span>
+                  </>
+                )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div
         className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-[297mm] relative flex flex-col print:block print:shadow-none print:border-none"
         style={{ fontFamily: fontFamily }}
@@ -51,33 +76,15 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
           <tfoot className="hidden print:table-footer-group">
             <tr>
               <td className="align-bottom">
-                <div className="h-[20mm] relative flex items-end justify-center pb-2">
-                  <div className="text-center text-xs text-gray-400 w-full px-8">
-                    <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-                        {isAE ? (
-                          <>
-                            <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
-                            <span>NIF: {business?.nif || "N/A"}</span>
-                            <span>NIS: {business?.nis || "N/A"}</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>RC: {business?.rc || "N/A"}</span>
-                            <span>NIF: {business?.nif || "N/A"}</span>
-                            <span>NIS: {business?.nis || "N/A"}</span>
-                            <span>AI: {business?.ai || "N/A"}</span>
-                          </>
-                        )}
-                    </div>
-                  </div>
-                </div>
+                {/* Spacer to reserve space for the fixed footer */}
+                <div className="h-[20mm]"></div>
               </td>
             </tr>
           </tfoot>
           <tbody>
             <tr>
               <td className="print:px-[25mm] print:align-top w-full align-top">
-                <div className="p-8 md:p-12 print:p-0 flex flex-col">
+                <div className="p-8 md:p-12 print:p-0 flex flex-col h-full min-h-full">
                   {/* Header */}
                   <div className="legal-document-header flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-8">
                     <div className="w-full md:w-1/2 print:flex-1">
@@ -126,10 +133,10 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
 
                   {/* Signature & Stamp Section */}
                   <div className="flex flex-col items-end mb-0 print:break-inside-avoid">
-                    <div className="text-right relative">
-                      <p className="text-sm font-semibold text-gray-900 mb-0 mr-2">Signature et Cachet</p>
+                    <div className="text-right relative flex flex-col items-end">
+                      <p className="text-sm font-semibold text-gray-900 mb-0 mr-2 text-right">Signature et Cachet</p>
                       
-                      <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-end mr-2">
+                      <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-end mr-2 mt-[-10px]">
                         {/* Stamp Layer */}
                         {stampUrl && (
                           <img 
