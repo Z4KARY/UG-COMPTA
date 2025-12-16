@@ -51,7 +51,7 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
           <tfoot className="hidden print:table-footer-group">
             <tr>
               <td className="align-bottom">
-                <div className="h-[35mm] relative flex items-end justify-center pb-8">
+                <div className="h-[20mm] relative flex items-end justify-center pb-2">
                   <div className="text-center text-xs text-gray-400 w-full px-8">
                     <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
                         {isAE ? (
