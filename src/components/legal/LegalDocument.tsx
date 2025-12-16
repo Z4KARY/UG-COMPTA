@@ -28,19 +28,19 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
     <div className="w-full mx-auto print:w-full print:max-w-none">
       <style type="text/css" media="print">
         {`
-          @page { size: A4; margin: 0; }
+          @page { size: A4; margin: 35mm 25mm 35mm 25mm; }
           body { print-color-adjust: exact; -webkit-print-color-adjust: exact; height: auto !important; }
           html { height: auto !important; }
         `}
       </style>
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:block print:shadow-none print:border-none"
+        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:shadow-none print:border-none"
         style={{ fontFamily: fontFamily }}
       >
         {/* Top Accent Line */}
         <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
-        <div className="p-8 md:p-12 print:p-[25mm] flex-grow print:flex-grow-0 flex flex-col">
+        <div className="p-8 md:p-12 print:p-0 flex-grow print:flex-grow-0 flex flex-col">
           {/* Header */}
           <div className="legal-document-header flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-8">
             <div className="w-full md:w-1/2 print:flex-1">
