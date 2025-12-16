@@ -33,9 +33,18 @@ export default function LegalDocumentView() {
       <style>
         {`
           @media print {
-            @page { size: A4; margin: 0; }
+            @page { size: A4; margin: 25mm; }
             body { 
               visibility: hidden; 
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+              margin: 0 !important;
+              padding: 20mm !important;
+              box-shadow: none !important;
+=======
+              margin: 0 !important;
+              padding: 0 !important;
+              box-shadow: none !important;
               -webkit-print-color-adjust: exact;
             }
             .print-container { 
