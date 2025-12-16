@@ -32,6 +32,8 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
           body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
           a { text-decoration: none !important; color: inherit !important; }
           a[href]:after { content: none !important; }
+          /* Hide Vly branding in print */
+          [class*="vly"], [id*="vly"] { display: none !important; }
         `}
       </style>
       <div
@@ -47,7 +49,30 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
             <tr><td><div className="h-[35mm]"></div></td></tr>
           </thead>
           <tfoot className="hidden print:table-footer-group">
-            <tr><td><div className="h-[35mm]"></div></td></tr>
+            <tr>
+              <td>
+                <div className="h-[35mm] relative flex items-end justify-center pb-8">
+                  <div className="text-center text-xs text-gray-400 w-full px-8">
+                    <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                        {isAE ? (
+                          <>
+                            <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
+                            <span>NIF: {business?.nif || "N/A"}</span>
+                            <span>NIS: {business?.nis || "N/A"}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>RC: {business?.rc || "N/A"}</span>
+                            <span>NIF: {business?.nif || "N/A"}</span>
+                            <span>NIS: {business?.nis || "N/A"}</span>
+                            <span>AI: {business?.ai || "N/A"}</span>
+                          </>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
           </tfoot>
           <tbody>
             <tr>
@@ -135,8 +160,8 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                     </div>
                   </div>
 
-                  {/* Footer */}
-                  <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
+                  {/* Footer - Screen Only */}
+                  <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:hidden">
                     <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 px-4">
                         {isAE ? (
                           <>
