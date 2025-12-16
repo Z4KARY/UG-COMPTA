@@ -126,16 +126,16 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
 
                   {/* Signature & Stamp Section */}
                   <div className="flex justify-end mb-8 print:mb-4 print:break-inside-avoid">
-                    <div className="w-[400px] text-center relative">
+                    <div className="w-full max-w-[400px] text-center relative">
                       <p className="text-sm font-semibold text-gray-900 mb-2">Signature et Cachet</p>
                       
-                      <div className="h-64 w-full flex items-center justify-center relative overflow-hidden">
+                      <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
                         {/* Stamp Layer */}
                         {stampUrl && (
                           <img 
                             src={stampUrl} 
                             alt="Stamp" 
-                            className="absolute right-0 top-0 w-64 h-64 object-contain opacity-80 rotate-[-12deg] mix-blend-multiply" 
+                            className="col-start-1 row-start-1 w-full h-auto object-contain opacity-80 rotate-[-12deg] mix-blend-multiply z-0" 
                             crossOrigin="anonymous"
                           />
                         )}
@@ -145,14 +145,14 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                           <img 
                             src={signatureUrl} 
                             alt="Signature" 
-                            className="absolute inset-0 w-full h-full object-contain z-10" 
+                            className="col-start-1 row-start-1 w-full h-auto object-contain z-10" 
                             crossOrigin="anonymous"
                           />
                         )}
                         
                         {/* Placeholder if neither exists */}
                         {!stampUrl && !signatureUrl && (
-                          <div className="w-full h-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
+                          <div className="col-start-1 row-start-1 w-full h-32 border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
                             <span className="text-xs text-gray-300">Cachet et Signature</span>
                           </div>
                         )}
