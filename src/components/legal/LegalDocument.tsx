@@ -135,7 +135,7 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                           <img 
                             src={stampUrl} 
                             alt="Stamp" 
-                            className="col-start-1 row-start-1 h-[160px] w-auto max-w-full object-contain opacity-80 rotate-[-12deg] mix-blend-multiply z-0" 
+                            className="col-start-1 row-start-1 h-[240px] w-auto max-w-full object-contain opacity-80 rotate-[-12deg] mix-blend-multiply z-0" 
                             crossOrigin="anonymous"
                           />
                         )}
@@ -145,7 +145,7 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                           <img 
                             src={signatureUrl} 
                             alt="Signature" 
-                            className="col-start-1 row-start-1 h-[160px] w-auto max-w-full object-contain z-10" 
+                            className="col-start-1 row-start-1 h-[240px] w-auto max-w-full object-contain z-10" 
                             crossOrigin="anonymous"
                           />
                         )}
