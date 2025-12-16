@@ -37,20 +37,20 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
         `}
       </style>
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:block print:shadow-none print:border-none"
+        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-[297mm] relative flex flex-col print:block print:shadow-none print:border-none"
         style={{ fontFamily: fontFamily }}
       >
         {/* Top Accent Line - Hide in print as we use table spacers */}
         <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
         {/* Table wrapper for print margins */}
-        <table className="w-full print:w-full">
+        <table className="w-full print:w-full h-full">
           <thead className="hidden print:table-header-group">
             <tr><td><div className="h-[35mm]"></div></td></tr>
           </thead>
           <tfoot className="hidden print:table-footer-group">
             <tr>
-              <td>
+              <td className="align-bottom">
                 <div className="h-[35mm] relative flex items-end justify-center pb-8">
                   <div className="text-center text-xs text-gray-400 w-full px-8">
                     <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
@@ -76,7 +76,7 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
           </tfoot>
           <tbody>
             <tr>
-              <td className="print:px-[25mm] print:align-top w-full">
+              <td className="print:px-[25mm] print:align-top w-full align-top">
                 <div className="p-8 md:p-12 print:p-0 flex flex-col">
                   {/* Header */}
                   <div className="legal-document-header flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-8">
@@ -125,17 +125,17 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                   />
 
                   {/* Signature & Stamp Section */}
-                  <div className="flex justify-end mb-4 print:mb-2 print:break-inside-avoid">
-                    <div className="w-full max-w-[600px] text-right relative">
-                      <p className="text-sm font-semibold text-gray-900 mb-0">Signature et Cachet</p>
+                  <div className="flex flex-col items-end mb-0 print:break-inside-avoid">
+                    <div className="text-right relative">
+                      <p className="text-sm font-semibold text-gray-900 mb-0 mr-2">Signature et Cachet</p>
                       
-                      <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-end">
+                      <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-end mr-2">
                         {/* Stamp Layer */}
                         {stampUrl && (
                           <img 
                             src={stampUrl} 
                             alt="Stamp" 
-                            className="col-start-1 row-start-1 h-80 w-auto max-w-full object-contain opacity-80 rotate-[-12deg] mix-blend-multiply z-0" 
+                            className="col-start-1 row-start-1 h-[160px] w-auto max-w-full object-contain opacity-80 rotate-[-12deg] mix-blend-multiply z-0" 
                             crossOrigin="anonymous"
                           />
                         )}
@@ -145,14 +145,14 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                           <img 
                             src={signatureUrl} 
                             alt="Signature" 
-                            className="col-start-1 row-start-1 h-80 w-auto max-w-full object-contain z-10" 
+                            className="col-start-1 row-start-1 h-[160px] w-auto max-w-full object-contain z-10" 
                             crossOrigin="anonymous"
                           />
                         )}
                         
                         {/* Placeholder if neither exists */}
                         {!stampUrl && !signatureUrl && (
-                          <div className="col-start-1 row-start-1 w-full h-32 border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
+                          <div className="col-start-1 row-start-1 w-64 h-32 border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
                             <span className="text-xs text-gray-300">Cachet et Signature</span>
                           </div>
                         )}
