@@ -161,7 +161,6 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                   </>
                 )}
             </div>
-            <p className="mt-2">Document généré par UGCOMPTA</p>
           </div>
         </div>
       </div>
