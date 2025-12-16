@@ -85,7 +85,7 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
             </div>
 
             <div className="w-full md:w-1/2 print:w-1/2 text-right">
-              <h1 className={`${sizeClass} ${weightClass} tracking-tight mb-2 uppercase text-gray-900 print:text-2xl`}>
+              <h1 className={`${sizeClass} ${weightClass} tracking-tight mb-2 uppercase text-gray-900`}>
                 {title || "DOCUMENT JURIDIQUE"}
               </h1>
               <p className="text-sm text-gray-500">
