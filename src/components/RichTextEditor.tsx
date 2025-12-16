@@ -1,8 +1,17 @@
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
+import { Extension } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
+import { TextStyle } from "@tiptap/extension-text-style";
 import { Toggle } from "@/components/ui/toggle";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import {
   Bold,
@@ -24,7 +33,57 @@ import {
   Undo2,
   Redo2,
   Eraser,
+  Type,
 } from "lucide-react";
+
+// Custom Font Size Extension
+// We use any casting in usage to avoid module augmentation issues in this environment
+const FontSize = Extension.create({
+  name: "fontSize",
+  addOptions() {
+    return {
+      types: ["textStyle"],
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (element: HTMLElement) => element.style.fontSize.replace(/['"]+/g, ""),
+            renderHTML: (attributes: Record<string, any>) => {
+              if (!attributes.fontSize) {
+                return {};
+              }
+              return {
+                style: `font-size: ${attributes.fontSize}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setFontSize:
+        (fontSize: string) =>
+        ({ chain }: { chain: any }) => {
+          return chain().setMark("textStyle", { fontSize }).run();
+        },
+      unsetFontSize:
+        () =>
+        ({ chain }: { chain: any }) => {
+          return chain()
+            .setMark("textStyle", { fontSize: null })
+            .removeEmptyTextStyle()
+            .run();
+        },
+    } as any;
+  },
+});
 
 interface RichTextEditorProps {
   value: string;
@@ -62,10 +121,12 @@ export function RichTextEditor({
     extensions: [
       StarterKit,
       Underline,
+      TextStyle,
+      FontSize,
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
-    ],
+    ] as any,
     content: value,
     editorProps: {
       attributes: {
@@ -106,7 +167,7 @@ export function RichTextEditor({
 
   const handleUndo = () => editor.chain().focus().undo().run();
   const handleRedo = () => editor.chain().focus().redo().run();
-  const handleInsertDivider = () => editor.chain().focus().setHorizontalRule().run();
+  const handleInsertDivider = () => (editor.chain().focus() as any).setHorizontalRule().run();
   const handleClearFormatting = () =>
     editor.chain().focus().clearNodes().unsetAllMarks().run();
 
@@ -116,6 +177,17 @@ export function RichTextEditor({
     { value: "right", label: "Aligner à droite", icon: AlignRight },
     { value: "justify", label: "Justifier", icon: AlignJustify },
   ] as const;
+
+  const fontSizes = [
+    { value: "12px", label: "Petit" },
+    { value: "14px", label: "Normal" },
+    { value: "16px", label: "Moyen" },
+    { value: "18px", label: "Grand" },
+    { value: "20px", label: "Très Grand" },
+    { value: "24px", label: "Géant" },
+  ];
+
+  const currentFontSize = (editor.getAttributes("textStyle").fontSize as string) || "14px";
 
   return (
     <div className={`space-y-4 ${className || ""}`}>
@@ -143,10 +215,29 @@ export function RichTextEditor({
           </div>
 
           <div className={toolbarGroupClasses}>
+            <Select
+              value={currentFontSize}
+              onValueChange={(value) => (editor.chain().focus() as any).setFontSize(value).run()}
+            >
+              <SelectTrigger className="h-8 w-[110px] border-transparent bg-transparent text-xs font-medium hover:bg-muted/60 focus:ring-0">
+                <Type className="mr-2 h-3 w-3 text-muted-foreground" />
+                <SelectValue placeholder="Taille" />
+              </SelectTrigger>
+              <SelectContent>
+                {fontSizes.map((size) => (
+                  <SelectItem key={size.value} value={size.value}>
+                    {size.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className={toolbarGroupClasses}>
             <Toggle
               size="sm"
               pressed={editor.isActive("bold")}
-              onPressedChange={() => editor.chain().focus().toggleBold().run()}
+              onPressedChange={() => (editor.chain().focus() as any).toggleBold().run()}
               aria-label="Gras"
               className={toggleClasses}
             >
@@ -155,7 +246,7 @@ export function RichTextEditor({
             <Toggle
               size="sm"
               pressed={editor.isActive("italic")}
-              onPressedChange={() => editor.chain().focus().toggleItalic().run()}
+              onPressedChange={() => (editor.chain().focus() as any).toggleItalic().run()}
               aria-label="Italique"
               className={toggleClasses}
             >
@@ -164,7 +255,7 @@ export function RichTextEditor({
             <Toggle
               size="sm"
               pressed={editor.isActive("underline")}
-              onPressedChange={() => editor.chain().focus().toggleUnderline().run()}
+              onPressedChange={() => (editor.chain().focus() as any).toggleUnderline().run()}
               aria-label="Souligner"
               className={toggleClasses}
             >
@@ -173,7 +264,7 @@ export function RichTextEditor({
             <Toggle
               size="sm"
               pressed={editor.isActive("strike")}
-              onPressedChange={() => editor.chain().focus().toggleStrike().run()}
+              onPressedChange={() => (editor.chain().focus() as any).toggleStrike().run()}
               aria-label="Barré"
               className={toggleClasses}
             >
@@ -188,7 +279,7 @@ export function RichTextEditor({
                 size="sm"
                 pressed={editor.isActive("heading", { level })}
                 onPressedChange={() =>
-                  editor.chain().focus().toggleHeading({ level }).run()
+                  (editor.chain().focus() as any).toggleHeading({ level }).run()
                 }
                 aria-label={`Titre ${level}`}
                 className={toggleClasses}
@@ -222,7 +313,7 @@ export function RichTextEditor({
               size="sm"
               pressed={editor.isActive("bulletList")}
               onPressedChange={() =>
-                editor.chain().focus().toggleBulletList().run()
+                (editor.chain().focus() as any).toggleBulletList().run()
               }
               aria-label="Liste à puces"
               className={toggleClasses}
@@ -233,7 +324,7 @@ export function RichTextEditor({
               size="sm"
               pressed={editor.isActive("orderedList")}
               onPressedChange={() =>
-                editor.chain().focus().toggleOrderedList().run()
+                (editor.chain().focus() as any).toggleOrderedList().run()
               }
               aria-label="Liste numérotée"
               className={toggleClasses}
@@ -244,7 +335,7 @@ export function RichTextEditor({
               size="sm"
               pressed={editor.isActive("blockquote")}
               onPressedChange={() =>
-                editor.chain().focus().toggleBlockquote().run()
+                (editor.chain().focus() as any).toggleBlockquote().run()
               }
               aria-label="Citation"
               className={toggleClasses}
@@ -255,7 +346,7 @@ export function RichTextEditor({
               size="sm"
               pressed={editor.isActive("codeBlock")}
               onPressedChange={() =>
-                editor.chain().focus().toggleCodeBlock().run()
+                (editor.chain().focus() as any).toggleCodeBlock().run()
               }
               aria-label="Bloc de code"
               className={toggleClasses}
