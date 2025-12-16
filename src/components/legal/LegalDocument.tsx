@@ -143,25 +143,23 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
             </div>
           </div>
 
+          {/* Spacer for fixed footer in print */}
+          <div className="hidden print:block h-[25mm]"></div>
+
           {/* Footer */}
-          <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
-            <div className="space-y-1">
+          <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid print:fixed print:bottom-0 print:left-0 print:w-full print:bg-white print:px-[20mm] print:pb-[10mm] print:pt-4 print:border-t print:border-gray-200">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
                 {isAE ? (
                   <>
                     <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
-                    <span className="mx-2">|</span>
                     <span>NIF: {business?.nif || "N/A"}</span>
-                    <span className="mx-2">|</span>
                     <span>NIS: {business?.nis || "N/A"}</span>
                   </>
                 ) : (
                   <>
                     <span>RC: {business?.rc || "N/A"}</span>
-                    <span className="mx-2">|</span>
                     <span>NIF: {business?.nif || "N/A"}</span>
-                    <span className="mx-2">|</span>
                     <span>NIS: {business?.nis || "N/A"}</span>
-                    <span className="mx-2">|</span>
                     <span>AI: {business?.ai || "N/A"}</span>
                   </>
                 )}
