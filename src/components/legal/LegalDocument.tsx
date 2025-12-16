@@ -31,26 +31,6 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
           @page { size: A4; margin: 0; }
           body { print-color-adjust: exact; -webkit-print-color-adjust: exact; height: auto !important; }
           html { height: auto !important; }
-
-          /* Explicit print styles for the header */
->>>>>>> REPLACE
-<<<<<<< SEARCH
-        <div className="p-8 md:p-12 print:p-0 flex-grow print:flex-grow-0 flex flex-col">
-=======
-        <div className="p-8 md:p-12 print:p-[20mm] flex-grow print:flex-grow-0 flex flex-col">
-          .legal-document-header {
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: flex-start !important;
-          }
-          .legal-document-header > div:first-child {
-            width: 50% !important;
-          }
-          .legal-document-header > div:last-child {
-            width: 50% !important;
-            text-align: right !important;
-          }
         `}
       </style>
       <div
@@ -60,15 +40,15 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
         {/* Top Accent Line */}
         <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
-        <div className="p-8 md:p-12 print:p-0 flex-grow print:flex-grow-0 flex flex-col">
+        <div className="p-8 md:p-12 print:p-[25mm] flex-grow print:flex-grow-0 flex flex-col">
           {/* Header */}
-          <div className="legal-document-header flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-6">
-            <div className="w-full md:w-1/2 print:w-1/2">
+          <div className="legal-document-header flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-8">
+            <div className="w-full md:w-1/2 print:flex-1">
               {logoUrl ? (
                 <img 
                   src={logoUrl} 
                   alt="Business Logo" 
-                  className="h-20 object-contain mb-6 print:h-16 print:mb-4" 
+                  className="h-20 object-contain mb-6 print:h-20 print:mb-4" 
                   crossOrigin="anonymous" 
                 />
               ) : (
@@ -89,8 +69,8 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
               </div>
             </div>
 
-            <div className="w-full md:w-1/2 print:w-1/2 text-right">
-              <h1 className={`${sizeClass} ${weightClass} tracking-tight mb-2 uppercase text-gray-900`}>
+            <div className="w-full md:w-1/2 print:flex-1 text-right">
+              <h1 className={`${sizeClass} ${weightClass} tracking-tight mb-2 uppercase text-gray-900 break-words`}>
                 {title || "DOCUMENT JURIDIQUE"}
               </h1>
               <p className="text-sm text-gray-500">
@@ -103,12 +83,12 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
 
           {/* Content Body */}
           <div 
-            className="flex-grow mb-12 text-gray-800 leading-relaxed tiptap-content"
+            className="flex-grow mb-12 text-gray-800 leading-relaxed tiptap-content text-justify"
             dangerouslySetInnerHTML={{ __html: content || "<p>Aucun contenu disponible.</p>" }}
           />
 
           {/* Signature & Stamp Section */}
-          <div className="flex justify-end mb-12 print:break-inside-avoid">
+          <div className="flex justify-end mb-12 print:mb-8 print:break-inside-avoid">
             <div className="w-[300px] text-center relative">
               <p className="text-sm font-semibold text-gray-900 mb-4">Signature et Cachet</p>
               
@@ -143,12 +123,9 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
             </div>
           </div>
 
-          {/* Spacer for fixed footer in print */}
-          <div className="hidden print:block h-[25mm]"></div>
-
           {/* Footer */}
-          <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid print:fixed print:bottom-0 print:left-0 print:w-full print:bg-white print:px-[20mm] print:pb-[10mm] print:pt-4 print:border-t print:border-gray-200">
-            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+          <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:break-inside-avoid">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 px-4">
                 {isAE ? (
                   <>
                     <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
