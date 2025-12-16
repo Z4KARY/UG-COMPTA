@@ -71,6 +71,8 @@ export const save = mutation({
     businessId: v.id("businesses"),
     content: v.string(),
     title: v.optional(v.string()),
+    titleSize: v.optional(v.string()),
+    titleWeight: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -90,6 +92,8 @@ export const save = mutation({
       await ctx.db.patch(existing._id, {
         content: args.content,
         title: args.title,
+        titleSize: args.titleSize,
+        titleWeight: args.titleWeight,
         updatedAt: Date.now(),
       });
     } else {
@@ -97,6 +101,8 @@ export const save = mutation({
         businessId: args.businessId,
         content: args.content,
         title: args.title,
+        titleSize: args.titleSize,
+        titleWeight: args.titleWeight,
         updatedAt: Date.now(),
       });
     }

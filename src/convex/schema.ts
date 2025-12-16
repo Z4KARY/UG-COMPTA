@@ -145,6 +145,8 @@ const schema = defineSchema(
       title: v.optional(v.string()),
       content: v.string(),
       updatedAt: v.number(),
+      titleSize: v.optional(v.string()),
+      titleWeight: v.optional(v.string()),
     }).index("by_business", ["businessId"]),
 
     // New table for multi-user access to businesses

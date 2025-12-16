@@ -24,12 +24,15 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 export default function LegalDocumentSettings() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
   const saveDocument = useMutation(api.legalDocuments.save);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [titleSize, setTitleSize] = useState("text-3xl");
+  const [titleWeight, setTitleWeight] = useState("font-light");
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<LegalTemplate | null>(null);
 
@@ -41,6 +44,8 @@ export default function LegalDocumentSettings() {
     if (data?.document) {
       setTitle(data.document.title || "");
       setContent(data.document.content || "");
+      if (data.document.titleSize) setTitleSize(data.document.titleSize);
+      if (data.document.titleWeight) setTitleWeight(data.document.titleWeight);
     }
   }, [data]);
 
@@ -59,6 +64,8 @@ export default function LegalDocumentSettings() {
         businessId: data.business._id,
         content,
         title,
+        titleSize,
+        titleWeight,
       });
       toast.success("Document sauvegardé avec succès");
     } catch (error) {
@@ -200,6 +207,40 @@ export default function LegalDocumentSettings() {
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Taille du titre</Label>
+                  <Select value={titleSize} onValueChange={setTitleSize}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text-xl">Petit</SelectItem>
+                      <SelectItem value="text-2xl">Moyen</SelectItem>
+                      <SelectItem value="text-3xl">Grand</SelectItem>
+                      <SelectItem value="text-4xl">Très Grand</SelectItem>
+                      <SelectItem value="text-5xl">Géant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Style du titre</Label>
+                  <Select value={titleWeight} onValueChange={setTitleWeight}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="font-light">Léger</SelectItem>
+                      <SelectItem value="font-normal">Normal</SelectItem>
+                      <SelectItem value="font-medium">Moyen</SelectItem>
+                      <SelectItem value="font-semibold">Semi-Gras</SelectItem>
+                      <SelectItem value="font-bold">Gras</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="content">Contenu</Label>
                 <RichTextEditor
@@ -221,7 +262,9 @@ export default function LegalDocumentSettings() {
                       <LegalDocument 
                         business={data.business} 
                         content={content} 
-                        title={title} 
+                        title={title}
+                        titleSize={titleSize}
+                        titleWeight={titleWeight}
                       />
                    </div>
                 </CardContent>
@@ -234,7 +277,9 @@ export default function LegalDocumentSettings() {
             <LegalDocument 
               business={data.business} 
               content={content} 
-              title={title} 
+              title={title}
+              titleSize={titleSize}
+              titleWeight={titleWeight}
             />
         </div>
 

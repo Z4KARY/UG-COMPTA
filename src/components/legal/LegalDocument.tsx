@@ -4,9 +4,11 @@ interface LegalDocumentProps {
   business: any;
   content: string;
   title?: string;
+  titleSize?: string;
+  titleWeight?: string;
 }
 
-export function LegalDocument({ business, content, title }: LegalDocumentProps) {
+export function LegalDocument({ business, content, title, titleSize, titleWeight }: LegalDocumentProps) {
   const primaryColor = business?.primaryColor || "#0f172a";
   const font = business?.font || "Inter";
   const fontFamily = font.includes(" ")
@@ -17,6 +19,10 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
   const stampUrl = business?.stampUrl;
 
   const isAE = business?.type === "auto_entrepreneur";
+
+  // Defaults matching previous hardcoded values
+  const sizeClass = titleSize || "text-3xl";
+  const weightClass = titleWeight || "font-light";
 
   return (
     <div className="w-full mx-auto print:w-full print:max-w-none">
@@ -79,7 +85,7 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
             </div>
 
             <div className="w-full md:w-1/2 print:w-1/2 text-right">
-              <h1 className="text-3xl font-light tracking-tight mb-2 uppercase text-gray-900 print:text-2xl">
+              <h1 className={`${sizeClass} ${weightClass} tracking-tight mb-2 uppercase text-gray-900 print:text-2xl`}>
                 {title || "DOCUMENT JURIDIQUE"}
               </h1>
               <p className="text-sm text-gray-500">

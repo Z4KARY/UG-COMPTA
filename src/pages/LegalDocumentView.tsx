@@ -72,7 +72,9 @@ export default function LegalDocumentView() {
           <LegalDocument 
             business={data.business} 
             content={data.document.content} 
-            title={data.document.title} 
+            title={data.document.title}
+            titleSize={data.document.titleSize}
+            titleWeight={data.document.titleWeight}
           />
         </div>
       </div>
