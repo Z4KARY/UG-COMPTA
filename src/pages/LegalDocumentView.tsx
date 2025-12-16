@@ -33,7 +33,7 @@ export default function LegalDocumentView() {
       <style>
         {`
           @media print {
-            @page { size: A4; margin: 25mm; }
+            @page { size: A4; margin: 35mm 25mm 25mm 25mm; }
             body { 
               visibility: hidden; 
 >>>>>>> REPLACE
