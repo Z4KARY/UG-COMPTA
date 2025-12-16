@@ -1,62 +1,14 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { LegalDocument } from "@/components/legal/LegalDocument";
-import { Loader2, Printer, Download } from "lucide-react";
+import { Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useReactToPrint } from "react-to-print";
-import { useRef, useState } from "react";
-import { toast } from "sonner";
 
 export default function LegalDocumentView() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
-  const componentRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
 
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    documentTitle: data?.document?.title || "Document Juridique",
-    onAfterPrint: () => console.log("Print finished"),
-    onPrintError: (error) => {
-      console.error("Print error:", error);
-      toast.error("Erreur lors de l'impression");
-    },
-    pageStyle: `
-      @page { size: auto; margin: 0mm; }
-      @media print {
-        body { -webkit-print-color-adjust: exact; }
-      }
-    `,
-  });
-
-  const handleExportPdf = async () => {
-    if (!componentRef.current) {
-      console.error("Component ref is missing");
-      return;
-    }
-    
-    setIsExporting(true);
-    console.log("Starting PDF export...");
-    const element = componentRef.current;
-    const opt = {
-      margin: 0,
-      filename: `${data?.document?.title || 'document-juridique'}.pdf`,
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, scrollY: 0, logging: true, letterRendering: true },
-      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-    };
-
-    try {
-      // @ts-ignore
-      const html2pdf = (await import("html2pdf.js")).default;
-      await html2pdf().set(opt).from(element).save();
-      console.log("PDF export successful");
-      toast.success("PDF téléchargé avec succès");
-    } catch (error) {
-      console.error("PDF Export Error:", error);
-      toast.error("Erreur lors de l'export PDF. Vérifiez la console.");
-    } finally {
-      setIsExporting(false);
-    }
+  const handlePrint = () => {
+    window.print();
   };
 
   if (data === undefined) {
@@ -78,29 +30,50 @@ export default function LegalDocumentView() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
+      <style>
+        {`
+          @media print {
+            @page { size: A4; margin: 0; }
+            body { 
+              visibility: hidden; 
+              -webkit-print-color-adjust: exact;
+            }
+            .print-container { 
+              visibility: visible;
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100% !important;
+              max-width: none !important;
+              margin: 0 !important;
+              padding: 20mm !important;
+              box-shadow: none !important;
+              border: none !important;
+              background: white !important;
+            }
+            .print-container * {
+              visibility: visible;
+            }
+            /* Ensure no other elements interfere */
+            nav, header, aside, .no-print { display: none !important; }
+          }
+        `}
+      </style>
       <div className="container mx-auto px-4">
-        <div className="mb-6 flex justify-between items-center max-w-[210mm] mx-auto">
+        <div className="mb-6 flex justify-between items-center max-w-[210mm] mx-auto print:hidden">
           <h1 className="text-2xl font-bold text-gray-900">{data.document.title}</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => handlePrint()}>
-              <Printer className="mr-2 h-4 w-4" />
-              Imprimer
-            </Button>
-            <Button variant="outline" onClick={handleExportPdf} disabled={isExporting}>
-              {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-              PDF
-            </Button>
-          </div>
+          <Button variant="outline" onClick={handlePrint}>
+            <Printer className="mr-2 h-4 w-4" />
+            Print / PDF
+          </Button>
         </div>
         
-        <div style={{ position: "absolute", left: "-9999px", top: 0, width: "210mm" }}>
-          <div ref={componentRef}>
-            <LegalDocument 
-              business={data.business} 
-              content={data.document.content} 
-              title={data.document.title} 
-            />
-          </div>
+        <div className="flex justify-center">
+          <LegalDocument 
+            business={data.business} 
+            content={data.document.content} 
+            title={data.document.title} 
+          />
         </div>
       </div>
     </div>

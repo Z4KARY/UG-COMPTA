@@ -182,7 +182,7 @@ export function RichTextEditor({
           </div>
 
           <div className={toolbarGroupClasses}>
-            {[1, 2, 3].map((level) => (
+            {([1, 2, 3] as const).map((level) => (
               <Toggle
                 key={level}
                 size="sm"
