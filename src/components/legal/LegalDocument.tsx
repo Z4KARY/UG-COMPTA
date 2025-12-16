@@ -28,11 +28,16 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
     <div className="w-full mx-auto print:w-full print:max-w-none">
       <style type="text/css" media="print">
         {`
-          @page { size: A4; margin: 20mm; }
+          @page { size: A4; margin: 0; }
           body { print-color-adjust: exact; -webkit-print-color-adjust: exact; height: auto !important; }
           html { height: auto !important; }
 
           /* Explicit print styles for the header */
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        <div className="p-8 md:p-12 print:p-0 flex-grow print:flex-grow-0 flex flex-col">
+=======
+        <div className="p-8 md:p-12 print:p-[20mm] flex-grow print:flex-grow-0 flex flex-col">
           .legal-document-header {
             display: flex !important;
             flex-direction: row !important;
