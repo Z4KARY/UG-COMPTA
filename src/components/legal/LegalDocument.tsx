@@ -125,11 +125,11 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                   />
 
                   {/* Signature & Stamp Section */}
-                  <div className="flex justify-end mb-8 print:mb-4 print:break-inside-avoid">
-                    <div className="w-full max-w-[600px] text-center relative">
+                  <div className="flex justify-end mb-4 print:mb-2 print:break-inside-avoid">
+                    <div className="w-full max-w-[600px] text-right relative">
                       <p className="text-sm font-semibold text-gray-900 mb-2">Signature et Cachet</p>
                       
-                      <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+                      <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-end">
                         {/* Stamp Layer */}
                         {stampUrl && (
                           <img 
