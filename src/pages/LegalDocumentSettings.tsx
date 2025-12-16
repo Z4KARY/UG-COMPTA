@@ -24,9 +24,6 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useReactToPrint } from "react-to-print";
-import { useRef } from "react";
-
 export default function LegalDocumentSettings() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
   const saveDocument = useMutation(api.legalDocuments.save);
@@ -36,17 +33,9 @@ export default function LegalDocumentSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<LegalTemplate | null>(null);
 
-  const printRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: title || "Document Juridique",
-    onAfterPrint: () => console.log("Print finished"),
-    onPrintError: (error) => {
-      console.error("Print error:", error);
-      toast.error("Erreur lors de l'impression");
-    },
-    // Removing pageStyle to allow the component's internal styles to take precedence
-  });
+  const handlePrint = () => {
+    window.print();
+  };
 
   useEffect(() => {
     if (data?.document) {
@@ -241,15 +230,36 @@ export default function LegalDocumentSettings() {
         </div>
 
         {/* Hidden Print Component */}
-        <div style={{ position: "absolute", left: "-9999px", top: 0, width: "210mm" }}>
-            <div ref={printRef}>
-                <LegalDocument 
-                  business={data.business} 
-                  content={content} 
-                  title={title} 
-                />
-            </div>
+        <div id="print-area" style={{ position: "absolute", left: "-9999px", top: 0, width: "210mm" }}>
+            <LegalDocument 
+              business={data.business} 
+              content={content} 
+              title={title} 
+            />
         </div>
+
+        <style>
+          {`
+            @media print {
+              body * {
+                visibility: hidden;
+              }
+              #print-area, #print-area * {
+                visibility: visible;
+              }
+              #print-area {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                z-index: 9999;
+              }
+            }
+          `}
+        </style>
       </div>
     </DashboardLayout>
   );

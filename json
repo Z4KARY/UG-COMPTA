@@ -1,3 +1,10 @@
-{
-  "command": "npm test"
-}
+[
+  {
+    "tool_name": "readFilesToContextTool",
+    "input_args": {
+      "file_paths": [
+        "src/index.css"
+      ]
+    }
+  }
+]
