@@ -25,6 +25,21 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
           @page { size: A4; margin: 5mm; }
           body { print-color-adjust: exact; -webkit-print-color-adjust: exact; height: auto !important; }
           html { height: auto !important; }
+
+          /* Explicit print styles for the header */
+          .legal-document-header {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: flex-start !important;
+          }
+          .legal-document-header > div:first-child {
+            width: 50% !important;
+          }
+          .legal-document-header > div:last-child {
+            width: 50% !important;
+            text-align: right !important;
+          }
         `}
       </style>
       <div
@@ -36,25 +51,25 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
 
         <div className="p-8 md:p-12 print:p-0 flex-grow flex flex-col">
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
-            <div className="w-full md:w-1/2">
+          <div className="flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-6">
+            <div className="w-full md:w-1/2 print:w-1/2">
               {logoUrl ? (
                 <img 
                   src={logoUrl} 
                   alt="Business Logo" 
-                  className="h-20 object-contain mb-6" 
+                  className="h-20 object-contain mb-6 print:h-16 print:mb-4" 
                   crossOrigin="anonymous" 
                 />
               ) : (
-                <div className="h-20 flex items-center mb-6">
+                <div className="h-20 flex items-center mb-6 print:h-16 print:mb-4">
                   <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: primaryColor }}>
                     {business?.name}
                   </h2>
                 </div>
               )}
 
-              <div className="text-sm text-gray-600 space-y-1">
-                <p className="font-semibold text-gray-900 text-base mb-1">{business?.name}</p>
+              <div className="text-sm text-gray-600 space-y-1 print:text-xs">
+                <p className="font-semibold text-gray-900 text-base mb-1 print:text-sm">{business?.name}</p>
                 {business?.tradeName && <p>{business.tradeName}</p>}
                 <p className="whitespace-pre-line">{business?.address}</p>
                 <p>{business?.city}, Algeria</p>
@@ -63,8 +78,8 @@ export function LegalDocument({ business, content, title }: LegalDocumentProps) 
               </div>
             </div>
 
-            <div className="w-full md:w-1/2 text-right">
-              <h1 className="text-3xl font-light tracking-tight mb-2 uppercase text-gray-900">
+            <div className="w-full md:w-1/2 print:w-1/2 text-right">
+              <h1 className="text-3xl font-light tracking-tight mb-2 uppercase text-gray-900 print:text-2xl">
                 {title || "DOCUMENT JURIDIQUE"}
               </h1>
               <p className="text-sm text-gray-500">
