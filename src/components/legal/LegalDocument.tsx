@@ -49,15 +49,15 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
         `}
       </style>
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] relative flex flex-col"
+        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:block print:shadow-none print:border-none"
         style={{ fontFamily: fontFamily }}
       >
         {/* Top Accent Line */}
         <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
-        <div className="p-8 md:p-12 print:p-0 flex-grow flex flex-col">
+        <div className="p-8 md:p-12 print:p-0 flex-grow print:flex-grow-0 flex flex-col">
           {/* Header */}
-          <div className="flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-6">
+          <div className="legal-document-header flex flex-col md:flex-row print:flex-row justify-between items-start gap-8 mb-12 print:mb-6">
             <div className="w-full md:w-1/2 print:w-1/2">
               {logoUrl ? (
                 <img 
