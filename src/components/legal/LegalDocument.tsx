@@ -120,13 +120,13 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
 
                   {/* Content Body */}
                   <div 
-                    className="mb-6 text-gray-800 leading-relaxed tiptap-content text-justify"
+                    className="mb-2 text-gray-800 leading-relaxed tiptap-content text-justify"
                     dangerouslySetInnerHTML={{ __html: content || "<p>Aucun contenu disponible.</p>" }}
                   />
 
                   {/* Signature & Stamp Section */}
                   <div className="flex justify-end mb-8 print:mb-4 print:break-inside-avoid">
-                    <div className="w-full max-w-[400px] text-center relative">
+                    <div className="w-full max-w-[600px] text-center relative">
                       <p className="text-sm font-semibold text-gray-900 mb-2">Signature et Cachet</p>
                       
                       <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-center">
@@ -135,7 +135,7 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                           <img 
                             src={stampUrl} 
                             alt="Stamp" 
-                            className="col-start-1 row-start-1 h-48 w-auto max-w-full object-contain opacity-80 rotate-[-12deg] mix-blend-multiply z-0" 
+                            className="col-start-1 row-start-1 h-80 w-auto max-w-full object-contain opacity-80 rotate-[-12deg] mix-blend-multiply z-0" 
                             crossOrigin="anonymous"
                           />
                         )}
@@ -145,7 +145,7 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                           <img 
                             src={signatureUrl} 
                             alt="Signature" 
-                            className="col-start-1 row-start-1 h-48 w-auto max-w-full object-contain z-10" 
+                            className="col-start-1 row-start-1 h-80 w-auto max-w-full object-contain z-10" 
                             crossOrigin="anonymous"
                           />
                         )}
