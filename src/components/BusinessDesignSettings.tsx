@@ -353,6 +353,8 @@ export function BusinessDesignSettings({ businessId, initialData }: BusinessDesi
                 <SelectItem value="modern">Modern</SelectItem>
                 <SelectItem value="classic">Classic</SelectItem>
                 <SelectItem value="minimal">Minimal</SelectItem>
+                <SelectItem value="bold">Bold</SelectItem>
+                <SelectItem value="elegant">Elegant</SelectItem>
               </SelectContent>
             </Select>
           </div>
