@@ -12,6 +12,7 @@
 import { INVOICE_LABELS, InvoiceLanguage } from "@/lib/invoice-templates";
 import { numberToWords } from "@/lib/numberToWords";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface InvoiceDocumentProps {
   invoice: any;
@@ -27,6 +28,10 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
   const primaryColor = business?.primaryColor || "#0f172a";
   const font = business?.font || "Inter";
+  const template = business?.template || "modern";
+  const isClassic = template === "classic";
+  const isMinimal = template === "minimal";
+
   const invoiceFontFamily = font.includes(" ")
     ? `"${font}", Inter, sans-serif`
     : `${font}, Inter, sans-serif`;
@@ -48,11 +53,22 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
         `}
       </style>
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:block print:shadow-none print:border-none"
+        className={cn(
+          "print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-0 print:h-auto relative flex flex-col print:block print:shadow-none print:border-none",
+          isClassic && "border-2 border-gray-900 rounded-none"
+        )}
         style={{ fontFamily: invoiceFontFamily, direction: isRTL ? "rtl" : "ltr" }}
       >
         {/* Top Accent Line */}
-        <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
+        {!isMinimal && (
+          <div 
+            className={cn("w-full print:hidden", isClassic ? "h-1 border-b-4 border-double" : "h-2")} 
+            style={{ 
+              backgroundColor: isClassic ? "transparent" : primaryColor,
+              borderColor: isClassic ? primaryColor : undefined
+            }}
+          ></div>
+        )}
 
         <div className="p-8 md:p-12 print:p-2 flex-grow print:flex-grow-0 flex flex-col">
           
@@ -104,7 +120,11 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             <div className={`flex flex-col ${isRTL ? "items-start text-right" : "items-end text-right"}`}>
               {/* Invoice Title & Number */}
               <div className="mb-6 print:mb-1 w-full">
-                <h1 className="text-4xl font-light tracking-tight mb-1 uppercase text-gray-900 print:text-5xl print:font-bold print:mb-0">
+                <h1 className={cn(
+                  "text-4xl tracking-tight mb-1 uppercase text-gray-900 print:text-5xl print:mb-0",
+                  isClassic ? "font-serif font-bold" : "font-light",
+                  isMinimal ? "text-3xl font-normal" : ""
+                )}>
                   {invoice.type === "quote" ? labels.quote : invoice.type === "credit_note" ? labels.credit_note : labels.invoice}
                 </h1>
                 <p className="text-lg font-medium text-gray-500 mb-4 print:mb-1 print:text-sm">#{invoice.invoiceNumber}</p>
@@ -132,7 +152,15 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
               </div>
 
               {/* Customer Info (Bill To) */}
-              <div className={`w-full bg-gray-50/50 rounded-lg p-4 border border-gray-100 print:p-1 print:bg-transparent print:border-gray-200 text-left ${isRTL ? "text-right" : "text-left"}`}>
+              <div className={cn(
+                "w-full p-4 text-left",
+                isRTL ? "text-right" : "text-left",
+                // Template styles
+                isMinimal ? "bg-transparent border-none p-0" : 
+                isClassic ? "bg-white border-2 border-gray-100 rounded-none" :
+                "bg-gray-50/50 rounded-lg border border-gray-100", // Modern (default)
+                "print:p-1 print:bg-transparent print:border-gray-200"
+              )}>
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 print:mb-0.5">{labels.billTo}</h3>
                 <h2 className="font-bold text-lg text-gray-900 mb-1 print:text-sm print:mb-0">{invoice.customer?.name}</h2>
                 {invoice.customer?.contactPerson && (
@@ -141,7 +169,10 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
                 <div className="text-sm text-gray-600 space-y-1 print:text-[10px] print:leading-tight print:space-y-0">
                   <p className="whitespace-pre-line">{invoice.customer?.address}</p>
-                  <div className="grid grid-cols-1 gap-y-0.5 mt-2 text-xs text-gray-500 border-t border-gray-200 pt-2 print:mt-1 print:pt-1 print:text-[9px]">
+                  <div className={cn(
+                    "grid grid-cols-1 gap-y-0.5 mt-2 text-xs text-gray-500 pt-2 print:mt-1 print:pt-1 print:text-[9px]",
+                    !isMinimal && "border-t border-gray-200"
+                  )}>
                     {invoice.customer?.taxId && <span>{labels.sellerNif}: {invoice.customer.taxId}</span>}
                     {invoice.customer?.rc && <span>{labels.sellerRc}: {invoice.customer.rc}</span>}
                     {invoice.customer?.ai && <span>{labels.sellerAi}: {invoice.customer.ai}</span>}
@@ -156,14 +187,55 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           <div className="mb-8 mt-8 print:mb-1 print:mt-4">
             <table className="w-full text-sm print:text-[10px]">
               <thead>
-                <tr className="border-b-2 border-gray-100">
-                  <th className={`text-left py-3 print:py-1 ${isRTL ? "pr-2" : "pl-2"} font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50`}>
+                <tr className={cn(
+                  "border-b-2 border-gray-100",
+                  isClassic && "border-gray-900 border-t-2",
+                  isMinimal && "border-gray-200"
+                )}>
+                  <th className={cn(
+                    "text-left py-3 print:py-1 font-semibold text-gray-900",
+                    isRTL ? "pr-2" : "pl-2",
+                    // Template styles
+                    isMinimal ? "bg-transparent" :
+                    isClassic ? "bg-transparent uppercase tracking-widest" :
+                    "bg-gray-50/50", // Modern
+                    "print:bg-gray-50"
+                  )}>
                     {labels.description}
                   </th>
-                  <th className="text-right py-3 print:py-1 font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50 w-16">{labels.qty}</th>
-                  <th className="text-right py-3 print:py-1 font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50 w-24">{labels.price}</th>
-                  {!isAE && <th className="text-right py-3 print:py-1 font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50 w-16">{labels.vat}</th>}
-                  <th className={`text-right py-3 print:py-1 ${isRTL ? "pl-2" : "pr-2"} font-semibold text-gray-900 bg-gray-50/50 print:bg-gray-50 w-24`}>
+                  <th className={cn(
+                    "text-right py-3 print:py-1 font-semibold text-gray-900 w-16",
+                    // Template styles
+                    isMinimal ? "bg-transparent" :
+                    isClassic ? "bg-transparent uppercase tracking-widest" :
+                    "bg-gray-50/50", // Modern
+                    "print:bg-gray-50"
+                  )}>{labels.qty}</th>
+                  <th className={cn(
+                    "text-right py-3 print:py-1 font-semibold text-gray-900 w-24",
+                    // Template styles
+                    isMinimal ? "bg-transparent" :
+                    isClassic ? "bg-transparent uppercase tracking-widest" :
+                    "bg-gray-50/50", // Modern
+                    "print:bg-gray-50"
+                  )}>{labels.price}</th>
+                  {!isAE && <th className={cn(
+                    "text-right py-3 print:py-1 font-semibold text-gray-900 w-16",
+                    // Template styles
+                    isMinimal ? "bg-transparent" :
+                    isClassic ? "bg-transparent uppercase tracking-widest" :
+                    "bg-gray-50/50", // Modern
+                    "print:bg-gray-50"
+                  )}>{labels.vat}</th>}
+                  <th className={cn(
+                    "text-right py-3 print:py-1 font-semibold text-gray-900 w-24",
+                    isRTL ? "pl-2" : "pr-2",
+                    // Template styles
+                    isMinimal ? "bg-transparent" :
+                    isClassic ? "bg-transparent uppercase tracking-widest" :
+                    "bg-gray-50/50", // Modern
+                    "print:bg-gray-50"
+                  )}>
                     {labels.total}
                   </th>
                 </tr>
@@ -190,8 +262,21 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           <div className="flex flex-col md:flex-row print:flex-row gap-8 print:gap-2 mb-8 print:mb-1 print:break-inside-avoid">
             <div className="flex-1">
               {invoice.notes && (
-                <div className="bg-yellow-50/50 border border-yellow-100 rounded-lg p-3 text-sm text-yellow-800 print:bg-transparent print:border-gray-200 print:text-gray-800 print:p-1 print:text-[10px]">
-                  <p className="font-semibold mb-1 text-yellow-900 print:text-gray-900">{labels.notes}</p>
+                <div className={cn(
+                  "text-sm p-3",
+                  // Template styles
+                  isMinimal ? "bg-transparent border-l-2 border-gray-200 rounded-none pl-4 text-gray-600" :
+                  isClassic ? "bg-white border border-gray-300 rounded-none text-gray-800" :
+                  "bg-yellow-50/50 border border-yellow-100 rounded-lg text-yellow-800", // Modern
+                  "print:bg-transparent print:border-gray-200 print:text-gray-800 print:p-1 print:text-[10px]"
+                )}>
+                  <p className={cn(
+                    "font-semibold mb-1",
+                    isMinimal ? "text-gray-900" :
+                    isClassic ? "text-gray-900 uppercase" :
+                    "text-yellow-900",
+                    "print:text-gray-900"
+                  )}>{labels.notes}</p>
                   <p>{invoice.notes}</p>
                 </div>
               )}
