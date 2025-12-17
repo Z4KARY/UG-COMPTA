@@ -187,19 +187,21 @@ export function LegalDocument({
                     <div className="flex-1">
                       {(requiresClientSignature || clientSignatureImageUrl) && (
                         <div className="flex flex-col items-start">
-                          <p className="text-sm font-semibold text-gray-900 mb-4">Lu et approuvé</p>
-                          {clientSignatureImageUrl ? (
-                            <img 
-                              src={clientSignatureImageUrl} 
-                              alt="Client Signature" 
-                              className="h-[120px] w-auto max-w-full object-contain" 
-                              crossOrigin="anonymous"
-                            />
-                          ) : (
-                            <div className="w-64 h-32 border border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
-                              <span className="text-xs text-gray-400">Signature du Client</span>
-                            </div>
-                          )}
+                          <p className="text-sm font-semibold text-gray-900 mb-0 ml-2">Lu et approuvé</p>
+                          <div className="ml-2 mt-[-10px]">
+                            {clientSignatureImageUrl ? (
+                              <img 
+                                src={clientSignatureImageUrl} 
+                                alt="Client Signature" 
+                                className="h-[240px] w-auto max-w-full object-contain" 
+                                crossOrigin="anonymous"
+                              />
+                            ) : (
+                              <div className="w-64 h-32 border border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                                <span className="text-xs text-gray-400">Signature du Client</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
