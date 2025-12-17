@@ -83,9 +83,20 @@ export function LegalDocument({
         className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-[297mm] relative flex flex-col print:block print:shadow-none print:border-none"
         style={{ fontFamily: fontFamily }}
       >
+        {/* Watermark */}
+        {logoUrl && (
+          <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none overflow-hidden print:overflow-hidden">
+            <img 
+              src={logoUrl} 
+              alt="Watermark" 
+              className="w-[500px] h-auto opacity-[0.04] grayscale transform -rotate-12 object-contain"
+            />
+          </div>
+        )}
+
         {/* Screen-only Footer - Absolute positioning within the container */}
         {!displayRegistrationInHeader && (
-          <div className="absolute bottom-0 left-0 w-full print:hidden">
+          <div className="absolute bottom-0 left-0 w-full print:hidden z-20">
             <div className="h-[20mm] flex items-end justify-center pb-4">
               <div className="text-center text-xs text-gray-400 w-full px-8">
                 <RegistrationDetails />
@@ -95,10 +106,10 @@ export function LegalDocument({
         )}
 
         {/* Top Accent Line - Hide in print as we use table spacers */}
-        <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
+        <div className="h-2 w-full print:hidden relative z-20" style={{ backgroundColor: primaryColor }}></div>
 
         {/* Table wrapper for print margins */}
-        <table className="w-full print:w-full h-full">
+        <table className="w-full print:w-full h-full relative z-10">
           <thead className="hidden print:table-header-group">
             <tr><td><div className="h-[35mm]"></div></td></tr>
           </thead>
@@ -209,6 +220,7 @@ export function LegalDocument({
                     {/* Business Signature & Stamp (Right) */}
                     <div className="flex-1 flex flex-col items-end">
                       <div className="text-right relative flex flex-col items-end">
+                        <p className="text-xs text-gray-500 mb-1 mr-2">Pour {business?.name}</p>
                         <p className="text-sm font-semibold text-gray-900 mb-0 mr-2 text-right">Signature et Cachet</p>
                         
                         <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-end mr-2 mt-[-10px]">
