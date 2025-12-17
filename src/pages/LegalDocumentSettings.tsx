@@ -36,6 +36,7 @@ export default function LegalDocumentSettings() {
   const [titleSize, setTitleSize] = useState("text-3xl");
   const [titleWeight, setTitleWeight] = useState("font-light");
   const [displayRegistrationInHeader, setDisplayRegistrationInHeader] = useState(false);
+  const [requiresClientSignature, setRequiresClientSignature] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<LegalTemplate | null>(null);
 
@@ -52,6 +53,9 @@ export default function LegalDocumentSettings() {
       if (data.document.displayRegistrationInHeader !== undefined) {
         setDisplayRegistrationInHeader(data.document.displayRegistrationInHeader);
       }
+      if (data.document.requiresClientSignature !== undefined) {
+        setRequiresClientSignature(data.document.requiresClientSignature);
+      }
     }
   }, [data]);
 
@@ -61,8 +65,12 @@ export default function LegalDocumentSettings() {
     if (template.displayRegistrationInHeader !== undefined) {
       setDisplayRegistrationInHeader(template.displayRegistrationInHeader);
     } else {
-      // Default behavior if not specified in template (though we added it to all)
       setDisplayRegistrationInHeader(true);
+    }
+    if (template.requiresClientSignature !== undefined) {
+      setRequiresClientSignature(template.requiresClientSignature);
+    } else {
+      setRequiresClientSignature(false);
     }
     toast.success("Modèle appliqué avec succès");
   };
@@ -79,6 +87,7 @@ export default function LegalDocumentSettings() {
         titleSize,
         titleWeight,
         displayRegistrationInHeader,
+        requiresClientSignature,
       });
       toast.success("Document sauvegardé avec succès");
     } catch (error) {
@@ -267,6 +276,19 @@ export default function LegalDocumentSettings() {
                 </Label>
               </div>
 
+              <div className="flex items-center space-x-2 border p-3 rounded-md">
+                <input
+                  type="checkbox"
+                  id="requiresClientSignature"
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  checked={requiresClientSignature}
+                  onChange={(e) => setRequiresClientSignature(e.target.checked)}
+                />
+                <Label htmlFor="requiresClientSignature" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                  Inclure un emplacement pour la signature du client
+                </Label>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="content">Contenu</Label>
                 <RichTextEditor
@@ -292,6 +314,7 @@ export default function LegalDocumentSettings() {
                         titleSize={titleSize}
                         titleWeight={titleWeight}
                         displayRegistrationInHeader={displayRegistrationInHeader}
+                        requiresClientSignature={requiresClientSignature}
                       />
                    </div>
                 </CardContent>
@@ -309,6 +332,7 @@ export default function LegalDocumentSettings() {
               titleSize={titleSize}
               titleWeight={titleWeight}
               displayRegistrationInHeader={displayRegistrationInHeader}
+              requiresClientSignature={requiresClientSignature}
             />
           </div>,
           document.body

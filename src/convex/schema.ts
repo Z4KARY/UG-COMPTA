@@ -148,6 +148,8 @@ const schema = defineSchema(
       titleSize: v.optional(v.string()),
       titleWeight: v.optional(v.string()),
       displayRegistrationInHeader: v.optional(v.boolean()),
+      clientSignatureImageUrl: v.optional(v.string()),
+      requiresClientSignature: v.optional(v.boolean()),
     }).index("by_business", ["businessId"]),
 
     // New table for multi-user access to businesses

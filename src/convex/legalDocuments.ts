@@ -74,6 +74,8 @@ export const save = mutation({
     titleSize: v.optional(v.string()),
     titleWeight: v.optional(v.string()),
     displayRegistrationInHeader: v.optional(v.boolean()),
+    clientSignatureImageUrl: v.optional(v.string()),
+    requiresClientSignature: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -96,6 +98,8 @@ export const save = mutation({
         titleSize: args.titleSize,
         titleWeight: args.titleWeight,
         displayRegistrationInHeader: args.displayRegistrationInHeader,
+        clientSignatureImageUrl: args.clientSignatureImageUrl,
+        requiresClientSignature: args.requiresClientSignature,
         updatedAt: Date.now(),
       });
     } else {
@@ -106,6 +110,8 @@ export const save = mutation({
         titleSize: args.titleSize,
         titleWeight: args.titleWeight,
         displayRegistrationInHeader: args.displayRegistrationInHeader,
+        clientSignatureImageUrl: args.clientSignatureImageUrl,
+        requiresClientSignature: args.requiresClientSignature,
         updatedAt: Date.now(),
       });
     }

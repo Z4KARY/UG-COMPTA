@@ -5,6 +5,7 @@ export interface LegalTemplate {
   content: string;
   category: "commercial" | "employment" | "corporate" | "other";
   displayRegistrationInHeader?: boolean;
+  requiresClientSignature?: boolean;
 }
 
 export const LEGAL_TEMPLATES: LegalTemplate[] = [
@@ -14,6 +15,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Support officiel pour vos courriers et documents administratifs avec en-tête et pied de page.",
     category: "other",
     displayRegistrationInHeader: false,
+    requiresClientSignature: false,
     content: `
       <p>&nbsp;</p>
       <p style="text-align: right">Fait à [VILLE], le [DATE]</p>
@@ -33,6 +35,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Modèle standard de CGV pour les prestataires de services.",
     category: "commercial",
     displayRegistrationInHeader: true,
+    requiresClientSignature: true,
     content: `
       <h1>Conditions Générales de Vente</h1>
       <p><strong>Date de dernière mise à jour :</strong> [DATE]</p>
@@ -63,6 +66,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Accord de non-divulgation pour protéger vos informations sensibles.",
     category: "corporate",
     displayRegistrationInHeader: true,
+    requiresClientSignature: true,
     content: `
       <h1>Accord de Confidentialité</h1>
       
@@ -90,11 +94,12 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Contrat cadre pour une mission de prestation de services.",
     category: "commercial",
     displayRegistrationInHeader: true,
+    requiresClientSignature: true,
     content: `
       <h1>Contrat de Prestation de Services</h1>
       
       <h2>1. Désignation des Parties</h2>
-      <p>Le présent contrat est conclu entre [VOTRE SOCIÉTÉ] ("le Prestataire") et [NOM DU CLIENT] ("le Client").</p>
+      <p>Le présent contrat est conclu entre [VOTRE SOCIÉTÉ] (\"le Prestataire\") et [NOM DU CLIENT] (\"le Client\").</p>
       
       <h2>2. Objet du Contrat</h2>
       <p>Le Prestataire s'engage à réaliser pour le Client la mission suivante : [DESCRIPTION DE LA MISSION].</p>
@@ -115,6 +120,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Texte standard à inclure en bas de vos devis.",
     category: "commercial",
     displayRegistrationInHeader: true,
+    requiresClientSignature: true,
     content: `
       <h3>Conditions de l'Offre</h3>
       <p>Cette offre est valable pour une durée de 30 jours.</p>
@@ -129,6 +135,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Structure complète pour présenter la faisabilité technique et la rentabilité économique d'un projet.",
     category: "corporate",
     displayRegistrationInHeader: true,
+    requiresClientSignature: false,
     content: `
       <h1>Étude Technico-Économique</h1>
       <p><strong>Projet :</strong> [NOM DU PROJET]</p>
@@ -167,6 +174,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Dossier de présentation stratégique pour investisseurs ou banques.",
     category: "corporate",
     displayRegistrationInHeader: true,
+    requiresClientSignature: false,
     content: `
       <h1>Business Plan</h1>
       
@@ -198,6 +206,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Trame narrative pour présenter votre projet à des investisseurs ou partenaires.",
     category: "corporate",
     displayRegistrationInHeader: true,
+    requiresClientSignature: false,
     content: `
       <h1>Pitch Deck (Structure Narrative)</h1>
       
@@ -232,6 +241,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Modèle de contrat à durée indéterminée standard.",
     category: "employment",
     displayRegistrationInHeader: true,
+    requiresClientSignature: true,
     content: `
       <h1>Contrat de Travail à Durée Indéterminée</h1>
       
@@ -266,6 +276,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     description: "Pour formaliser une mission ponctuelle ou de conseil.",
     category: "commercial",
     displayRegistrationInHeader: true,
+    requiresClientSignature: true,
     content: `
       <h1>Lettre de Mission</h1>
       

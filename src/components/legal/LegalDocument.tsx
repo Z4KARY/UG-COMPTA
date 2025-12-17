@@ -7,6 +7,8 @@ interface LegalDocumentProps {
   titleSize?: string;
   titleWeight?: string;
   displayRegistrationInHeader?: boolean;
+  clientSignatureImageUrl?: string;
+  requiresClientSignature?: boolean;
 }
 
 export function LegalDocument({ 
@@ -15,7 +17,9 @@ export function LegalDocument({
   title, 
   titleSize, 
   titleWeight,
-  displayRegistrationInHeader = false 
+  displayRegistrationInHeader = false,
+  clientSignatureImageUrl,
+  requiresClientSignature = false
 }: LegalDocumentProps) {
   const primaryColor = business?.primaryColor || "#0f172a";
   const font = business?.font || "Inter";
@@ -177,38 +181,62 @@ export function LegalDocument({
                     dangerouslySetInnerHTML={{ __html: content || "<p>Aucun contenu disponible.</p>" }}
                   />
 
-                  {/* Signature & Stamp Section */}
-                  <div className="flex flex-col items-end mb-0 print:break-inside-avoid">
-                    <div className="text-right relative flex flex-col items-end">
-                      <p className="text-sm font-semibold text-gray-900 mb-0 mr-2 text-right">Signature et Cachet</p>
-                      
-                      <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-end mr-2 mt-[-10px]">
-                        {/* Stamp Layer */}
-                        {stampUrl && (
-                          <img 
-                            src={stampUrl} 
-                            alt="Stamp" 
-                            className="col-start-1 row-start-1 h-[240px] w-auto max-w-full object-contain opacity-80 rotate-[-12deg] mix-blend-multiply z-0" 
-                            crossOrigin="anonymous"
-                          />
-                        )}
+                  {/* Signatures Section */}
+                  <div className="flex justify-between items-end mb-0 print:break-inside-avoid mt-8">
+                    {/* Client Signature (Left) */}
+                    <div className="flex-1">
+                      {(requiresClientSignature || clientSignatureImageUrl) && (
+                        <div className="flex flex-col items-start">
+                          <p className="text-sm font-semibold text-gray-900 mb-4">Lu et approuvé</p>
+                          {clientSignatureImageUrl ? (
+                            <img 
+                              src={clientSignatureImageUrl} 
+                              alt="Client Signature" 
+                              className="h-[120px] w-auto max-w-full object-contain" 
+                              crossOrigin="anonymous"
+                            />
+                          ) : (
+                            <div className="w-64 h-32 border border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                              <span className="text-xs text-gray-400">Signature du Client</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Business Signature & Stamp (Right) */}
+                    <div className="flex-1 flex flex-col items-end">
+                      <div className="text-right relative flex flex-col items-end">
+                        <p className="text-sm font-semibold text-gray-900 mb-0 mr-2 text-right">Signature et Cachet</p>
                         
-                        {/* Signature Layer */}
-                        {signatureUrl && (
-                          <img 
-                            src={signatureUrl} 
-                            alt="Signature" 
-                            className="col-start-1 row-start-1 h-[240px] w-auto max-w-full object-contain z-10" 
-                            crossOrigin="anonymous"
-                          />
-                        )}
-                        
-                        {/* Placeholder if neither exists */}
-                        {!stampUrl && !signatureUrl && (
-                          <div className="col-start-1 row-start-1 w-64 h-32 border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
-                            <span className="text-xs text-gray-300">Cachet et Signature</span>
-                          </div>
-                        )}
+                        <div className="grid grid-cols-1 grid-rows-1 items-center justify-items-end mr-2 mt-[-10px]">
+                          {/* Stamp Layer */}
+                          {stampUrl && (
+                            <img 
+                              src={stampUrl} 
+                              alt="Stamp" 
+                              className="col-start-1 row-start-1 h-[240px] w-auto max-w-full object-contain opacity-80 rotate-[-12deg] mix-blend-multiply z-0" 
+                              crossOrigin="anonymous"
+                            />
+                          )}
+                          
+                          {/* Signature Layer */}
+                          {signatureUrl && (
+                            <img 
+                              src={signatureUrl} 
+                              alt="Signature" 
+                              className="col-start-1 row-start-1 h-[240px] w-auto max-w-full object-contain z-10" 
+                              crossOrigin="anonymous"
+                            />
+                          )}
+                          
+                          {/* Placeholder if neither exists */}
+                          {!stampUrl && !signatureUrl && (
+                            <div className="col-start-1 row-start-1 w-64 h-32 border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
+                              <span className="text-xs text-gray-300">Cachet et Signature</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

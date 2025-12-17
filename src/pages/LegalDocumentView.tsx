@@ -79,6 +79,8 @@ export default function LegalDocumentView() {
             titleSize={data.document.titleSize}
             titleWeight={data.document.titleWeight}
             displayRegistrationInHeader={data.document.displayRegistrationInHeader}
+            clientSignatureImageUrl={data.document.clientSignatureImageUrl}
+            requiresClientSignature={data.document.requiresClientSignature}
           />
         </div>
       </div>
