@@ -150,6 +150,7 @@ const schema = defineSchema(
       displayRegistrationInHeader: v.optional(v.boolean()),
       clientSignatureImageUrl: v.optional(v.string()),
       requiresClientSignature: v.optional(v.boolean()),
+      displayWatermark: v.optional(v.boolean()), // Added displayWatermark
     }).index("by_business", ["businessId"]),
 
     // New table for multi-user access to businesses

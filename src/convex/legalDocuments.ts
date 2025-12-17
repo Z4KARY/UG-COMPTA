@@ -76,6 +76,7 @@ export const save = mutation({
     displayRegistrationInHeader: v.optional(v.boolean()),
     clientSignatureImageUrl: v.optional(v.string()),
     requiresClientSignature: v.optional(v.boolean()),
+    displayWatermark: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -100,6 +101,7 @@ export const save = mutation({
         displayRegistrationInHeader: args.displayRegistrationInHeader,
         clientSignatureImageUrl: args.clientSignatureImageUrl,
         requiresClientSignature: args.requiresClientSignature,
+        displayWatermark: args.displayWatermark,
         updatedAt: Date.now(),
       });
     } else {
@@ -112,6 +114,7 @@ export const save = mutation({
         displayRegistrationInHeader: args.displayRegistrationInHeader,
         clientSignatureImageUrl: args.clientSignatureImageUrl,
         requiresClientSignature: args.requiresClientSignature,
+        displayWatermark: args.displayWatermark,
         updatedAt: Date.now(),
       });
     }

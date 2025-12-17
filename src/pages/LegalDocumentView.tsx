@@ -81,6 +81,7 @@ export default function LegalDocumentView() {
             displayRegistrationInHeader={data.document.displayRegistrationInHeader}
             clientSignatureImageUrl={data.document.clientSignatureImageUrl}
             requiresClientSignature={data.document.requiresClientSignature}
+            displayWatermark={data.document.displayWatermark}
           />
         </div>
       </div>

@@ -9,6 +9,7 @@ interface LegalDocumentProps {
   displayRegistrationInHeader?: boolean;
   clientSignatureImageUrl?: string;
   requiresClientSignature?: boolean;
+  displayWatermark?: boolean;
 }
 
 export function LegalDocument({ 
@@ -19,7 +20,8 @@ export function LegalDocument({
   titleWeight,
   displayRegistrationInHeader = false,
   clientSignatureImageUrl,
-  requiresClientSignature = false
+  requiresClientSignature = false,
+  displayWatermark = false
 }: LegalDocumentProps) {
   const primaryColor = business?.primaryColor || "#0f172a";
   const font = business?.font || "Inter";
@@ -79,13 +81,24 @@ export function LegalDocument({
         </div>
       )}
 
+      {/* Print Watermark - Fixed to center of every page */}
+      {displayWatermark && logoUrl && (
+        <div className="hidden print:flex fixed inset-0 items-center justify-center z-0 pointer-events-none">
+            <img 
+            src={logoUrl} 
+            alt="Watermark" 
+            className="w-[500px] h-auto opacity-[0.04] grayscale transform -rotate-12 object-contain"
+            />
+        </div>
+      )}
+
       <div
         className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-[297mm] relative flex flex-col print:block print:shadow-none print:border-none"
         style={{ fontFamily: fontFamily }}
       >
-        {/* Watermark */}
-        {logoUrl && (
-          <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none overflow-hidden print:overflow-hidden">
+        {/* Screen Watermark - Centered in container */}
+        {displayWatermark && logoUrl && (
+          <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none overflow-hidden print:hidden">
             <img 
               src={logoUrl} 
               alt="Watermark" 
@@ -201,14 +214,16 @@ export function LegalDocument({
                           <p className="text-sm font-semibold text-gray-900 mb-1 ml-2">Lu et approuvé</p>
                           <div className="ml-2 mt-1">
                             {clientSignatureImageUrl ? (
-                              <img 
-                                src={clientSignatureImageUrl} 
-                                alt="Client Signature" 
-                                className="h-[240px] w-auto max-w-full object-contain" 
-                                crossOrigin="anonymous"
-                              />
+                              <div className="m-2">
+                                <img 
+                                  src={clientSignatureImageUrl} 
+                                  alt="Client Signature" 
+                                  className="h-[240px] w-auto max-w-full object-contain" 
+                                  crossOrigin="anonymous"
+                                />
+                              </div>
                             ) : (
-                              <div className="w-64 h-32 border border-gray-100 rounded-lg flex items-center justify-center bg-gray-50/30">
+                              <div className="w-64 h-32 border border-gray-100 rounded-lg flex items-center justify-center bg-gray-50/30 shadow-sm">
                                 <span className="text-xs text-gray-300">Signature du Client</span>
                               </div>
                             )}

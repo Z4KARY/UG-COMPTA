@@ -37,6 +37,7 @@ export default function LegalDocumentSettings() {
   const [titleWeight, setTitleWeight] = useState("font-light");
   const [displayRegistrationInHeader, setDisplayRegistrationInHeader] = useState(false);
   const [requiresClientSignature, setRequiresClientSignature] = useState(false);
+  const [displayWatermark, setDisplayWatermark] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<LegalTemplate | null>(null);
 
@@ -55,6 +56,9 @@ export default function LegalDocumentSettings() {
       }
       if (data.document.requiresClientSignature !== undefined) {
         setRequiresClientSignature(data.document.requiresClientSignature);
+      }
+      if (data.document.displayWatermark !== undefined) {
+        setDisplayWatermark(data.document.displayWatermark);
       }
     }
   }, [data]);
@@ -88,6 +92,7 @@ export default function LegalDocumentSettings() {
         titleWeight,
         displayRegistrationInHeader,
         requiresClientSignature,
+        displayWatermark,
       });
       toast.success("Document sauvegardé avec succès");
     } catch (error) {
@@ -201,6 +206,11 @@ export default function LegalDocumentSettings() {
                   business={data.business} 
                   content={content} 
                   title={title} 
+                  titleSize={titleSize}
+                  titleWeight={titleWeight}
+                  displayRegistrationInHeader={displayRegistrationInHeader}
+                  requiresClientSignature={requiresClientSignature}
+                  displayWatermark={displayWatermark}
                 />
               </DialogContent>
             </Dialog>
@@ -289,6 +299,19 @@ export default function LegalDocumentSettings() {
                 </Label>
               </div>
 
+              <div className="flex items-center space-x-2 border p-3 rounded-md">
+                <input
+                  type="checkbox"
+                  id="displayWatermark"
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  checked={displayWatermark}
+                  onChange={(e) => setDisplayWatermark(e.target.checked)}
+                />
+                <Label htmlFor="displayWatermark" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                  Afficher le filigrane (logo en arrière-plan)
+                </Label>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="content">Contenu</Label>
                 <RichTextEditor
@@ -315,6 +338,7 @@ export default function LegalDocumentSettings() {
                         titleWeight={titleWeight}
                         displayRegistrationInHeader={displayRegistrationInHeader}
                         requiresClientSignature={requiresClientSignature}
+                        displayWatermark={displayWatermark}
                       />
                    </div>
                 </CardContent>
@@ -333,6 +357,7 @@ export default function LegalDocumentSettings() {
               titleWeight={titleWeight}
               displayRegistrationInHeader={displayRegistrationInHeader}
               requiresClientSignature={requiresClientSignature}
+              displayWatermark={displayWatermark}
             />
           </div>,
           document.body
