@@ -83,7 +83,7 @@ export function LegalDocument({
 
       {/* Print Watermark - Fixed to center of every page */}
       {displayWatermark && logoUrl && (
-        <div className="hidden print:flex fixed inset-0 items-center justify-center z-0 pointer-events-none">
+        <div className="print-watermark hidden print:flex fixed inset-0 items-center justify-center z-40 pointer-events-none mix-blend-multiply">
             <img 
             src={logoUrl} 
             alt="Watermark" 
@@ -93,7 +93,7 @@ export function LegalDocument({
       )}
 
       <div
-        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-[297mm] relative flex flex-col print:block print:shadow-none print:border-none"
+        className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-[297mm] relative flex flex-col print:block print:shadow-none print:border-none print:bg-transparent"
         style={{ fontFamily: fontFamily }}
       >
         {/* Screen Watermark - Centered in container */}

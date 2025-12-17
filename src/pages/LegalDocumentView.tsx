@@ -52,7 +52,10 @@ export default function LegalDocumentView() {
               padding: 0 !important;
               box-shadow: none !important;
               border: none !important;
-              background: white !important;
+              background: transparent !important;
+            }
+            .print-watermark {
+              visibility: visible;
             }
             .print-container * {
               visibility: visible;
