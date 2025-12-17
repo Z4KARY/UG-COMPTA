@@ -79,6 +79,17 @@ export function LegalDocument({
         className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-[297mm] relative flex flex-col print:block print:shadow-none print:border-none"
         style={{ fontFamily: fontFamily }}
       >
+        {/* Screen-only Footer - Absolute positioning within the container */}
+        {!displayRegistrationInHeader && (
+          <div className="absolute bottom-0 left-0 w-full print:hidden">
+            <div className="h-[20mm] flex items-end justify-center pb-4">
+              <div className="text-center text-xs text-gray-400 w-full px-8">
+                <RegistrationDetails />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Top Accent Line - Hide in print as we use table spacers */}
         <div className="h-2 w-full print:hidden" style={{ backgroundColor: primaryColor }}></div>
 
@@ -87,7 +98,7 @@ export function LegalDocument({
           <thead className="hidden print:table-header-group">
             <tr><td><div className="h-[35mm]"></div></td></tr>
           </thead>
-          <tfoot className="hidden print:table-footer-group">
+          <tfoot className="table-footer-group">
             <tr>
               <td className="align-bottom">
                 {/* Spacer to reserve space for the fixed footer if needed */}
