@@ -4,6 +4,7 @@ export interface LegalTemplate {
   description: string;
   content: string;
   category: "commercial" | "employment" | "corporate" | "other";
+  displayRegistrationInHeader?: boolean;
 }
 
 export const LEGAL_TEMPLATES: LegalTemplate[] = [
@@ -12,6 +13,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     title: "Papier à en-tête",
     description: "Support officiel pour vos courriers et documents administratifs avec en-tête et pied de page.",
     category: "other",
+    displayRegistrationInHeader: false,
     content: `
       <p>&nbsp;</p>
       <p style="text-align: right">Fait à [VILLE], le [DATE]</p>
@@ -30,6 +32,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     title: "Conditions Générales de Vente (Prestations)",
     description: "Modèle standard de CGV pour les prestataires de services.",
     category: "commercial",
+    displayRegistrationInHeader: true,
     content: `
       <h1>Conditions Générales de Vente</h1>
       <p><strong>Date de dernière mise à jour :</strong> [DATE]</p>
@@ -59,6 +62,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     title: "Accord de Confidentialité (NDA)",
     description: "Accord de non-divulgation pour protéger vos informations sensibles.",
     category: "corporate",
+    displayRegistrationInHeader: true,
     content: `
       <h1>Accord de Confidentialité</h1>
       
@@ -85,6 +89,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     title: "Contrat de Prestation de Services",
     description: "Contrat cadre pour une mission de prestation de services.",
     category: "commercial",
+    displayRegistrationInHeader: true,
     content: `
       <h1>Contrat de Prestation de Services</h1>
       
@@ -109,6 +114,7 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
     title: "Conditions Particulières (Devis)",
     description: "Texte standard à inclure en bas de vos devis.",
     category: "commercial",
+    displayRegistrationInHeader: true,
     content: `
       <h3>Conditions de l'Offre</h3>
       <p>Cette offre est valable pour une durée de 30 jours.</p>

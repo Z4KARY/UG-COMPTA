@@ -78,6 +78,7 @@ export default function LegalDocumentView() {
             title={data.document.title}
             titleSize={data.document.titleSize}
             titleWeight={data.document.titleWeight}
+            displayRegistrationInHeader={data.document.displayRegistrationInHeader}
           />
         </div>
       </div>

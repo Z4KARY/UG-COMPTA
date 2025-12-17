@@ -6,9 +6,17 @@ interface LegalDocumentProps {
   title?: string;
   titleSize?: string;
   titleWeight?: string;
+  displayRegistrationInHeader?: boolean;
 }
 
-export function LegalDocument({ business, content, title, titleSize, titleWeight }: LegalDocumentProps) {
+export function LegalDocument({ 
+  business, 
+  content, 
+  title, 
+  titleSize, 
+  titleWeight,
+  displayRegistrationInHeader = false 
+}: LegalDocumentProps) {
   const primaryColor = business?.primaryColor || "#0f172a";
   const font = business?.font || "Inter";
   const fontFamily = font.includes(" ")
@@ -24,6 +32,25 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
   const sizeClass = titleSize || "text-3xl";
   const weightClass = titleWeight || "font-light";
 
+  const RegistrationDetails = () => (
+    <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+      {isAE ? (
+        <>
+          <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
+          <span>NIF: {business?.nif || "N/A"}</span>
+          <span>NIS: {business?.nis || "N/A"}</span>
+        </>
+      ) : (
+        <>
+          <span>RC: {business?.rc || "N/A"}</span>
+          <span>NIF: {business?.nif || "N/A"}</span>
+          <span>NIS: {business?.nis || "N/A"}</span>
+          <span>AI: {business?.ai || "N/A"}</span>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div className="w-full mx-auto print:w-full print:max-w-none">
       <style type="text/css" media="print">
@@ -38,28 +65,15 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
       </style>
       
       {/* Fixed Footer for Print - Ensures positioning at the absolute bottom of the page */}
-      <div className="hidden print:block fixed bottom-0 left-0 w-full z-50 bg-white">
-        <div className="h-[20mm] flex items-end justify-center pb-4">
-          <div className="text-center text-xs text-gray-400 w-full px-8">
-            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-                {isAE ? (
-                  <>
-                    <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
-                    <span>NIF: {business?.nif || "N/A"}</span>
-                    <span>NIS: {business?.nis || "N/A"}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>RC: {business?.rc || "N/A"}</span>
-                    <span>NIF: {business?.nif || "N/A"}</span>
-                    <span>NIS: {business?.nis || "N/A"}</span>
-                    <span>AI: {business?.ai || "N/A"}</span>
-                  </>
-                )}
+      {!displayRegistrationInHeader && (
+        <div className="hidden print:block fixed bottom-0 left-0 w-full z-50 bg-white">
+          <div className="h-[20mm] flex items-end justify-center pb-2">
+            <div className="text-center text-xs text-gray-400 w-full px-8">
+              <RegistrationDetails />
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div
         className="print-container bg-white shadow-xl rounded-xl overflow-hidden print:overflow-visible border border-gray-100 w-full max-w-[210mm] mx-auto min-h-[297mm] print:min-h-[297mm] relative flex flex-col print:block print:shadow-none print:border-none"
@@ -76,8 +90,8 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
           <tfoot className="hidden print:table-footer-group">
             <tr>
               <td className="align-bottom">
-                {/* Spacer to reserve space for the fixed footer */}
-                <div className="h-[20mm]"></div>
+                {/* Spacer to reserve space for the fixed footer if needed */}
+                {!displayRegistrationInHeader && <div className="h-[20mm]"></div>}
               </td>
             </tr>
           </tfoot>
@@ -110,6 +124,27 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                         <p>{business?.city}, Algeria</p>
                         {business?.phone && <p>Tel: {business.phone}</p>}
                         {business?.email && <p>Email: {business.email}</p>}
+                        
+                        {displayRegistrationInHeader && (
+                          <div className="mt-4 pt-2 border-t border-gray-100 text-xs text-gray-500">
+                             <div className="flex flex-col gap-0.5">
+                                {isAE ? (
+                                  <>
+                                    <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
+                                    <span>NIF: {business?.nif || "N/A"}</span>
+                                    <span>NIS: {business?.nis || "N/A"}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>RC: {business?.rc || "N/A"}</span>
+                                    <span>NIF: {business?.nif || "N/A"}</span>
+                                    <span>NIS: {business?.nis || "N/A"}</span>
+                                    <span>AI: {business?.ai || "N/A"}</span>
+                                  </>
+                                )}
+                             </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -127,7 +162,7 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
 
                   {/* Content Body */}
                   <div 
-                    className="mb-0 text-gray-800 leading-relaxed tiptap-content text-justify"
+                    className="mb-0 text-gray-800 leading-relaxed tiptap-content text-justify flex-grow"
                     dangerouslySetInnerHTML={{ __html: content || "<p>Aucun contenu disponible.</p>" }}
                   />
 
@@ -164,26 +199,6 @@ export function LegalDocument({ business, content, title, titleSize, titleWeight
                           </div>
                         )}
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Footer - Screen Only */}
-                  <div className="mt-auto pt-8 border-t border-gray-100 text-center text-xs text-gray-400 print:hidden">
-                    <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 px-4">
-                        {isAE ? (
-                          <>
-                            <span>Auto-Entrepreneur Card: {business?.autoEntrepreneurCardNumber || "N/A"}</span>
-                            <span>NIF: {business?.nif || "N/A"}</span>
-                            <span>NIS: {business?.nis || "N/A"}</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>RC: {business?.rc || "N/A"}</span>
-                            <span>NIF: {business?.nif || "N/A"}</span>
-                            <span>NIS: {business?.nis || "N/A"}</span>
-                            <span>AI: {business?.ai || "N/A"}</span>
-                          </>
-                        )}
                     </div>
                   </div>
                 </div>

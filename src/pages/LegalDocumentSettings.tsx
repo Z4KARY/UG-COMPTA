@@ -35,6 +35,7 @@ export default function LegalDocumentSettings() {
   const [content, setContent] = useState("");
   const [titleSize, setTitleSize] = useState("text-3xl");
   const [titleWeight, setTitleWeight] = useState("font-light");
+  const [displayRegistrationInHeader, setDisplayRegistrationInHeader] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<LegalTemplate | null>(null);
 
@@ -48,12 +49,21 @@ export default function LegalDocumentSettings() {
       setContent(data.document.content || "");
       if (data.document.titleSize) setTitleSize(data.document.titleSize);
       if (data.document.titleWeight) setTitleWeight(data.document.titleWeight);
+      if (data.document.displayRegistrationInHeader !== undefined) {
+        setDisplayRegistrationInHeader(data.document.displayRegistrationInHeader);
+      }
     }
   }, [data]);
 
   const handleTemplateSelect = (template: LegalTemplate) => {
     setTitle(template.title);
     setContent(template.content);
+    if (template.displayRegistrationInHeader !== undefined) {
+      setDisplayRegistrationInHeader(template.displayRegistrationInHeader);
+    } else {
+      // Default behavior if not specified in template (though we added it to all)
+      setDisplayRegistrationInHeader(true);
+    }
     toast.success("Modèle appliqué avec succès");
   };
 
@@ -68,6 +78,7 @@ export default function LegalDocumentSettings() {
         title,
         titleSize,
         titleWeight,
+        displayRegistrationInHeader,
       });
       toast.success("Document sauvegardé avec succès");
     } catch (error) {
@@ -243,6 +254,19 @@ export default function LegalDocumentSettings() {
                 </div>
               </div>
 
+              <div className="flex items-center space-x-2 border p-3 rounded-md">
+                <input
+                  type="checkbox"
+                  id="displayRegistrationInHeader"
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  checked={displayRegistrationInHeader}
+                  onChange={(e) => setDisplayRegistrationInHeader(e.target.checked)}
+                />
+                <Label htmlFor="displayRegistrationInHeader" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                  Afficher les infos légales dans l'en-tête (au lieu du pied de page)
+                </Label>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="content">Contenu</Label>
                 <RichTextEditor
@@ -267,6 +291,7 @@ export default function LegalDocumentSettings() {
                         title={title}
                         titleSize={titleSize}
                         titleWeight={titleWeight}
+                        displayRegistrationInHeader={displayRegistrationInHeader}
                       />
                    </div>
                 </CardContent>
@@ -283,6 +308,7 @@ export default function LegalDocumentSettings() {
               title={title}
               titleSize={titleSize}
               titleWeight={titleWeight}
+              displayRegistrationInHeader={displayRegistrationInHeader}
             />
           </div>,
           document.body

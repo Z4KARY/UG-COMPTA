@@ -73,6 +73,7 @@ export const save = mutation({
     title: v.optional(v.string()),
     titleSize: v.optional(v.string()),
     titleWeight: v.optional(v.string()),
+    displayRegistrationInHeader: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -94,6 +95,7 @@ export const save = mutation({
         title: args.title,
         titleSize: args.titleSize,
         titleWeight: args.titleWeight,
+        displayRegistrationInHeader: args.displayRegistrationInHeader,
         updatedAt: Date.now(),
       });
     } else {
@@ -103,6 +105,7 @@ export const save = mutation({
         title: args.title,
         titleSize: args.titleSize,
         titleWeight: args.titleWeight,
+        displayRegistrationInHeader: args.displayRegistrationInHeader,
         updatedAt: Date.now(),
       });
     }
