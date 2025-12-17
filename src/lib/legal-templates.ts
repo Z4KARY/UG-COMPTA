@@ -122,5 +122,177 @@ export const LEGAL_TEMPLATES: LegalTemplate[] = [
       <p><strong>Solde :</strong> À la livraison / fin de mission.</p>
       <p><strong>Délai de livraison :</strong> [NOMBRE] semaines après réception de l'acompte et des éléments nécessaires.</p>
     `
+  },
+  {
+    id: "etude-technico-economique",
+    title: "Étude Technico-Économique",
+    description: "Structure complète pour présenter la faisabilité technique et la rentabilité économique d'un projet.",
+    category: "corporate",
+    displayRegistrationInHeader: true,
+    content: `
+      <h1>Étude Technico-Économique</h1>
+      <p><strong>Projet :</strong> [NOM DU PROJET]</p>
+      <p><strong>Date :</strong> [DATE]</p>
+
+      <h2>1. Présentation du Projet</h2>
+      <p>Description détaillée du projet, de ses objectifs et de son contexte.</p>
+
+      <h2>2. Étude de Marché</h2>
+      <h3>2.1 La Demande</h3>
+      <p>Analyse de la clientèle cible et des besoins.</p>
+      <h3>2.2 L'Offre</h3>
+      <p>Analyse de la concurrence et positionnement.</p>
+
+      <h2>3. Étude Technique</h2>
+      <h3>3.1 Moyens Matériels</h3>
+      <p>Locaux, équipements, machines et technologies nécessaires.</p>
+      <h3>3.2 Moyens Humains</h3>
+      <p>Organigramme, effectifs et compétences requises.</p>
+
+      <h2>4. Étude Financière</h2>
+      <h3>4.1 Investissements Initiaux</h3>
+      <p>Détail des coûts de démarrage (frais d'établissement, équipements, BFR).</p>
+      <h3>4.2 Compte de Résultat Prévisionnel</h3>
+      <p>Chiffre d'affaires prévisionnel et charges d'exploitation sur 3 ans.</p>
+      <h3>4.3 Rentabilité</h3>
+      <p>Calcul du seuil de rentabilité et du retour sur investissement (ROI).</p>
+
+      <h2>5. Conclusion</h2>
+      <p>Synthèse sur la viabilité et la faisabilité du projet.</p>
+    `
+  },
+  {
+    id: "business-plan",
+    title: "Business Plan",
+    description: "Dossier de présentation stratégique pour investisseurs ou banques.",
+    category: "corporate",
+    displayRegistrationInHeader: true,
+    content: `
+      <h1>Business Plan</h1>
+      
+      <h2>1. Executive Summary</h2>
+      <p>Résumé opérationnel du projet en une page : opportunité, solution, modèle économique et besoins de financement.</p>
+
+      <h2>2. Présentation de l'Entreprise</h2>
+      <p>Historique, mission, vision et valeurs. Présentation des fondateurs et de l'équipe dirigeante.</p>
+
+      <h2>3. Produits et Services</h2>
+      <p>Description détaillée de l'offre, avantages concurrentiels, propriété intellectuelle.</p>
+
+      <h2>4. Analyse du Marché</h2>
+      <p>Taille du marché, tendances, segmentation, analyse SWOT (Forces, Faiblesses, Opportunités, Menaces).</p>
+
+      <h2>5. Stratégie Marketing et Commerciale</h2>
+      <p>Positionnement prix, canaux de distribution, stratégie de communication et d'acquisition client.</p>
+
+      <h2>6. Plan Opérationnel</h2>
+      <p>Localisation, production, logistique, fournisseurs clés.</p>
+
+      <h2>7. Prévisions Financières</h2>
+      <p>Plan de financement, compte de résultat prévisionnel, plan de trésorerie sur 3 à 5 ans.</p>
+    `
+  },
+  {
+    id: "pitch-deck-structure",
+    title: "Structure Pitch Deck",
+    description: "Trame narrative pour présenter votre projet à des investisseurs ou partenaires.",
+    category: "corporate",
+    displayRegistrationInHeader: true,
+    content: `
+      <h1>Pitch Deck (Structure Narrative)</h1>
+      
+      <h2>1. Le Problème</h2>
+      <p>Quel est le problème douloureux que vous résolvez ? Qui en souffre ?</p>
+
+      <h2>2. La Solution</h2>
+      <p>Votre proposition de valeur unique. Comment votre produit/service résout-il le problème ?</p>
+
+      <h2>3. Le Marché</h2>
+      <p>Quelle est la taille de l'opportunité (TAM, SAM, SOM) ? Pourquoi maintenant ?</p>
+
+      <h2>4. Le Produit</h2>
+      <p>Démonstration ou description de la solution. Fonctionnalités clés.</p>
+
+      <h2>5. Modèle Économique (Business Model)</h2>
+      <p>Comment gagnez-vous de l'argent ? (Vente directe, abonnement, commission, etc.)</p>
+
+      <h2>6. Traction</h2>
+      <p>Preuves de concept, métriques clés, premiers clients, partenariats.</p>
+
+      <h2>7. L'Équipe</h2>
+      <p>Pourquoi êtes-vous la meilleure équipe pour exécuter ce plan ?</p>
+
+      <h2>8. La Demande (The Ask)</h2>
+      <p>De quoi avez-vous besoin (financement, partenaires) et pour quoi faire ?</p>
+    `
+  },
+  {
+    id: "contrat-travail-cdi",
+    title: "Contrat de Travail (CDI)",
+    description: "Modèle de contrat à durée indéterminée standard.",
+    category: "employment",
+    displayRegistrationInHeader: true,
+    content: `
+      <h1>Contrat de Travail à Durée Indéterminée</h1>
+      
+      <p>Entre la Société [NOM DE LA SOCIÉTÉ], sise à [ADRESSE], représentée par [NOM DU REPRÉSENTANT], ci-après l'Employeur,</p>
+      <p>Et M./Mme [NOM DU SALARIÉ], demeurant à [ADRESSE], ci-après le Salarié.</p>
+
+      <h2>1. Engagement</h2>
+      <p>Le Salarié est engagé à compter du [DATE DE DÉBUT] en qualité de [INTITULÉ DU POSTE], sous contrat à durée indéterminée.</p>
+
+      <h2>2. Période d'Essai</h2>
+      <p>Le présent contrat ne deviendra définitif qu'à l'issue d'une période d'essai de [DURÉE] mois, renouvelable une fois.</p>
+
+      <h2>3. Fonctions et Attributions</h2>
+      <p>Le Salarié sera chargé des missions suivantes : [LISTE DES TÂCHES].</p>
+
+      <h2>4. Lieu de Travail</h2>
+      <p>Le lieu de travail est fixé à [ADRESSE DU LIEU DE TRAVAIL].</p>
+
+      <h2>5. Durée du Travail</h2>
+      <p>La durée de travail est fixée à 40 heures hebdomadaires.</p>
+
+      <h2>6. Rémunération</h2>
+      <p>Le Salarié percevra une rémunération mensuelle brute de [MONTANT] DZD.</p>
+
+      <h2>7. Congés Payés</h2>
+      <p>Le Salarié bénéficiera des congés payés conformément à la législation en vigueur.</p>
+    `
+  },
+  {
+    id: "lettre-mission",
+    title: "Lettre de Mission",
+    description: "Pour formaliser une mission ponctuelle ou de conseil.",
+    category: "commercial",
+    displayRegistrationInHeader: true,
+    content: `
+      <h1>Lettre de Mission</h1>
+      
+      <p><strong>Client :</strong> [NOM DU CLIENT]</p>
+      <p><strong>Consultant :</strong> [VOTRE NOM]</p>
+      <p><strong>Date :</strong> [DATE]</p>
+
+      <h2>1. Contexte</h2>
+      <p>Le Client souhaite bénéficier de l'expertise du Consultant pour [OBJECTIF DE LA MISSION].</p>
+
+      <h2>2. Objectifs de la Mission</h2>
+      <ul>
+        <li>Objectif 1 : [DÉTAIL]</li>
+        <li>Objectif 2 : [DÉTAIL]</li>
+      </ul>
+
+      <h2>3. Périmètre d'Intervention</h2>
+      <p>Le Consultant interviendra sur les domaines suivants : [DOMAINES].</p>
+
+      <h2>4. Livrables</h2>
+      <p>À l'issue de la mission, le Consultant remettra : [LISTE DES LIVRABLES].</p>
+
+      <h2>5. Planning Prévisionnel</h2>
+      <p>La mission débutera le [DATE] pour une durée estimée de [DURÉE].</p>
+
+      <h2>6. Honoraires</h2>
+      <p>Les honoraires sont fixés à [MONTANT] DZD HT, payables selon l'échéancier suivant : [ÉCHÉANCIER].</p>
+    `
   }
 ];
