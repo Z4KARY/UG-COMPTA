@@ -8,6 +8,24 @@ export interface LegalTemplate {
 
 export const LEGAL_TEMPLATES: LegalTemplate[] = [
   {
+    id: "letterhead",
+    title: "Papier à en-tête",
+    description: "Support officiel pour vos courriers et documents administratifs avec en-tête et pied de page.",
+    category: "other",
+    content: `
+      <p>&nbsp;</p>
+      <p style="text-align: right">Fait à [VILLE], le [DATE]</p>
+      <p>&nbsp;</p>
+      <p><strong>Objet :</strong> [OBJET]</p>
+      <p>&nbsp;</p>
+      <p>Madame, Monsieur,</p>
+      <p>&nbsp;</p>
+      <p>[VOTRE CONTENU ICI]</p>
+      <p>&nbsp;</p>
+      <p>Cordialement,</p>
+    `
+  },
+  {
     id: "cgv-service",
     title: "Conditions Générales de Vente (Prestations)",
     description: "Modèle standard de CGV pour les prestataires de services.",
