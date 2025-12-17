@@ -85,6 +85,7 @@ export default function LegalDocumentView() {
             clientSignatureImageUrl={data.document.clientSignatureImageUrl}
             requiresClientSignature={data.document.requiresClientSignature}
             displayWatermark={data.document.displayWatermark}
+            watermarkOpacity={data.document.watermarkOpacity}
           />
         </div>
       </div>

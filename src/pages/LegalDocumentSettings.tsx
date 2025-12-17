@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createPortal } from "react-dom";
+import { Slider } from "@/components/ui/slider";
 
 export default function LegalDocumentSettings() {
   const data = useQuery(api.legalDocuments.getMyLegalDocument);
@@ -38,6 +39,7 @@ export default function LegalDocumentSettings() {
   const [displayRegistrationInHeader, setDisplayRegistrationInHeader] = useState(false);
   const [requiresClientSignature, setRequiresClientSignature] = useState(false);
   const [displayWatermark, setDisplayWatermark] = useState(false);
+  const [watermarkOpacity, setWatermarkOpacity] = useState(0.04);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<LegalTemplate | null>(null);
 
@@ -59,6 +61,9 @@ export default function LegalDocumentSettings() {
       }
       if (data.document.displayWatermark !== undefined) {
         setDisplayWatermark(data.document.displayWatermark);
+      }
+      if (data.document.watermarkOpacity !== undefined) {
+        setWatermarkOpacity(data.document.watermarkOpacity);
       }
     }
   }, [data]);
@@ -93,6 +98,7 @@ export default function LegalDocumentSettings() {
         displayRegistrationInHeader,
         requiresClientSignature,
         displayWatermark,
+        watermarkOpacity,
       });
       toast.success("Document sauvegardé avec succès");
     } catch (error) {
@@ -211,6 +217,7 @@ export default function LegalDocumentSettings() {
                   displayRegistrationInHeader={displayRegistrationInHeader}
                   requiresClientSignature={requiresClientSignature}
                   displayWatermark={displayWatermark}
+                  watermarkOpacity={watermarkOpacity}
                 />
               </DialogContent>
             </Dialog>
@@ -312,6 +319,22 @@ export default function LegalDocumentSettings() {
                 </Label>
               </div>
 
+              {displayWatermark && (
+                <div className="space-y-2 border p-3 rounded-md">
+                  <div className="flex justify-between">
+                    <Label>Opacité du filigrane</Label>
+                    <span className="text-sm text-muted-foreground">{Math.round(watermarkOpacity * 100)}%</span>
+                  </div>
+                  <Slider
+                    value={[watermarkOpacity]}
+                    min={0.01}
+                    max={0.5}
+                    step={0.01}
+                    onValueChange={(value) => setWatermarkOpacity(value[0])}
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="content">Contenu</Label>
                 <RichTextEditor
@@ -339,6 +362,7 @@ export default function LegalDocumentSettings() {
                         displayRegistrationInHeader={displayRegistrationInHeader}
                         requiresClientSignature={requiresClientSignature}
                         displayWatermark={displayWatermark}
+                        watermarkOpacity={watermarkOpacity}
                       />
                    </div>
                 </CardContent>
@@ -358,6 +382,7 @@ export default function LegalDocumentSettings() {
               displayRegistrationInHeader={displayRegistrationInHeader}
               requiresClientSignature={requiresClientSignature}
               displayWatermark={displayWatermark}
+              watermarkOpacity={watermarkOpacity}
             />
           </div>,
           document.body

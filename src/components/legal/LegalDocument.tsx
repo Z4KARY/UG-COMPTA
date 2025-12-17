@@ -10,6 +10,7 @@ interface LegalDocumentProps {
   clientSignatureImageUrl?: string;
   requiresClientSignature?: boolean;
   displayWatermark?: boolean;
+  watermarkOpacity?: number;
 }
 
 export function LegalDocument({ 
@@ -21,7 +22,8 @@ export function LegalDocument({
   displayRegistrationInHeader = false,
   clientSignatureImageUrl,
   requiresClientSignature = false,
-  displayWatermark = false
+  displayWatermark = false,
+  watermarkOpacity = 0.04
 }: LegalDocumentProps) {
   const primaryColor = business?.primaryColor || "#0f172a";
   const font = business?.font || "Inter";
@@ -87,7 +89,8 @@ export function LegalDocument({
             <img 
             src={logoUrl} 
             alt="Watermark" 
-            className="w-[500px] h-auto opacity-[0.04] grayscale transform -rotate-12 object-contain"
+            className="w-[500px] h-auto grayscale transform -rotate-12 object-contain"
+            style={{ opacity: watermarkOpacity }}
             />
         </div>
       )}
@@ -102,7 +105,8 @@ export function LegalDocument({
             <img 
               src={logoUrl} 
               alt="Watermark" 
-              className="w-[500px] h-auto opacity-[0.04] grayscale transform -rotate-12 object-contain"
+              className="w-[500px] h-auto grayscale transform -rotate-12 object-contain"
+              style={{ opacity: watermarkOpacity }}
             />
           </div>
         )}

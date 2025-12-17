@@ -77,6 +77,7 @@ export const save = mutation({
     clientSignatureImageUrl: v.optional(v.string()),
     requiresClientSignature: v.optional(v.boolean()),
     displayWatermark: v.optional(v.boolean()),
+    watermarkOpacity: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -102,6 +103,7 @@ export const save = mutation({
         clientSignatureImageUrl: args.clientSignatureImageUrl,
         requiresClientSignature: args.requiresClientSignature,
         displayWatermark: args.displayWatermark,
+        watermarkOpacity: args.watermarkOpacity,
         updatedAt: Date.now(),
       });
     } else {
@@ -115,6 +117,7 @@ export const save = mutation({
         clientSignatureImageUrl: args.clientSignatureImageUrl,
         requiresClientSignature: args.requiresClientSignature,
         displayWatermark: args.displayWatermark,
+        watermarkOpacity: args.watermarkOpacity,
         updatedAt: Date.now(),
       });
     }
