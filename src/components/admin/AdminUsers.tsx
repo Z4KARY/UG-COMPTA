@@ -60,6 +60,8 @@ export function AdminUsers() {
   const [newRole, setNewRole] = useState<"NORMAL" | "ACCOUNTANT" | "ADMIN">("NORMAL");
   const [createBusiness, setCreateBusiness] = useState(false);
   const [businessName, setBusinessName] = useState("");
+  const [plan, setPlan] = useState<"free" | "startup" | "pro" | "premium" | "enterprise">("enterprise");
+  const [durationMonths, setDurationMonths] = useState(12);
 
   const handleToggleUser = async (id: Id<"users">, currentStatus: boolean | undefined) => {
     try {
@@ -115,6 +117,8 @@ export function AdminUsers() {
         role: newRole,
         createBusiness,
         businessName: createBusiness ? businessName : undefined,
+        plan: createBusiness ? plan : undefined,
+        durationMonths: createBusiness ? durationMonths : undefined,
       });
       toast.success("Account created successfully");
       setIsCreateOpen(false);
@@ -124,6 +128,8 @@ export function AdminUsers() {
       setNewRole("NORMAL");
       setCreateBusiness(false);
       setBusinessName("");
+      setPlan("enterprise");
+      setDurationMonths(12);
     } catch (e: any) {
       toast.error(e.message || "Error creating account");
     }
@@ -184,9 +190,45 @@ export function AdminUsers() {
                   <Label htmlFor="createBusiness">Create Business for User</Label>
                 </div>
                 {createBusiness && (
-                  <div className="grid gap-2 pl-6 border-l-2 border-muted">
-                    <Label htmlFor="businessName">Business Name</Label>
-                    <Input id="businessName" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Company LLC" />
+                  <div className="grid gap-4 pl-6 border-l-2 border-muted">
+                    <div className="grid gap-2">
+                      <Label htmlFor="businessName">Business Name</Label>
+                      <Input id="businessName" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Company LLC" />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="plan">Subscription Plan</Label>
+                        <Select value={plan} onValueChange={(v: any) => setPlan(v)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="free">Free</SelectItem>
+                            <SelectItem value="startup">Startup</SelectItem>
+                            <SelectItem value="pro">Pro</SelectItem>
+                            <SelectItem value="premium">Premium</SelectItem>
+                            <SelectItem value="enterprise">Enterprise</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="duration">Duration (Months)</Label>
+                        <Select value={durationMonths.toString()} onValueChange={(v) => setDurationMonths(parseInt(v))}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1 Month</SelectItem>
+                            <SelectItem value="3">3 Months</SelectItem>
+                            <SelectItem value="6">6 Months</SelectItem>
+                            <SelectItem value="12">1 Year</SelectItem>
+                            <SelectItem value="24">2 Years</SelectItem>
+                            <SelectItem value="36">3 Years</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
