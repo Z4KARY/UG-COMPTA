@@ -39,7 +39,10 @@ async function generatePurchaseNumber(
 }
 
 export const list = query({
-  args: { businessId: v.id("businesses") },
+  args: { 
+    businessId: v.id("businesses"),
+    type: v.optional(v.string())
+  },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
@@ -55,11 +58,21 @@ export const list = query({
         if (!member) return [];
     }
 
-    const invoices = await ctx.db
-      .query("purchaseInvoices")
-      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
-      .order("desc")
-      .collect();
+    let invoices;
+    
+    if (args.type && args.type !== "all") {
+        invoices = await ctx.db
+          .query("purchaseInvoices")
+          .withIndex("by_business_type", (q) => q.eq("businessId", args.businessId).eq("type", args.type))
+          .order("desc")
+          .collect();
+    } else {
+        invoices = await ctx.db
+          .query("purchaseInvoices")
+          .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+          .order("desc")
+          .collect();
+    }
 
     // Enrich with supplier name
     const enriched = await Promise.all(invoices.map(async (inv) => {

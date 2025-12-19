@@ -34,7 +34,7 @@ export function DashboardTreasury({ businessId }: { businessId: Id<"businesses">
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(account.balance)}</div>
-              <p className="text-xs text-muted-foreground truncate">{account.accountNumber}</p>
+              <p className="text-xs text-muted-foreground truncate">{account.iban || account.name}</p>
             </CardContent>
           </Card>
         ))}

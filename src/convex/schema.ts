@@ -411,45 +411,23 @@ const schema = defineSchema(
       businessId: v.id("businesses"),
       supplierId: v.id("suppliers"),
       invoiceNumber: v.string(),
-      type: v.optional(v.union(
-        v.literal("invoice"),
-        v.literal("credit_note"),
-        v.literal("delivery_note"),
-        v.literal("purchase_order"),
-        v.literal("receipt")
-      )), // Added document type
+      type: v.optional(v.string()), // invoice, receipt, credit_note, delivery_note, purchase_order
       invoiceDate: v.number(),
       paymentDate: v.optional(v.number()),
-      paymentMethod: v.optional(v.union(
-        v.literal("CASH"),
-        v.literal("BANK_TRANSFER"),
-        v.literal("CHEQUE"),
-        v.literal("CARD"),
-        v.literal("OTHER")
-      )),
-      status: v.optional(v.union(v.literal("unpaid"), v.literal("paid"), v.literal("partial"))), // Added status
-      amountPaid: v.optional(v.number()),
-      category: v.optional(v.string()), // Added category
+      paymentMethod: v.optional(v.string()),
+      status: v.union(v.literal("paid"), v.literal("unpaid"), v.literal("partial")),
       description: v.optional(v.string()),
+      category: v.optional(v.string()), // Added to fix type error
       subtotalHt: v.number(),
       vatTotal: v.number(),
       totalTtc: v.number(),
-      vatDeductible: v.number(), // Actual amount claimed
-      pdfUrl: v.optional(v.string()),
+      vatDeductible: v.number(),
+      amountPaid: v.optional(v.number()),
+      pdfUrl: v.optional(v.string()), // Added to fix type error
     })
       .index("by_business", ["businessId"])
       .index("by_supplier", ["supplierId"])
-      .index("by_business_and_date", ["businessId", "invoiceDate"]),
-
-    bankAccounts: defineTable({
-      businessId: v.id("businesses"),
-      bankName: v.string(),
-      accountNumber: v.string(),
-      iban: v.optional(v.string()),
-      currency: v.string(),
-      balance: v.number(),
-      lastUpdated: v.number(),
-    }).index("by_business", ["businessId"]),
+      .index("by_business_type", ["businessId", "type"]),
 
     purchaseInvoiceItems: defineTable({
       purchaseInvoiceId: v.id("purchaseInvoices"),
@@ -549,6 +527,17 @@ const schema = defineSchema(
       status: v.union(v.literal("new"), v.literal("contacted"), v.literal("closed")),
       submittedAt: v.number(),
     }).index("by_status", ["status"]),
+
+    bankAccounts: defineTable({
+      businessId: v.id("businesses"),
+      name: v.string(),
+      bankName: v.optional(v.string()),
+      iban: v.optional(v.string()),
+      currency: v.string(),
+      balance: v.number(),
+      initialBalance: v.optional(v.number()),
+      isDefault: v.optional(v.boolean()),
+    }).index("by_business", ["businessId"]),
 
     subscriptions: defineTable({
       businessId: v.id("businesses"),

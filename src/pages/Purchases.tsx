@@ -24,12 +24,21 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SetupRequired } from "@/components/SetupRequired";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from "react";
 
 export default function Purchases() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [filterType, setFilterType] = useState<string>("all");
   const business = useQuery(api.businesses.getMyBusiness, {});
-  const purchases = useQuery(api.purchaseInvoices.list, business ? { businessId: business._id } : "skip");
+  const purchases = useQuery(api.purchaseInvoices.list, business ? { businessId: business._id, type: filterType === "all" ? undefined : filterType } : "skip");
   const deletePurchase = useMutation(api.purchaseInvoices.remove);
 
   const handleDelete = async (id: any) => {
@@ -95,9 +104,26 @@ export default function Purchases() {
         </div>
 
         <Card>
-            <CardHeader>
-                <CardTitle>{t("purchases.listTitle")}</CardTitle>
-                <CardDescription>{t("purchases.listDescription")}</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="space-y-1">
+                    <CardTitle>{t("purchases.listTitle")}</CardTitle>
+                    <CardDescription>{t("purchases.listDescription")}</CardDescription>
+                </div>
+                <div className="w-[200px]">
+                    <Select value={filterType} onValueChange={setFilterType}>
+                        <SelectTrigger>
+                            <SelectValue placeholder={t("invoices.filterByType")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">{t("invoices.filterAll")}</SelectItem>
+                            <SelectItem value="invoice">{t("purchases.type.invoice")}</SelectItem>
+                            <SelectItem value="receipt">{t("purchases.type.receipt")}</SelectItem>
+                            <SelectItem value="credit_note">{t("purchases.type.credit_note")}</SelectItem>
+                            <SelectItem value="delivery_note">{t("purchases.type.delivery_note")}</SelectItem>
+                            <SelectItem value="purchase_order">{t("purchases.type.purchase_order")}</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </CardHeader>
             <CardContent>
                 <Table>
