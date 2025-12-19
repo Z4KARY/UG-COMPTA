@@ -14,11 +14,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Lock, Unlock, Trash2 } from "lucide-react";
+import { Lock, Unlock, Trash2, Plus, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -29,8 +47,17 @@ export function AdminBusinesses() {
   const businesses = useQuery(api.admin.listBusinesses);
   const toggleBusiness = useMutation(api.admin.toggleBusinessSuspension);
   const deleteBusinesses = useMutation(api.admin.deleteBusinesses);
+  const createBusiness = useMutation(api.admin.createBusiness);
 
   const [selectedBusinesses, setSelectedBusinesses] = useState<Id<"businesses">[]>([]);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  // Create Form State
+  const [businessName, setBusinessName] = useState("");
+  const [ownerEmail, setOwnerEmail] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [plan, setPlan] = useState<"free" | "startup" | "pro" | "premium" | "enterprise">("enterprise");
+  const [durationMonths, setDurationMonths] = useState(12);
 
   const handleToggleBusiness = async (id: Id<"businesses">, currentStatus: boolean | undefined) => {
     try {
@@ -69,6 +96,33 @@ export function AdminBusinesses() {
     }
   };
 
+  const handleCreateBusiness = async () => {
+    if (!businessName || !ownerEmail) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      await createBusiness({
+        name: businessName,
+        ownerEmail,
+        ownerName: ownerName || undefined,
+        plan,
+        durationMonths,
+      });
+      toast.success("Business created successfully");
+      setIsCreateOpen(false);
+      // Reset form
+      setBusinessName("");
+      setOwnerEmail("");
+      setOwnerName("");
+      setPlan("enterprise");
+      setDurationMonths(12);
+    } catch (e: any) {
+      toast.error(e.message || "Error creating business");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -76,12 +130,100 @@ export function AdminBusinesses() {
           <CardTitle>{t("admin.businesses.title") || "Businesses"}</CardTitle>
           <CardDescription>{t("admin.businesses.description") || "Manage registered businesses"}</CardDescription>
         </div>
-        {selectedBusinesses.length > 0 && (
-          <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete ({selectedBusinesses.length})
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {selectedBusinesses.length > 0 && (
+            <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete ({selectedBusinesses.length})
+            </Button>
+          )}
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Business
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Business</DialogTitle>
+                <DialogDescription>
+                  Create a new business and assign it to a user (existing or new).
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="businessName">Business Name *</Label>
+                  <Input 
+                    id="businessName" 
+                    value={businessName} 
+                    onChange={(e) => setBusinessName(e.target.value)} 
+                    placeholder="Company LLC" 
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="ownerEmail">Owner Email *</Label>
+                  <Input 
+                    id="ownerEmail" 
+                    type="email" 
+                    value={ownerEmail} 
+                    onChange={(e) => setOwnerEmail(e.target.value)} 
+                    placeholder="owner@example.com" 
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    If user exists, business will be assigned to them. If not, a new user will be created.
+                  </p>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="ownerName">Owner Name (Optional)</Label>
+                  <Input 
+                    id="ownerName" 
+                    value={ownerName} 
+                    onChange={(e) => setOwnerName(e.target.value)} 
+                    placeholder="John Doe" 
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="plan">Subscription Plan</Label>
+                    <Select value={plan} onValueChange={(v: any) => setPlan(v)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="free">Free</SelectItem>
+                        <SelectItem value="startup">Startup</SelectItem>
+                        <SelectItem value="pro">Pro</SelectItem>
+                        <SelectItem value="premium">Premium</SelectItem>
+                        <SelectItem value="enterprise">Enterprise</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="duration">Duration (Months)</Label>
+                    <Select value={durationMonths.toString()} onValueChange={(v) => setDurationMonths(parseInt(v))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 Month</SelectItem>
+                        <SelectItem value="3">3 Months</SelectItem>
+                        <SelectItem value="6">6 Months</SelectItem>
+                        <SelectItem value="12">1 Year</SelectItem>
+                        <SelectItem value="24">2 Years</SelectItem>
+                        <SelectItem value="36">3 Years</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                <Button onClick={handleCreateBusiness}>Create Business</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -109,7 +251,12 @@ export function AdminBusinesses() {
                     onCheckedChange={(c) => handleSelectBusiness(b._id, !!c)}
                   />
                 </TableCell>
-                <TableCell className="font-medium">{b.name}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    {b.name}
+                  </div>
+                </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
                     <span>{b.ownerName}</span>

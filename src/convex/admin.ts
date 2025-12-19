@@ -309,6 +309,60 @@ export const deleteBusinesses = mutation({
   },
 });
 
+export const createBusiness = mutation({
+  args: {
+    name: v.string(),
+    ownerEmail: v.string(),
+    ownerName: v.optional(v.string()),
+    plan: v.union(v.literal("free"), v.literal("startup"), v.literal("pro"), v.literal("premium"), v.literal("enterprise")),
+    durationMonths: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+
+    // 1. Find or Create User
+    let userId;
+    const existingUser = await ctx.db.query("users").withIndex("email", q => q.eq("email", args.ownerEmail)).first();
+    if (existingUser) {
+        userId = existingUser._id;
+    } else {
+        // Create user
+        userId = await ctx.db.insert("users", {
+            email: args.ownerEmail,
+            name: args.ownerName || args.ownerEmail.split('@')[0],
+            role: "user",
+            roleGlobal: "NORMAL",
+        });
+    }
+
+    // 2. Create Business
+    const subscriptionEndsAt = Date.now() + (args.durationMonths * 30 * 24 * 60 * 60 * 1000);
+    const businessId = await ctx.db.insert("businesses", {
+        userId,
+        name: args.name,
+        address: "Alger, Algérie", // Default
+        currency: "DZD",
+        tvaDefault: 19,
+        subscriptionStatus: "active",
+        plan: args.plan,
+        subscriptionEndsAt,
+    });
+
+    // 3. Create Subscription Record
+    await ctx.db.insert("subscriptions", {
+        businessId,
+        planId: args.plan,
+        status: "active",
+        amount: 0, // Free/Manual
+        currency: "DZD",
+        interval: args.durationMonths >= 12 ? "year" : "month",
+        startDate: Date.now(),
+        endDate: subscriptionEndsAt,
+        paymentMethod: "manual_admin",
+    });
+  }
+});
+
 export const createAccount = mutation({
   args: {
     name: v.string(),
