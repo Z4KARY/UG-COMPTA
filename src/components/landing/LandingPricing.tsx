@@ -81,7 +81,7 @@ export function LandingPricing({ fromDashboard = false }: LandingPricingProps) {
                 <CardFooter>
                   {plan.id === "enterprise" ? (
                     <ContactSalesDialog planName={plan.name}>
-                      <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
+                      <Button className="w-full" variant={plan.popular ? "default" : "secondary"}>
                         {plan.cta}
                       </Button>
                     </ContactSalesDialog>

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PRICING_PLANS, PlanId } from "@/lib/pricing";
 import { useSearchParams, useNavigate } from "react-router";
+import { ContactSalesDialog } from "@/components/ContactSalesDialog";
 
 interface SubscriptionSettingsProps {
   businessId: Id<"businesses">;
@@ -144,20 +145,32 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
               </CardContent>
               
               <CardFooter>
-                <Button 
-                  className="w-full" 
-                  variant={isCurrent ? "outline" : isPopular ? "default" : "secondary"}
-                  disabled={isCurrent || isLoading !== null}
-                  onClick={() => handleUpgrade(plan.id as PlanId)}
-                >
-                  {isLoading === plan.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : isCurrent ? (
-                    t("settings.subscription.currentPlan")
-                  ) : (
-                    t("settings.subscription.upgrade")
-                  )}
-                </Button>
+                {plan.id === "enterprise" ? (
+                  <ContactSalesDialog planName={plan.name}>
+                    <Button 
+                      className="w-full" 
+                      variant={isCurrent ? "outline" : "secondary"}
+                      disabled={isCurrent}
+                    >
+                      {isCurrent ? t("settings.subscription.currentPlan") : plan.cta}
+                    </Button>
+                  </ContactSalesDialog>
+                ) : (
+                  <Button 
+                    className="w-full" 
+                    variant={isCurrent ? "outline" : isPopular ? "default" : "secondary"}
+                    disabled={isCurrent || isLoading !== null}
+                    onClick={() => handleUpgrade(plan.id as PlanId)}
+                  >
+                    {isLoading === plan.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isCurrent ? (
+                      t("settings.subscription.currentPlan")
+                    ) : (
+                      t("settings.subscription.upgrade")
+                    )}
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           );
