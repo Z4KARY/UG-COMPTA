@@ -17,13 +17,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Ban } from "lucide-react";
+import { Ban, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 
 export function AdminSubscriptions() {
   const subscriptions = useQuery(api.admin.listAllSubscriptions);
   const cancelSubscription = useMutation(api.admin.cancelSubscription);
+  const deleteSubscription = useMutation(api.admin.deleteSubscription);
 
   const handleCancel = async (id: Id<"subscriptions">) => {
     if (!confirm("Are you sure you want to cancel this subscription?")) return;
@@ -32,6 +33,16 @@ export function AdminSubscriptions() {
       toast.success("Subscription canceled");
     } catch (e) {
       toast.error("Failed to cancel subscription");
+    }
+  };
+
+  const handleDelete = async (id: Id<"subscriptions">) => {
+    if (!confirm("Are you sure you want to PERMANENTLY DELETE this subscription? This cannot be undone.")) return;
+    try {
+      await deleteSubscription({ id });
+      toast.success("Subscription deleted");
+    } catch (e) {
+      toast.error("Failed to delete subscription");
     }
   };
 
@@ -68,16 +79,26 @@ export function AdminSubscriptions() {
                 </TableCell>
                 <TableCell>{new Date(sub.startDate).toLocaleDateString()}</TableCell>
                 <TableCell className="text-right">
-                  {sub.status === "active" && (
+                  <div className="flex justify-end gap-2">
+                    {sub.status === "active" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCancel(sub._id)}
+                      >
+                        <Ban className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                    )}
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleCancel(sub._id)}
+                      onClick={() => handleDelete(sub._id)}
                     >
-                      <Ban className="h-4 w-4 mr-2" />
-                      Cancel
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
                     </Button>
-                  )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

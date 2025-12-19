@@ -98,6 +98,14 @@ export const cancelSubscription = mutation({
     }
 });
 
+export const deleteSubscription = mutation({
+  args: { id: v.id("subscriptions") },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    await ctx.db.delete(args.id);
+  },
+});
+
 export const listBusinesses = query({
   args: {},
   handler: async (ctx) => {
