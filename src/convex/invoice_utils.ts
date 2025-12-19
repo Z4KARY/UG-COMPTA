@@ -4,7 +4,7 @@ import { Id } from "./_generated/dataModel";
 export async function generateInvoiceNumber(
   ctx: MutationCtx, 
   businessId: Id<"businesses">, 
-  type: "invoice" | "quote" | "credit_note", 
+  type: "invoice" | "quote" | "credit_note" | "pro_forma" | "delivery_note" | "sale_order", 
   dateTimestamp: number
 ) {
   const date = new Date(dateTimestamp);
@@ -18,6 +18,9 @@ export async function generateInvoiceNumber(
   if (type === "invoice") prefix = business?.invoicePrefix || "INV-";
   if (type === "quote") prefix = business?.quotePrefix || "DEV-";
   if (type === "credit_note") prefix = business?.creditNotePrefix || "AV-";
+  if (type === "pro_forma") prefix = business?.proFormaPrefix || "PF-";
+  if (type === "delivery_note") prefix = business?.deliveryNotePrefix || "BL-";
+  if (type === "sale_order") prefix = business?.saleOrderPrefix || "BC-";
 
   // Find the actual last invoice to ensure counter sync
   // This makes the system self-healing if counters get out of sync
@@ -77,7 +80,7 @@ export async function generateInvoiceNumber(
 export async function decrementInvoiceCounterIfLast(
   ctx: MutationCtx, 
   businessId: Id<"businesses">, 
-  type: "invoice" | "quote" | "credit_note", 
+  type: "invoice" | "quote" | "credit_note" | "pro_forma" | "delivery_note" | "sale_order", 
   invoiceNumber: string,
   dateTimestamp: number
 ) {
@@ -90,6 +93,9 @@ export async function decrementInvoiceCounterIfLast(
   if (type === "invoice") prefix = business?.invoicePrefix || "INV-";
   if (type === "quote") prefix = business?.quotePrefix || "DEV-";
   if (type === "credit_note") prefix = business?.creditNotePrefix || "AV-";
+  if (type === "pro_forma") prefix = business?.proFormaPrefix || "PF-";
+  if (type === "delivery_note") prefix = business?.deliveryNotePrefix || "BL-";
+  if (type === "sale_order") prefix = business?.saleOrderPrefix || "BC-";
 
   // Get current counter
   const counter = await ctx.db

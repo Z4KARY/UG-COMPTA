@@ -66,6 +66,9 @@ const schema = defineSchema(
       invoicePrefix: v.optional(v.string()),
       quotePrefix: v.optional(v.string()),
       creditNotePrefix: v.optional(v.string()),
+      proFormaPrefix: v.optional(v.string()),
+      deliveryNotePrefix: v.optional(v.string()),
+      saleOrderPrefix: v.optional(v.string()),
 
       currency: v.string(),
       tvaDefault: v.number(),
@@ -217,7 +220,10 @@ const schema = defineSchema(
         v.literal("invoice"),
         v.literal("quote"),
         v.literal("credit_note"),
-        v.literal("purchase")
+        v.literal("purchase"),
+        v.literal("pro_forma"),
+        v.literal("delivery_note"),
+        v.literal("sale_order")
       ),
       year: v.number(),
       count: v.number(),
@@ -231,7 +237,10 @@ const schema = defineSchema(
       type: v.union(
         v.literal("invoice"),
         v.literal("quote"),
-        v.literal("credit_note")
+        v.literal("credit_note"),
+        v.literal("pro_forma"),
+        v.literal("delivery_note"),
+        v.literal("sale_order")
       ),
       fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))), // Added for G50
       language: v.optional(v.string()), // Added language preference

@@ -124,7 +124,10 @@ export const create = mutation({
     type: v.union(
       v.literal("invoice"),
       v.literal("quote"),
-      v.literal("credit_note")
+      v.literal("credit_note"),
+      v.literal("pro_forma"),
+      v.literal("delivery_note"),
+      v.literal("sale_order")
     ),
     fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))), // Added
     language: v.optional(v.string()), // Added language
@@ -191,7 +194,10 @@ export const update = mutation({
     type: v.optional(v.union(
       v.literal("invoice"),
       v.literal("quote"),
-      v.literal("credit_note")
+      v.literal("credit_note"),
+      v.literal("pro_forma"),
+      v.literal("delivery_note"),
+      v.literal("sale_order")
     )),
     fiscalType: v.optional(v.union(v.literal("LOCAL"), v.literal("EXPORT"), v.literal("EXEMPT"))), // Added
     language: v.optional(v.string()), // Added language
