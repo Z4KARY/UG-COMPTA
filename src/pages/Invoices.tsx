@@ -26,6 +26,13 @@ import { useState } from "react";
 import { ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SetupRequired } from "@/components/SetupRequired";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Invoices() {
   const { t } = useLanguage();
@@ -40,6 +47,7 @@ export default function Invoices() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
+  const [filterType, setFilterType] = useState<string>("all");
 
   const handleDelete = async (id: Id<"invoices">) => {
     if (confirm(t("invoices.deleteConfirm"))) {
@@ -60,13 +68,42 @@ export default function Invoices() {
         return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20";
       case "overdue":
         return "bg-red-500/10 text-red-500 hover:bg-red-500/20";
+      case "draft":
+        return "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20";
+      case "cancelled":
+        return "bg-red-500/10 text-red-500 hover:bg-red-500/20";
       default:
         return "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20";
     }
   };
 
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case "invoice":
+        return "bg-indigo-500/10 text-indigo-500 border-indigo-200";
+      case "quote":
+        return "bg-orange-500/10 text-orange-500 border-orange-200";
+      case "credit_note":
+        return "bg-red-500/10 text-red-500 border-red-200";
+      case "pro_forma":
+        return "bg-blue-500/10 text-blue-500 border-blue-200";
+      case "delivery_note":
+        return "bg-emerald-500/10 text-emerald-500 border-emerald-200";
+      case "sale_order":
+        return "bg-violet-500/10 text-violet-500 border-violet-200";
+      default:
+        return "bg-gray-500/10 text-gray-500 border-gray-200";
+    }
+  };
+
+  // Filtering Logic
+  const filteredInvoices = (invoices || []).filter((invoice) => {
+    if (filterType === "all") return true;
+    return invoice.type === filterType;
+  });
+
   // Sorting Logic
-  const sortedInvoices = [...(invoices || [])].sort((a, b) => {
+  const sortedInvoices = [...filteredInvoices].sort((a, b) => {
     if (!sortConfig) return 0;
     const { key, direction } = sortConfig;
     
@@ -122,19 +159,38 @@ export default function Invoices() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">{t("invoices.title")}</h1>
-        <Button asChild className="w-full md:w-auto">
-          <Link to="/invoices/new">
-            <Plus className="mr-2 h-4 w-4" /> {t("invoices.createNew")}
-          </Link>
-        </Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t("invoices.title")}</h1>
+          <p className="text-muted-foreground">{t("invoices.description")}</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder={t("invoices.filterByType")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("invoices.filterAll")}</SelectItem>
+              <SelectItem value="invoice">{t("invoiceForm.type.invoice")}</SelectItem>
+              <SelectItem value="quote">{t("invoiceForm.type.quote")}</SelectItem>
+              <SelectItem value="credit_note">{t("invoiceForm.type.creditNote")}</SelectItem>
+              <SelectItem value="pro_forma">{t("invoiceForm.type.proForma")}</SelectItem>
+              <SelectItem value="delivery_note">{t("invoiceForm.type.deliveryNote")}</SelectItem>
+              <SelectItem value="sale_order">{t("invoiceForm.type.saleOrder")}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button asChild className="w-full sm:w-auto">
+            <Link to="/invoices/new">
+              <Plus className="mr-2 h-4 w-4" /> {t("invoices.createNew")}
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>{t("invoices.documents")}</CardTitle>
           <CardDescription>
-            {t("invoices.description")}
+            {t("invoices.listDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -163,8 +219,8 @@ export default function Invoices() {
                 {paginatedInvoices.map((invoice) => (
                   <TableRow key={invoice._id}>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant="secondary" className="capitalize whitespace-nowrap">
-                        {invoice.type || "invoice"}
+                      <Badge variant="outline" className={`capitalize whitespace-nowrap ${getTypeColor(invoice.type || 'invoice')}`}>
+                        {t(`invoiceForm.type.${invoice.type || 'invoice'}` as any)}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-medium whitespace-nowrap text-xs sm:text-sm">

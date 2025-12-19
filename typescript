@@ -1,1 +1,10 @@
-// ... keep existing code (none, rewriting file to fix corruption) ...
+import { common } from "./common";
+// ...
+export const fr = {
+  ...common,
+  "auth.error.failedToSend": "Échec de l'envoi du code de vérification. Veuillez réessayer.",
+    
+    // Invoices
+    "invoices.title": "Factures & Devis",
+    // ...
+};
