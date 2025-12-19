@@ -134,11 +134,11 @@ export default function PurchaseCreate() {
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="invoice">Invoice (Facture)</SelectItem>
+                                <SelectItem value="invoice">Purchase Invoice (Facture d'achat)</SelectItem>
                                 <SelectItem value="receipt">Receipt (Bon/Reçu)</SelectItem>
-                                <SelectItem value="credit_note">Credit Note (Avoir)</SelectItem>
-                                <SelectItem value="delivery_note">Delivery Note (Bon de Livraison)</SelectItem>
-                                <SelectItem value="purchase_order">Purchase Order (Bon de Commande)</SelectItem>
+                                <SelectItem value="credit_note">Purchase Credit Note (Avoir fournisseur)</SelectItem>
+                                <SelectItem value="delivery_note">Purchase Delivery Note (Bon de réception)</SelectItem>
+                                <SelectItem value="purchase_order">Purchase Order (Bon de commande)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
