@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Lock, Unlock, Trash2, Plus, Building2 } from "lucide-react";
+import { Lock, Unlock, Trash2, Plus, Building2, CreditCard, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -48,9 +48,17 @@ export function AdminBusinesses() {
   const toggleBusiness = useMutation(api.admin.toggleBusinessSuspension);
   const deleteBusinesses = useMutation(api.admin.deleteBusinesses);
   const createBusiness = useMutation(api.admin.createBusiness);
+  const createSubscription = useMutation(api.admin.createSubscription);
 
   const [selectedBusinesses, setSelectedBusinesses] = useState<Id<"businesses">[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  
+  // Details & Subscription State
+  const [viewBusinessId, setViewBusinessId] = useState<Id<"businesses"> | null>(null);
+  const businessDetails = useQuery(api.admin.getBusinessDetails, viewBusinessId ? { id: viewBusinessId } : "skip");
+  const [isAddSubOpen, setIsAddSubOpen] = useState(false);
+  const [subPlan, setSubPlan] = useState<string>("");
+  const [subDuration, setSubDuration] = useState<string>("");
 
   // Create Form State
   const [businessName, setBusinessName] = useState("");
@@ -132,6 +140,23 @@ export function AdminBusinesses() {
     }
   };
 
+  const handleAddSubscription = async () => {
+    if (!viewBusinessId || !subPlan || !subDuration) return;
+    try {
+      await createSubscription({
+        businessId: viewBusinessId,
+        plan: subPlan as any,
+        durationMonths: parseInt(subDuration),
+      });
+      toast.success("Subscription added successfully");
+      setIsAddSubOpen(false);
+      setSubPlan("");
+      setSubDuration("");
+    } catch (e) {
+      toast.error("Failed to add subscription");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -157,7 +182,7 @@ export function AdminBusinesses() {
               <DialogHeader>
                 <DialogTitle>Create New Business</DialogTitle>
                 <DialogDescription>
-                  Create a new business and assign it to a user (existing or new).
+                  Create a new business and assign it to a user. Enter an existing user's email to assign to them, or a new email to create a new user.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
@@ -253,7 +278,11 @@ export function AdminBusinesses() {
           </TableHeader>
           <TableBody>
             {businesses?.map((b) => (
-              <TableRow key={b._id}>
+              <TableRow key={b._id} className="cursor-pointer hover:bg-muted/50" onClick={(e) => {
+                // Prevent click when clicking checkbox or actions
+                if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("[role='checkbox']")) return;
+                setViewBusinessId(b._id);
+              }}>
                 <TableCell>
                   <Checkbox 
                     checked={selectedBusinesses.includes(b._id)}
@@ -281,19 +310,178 @@ export function AdminBusinesses() {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant={b.isSuspended ? "outline" : "destructive"}
-                    size="sm"
-                    onClick={() => handleToggleBusiness(b._id, b.isSuspended)}
-                  >
-                    {b.isSuspended ? <Unlock className="h-4 w-4 mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
-                    <span>{b.isSuspended ? (t("admin.action.unlock") || "Unlock") : (t("admin.action.lock") || "Lock")}</span>
-                  </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => setViewBusinessId(b._id)}>
+                        <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant={b.isSuspended ? "outline" : "destructive"}
+                        size="sm"
+                        onClick={() => handleToggleBusiness(b._id, b.isSuspended)}
+                    >
+                        {b.isSuspended ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+
+        {/* Business Details Dialog */}
+        <Dialog open={!!viewBusinessId} onOpenChange={(open) => !open && setViewBusinessId(null)}>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>Business Details</DialogTitle>
+                    <DialogDescription>Detailed information for {businessDetails?.name}</DialogDescription>
+                </DialogHeader>
+                
+                {businessDetails ? (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">Business Name</Label>
+                                <p className="font-medium">{businessDetails.name}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">Trade Name</Label>
+                                <p className="font-medium">{businessDetails.tradeName || "-"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">Owner</Label>
+                                <div className="flex flex-col">
+                                    <span className="font-medium">{businessDetails.owner?.name}</span>
+                                    <span className="text-sm text-muted-foreground">{businessDetails.owner?.email}</span>
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">Status</Label>
+                                <div>
+                                    {businessDetails.isSuspended ? (
+                                        <Badge variant="destructive">Suspended</Badge>
+                                    ) : (
+                                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">NIF</Label>
+                                <p className="font-medium">{businessDetails.nif || "-"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">RC</Label>
+                                <p className="font-medium">{businessDetails.rc || "-"}</p>
+                            </div>
+                        </div>
+
+                        <div className="border-t pt-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold">Subscription</h3>
+                                <Button size="sm" variant="outline" onClick={() => setIsAddSubOpen(true)}>
+                                    <CreditCard className="h-4 w-4 mr-2" />
+                                    Add/Update Subscription
+                                </Button>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div className="space-y-1">
+                                    <Label className="text-muted-foreground">Current Plan</Label>
+                                    <p className="font-medium capitalize">{businessDetails.plan || "None"}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-muted-foreground">Status</Label>
+                                    <p className="font-medium capitalize">{businessDetails.subscriptionStatus || "None"}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-muted-foreground">Ends At</Label>
+                                    <p className="font-medium">
+                                        {businessDetails.subscriptionEndsAt 
+                                            ? new Date(businessDetails.subscriptionEndsAt).toLocaleDateString() 
+                                            : "-"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <h4 className="text-sm font-semibold mb-2">History</h4>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Plan</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Start Date</TableHead>
+                                        <TableHead>End Date</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {businessDetails.subscriptions?.map((sub) => (
+                                        <TableRow key={sub._id}>
+                                            <TableCell className="capitalize">{sub.planId}</TableCell>
+                                            <TableCell className="capitalize">{sub.status}</TableCell>
+                                            <TableCell>{new Date(sub.startDate).toLocaleDateString()}</TableCell>
+                                            <TableCell>{sub.endDate ? new Date(sub.endDate).toLocaleDateString() : "-"}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {(!businessDetails.subscriptions || businessDetails.subscriptions.length === 0) && (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="text-center text-muted-foreground">No subscription history</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="py-8 text-center">Loading details...</div>
+                )}
+            </DialogContent>
+        </Dialog>
+
+        {/* Add Subscription Dialog */}
+        <Dialog open={isAddSubOpen} onOpenChange={setIsAddSubOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add Subscription</DialogTitle>
+                    <DialogDescription>Add a new subscription to this business. This will update the current plan.</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="subPlan">Plan</Label>
+                        <Select value={subPlan} onValueChange={setSubPlan}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Plan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="free">Free</SelectItem>
+                                <SelectItem value="startup">Startup</SelectItem>
+                                <SelectItem value="pro">Pro</SelectItem>
+                                <SelectItem value="premium">Premium</SelectItem>
+                                <SelectItem value="enterprise">Enterprise</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="subDuration">Duration</Label>
+                        <Select value={subDuration} onValueChange={setSubDuration}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Duration" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="1">1 Month</SelectItem>
+                                <SelectItem value="3">3 Months</SelectItem>
+                                <SelectItem value="6">6 Months</SelectItem>
+                                <SelectItem value="12">1 Year</SelectItem>
+                                <SelectItem value="24">2 Years</SelectItem>
+                                <SelectItem value="36">3 Years</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsAddSubOpen(false)}>Cancel</Button>
+                    <Button onClick={handleAddSubscription}>Add Subscription</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

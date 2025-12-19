@@ -116,7 +116,10 @@ export function AdminSubscriptions() {
           </TableHeader>
           <TableBody>
             {subscriptions?.map((sub) => (
-              <TableRow key={sub._id}>
+              <TableRow key={sub._id} className="cursor-pointer hover:bg-muted/50" onClick={(e) => {
+                if ((e.target as HTMLElement).closest("button")) return;
+                openEditDialog(sub);
+              }}>
                 <TableCell className="font-medium">{sub.businessName}</TableCell>
                 <TableCell className="capitalize">{sub.planId}</TableCell>
                 <TableCell>{sub.amount.toLocaleString()} {sub.currency}</TableCell>

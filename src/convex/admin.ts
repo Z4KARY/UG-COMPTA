@@ -141,6 +141,82 @@ export const updateSubscription = mutation({
   }
 });
 
+export const createSubscription = mutation({
+  args: {
+    businessId: v.id("businesses"),
+    plan: v.union(v.literal("free"), v.literal("startup"), v.literal("pro"), v.literal("premium"), v.literal("enterprise")),
+    durationMonths: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    const business = await ctx.db.get(args.businessId);
+    if (!business) throw new Error("Business not found");
+
+    const subscriptionEndsAt = Date.now() + (args.durationMonths * 30 * 24 * 60 * 60 * 1000);
+
+    // Update business
+    await ctx.db.patch(args.businessId, {
+        plan: args.plan,
+        subscriptionStatus: "active",
+        subscriptionEndsAt,
+    });
+
+    // Create Subscription Record
+    await ctx.db.insert("subscriptions", {
+        businessId: args.businessId,
+        planId: args.plan,
+        status: "active",
+        amount: 0, // Manual admin assignment
+        currency: "DZD",
+        interval: args.durationMonths >= 12 ? "year" : "month",
+        startDate: Date.now(),
+        endDate: subscriptionEndsAt,
+        paymentMethod: "manual_admin",
+    });
+  }
+});
+
+export const getBusinessDetails = query({
+  args: { id: v.id("businesses") },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    const business = await ctx.db.get(args.id);
+    if (!business) return null;
+
+    const owner = await ctx.db.get(business.userId);
+    const subscriptions = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_business", (q) => q.eq("businessId", business._id))
+      .order("desc")
+      .collect();
+
+    return {
+      ...business,
+      owner,
+      subscriptions,
+    };
+  },
+});
+
+export const getUserDetails = query({
+  args: { id: v.id("users") },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    const user = await ctx.db.get(args.id);
+    if (!user) return null;
+
+    const businesses = await ctx.db
+      .query("businesses")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    return {
+      ...user,
+      businesses,
+    };
+  },
+});
+
 export const listBusinesses = query({
   args: {},
   handler: async (ctx) => {

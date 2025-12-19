@@ -36,7 +36,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Lock, Unlock, Trash2, UserPlus } from "lucide-react";
+import { Lock, Unlock, Trash2, UserPlus, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -53,6 +53,10 @@ export function AdminUsers() {
 
   const [selectedUsers, setSelectedUsers] = useState<Id<"users">[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  
+  // Details State
+  const [viewUserId, setViewUserId] = useState<Id<"users"> | null>(null);
+  const userDetails = useQuery(api.admin.getUserDetails, viewUserId ? { id: viewUserId } : "skip");
   
   // Create Form State
   const [newName, setNewName] = useState("");
@@ -270,7 +274,10 @@ export function AdminUsers() {
           </TableHeader>
           <TableBody>
             {users?.map((u) => (
-              <TableRow key={u._id}>
+              <TableRow key={u._id} className="cursor-pointer hover:bg-muted/50" onClick={(e) => {
+                if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("[role='checkbox']") || (e.target as HTMLElement).closest("[role='combobox']")) return;
+                setViewUserId(u._id);
+              }}>
                 <TableCell>
                   <Checkbox 
                     checked={selectedUsers.includes(u._id)}
@@ -303,21 +310,99 @@ export function AdminUsers() {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  {u.role !== "admin" && (
-                    <Button
-                      variant={u.isSuspended ? "outline" : "destructive"}
-                      size="sm"
-                      onClick={() => handleToggleUser(u._id, u.isSuspended)}
-                    >
-                      {u.isSuspended ? <Unlock className="h-4 w-4 mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
-                      <span>{u.isSuspended ? (t("admin.action.unlock") || "Unlock") : (t("admin.action.lock") || "Lock")}</span>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => setViewUserId(u._id)}>
+                        <Eye className="h-4 w-4" />
                     </Button>
-                  )}
+                    {u.role !== "admin" && (
+                        <Button
+                        variant={u.isSuspended ? "outline" : "destructive"}
+                        size="sm"
+                        onClick={() => handleToggleUser(u._id, u.isSuspended)}
+                        >
+                        {u.isSuspended ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                        </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+
+        {/* User Details Dialog */}
+        <Dialog open={!!viewUserId} onOpenChange={(open) => !open && setViewUserId(null)}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>User Details</DialogTitle>
+                    <DialogDescription>Information for {userDetails?.name || userDetails?.email}</DialogDescription>
+                </DialogHeader>
+                
+                {userDetails ? (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">Full Name</Label>
+                                <p className="font-medium">{userDetails.name || "-"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">Email</Label>
+                                <p className="font-medium">{userDetails.email}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">Role</Label>
+                                <Badge variant="secondary">{userDetails.roleGlobal || userDetails.role}</Badge>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-muted-foreground">Status</Label>
+                                <div>
+                                    {userDetails.isSuspended ? (
+                                        <Badge variant="destructive">Suspended</Badge>
+                                    ) : (
+                                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t pt-4">
+                            <h3 className="text-lg font-semibold mb-4">Businesses Owned</h3>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Plan</TableHead>
+                                        <TableHead>Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {userDetails.businesses?.map((b) => (
+                                        <TableRow key={b._id}>
+                                            <TableCell className="font-medium">{b.name}</TableCell>
+                                            <TableCell className="capitalize">{b.plan || "-"}</TableCell>
+                                            <TableCell>
+                                                {b.isSuspended ? (
+                                                    <Badge variant="destructive">Suspended</Badge>
+                                                ) : (
+                                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {(!userDetails.businesses || userDetails.businesses.length === 0) && (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="text-center text-muted-foreground">No businesses found</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="py-8 text-center">Loading details...</div>
+                )}
+            </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
