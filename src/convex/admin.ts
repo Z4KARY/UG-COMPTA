@@ -399,6 +399,8 @@ export const createAccount = mutation({
     role: v.union(v.literal("NORMAL"), v.literal("ACCOUNTANT"), v.literal("ADMIN")),
     createBusiness: v.boolean(),
     businessName: v.optional(v.string()),
+    plan: v.optional(v.union(v.literal("free"), v.literal("startup"), v.literal("pro"), v.literal("premium"), v.literal("enterprise"))),
+    durationMonths: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
@@ -414,7 +416,10 @@ export const createAccount = mutation({
     });
 
     if (args.createBusiness && args.businessName) {
-        const subscriptionEndsAt = Date.now() + (365 * 24 * 60 * 60 * 1000); // 1 year default
+        const plan = args.plan || "enterprise";
+        const durationMonths = args.durationMonths || 12;
+        const subscriptionEndsAt = Date.now() + (durationMonths * 30 * 24 * 60 * 60 * 1000); 
+        
         const businessId = await ctx.db.insert("businesses", {
             userId,
             name: args.businessName,
@@ -422,18 +427,18 @@ export const createAccount = mutation({
             currency: "DZD",
             tvaDefault: 19,
             subscriptionStatus: "active",
-            plan: "enterprise",
+            plan: plan,
             subscriptionEndsAt,
         });
 
         // Create Subscription Record
         await ctx.db.insert("subscriptions", {
             businessId,
-            planId: "enterprise",
+            planId: plan,
             status: "active",
             amount: 0,
             currency: "DZD",
-            interval: "year",
+            interval: durationMonths >= 12 ? "year" : "month",
             startDate: Date.now(),
             endDate: subscriptionEndsAt,
             paymentMethod: "manual_admin",
