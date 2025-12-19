@@ -60,8 +60,8 @@ export function AdminUsers() {
   const [newRole, setNewRole] = useState<"NORMAL" | "ACCOUNTANT" | "ADMIN">("NORMAL");
   const [createBusiness, setCreateBusiness] = useState(false);
   const [businessName, setBusinessName] = useState("");
-  const [plan, setPlan] = useState<"free" | "startup" | "pro" | "premium" | "enterprise">("enterprise");
-  const [durationMonths, setDurationMonths] = useState(12);
+  const [plan, setPlan] = useState<string>("");
+  const [durationMonths, setDurationMonths] = useState<string>("");
 
   const handleToggleUser = async (id: Id<"users">, currentStatus: boolean | undefined) => {
     try {
@@ -111,14 +111,25 @@ export function AdminUsers() {
 
   const handleCreateAccount = async () => {
     try {
+      if (createBusiness) {
+        if (!plan) {
+          toast.error("Please select a subscription plan");
+          return;
+        }
+        if (!durationMonths) {
+          toast.error("Please select a duration");
+          return;
+        }
+      }
+
       await createAccount({
         name: newName,
         email: newEmail,
         role: newRole,
         createBusiness,
         businessName: createBusiness ? businessName : undefined,
-        plan: createBusiness ? plan : undefined,
-        durationMonths: createBusiness ? durationMonths : undefined,
+        plan: createBusiness ? (plan as any) : undefined,
+        durationMonths: createBusiness ? parseInt(durationMonths) : undefined,
       });
       toast.success("Account created successfully");
       setIsCreateOpen(false);
@@ -128,8 +139,8 @@ export function AdminUsers() {
       setNewRole("NORMAL");
       setCreateBusiness(false);
       setBusinessName("");
-      setPlan("enterprise");
-      setDurationMonths(12);
+      setPlan("");
+      setDurationMonths("");
     } catch (e: any) {
       toast.error(e.message || "Error creating account");
     }
@@ -198,10 +209,10 @@ export function AdminUsers() {
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="plan">Subscription Plan</Label>
-                        <Select value={plan} onValueChange={(v: any) => setPlan(v)}>
+                        <Label htmlFor="plan">Subscription Plan *</Label>
+                        <Select value={plan} onValueChange={setPlan}>
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Select Plan" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="free">Free</SelectItem>
@@ -213,10 +224,10 @@ export function AdminUsers() {
                         </Select>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="duration">Duration (Months)</Label>
-                        <Select value={durationMonths.toString()} onValueChange={(v) => setDurationMonths(parseInt(v))}>
+                        <Label htmlFor="duration">Duration *</Label>
+                        <Select value={durationMonths} onValueChange={setDurationMonths}>
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Select Duration" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="1">1 Month</SelectItem>

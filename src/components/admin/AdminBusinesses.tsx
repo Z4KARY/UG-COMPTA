@@ -56,8 +56,8 @@ export function AdminBusinesses() {
   const [businessName, setBusinessName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerName, setOwnerName] = useState("");
-  const [plan, setPlan] = useState<"free" | "startup" | "pro" | "premium" | "enterprise">("enterprise");
-  const [durationMonths, setDurationMonths] = useState(12);
+  const [plan, setPlan] = useState<string>("");
+  const [durationMonths, setDurationMonths] = useState<string>("");
 
   const handleToggleBusiness = async (id: Id<"businesses">, currentStatus: boolean | undefined) => {
     try {
@@ -102,13 +102,22 @@ export function AdminBusinesses() {
       return;
     }
 
+    if (!plan) {
+      toast.error("Please select a subscription plan");
+      return;
+    }
+    if (!durationMonths) {
+      toast.error("Please select a duration");
+      return;
+    }
+
     try {
       await createBusiness({
         name: businessName,
         ownerEmail,
         ownerName: ownerName || undefined,
-        plan,
-        durationMonths,
+        plan: plan as any,
+        durationMonths: parseInt(durationMonths),
       });
       toast.success("Business created successfully");
       setIsCreateOpen(false);
@@ -116,8 +125,8 @@ export function AdminBusinesses() {
       setBusinessName("");
       setOwnerEmail("");
       setOwnerName("");
-      setPlan("enterprise");
-      setDurationMonths(12);
+      setPlan("");
+      setDurationMonths("");
     } catch (e: any) {
       toast.error(e.message || "Error creating business");
     }
@@ -185,10 +194,10 @@ export function AdminBusinesses() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="plan">Subscription Plan</Label>
-                    <Select value={plan} onValueChange={(v: any) => setPlan(v)}>
+                    <Label htmlFor="plan">Subscription Plan *</Label>
+                    <Select value={plan} onValueChange={setPlan}>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select Plan" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="free">Free</SelectItem>
@@ -200,10 +209,10 @@ export function AdminBusinesses() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="duration">Duration (Months)</Label>
-                    <Select value={durationMonths.toString()} onValueChange={(v) => setDurationMonths(parseInt(v))}>
+                    <Label htmlFor="duration">Duration *</Label>
+                    <Select value={durationMonths} onValueChange={setDurationMonths}>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select Duration" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="1">1 Month</SelectItem>

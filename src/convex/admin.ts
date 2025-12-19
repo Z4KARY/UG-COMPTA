@@ -106,6 +106,41 @@ export const deleteSubscription = mutation({
   },
 });
 
+export const updateSubscription = mutation({
+  args: {
+    id: v.id("subscriptions"),
+    planId: v.union(
+        v.literal("free"), 
+        v.literal("startup"), 
+        v.literal("pro"), 
+        v.literal("premium"), 
+        v.literal("enterprise")
+    ),
+    endDate: v.number(),
+    status: v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial")),
+  },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    const sub = await ctx.db.get(args.id);
+    if (!sub) throw new Error("Subscription not found");
+
+    await ctx.db.patch(args.id, {
+        planId: args.planId,
+        endDate: args.endDate,
+        status: args.status,
+    });
+
+    // Sync with business
+    if (sub.businessId) {
+        await ctx.db.patch(sub.businessId, {
+            plan: args.planId,
+            subscriptionEndsAt: args.endDate,
+            subscriptionStatus: args.status,
+        });
+    }
+  }
+});
+
 export const listBusinesses = query({
   args: {},
   handler: async (ctx) => {
@@ -416,8 +451,11 @@ export const createAccount = mutation({
     });
 
     if (args.createBusiness && args.businessName) {
-        const plan = args.plan || "enterprise";
-        const durationMonths = args.durationMonths || 12;
+        if (!args.plan) throw new Error("Subscription plan is required");
+        if (!args.durationMonths) throw new Error("Subscription duration is required");
+
+        const plan = args.plan;
+        const durationMonths = args.durationMonths;
         const subscriptionEndsAt = Date.now() + (durationMonths * 30 * 24 * 60 * 60 * 1000); 
         
         const businessId = await ctx.db.insert("businesses", {

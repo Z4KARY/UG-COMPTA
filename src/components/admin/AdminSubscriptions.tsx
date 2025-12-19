@@ -14,17 +14,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Ban, Trash2 } from "lucide-react";
+import { Ban, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
+import { useState } from "react";
 
 export function AdminSubscriptions() {
   const subscriptions = useQuery(api.admin.listAllSubscriptions);
   const cancelSubscription = useMutation(api.admin.cancelSubscription);
   const deleteSubscription = useMutation(api.admin.deleteSubscription);
+  const updateSubscription = useMutation(api.admin.updateSubscription);
+
+  const [editingSub, setEditingSub] = useState<any>(null);
+  const [editPlan, setEditPlan] = useState<string>("");
+  const [editStatus, setEditStatus] = useState<string>("");
+  const [editEndDate, setEditEndDate] = useState<string>("");
 
   const handleCancel = async (id: Id<"subscriptions">) => {
     if (!confirm("Are you sure you want to cancel this subscription?")) return;
@@ -46,6 +70,31 @@ export function AdminSubscriptions() {
     }
   };
 
+  const openEditDialog = (sub: any) => {
+    setEditingSub(sub);
+    setEditPlan(sub.planId);
+    setEditStatus(sub.status);
+    // Format date for input type="date" (YYYY-MM-DD)
+    const date = new Date(sub.endDate || Date.now());
+    setEditEndDate(date.toISOString().split('T')[0]);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingSub) return;
+    try {
+      await updateSubscription({
+        id: editingSub._id,
+        planId: editPlan as any,
+        status: editStatus as any,
+        endDate: new Date(editEndDate).getTime(),
+      });
+      toast.success("Subscription updated");
+      setEditingSub(null);
+    } catch (e) {
+      toast.error("Failed to update subscription");
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -61,7 +110,7 @@ export function AdminSubscriptions() {
               <TableHead>Amount</TableHead>
               <TableHead>Interval</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -77,17 +126,23 @@ export function AdminSubscriptions() {
                     {sub.status}
                   </Badge>
                 </TableCell>
-                <TableCell>{new Date(sub.startDate).toLocaleDateString()}</TableCell>
+                <TableCell>{sub.endDate ? new Date(sub.endDate).toLocaleDateString() : "-"}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditDialog(sub)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     {sub.status === "active" && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleCancel(sub._id)}
                       >
-                        <Ban className="h-4 w-4 mr-2" />
-                        Cancel
+                        <Ban className="h-4 w-4" />
                       </Button>
                     )}
                     <Button
@@ -95,8 +150,7 @@ export function AdminSubscriptions() {
                       size="sm"
                       onClick={() => handleDelete(sub._id)}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>
@@ -111,6 +165,61 @@ export function AdminSubscriptions() {
             )}
           </TableBody>
         </Table>
+
+        <Dialog open={!!editingSub} onOpenChange={(open) => !open && setEditingSub(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Subscription</DialogTitle>
+              <DialogDescription>
+                Modify subscription details for {editingSub?.businessName}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="plan">Plan</Label>
+                <Select value={editPlan} onValueChange={setEditPlan}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="startup">Startup</SelectItem>
+                    <SelectItem value="pro">Pro</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="status">Status</Label>
+                <Select value={editStatus} onValueChange={setEditStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="past_due">Past Due</SelectItem>
+                    <SelectItem value="canceled">Canceled</SelectItem>
+                    <SelectItem value="trial">Trial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="endDate">End Date</Label>
+                <Input 
+                  id="endDate" 
+                  type="date" 
+                  value={editEndDate} 
+                  onChange={(e) => setEditEndDate(e.target.value)} 
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingSub(null)}>Cancel</Button>
+              <Button onClick={handleUpdate}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
