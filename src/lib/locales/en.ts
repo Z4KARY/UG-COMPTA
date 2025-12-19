@@ -359,6 +359,13 @@ export const en = {
     "settings.sequencing.deliveryNotePrefix": "Delivery Note Prefix",
     "settings.sequencing.saleOrderPrefix": "Sale Order Prefix",
 
+    "settings.sequencing.purchaseTitle": "Purchase Sequencing",
+    "settings.sequencing.purchaseInvoicePrefix": "Purchase Invoice Prefix",
+    "settings.sequencing.receiptPrefix": "Receipt Prefix",
+    "settings.sequencing.purchaseOrderPrefix": "Purchase Order Prefix",
+    "settings.sequencing.purchaseCreditNotePrefix": "Purchase Credit Note Prefix",
+    "settings.sequencing.purchaseDeliveryNotePrefix": "Purchase Delivery Note Prefix",
+
     "settings.archiving.title": "Legal Archiving & Data Export",
     "settings.archiving.description": "Download a full backup of your business data for legal retention (10 years).",
     "settings.archiving.jsonTitle": "Quick Data Backup (JSON)",

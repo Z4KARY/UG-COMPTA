@@ -72,6 +72,11 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
     proFormaPrefix: "PF-",
     deliveryNotePrefix: "BL-",
     saleOrderPrefix: "BC-",
+    purchaseInvoicePrefix: "ACH-",
+    receiptPrefix: "REC-",
+    purchaseOrderPrefix: "BCA-",
+    purchaseCreditNotePrefix: "AVA-",
+    purchaseDeliveryNotePrefix: "BLA-",
   });
 
   useEffect(() => {
@@ -106,6 +111,11 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
         proFormaPrefix: business.proFormaPrefix || "PF-",
         deliveryNotePrefix: business.deliveryNotePrefix || "BL-",
         saleOrderPrefix: business.saleOrderPrefix || "BC-",
+        purchaseInvoicePrefix: business.purchaseInvoicePrefix || "ACH-",
+        receiptPrefix: business.receiptPrefix || "REC-",
+        purchaseOrderPrefix: business.purchaseOrderPrefix || "BCA-",
+        purchaseCreditNotePrefix: business.purchaseCreditNotePrefix || "AVA-",
+        purchaseDeliveryNotePrefix: business.purchaseDeliveryNotePrefix || "BLA-",
       });
     }
   }, [business]);
