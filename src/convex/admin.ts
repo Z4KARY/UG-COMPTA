@@ -360,6 +360,14 @@ export const createBusiness = mutation({
         endDate: subscriptionEndsAt,
         paymentMethod: "manual_admin",
     });
+
+    // 4. Add owner member
+    await ctx.db.insert("businessMembers", {
+        businessId,
+        userId,
+        role: "owner",
+        joinedAt: Date.now(),
+    });
   }
 });
 
@@ -385,7 +393,8 @@ export const createAccount = mutation({
     });
 
     if (args.createBusiness && args.businessName) {
-        await ctx.db.insert("businesses", {
+        const subscriptionEndsAt = Date.now() + (365 * 24 * 60 * 60 * 1000); // 1 year default
+        const businessId = await ctx.db.insert("businesses", {
             userId,
             name: args.businessName,
             address: "Alger, Algérie", // Default
@@ -393,7 +402,28 @@ export const createAccount = mutation({
             tvaDefault: 19,
             subscriptionStatus: "active",
             plan: "enterprise",
-            subscriptionEndsAt: Date.now() + (365 * 24 * 60 * 60 * 1000), // 1 year default
+            subscriptionEndsAt,
+        });
+
+        // Create Subscription Record
+        await ctx.db.insert("subscriptions", {
+            businessId,
+            planId: "enterprise",
+            status: "active",
+            amount: 0,
+            currency: "DZD",
+            interval: "year",
+            startDate: Date.now(),
+            endDate: subscriptionEndsAt,
+            paymentMethod: "manual_admin",
+        });
+
+        // Add owner member
+        await ctx.db.insert("businessMembers", {
+            businessId,
+            userId,
+            role: "owner",
+            joinedAt: Date.now(),
         });
     }
   }

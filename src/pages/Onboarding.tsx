@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { useMutation, useAction } from "convex/react";
+import { useMutation, useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,9 @@ export default function Onboarding() {
   const { user, isLoading: authLoading } = useAuth();
   const updateUser = useMutation(api.users.update);
   const createBusiness = useMutation(api.businesses.create);
+  const updateBusiness = useMutation(api.businesses.update);
   const createCheckout = useAction(api.chargilyActions.createCheckoutSession);
+  const myBusiness = useQuery(api.businesses.getMyBusiness, {});
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +54,16 @@ export default function Onboarding() {
     }
   }, [user]);
 
+  // Pre-fill business details if they exist (e.g. created by Admin)
+  useEffect(() => {
+    if (myBusiness) {
+      setBusinessName(myBusiness.name || "");
+      if (myBusiness.phone) setPhoneNumber(myBusiness.phone);
+      if (myBusiness.type) setBusinessType(myBusiness.type as any);
+      if (myBusiness.plan) setPlanId(myBusiness.plan as PlanId);
+    }
+  }, [myBusiness]);
+
   const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -69,15 +81,35 @@ export default function Onboarding() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // Create Business
-      const businessId = await createBusiness({
-        name: businessName,
-        type: businessType,
-        address: "To be updated", // Default placeholder
-        currency: "DZD",
-        tvaDefault: businessType === "societe" ? 19 : 0,
-        phone: phoneNumber,
-      });
+      let businessId;
+
+      if (myBusiness) {
+        // Update existing business
+        await updateBusiness({
+          id: myBusiness._id,
+          name: businessName,
+          type: businessType,
+          phone: phoneNumber,
+        });
+        businessId = myBusiness._id;
+
+        // If subscription is already active (e.g. assigned by Admin), skip payment
+        if (myBusiness.subscriptionStatus === "active") {
+          toast.success("Business setup complete!");
+          navigate("/dashboard");
+          return;
+        }
+      } else {
+        // Create Business
+        businessId = await createBusiness({
+          name: businessName,
+          type: businessType,
+          address: "To be updated", // Default placeholder
+          currency: "DZD",
+          tvaDefault: businessType === "societe" ? 19 : 0,
+          phone: phoneNumber,
+        });
+      }
 
       // If plan is free, we are done. If paid, go to payment step
       if (planId === "free") {
@@ -105,13 +137,13 @@ export default function Onboarding() {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create business");
+      toast.error("Failed to save business details");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (authLoading) {
+  if (authLoading || myBusiness === undefined) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -215,7 +247,7 @@ export default function Onboarding() {
             </CardContent>
             <CardFooter>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (planId === "free" ? "Complete Setup" : "Continue to Payment")}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (planId === "free" || myBusiness?.subscriptionStatus === "active" ? "Complete Setup" : "Continue to Payment")}
               </Button>
             </CardFooter>
           </form>
