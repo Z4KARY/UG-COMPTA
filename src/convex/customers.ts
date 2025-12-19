@@ -171,6 +171,15 @@ export const remove = mutation({
     const business = await ctx.db.get(customer.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
+    // Check for existing invoices
+    const existingInvoice = await ctx.db.query("invoices")
+        .withIndex("by_customer", q => q.eq("customerId", args.id))
+        .first();
+    
+    if (existingInvoice) {
+        throw new Error("Cannot delete customer with existing invoices. Please archive the customer instead or delete their invoices first.");
+    }
+
     await ctx.db.delete(args.id);
 
     await ctx.scheduler.runAfter(0, internal.audit.log, {

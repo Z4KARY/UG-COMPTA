@@ -165,6 +165,15 @@ export const remove = mutation({
         if (!member) throw new Error("Unauthorized");
     }
 
+    // Check for existing purchase invoices
+    const existingPurchase = await ctx.db.query("purchaseInvoices")
+        .withIndex("by_supplier", q => q.eq("supplierId", args.id))
+        .first();
+    
+    if (existingPurchase) {
+        throw new Error("Cannot delete supplier with existing purchase invoices. Please delete the invoices first.");
+    }
+
     await ctx.db.delete(args.id);
   },
 });

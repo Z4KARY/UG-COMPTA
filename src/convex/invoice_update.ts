@@ -107,6 +107,20 @@ export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoi
         throw new Error("Cannot delete invoice in a closed period");
     }
 
+    // Prevent deletion if paid or partial
+    if (invoice.status === "paid" || invoice.status === "partial") {
+        throw new Error("Cannot delete an invoice that has been paid or partially paid");
+    }
+
+    // Check for payments
+    const payment = await ctx.db.query("payments")
+        .withIndex("by_invoice", q => q.eq("invoiceId", args.id))
+        .first();
+    
+    if (payment) {
+        throw new Error("Cannot delete invoice with recorded payments");
+    }
+
     // Delete items first
     const items = await ctx.db
       .query("invoiceItems")

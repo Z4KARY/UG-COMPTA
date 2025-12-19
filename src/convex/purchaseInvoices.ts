@@ -355,6 +355,20 @@ export const remove = mutation({
             throw new Error("Cannot delete purchase from a closed period");
         }
 
+        // Prevent deletion if paid or partial
+        if (invoice.status === "paid" || invoice.status === "partial") {
+            throw new Error("Cannot delete a purchase invoice that has been paid or partially paid");
+        }
+
+        // Check for payments
+        const payment = await ctx.db.query("purchasePayments")
+            .withIndex("by_purchase_invoice", q => q.eq("purchaseInvoiceId", args.id))
+            .first();
+        
+        if (payment) {
+            throw new Error("Cannot delete purchase invoice with recorded payments");
+        }
+
         // Delete items
         const items = await ctx.db
             .query("purchaseInvoiceItems")
