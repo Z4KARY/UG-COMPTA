@@ -272,3 +272,67 @@ export const updatePlatformSetting = mutation({
     }
   },
 });
+
+export const deleteUsers = mutation({
+  args: { ids: v.array(v.id("users")) },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    for (const id of args.ids) {
+      await ctx.db.delete(id);
+      // Delete associated businesses
+      const businesses = await ctx.db
+        .query("businesses")
+        .withIndex("by_user", (q) => q.eq("userId", id))
+        .collect();
+      for (const business of businesses) {
+        await ctx.db.delete(business._id);
+      }
+    }
+  },
+});
+
+export const deleteBusinesses = mutation({
+  args: { ids: v.array(v.id("businesses")) },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    for (const id of args.ids) {
+      await ctx.db.delete(id);
+    }
+  },
+});
+
+export const createAccount = mutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    role: v.union(v.literal("NORMAL"), v.literal("ACCOUNTANT"), v.literal("ADMIN")),
+    createBusiness: v.boolean(),
+    businessName: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    
+    const existing = await ctx.db.query("users").withIndex("email", q => q.eq("email", args.email)).first();
+    if (existing) throw new Error("Email already in use");
+
+    const userId = await ctx.db.insert("users", {
+        name: args.name,
+        email: args.email,
+        role: args.role === "ADMIN" ? "admin" : "user",
+        roleGlobal: args.role,
+    });
+
+    if (args.createBusiness && args.businessName) {
+        await ctx.db.insert("businesses", {
+            userId,
+            name: args.businessName,
+            address: "Alger, Algérie", // Default
+            currency: "DZD",
+            tvaDefault: 19,
+            subscriptionStatus: "active",
+            plan: "enterprise",
+            subscriptionEndsAt: Date.now() + (365 * 24 * 60 * 60 * 1000), // 1 year default
+        });
+    }
+  }
+});
