@@ -563,7 +563,25 @@ const schema = defineSchema(
       endDate: v.optional(v.number()),
       paymentMethod: v.optional(v.string()), // e.g., "chargily", "bank_transfer"
       transactionId: v.optional(v.string()),
-    }).index("by_business", ["businessId"]),
+    }).index("by_business", ["businessId"])
+      .index("by_status", ["status"]), // Added index for admin dashboard stats
+
+    announcements: defineTable({
+      title: v.string(),
+      message: v.string(),
+      type: v.union(v.literal("info"), v.literal("warning"), v.literal("critical")),
+      isActive: v.boolean(),
+      targetRole: v.optional(v.union(v.literal("all"), v.literal("admin"), v.literal("user"))),
+      expiresAt: v.optional(v.number()),
+      createdBy: v.id("users"),
+    }).index("by_active", ["isActive"]),
+
+    platformSettings: defineTable({
+      key: v.string(), // e.g. "maintenance_mode", "allow_signups"
+      value: v.any(),
+      updatedBy: v.id("users"),
+      updatedAt: v.number(),
+    }).index("by_key", ["key"]),
   },
   {
     schemaValidation: false,
