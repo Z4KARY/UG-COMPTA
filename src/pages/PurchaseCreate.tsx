@@ -32,6 +32,7 @@ export default function PurchaseCreate() {
   const [formData, setFormData] = useState({
     supplierId: "",
     invoiceNumber: "",
+    type: "invoice",
     invoiceDate: new Date().toISOString().split("T")[0],
     paymentMethod: "CASH",
     description: "",
@@ -81,6 +82,7 @@ export default function PurchaseCreate() {
             businessId: business._id,
             supplierId: formData.supplierId as any,
             invoiceNumber: formData.invoiceNumber,
+            type: formData.type as any,
             invoiceDate: new Date(formData.invoiceDate).getTime(),
             paymentMethod: formData.paymentMethod as any,
             description: formData.description,
@@ -122,6 +124,24 @@ export default function PurchaseCreate() {
                     <CardTitle>Invoice Details</CardTitle>
                 </CardHeader>
                 <CardContent className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label>Document Type</Label>
+                        <Select 
+                            value={formData.type} 
+                            onValueChange={(val) => setFormData({...formData, type: val})}
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="invoice">Invoice (Facture)</SelectItem>
+                                <SelectItem value="receipt">Receipt (Bon/Reçu)</SelectItem>
+                                <SelectItem value="credit_note">Credit Note (Avoir)</SelectItem>
+                                <SelectItem value="delivery_note">Delivery Note (Bon de Livraison)</SelectItem>
+                                <SelectItem value="purchase_order">Purchase Order (Bon de Commande)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <div className="space-y-2">
                         <Label>Supplier</Label>
                         <Select 

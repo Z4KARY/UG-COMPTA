@@ -23,6 +23,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SetupRequired } from "@/components/SetupRequired";
+import { Badge } from "@/components/ui/badge";
 
 export default function Purchases() {
   const { t } = useLanguage();
@@ -40,6 +41,17 @@ export default function Purchases() {
               toast.error(t("purchases.toast.deleteError"));
           }
       }
+  };
+
+  const getTypeName = (type?: string) => {
+    switch (type) {
+        case "invoice": return "Invoice";
+        case "receipt": return "Receipt";
+        case "credit_note": return "Credit Note";
+        case "delivery_note": return "Delivery Note";
+        case "purchase_order": return "Purchase Order";
+        default: return "Invoice";
+    }
   };
 
   if (business === undefined) {
@@ -92,6 +104,7 @@ export default function Purchases() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>{t("purchases.table.date")}</TableHead>
+                            <TableHead>Type</TableHead>
                             <TableHead>{t("purchases.table.invoiceNumber")}</TableHead>
                             <TableHead>{t("purchases.table.supplier")}</TableHead>
                             <TableHead>{t("purchases.table.status")}</TableHead>
@@ -113,6 +126,11 @@ export default function Purchases() {
                         {purchases?.map((purchase) => (
                             <TableRow key={purchase._id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/purchases/${purchase._id}`)}>
                                 <TableCell>{format(purchase.invoiceDate, "dd/MM/yyyy")}</TableCell>
+                                <TableCell>
+                                    <Badge variant="outline" className="capitalize">
+                                        {getTypeName(purchase.type)}
+                                    </Badge>
+                                </TableCell>
                                 <TableCell className="font-medium text-blue-600">
                                     <Link to={`/purchases/${purchase._id}`} className="hover:underline">
                                         {purchase.invoiceNumber}

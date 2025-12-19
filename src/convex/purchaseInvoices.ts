@@ -163,6 +163,13 @@ export const create = mutation({
     businessId: v.id("businesses"),
     supplierId: v.id("suppliers"),
     invoiceNumber: v.optional(v.string()),
+    type: v.optional(v.union(
+        v.literal("invoice"),
+        v.literal("credit_note"),
+        v.literal("delivery_note"),
+        v.literal("purchase_order"),
+        v.literal("receipt")
+    )),
     invoiceDate: v.number(),
     paymentDate: v.optional(v.number()),
     paymentMethod: v.optional(v.union(
@@ -253,6 +260,7 @@ export const create = mutation({
         businessId: args.businessId,
         supplierId: args.supplierId,
         invoiceNumber: finalInvoiceNumber,
+        type: args.type || "invoice", // Default to invoice
         invoiceDate: args.invoiceDate,
         paymentDate: args.paymentDate,
         paymentMethod: args.paymentMethod,

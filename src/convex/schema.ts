@@ -411,6 +411,13 @@ const schema = defineSchema(
       businessId: v.id("businesses"),
       supplierId: v.id("suppliers"),
       invoiceNumber: v.string(),
+      type: v.optional(v.union(
+        v.literal("invoice"),
+        v.literal("credit_note"),
+        v.literal("delivery_note"),
+        v.literal("purchase_order"),
+        v.literal("receipt")
+      )), // Added document type
       invoiceDate: v.number(),
       paymentDate: v.optional(v.number()),
       paymentMethod: v.optional(v.union(
