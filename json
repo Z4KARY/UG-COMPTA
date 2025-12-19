@@ -1,1 +1,3 @@
-{"plan":["Verify the signature and stamp section is now reactive and follows the text closely in the preview.","Check that the images overlap correctly using the grid layout.","Ensure no layout issues occur in print mode."]}
+{
+  "plan": "1. Verify that the type errors are resolved.\n2. Ensure the UI for prefix management and invoice creation works as expected with the new types."
+}

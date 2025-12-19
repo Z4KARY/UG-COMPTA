@@ -25,4 +25,7 @@ export interface BusinessFormData {
   invoicePrefix: string;
   quotePrefix: string;
   creditNotePrefix: string;
+  proFormaPrefix: string;
+  deliveryNotePrefix: string;
+  saleOrderPrefix: string;
 }

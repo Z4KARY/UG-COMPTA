@@ -62,6 +62,39 @@ export function SequencingSection({ formData, handleChange }: SequencingSectionP
           />
           <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.creditNotePrefix}YYYY-001</p>
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="proFormaPrefix">{t("settings.sequencing.proFormaPrefix")}</Label>
+          <Input
+            id="proFormaPrefix"
+            name="proFormaPrefix"
+            value={formData.proFormaPrefix}
+            onChange={handleChange}
+            placeholder="PF-"
+          />
+          <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.proFormaPrefix || "PF-"}YYYY-001</p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="deliveryNotePrefix">{t("settings.sequencing.deliveryNotePrefix")}</Label>
+          <Input
+            id="deliveryNotePrefix"
+            name="deliveryNotePrefix"
+            value={formData.deliveryNotePrefix}
+            onChange={handleChange}
+            placeholder="BL-"
+          />
+          <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.deliveryNotePrefix || "BL-"}YYYY-001</p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="saleOrderPrefix">{t("settings.sequencing.saleOrderPrefix")}</Label>
+          <Input
+            id="saleOrderPrefix"
+            name="saleOrderPrefix"
+            value={formData.saleOrderPrefix}
+            onChange={handleChange}
+            placeholder="BC-"
+          />
+          <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.saleOrderPrefix || "BC-"}YYYY-001</p>
+        </div>
       </CardContent>
     </Card>
   );

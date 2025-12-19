@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface InvoiceFormDetailsProps {
+  type: string;
   issueDate: Date;
   dueDate: Date;
   currency: string;
@@ -34,6 +35,7 @@ interface InvoiceFormDetailsProps {
   paymentMethod?: string;
   invoiceNumber?: string;
   isAutoNumber?: boolean;
+  onTypeChange: (type: string) => void;
   onIssueDateChange: (date: Date | undefined) => void;
   onDueDateChange: (date: Date | undefined) => void;
   onCurrencyChange: (currency: string) => void;
@@ -44,6 +46,7 @@ interface InvoiceFormDetailsProps {
 }
 
 export function InvoiceFormDetails({
+  type,
   issueDate,
   dueDate,
   currency,
@@ -51,6 +54,7 @@ export function InvoiceFormDetails({
   paymentMethod,
   invoiceNumber,
   isAutoNumber = true,
+  onTypeChange,
   onIssueDateChange,
   onDueDateChange,
   onCurrencyChange,
@@ -67,6 +71,23 @@ export function InvoiceFormDetails({
         <CardTitle>{t("invoiceForm.details.title")}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-2 col-span-2 md:col-span-2">
+          <Label>{t("invoiceForm.details.type") || "Document Type"}</Label>
+          <Select value={type} onValueChange={onTypeChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="invoice">{t("invoiceForm.type.invoice") || "Invoice"}</SelectItem>
+              <SelectItem value="quote">{t("invoiceForm.type.quote") || "Quote"}</SelectItem>
+              <SelectItem value="credit_note">{t("invoiceForm.type.creditNote") || "Credit Note"}</SelectItem>
+              <SelectItem value="pro_forma">{t("invoiceForm.type.proForma") || "Pro Forma"}</SelectItem>
+              <SelectItem value="delivery_note">{t("invoiceForm.type.deliveryNote") || "Delivery Note"}</SelectItem>
+              <SelectItem value="sale_order">{t("invoiceForm.type.saleOrder") || "Sale Order"}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="space-y-2 col-span-2 md:col-span-2">
           <div className="flex items-center justify-between">
             <Label>{t("invoiceForm.details.invoiceNumber")}</Label>

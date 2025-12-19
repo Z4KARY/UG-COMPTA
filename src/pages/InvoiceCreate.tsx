@@ -45,7 +45,7 @@ const formSchema = z.object({
   })),
   notes: z.string().optional(),
   currency: z.string().optional(),
-  type: z.enum(["invoice", "quote", "credit_note"]),
+  type: z.enum(["invoice", "quote", "credit_note", "pro_forma", "delivery_note", "sale_order"]),
   fiscalType: z.enum(["LOCAL", "EXPORT", "EXEMPT"]).optional(),
   paymentMethod: z.enum(["CASH", "BANK_TRANSFER", "CHEQUE", "CARD", "OTHER"]),
   customerId: z.string().min(1, "Customer is required"),
@@ -85,7 +85,7 @@ export default function InvoiceCreate() {
 
   const [formData, setFormData] = useState({
     customerId: "",
-    type: "invoice" as "invoice" | "quote" | "credit_note",
+    type: "invoice" as "invoice" | "quote" | "credit_note" | "pro_forma" | "delivery_note" | "sale_order",
     fiscalType: "LOCAL" as "LOCAL" | "EXPORT" | "EXEMPT",
     language: "fr", // Default language
     issueDate: new Date(),
@@ -346,7 +346,14 @@ export default function InvoiceCreate() {
     <DashboardLayout>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h1 className="text-3xl font-bold tracking-tight">
-            {isEditMode ? "Edit Invoice" : (type === "quote" ? t("invoiceCreate.title.quote") : type === "credit_note" ? t("invoiceCreate.title.creditNote") : t("invoiceCreate.title.invoice"))}
+            {isEditMode ? "Edit Invoice" : (
+              type === "quote" ? t("invoiceCreate.title.quote") : 
+              type === "credit_note" ? t("invoiceCreate.title.creditNote") : 
+              type === "pro_forma" ? t("invoiceCreate.title.proForma") :
+              type === "delivery_note" ? t("invoiceCreate.title.deliveryNote") :
+              type === "sale_order" ? t("invoiceCreate.title.saleOrder") :
+              t("invoiceCreate.title.invoice")
+            )}
         </h1>
       </div>
 
@@ -354,6 +361,7 @@ export default function InvoiceCreate() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
             <InvoiceFormDetails
+              type={type}
               issueDate={formData.issueDate}
               dueDate={formData.dueDate}
               currency={formData.currency}
@@ -361,6 +369,10 @@ export default function InvoiceCreate() {
               paymentMethod={paymentMethod}
               invoiceNumber={formData.invoiceNumber}
               isAutoNumber={formData.isAutoNumber}
+              onTypeChange={(val) => {
+                form.setValue("type", val as any);
+                setFormData({ ...formData, type: val as any });
+              }}
               onIssueDateChange={(date) =>
                 setFormData({ ...formData, issueDate: date || new Date() })
               }

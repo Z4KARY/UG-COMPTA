@@ -69,6 +69,9 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
     invoicePrefix: "INV-",
     quotePrefix: "DEV-",
     creditNotePrefix: "AV-",
+    proFormaPrefix: "PF-",
+    deliveryNotePrefix: "BL-",
+    saleOrderPrefix: "BC-",
   });
 
   useEffect(() => {
@@ -100,6 +103,9 @@ export function BusinessGeneralSettings({ business }: BusinessGeneralSettingsPro
         invoicePrefix: business.invoicePrefix || "INV-",
         quotePrefix: business.quotePrefix || "DEV-",
         creditNotePrefix: business.creditNotePrefix || "AV-",
+        proFormaPrefix: business.proFormaPrefix || "PF-",
+        deliveryNotePrefix: business.deliveryNotePrefix || "BL-",
+        saleOrderPrefix: business.saleOrderPrefix || "BC-",
       });
     }
   }, [business]);
