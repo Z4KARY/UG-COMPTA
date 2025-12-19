@@ -1,3 +1,9 @@
-{
-  "plan": "1. Verify the changes in the browser (if possible) or via code review.\n2. Check if any other files need similar label updates (e.g. Purchases list).\n3. Ensure translations are consistent if used elsewhere."
-}
+  {
+    "companyName": "Test Corp",
+    "email": "test@example.com",
+    "message": "This is a test message for verification.",
+    "name": "Test User [Timestamp]",
+    "status": "new",
+    "submittedAt": 1766137686502
+  }
+  
