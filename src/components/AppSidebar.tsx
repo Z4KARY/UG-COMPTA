@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   Truck,
   Scale,
+  Shield,
 } from "lucide-react";
 import {
   Sidebar,
@@ -56,7 +57,7 @@ export function AppSidebar() {
     ? pricing.find(p => p.id === activeBusiness.plan)?.name 
     : "Business";
 
-  const items = [
+  const regularItems = [
     {
       title: t("sidebar.dashboard"),
       url: "/dashboard",
@@ -103,6 +104,16 @@ export function AppSidebar() {
       icon: Building2,
     },
   ];
+
+  const adminItems = [
+    {
+      title: "Admin Panel",
+      url: "/admin",
+      icon: Shield,
+    },
+  ];
+
+  const items = user?.role === "admin" ? adminItems : regularItems;
 
   const handleLogout = async () => {
     await signOut();
