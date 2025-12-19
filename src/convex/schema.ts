@@ -70,6 +70,13 @@ const schema = defineSchema(
       deliveryNotePrefix: v.optional(v.string()),
       saleOrderPrefix: v.optional(v.string()),
 
+      // Purchase Sequencing Preferences
+      purchaseInvoicePrefix: v.optional(v.string()),
+      receiptPrefix: v.optional(v.string()),
+      purchaseOrderPrefix: v.optional(v.string()),
+      purchaseCreditNotePrefix: v.optional(v.string()),
+      purchaseDeliveryNotePrefix: v.optional(v.string()),
+
       currency: v.string(),
       tvaDefault: v.number(),
       

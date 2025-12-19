@@ -296,6 +296,13 @@ export const update = mutation({
     quotePrefix: v.optional(v.string()),
     creditNotePrefix: v.optional(v.string()),
 
+    // Purchase Sequencing
+    purchaseInvoicePrefix: v.optional(v.string()),
+    receiptPrefix: v.optional(v.string()),
+    purchaseOrderPrefix: v.optional(v.string()),
+    purchaseCreditNotePrefix: v.optional(v.string()),
+    purchaseDeliveryNotePrefix: v.optional(v.string()),
+
     currency: v.optional(v.string()),
     tvaDefault: v.optional(v.number()),
     

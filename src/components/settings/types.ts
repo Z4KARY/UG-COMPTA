@@ -28,4 +28,9 @@ export interface BusinessFormData {
   proFormaPrefix: string;
   deliveryNotePrefix: string;
   saleOrderPrefix: string;
+  purchaseInvoicePrefix: string;
+  receiptPrefix: string;
+  purchaseOrderPrefix: string;
+  purchaseCreditNotePrefix: string;
+  purchaseDeliveryNotePrefix: string;
 }

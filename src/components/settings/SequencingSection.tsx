@@ -95,6 +95,67 @@ export function SequencingSection({ formData, handleChange }: SequencingSectionP
           />
           <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.saleOrderPrefix || "BC-"}YYYY-001</p>
         </div>
+
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-medium mb-4">{t("settings.sequencing.purchaseTitle")}</h3>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="purchaseInvoicePrefix">{t("settings.sequencing.purchaseInvoicePrefix")}</Label>
+              <Input
+                id="purchaseInvoicePrefix"
+                name="purchaseInvoicePrefix"
+                value={formData.purchaseInvoicePrefix}
+                onChange={handleChange}
+                placeholder="ACH-"
+              />
+              <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.purchaseInvoicePrefix || "ACH-"}YYYY-001</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="receiptPrefix">{t("settings.sequencing.receiptPrefix")}</Label>
+              <Input
+                id="receiptPrefix"
+                name="receiptPrefix"
+                value={formData.receiptPrefix}
+                onChange={handleChange}
+                placeholder="REC-"
+              />
+              <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.receiptPrefix || "REC-"}YYYY-001</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="purchaseOrderPrefix">{t("settings.sequencing.purchaseOrderPrefix")}</Label>
+              <Input
+                id="purchaseOrderPrefix"
+                name="purchaseOrderPrefix"
+                value={formData.purchaseOrderPrefix}
+                onChange={handleChange}
+                placeholder="BCA-"
+              />
+              <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.purchaseOrderPrefix || "BCA-"}YYYY-001</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="purchaseCreditNotePrefix">{t("settings.sequencing.purchaseCreditNotePrefix")}</Label>
+              <Input
+                id="purchaseCreditNotePrefix"
+                name="purchaseCreditNotePrefix"
+                value={formData.purchaseCreditNotePrefix}
+                onChange={handleChange}
+                placeholder="AVA-"
+              />
+              <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.purchaseCreditNotePrefix || "AVA-"}YYYY-001</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="purchaseDeliveryNotePrefix">{t("settings.sequencing.purchaseDeliveryNotePrefix")}</Label>
+              <Input
+                id="purchaseDeliveryNotePrefix"
+                name="purchaseDeliveryNotePrefix"
+                value={formData.purchaseDeliveryNotePrefix}
+                onChange={handleChange}
+                placeholder="BLA-"
+              />
+              <p className="text-xs text-muted-foreground">{t("settings.helpers.format")} {formData.purchaseDeliveryNotePrefix || "BLA-"}YYYY-001</p>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

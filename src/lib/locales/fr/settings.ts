@@ -32,6 +32,13 @@ export const settings = {
   "settings.sequencing.deliveryNotePrefix": "Préfixe Bon de Livraison",
   "settings.sequencing.saleOrderPrefix": "Préfixe Bon de Commande",
   
+  "settings.sequencing.purchaseTitle": "Séquençage des achats",
+  "settings.sequencing.purchaseInvoicePrefix": "Préfixe Facture d'Achat",
+  "settings.sequencing.receiptPrefix": "Préfixe Reçu",
+  "settings.sequencing.purchaseOrderPrefix": "Préfixe Bon de Commande Achat",
+  "settings.sequencing.purchaseCreditNotePrefix": "Préfixe Avoir Achat",
+  "settings.sequencing.purchaseDeliveryNotePrefix": "Préfixe Bon de Livraison Achat",
+
   "settings.placeholders.prefixInv": "INV-",
   "settings.placeholders.prefixQuote": "DEV-",
   "settings.placeholders.prefixCredit": "AV-",

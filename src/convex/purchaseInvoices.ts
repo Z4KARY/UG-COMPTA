@@ -7,20 +7,35 @@ import { internal } from "./_generated/api";
 async function generatePurchaseNumber(
   ctx: any, 
   businessId: any, 
+  type: string,
   dateTimestamp: number
 ) {
   const date = new Date(dateTimestamp);
   const year = date.getFullYear();
-  const prefix = "ACH-"; // Default prefix for purchases
+  
+  // Get business settings for prefixes
+  const business = await ctx.db.get(businessId);
+  let prefix = "ACH-"; // Default
+  
+  if (type === "invoice") prefix = business?.purchaseInvoicePrefix || "ACH-";
+  if (type === "receipt") prefix = business?.receiptPrefix || "REC-";
+  if (type === "purchase_order") prefix = business?.purchaseOrderPrefix || "BCA-";
+  if (type === "credit_note") prefix = business?.purchaseCreditNotePrefix || "AVA-";
+  if (type === "delivery_note") prefix = business?.purchaseDeliveryNotePrefix || "BLA-";
 
   // Get current counter
   const counter = await ctx.db
     .query("invoiceCounters")
     .withIndex("by_business_type_year", (q: any) => 
-      q.eq("businessId", businessId).eq("type", "purchase").eq("year", year)
+      q.eq("businessId", businessId).eq("type", "purchase_" + type).eq("year", year)
     )
     .first();
 
+  // Fallback to legacy "purchase" counter if specific type counter doesn't exist yet
+  // This prevents resetting numbers if migrating from single counter
+  // However, for new types, we want separate counters.
+  // Since we are introducing types now, we should probably stick to separate counters.
+  
   let nextCount = 1;
   if (counter) {
     nextCount = counter.count + 1;
@@ -28,7 +43,7 @@ async function generatePurchaseNumber(
   } else {
     await ctx.db.insert("invoiceCounters", {
       businessId,
-      type: "purchase",
+      type: "purchase_" + type, // Use distinct counter type
       year,
       count: nextCount,
     });
@@ -218,7 +233,7 @@ export const create = mutation({
     // Generate Invoice Number if not provided or AUTO
     let finalInvoiceNumber = args.invoiceNumber;
     if (!finalInvoiceNumber || finalInvoiceNumber === "AUTO") {
-        finalInvoiceNumber = await generatePurchaseNumber(ctx, args.businessId, args.invoiceDate);
+        finalInvoiceNumber = await generatePurchaseNumber(ctx, args.businessId, args.type || "invoice", args.invoiceDate);
     }
 
     // Calculate totals
