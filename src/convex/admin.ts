@@ -286,6 +286,27 @@ export const deleteUsers = mutation({
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
     for (const id of args.ids) {
+      // Delete auth accounts associated with the user
+      // We use filter here to be safe as we don't control the indexes on authTables directly
+      const authAccounts = await ctx.db
+        .query("authAccounts")
+        .filter((q) => q.eq(q.field("userId"), id))
+        .collect();
+      
+      for (const account of authAccounts) {
+        await ctx.db.delete(account._id);
+      }
+
+      // Delete auth sessions associated with the user
+      const authSessions = await ctx.db
+        .query("authSessions")
+        .filter((q) => q.eq(q.field("userId"), id))
+        .collect();
+        
+      for (const session of authSessions) {
+        await ctx.db.delete(session._id);
+      }
+
       await ctx.db.delete(id);
       // Delete associated businesses
       const businesses = await ctx.db
