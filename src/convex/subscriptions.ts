@@ -35,6 +35,62 @@ export const PLANS = {
   },
 };
 
+export const simulatePayment = mutation({
+  args: {
+    businessId: v.id("businesses"),
+    planId: v.string(),
+    interval: v.union(v.literal("month"), v.literal("year")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const business = await ctx.db.get(args.businessId);
+    if (!business) throw new Error("Business not found");
+
+    // Check authorization (owner only)
+    if (business.userId !== userId) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", args.businessId).eq("userId", userId))
+            .first();
+        if (!member || member.role !== "owner") {
+            throw new Error("Only the owner can manage subscriptions");
+        }
+    }
+
+    const plan = PLANS[args.planId as keyof typeof PLANS];
+    if (!plan) throw new Error("Invalid plan");
+
+    const now = Date.now();
+    const duration = args.interval === "year" ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+    const endDate = now + duration;
+
+    // Create subscription record
+    await ctx.db.insert("subscriptions", {
+      businessId: args.businessId,
+      planId: args.planId as any,
+      status: "active",
+      amount: plan.price || 0,
+      currency: "DZD",
+      interval: args.interval,
+      startDate: now,
+      endDate: endDate,
+      paymentMethod: "simulation",
+      transactionId: `sim_${Date.now()}`,
+    });
+
+    // Update business status
+    await ctx.db.patch(args.businessId, {
+      plan: args.planId as any,
+      subscriptionStatus: "active",
+      subscriptionEndsAt: endDate,
+    });
+
+    return { success: true };
+  },
+});
+
 export const upgradeSubscription = mutation({
   args: {
     businessId: v.id("businesses"),

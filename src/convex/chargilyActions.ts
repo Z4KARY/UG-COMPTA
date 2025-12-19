@@ -22,6 +22,20 @@ export const createCheckoutSession = action({
     // If running locally, this might be undefined or localhost.
     const domain = process.env.CONVEX_SITE_URL || "http://localhost:5173";
     
+    // Check if Chargily API key is configured
+    if (!process.env.CHARGILY_SECRET_KEY) {
+      console.log("Chargily secret key not found, using simulation mode");
+      // Return simulation URL
+      const params = new URLSearchParams({
+          businessId: args.businessId,
+          planId: args.planId,
+          interval: args.interval,
+          amount: amount.toString(),
+          currency: "DZD"
+      });
+      return { checkoutUrl: `${domain}/payment/simulate?${params.toString()}` };
+    }
+
     const payload = {
       amount: amount,
       currency: "dzd",

@@ -30,6 +30,7 @@ import Onboarding from "@/pages/Onboarding.tsx";
 import AdminAuth from "@/pages/AdminAuth.tsx";
 import LegalDocumentSettings from "@/pages/LegalDocumentSettings.tsx";
 import LegalDocumentView from "@/pages/LegalDocumentView.tsx";
+import PaymentSimulation from "@/pages/PaymentSimulation.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -72,6 +73,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/settings" element={<BusinessSettings />} />
               <Route path="/settings/legal-document" element={<LegalDocumentSettings />} />
               <Route path="/legal-document/view" element={<LegalDocumentView />} />
+              <Route path="/payment/simulate" element={<PaymentSimulation />} />
               <Route path="/customers" element={<Customers />} />
               <Route path="/products" element={<Products />} />
               <Route path="/invoices" element={<Invoices />} />
