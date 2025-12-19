@@ -325,6 +325,137 @@ export const create = mutation({
   },
 });
 
+export const update = mutation({
+  args: {
+    id: v.id("purchaseInvoices"),
+    supplierId: v.optional(v.id("suppliers")),
+    invoiceNumber: v.optional(v.string()),
+    type: v.optional(v.union(
+        v.literal("invoice"),
+        v.literal("credit_note"),
+        v.literal("delivery_note"),
+        v.literal("purchase_order"),
+        v.literal("receipt")
+    )),
+    invoiceDate: v.optional(v.number()),
+    paymentDate: v.optional(v.number()),
+    paymentMethod: v.optional(v.union(
+        v.literal("CASH"),
+        v.literal("BANK_TRANSFER"),
+        v.literal("CHEQUE"),
+        v.literal("CARD"),
+        v.literal("OTHER")
+    )),
+    description: v.optional(v.string()),
+    items: v.optional(v.array(v.object({
+        description: v.string(),
+        quantity: v.number(),
+        unitPrice: v.number(),
+        vatRate: v.number(),
+    }))),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const invoice = await ctx.db.get(args.id);
+    if (!invoice) throw new Error("Invoice not found");
+
+    const business = await ctx.db.get(invoice.businessId);
+    if (!business) throw new Error("Business not found");
+
+    if (business.userId !== userId) {
+        const member = await ctx.db
+            .query("businessMembers")
+            .withIndex("by_business_and_user", (q) => q.eq("businessId", invoice.businessId).eq("userId", userId))
+            .first();
+        if (!member) throw new Error("Unauthorized");
+    }
+
+    // Safety Checks
+    if (invoice.status === "paid" || invoice.status === "partial") {
+        throw new Error("Cannot update a purchase invoice that has been paid or partially paid");
+    }
+
+    const currentClosure = await ctx.db.query("periodClosures")
+        .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+        .filter(q => q.and(q.lte(q.field("startDate"), invoice.invoiceDate), q.gte(q.field("endDate"), invoice.invoiceDate)))
+        .first();
+    
+    if (currentClosure) {
+        throw new Error("Cannot update purchase invoice in a closed period");
+    }
+
+    if (args.invoiceDate !== undefined) {
+        const targetDate = args.invoiceDate;
+        const newClosure = await ctx.db.query("periodClosures")
+            .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+            .filter(q => q.and(q.lte(q.field("startDate"), targetDate), q.gte(q.field("endDate"), targetDate)))
+            .first();
+        
+        if (newClosure) {
+            throw new Error("Cannot move purchase invoice to a closed period");
+        }
+    }
+
+    const { id, items, ...fields } = args;
+    
+    if (items) {
+        let subtotalHt = 0;
+        let vatTotal = 0;
+        let totalTtc = 0;
+
+        const calculatedItems = items.map(item => {
+            const lineTotalHt = item.quantity * item.unitPrice;
+            const vatAmount = lineTotalHt * (item.vatRate / 100);
+            const lineTotalTtc = lineTotalHt + vatAmount;
+
+            subtotalHt += lineTotalHt;
+            vatTotal += vatAmount;
+            totalTtc += lineTotalTtc;
+
+            return {
+                ...item,
+                vatAmount,
+                lineTotalHt,
+                lineTotalTtc
+            };
+        });
+
+        let vatDeductible = 0;
+        if (business.fiscalRegime === "VAT") {
+            vatDeductible = vatTotal;
+        }
+
+        await ctx.db.patch(id, {
+            ...fields,
+            subtotalHt,
+            vatTotal,
+            totalTtc,
+            vatDeductible,
+        });
+
+        const existingItems = await ctx.db
+            .query("purchaseInvoiceItems")
+            .withIndex("by_purchase_invoice", (q) => q.eq("purchaseInvoiceId", id))
+            .collect();
+        
+        for (const item of existingItems) {
+            await ctx.db.delete(item._id);
+        }
+
+        for (const item of calculatedItems) {
+            await ctx.db.insert("purchaseInvoiceItems", {
+                purchaseInvoiceId: id,
+                ...item
+            });
+        }
+    } else {
+        await ctx.db.patch(id, fields);
+    }
+  }
+});
+
 export const remove = mutation({
     args: { id: v.id("purchaseInvoices") },
     handler: async (ctx, args) => {
