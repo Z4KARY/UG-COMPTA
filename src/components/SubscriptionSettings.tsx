@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Loader2, CreditCard, Zap, Shield, Star, LucideIcon, Rocket, Crown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PRICING_PLANS, PlanId } from "@/lib/pricing";
+import { useSearchParams, useNavigate } from "react-router";
 
 interface SubscriptionSettingsProps {
   businessId: Id<"businesses">;
@@ -34,6 +35,24 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
   const createCheckout = useAction(api.chargilyActions.createCheckoutSession);
   const history = useQuery(api.subscriptions.getSubscriptionHistory, { businessId });
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const paymentStatus = searchParams.get("payment");
+    if (paymentStatus === "success") {
+      toast.success(t("settings.subscription.toast.success") || "Subscription updated successfully!");
+      // Remove the param from URL without reloading
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("payment");
+      navigate({ search: newParams.toString() }, { replace: true });
+    } else if (paymentStatus === "failed") {
+      toast.error(t("settings.subscription.toast.error") || "Payment failed. Please try again.");
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("payment");
+      navigate({ search: newParams.toString() }, { replace: true });
+    }
+  }, [searchParams, navigate, t]);
 
   const handleUpgrade = async (planId: PlanId) => {
     setIsLoading(planId);
@@ -42,6 +61,7 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
         businessId,
         planId,
         interval: "year", // Default to year as per pricing
+        origin: window.location.origin,
       });
       
       if (result.checkoutUrl) {

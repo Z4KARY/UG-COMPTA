@@ -8,6 +8,7 @@ export const createCheckoutSession = action({
     businessId: v.id("businesses"),
     planId: v.string(),
     interval: v.union(v.literal("month"), v.literal("year")),
+    origin: v.optional(v.string()),
   },
   handler: async (_ctx, args) => {
     const plan = PLANS[args.planId as keyof typeof PLANS];
@@ -18,9 +19,8 @@ export const createCheckoutSession = action({
 
     const amount = price; 
     
-    // Use CONVEX_SITE_URL for success/failure redirects
-    // If running locally, this might be undefined or localhost.
-    const domain = process.env.CONVEX_SITE_URL || "http://localhost:5173";
+    // Use provided origin or fallback to CONVEX_SITE_URL or localhost
+    const domain = args.origin || process.env.CONVEX_SITE_URL || "http://localhost:5173";
     
     // Check if Chargily API key is configured
     if (!process.env.CHARGILY_SECRET_KEY) {

@@ -5,7 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
-import { Loader2, CheckCircle2, CreditCard } from "lucide-react";
+import { Loader2, CheckCircle2, CreditCard, AlertTriangle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function PaymentSimulation() {
@@ -36,7 +36,7 @@ export default function PaymentSimulation() {
       toast.success("Payment simulated successfully");
       setTimeout(() => {
         navigate("/settings?payment=success");
-      }, 2000);
+      }, 1500);
     } catch (error) {
       console.error(error);
       toast.error("Payment simulation failed. Ensure you are the owner of this business.");
@@ -63,13 +63,19 @@ export default function PaymentSimulation() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md shadow-lg">
+      <Card className="w-full max-w-md shadow-lg border-t-4 border-t-primary">
         <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-              <CreditCard className="h-5 w-5 text-primary-foreground" />
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                <CreditCard className="h-5 w-5 text-primary" />
+              </div>
+              <span className="font-bold text-xl tracking-tight">UGCOMPTA</span>
             </div>
-            <span className="font-bold text-xl">Chargily Test</span>
+            <div className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" />
+              Test Mode
+            </div>
           </div>
           <CardTitle className="text-2xl">Payment Simulation</CardTitle>
           <CardDescription>
@@ -102,7 +108,7 @@ export default function PaymentSimulation() {
             </div>
           )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-3">
           <Button 
             className="w-full h-11 text-base" 
             size="lg" 
@@ -118,6 +124,18 @@ export default function PaymentSimulation() {
               `Pay ${amount} ${currency}`
             )}
           </Button>
+          
+          {!isSuccess && (
+            <Button 
+              variant="ghost" 
+              className="w-full" 
+              onClick={() => navigate("/settings")}
+              disabled={isLoading}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Cancel and Return
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>
