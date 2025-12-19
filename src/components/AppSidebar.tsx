@@ -40,15 +40,21 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PRICING_PLANS } from "@/lib/pricing";
 
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const businesses = useQuery(api.businesses.listMyBusinesses);
   const activeBusiness = useQuery(api.businesses.getMyBusiness, {});
+
+  const pricing = PRICING_PLANS[language as keyof typeof PRICING_PLANS] ?? PRICING_PLANS.en;
+  const planName = activeBusiness?.plan 
+    ? pricing.find(p => p.id === activeBusiness.plan)?.name 
+    : "Business";
 
   const items = [
     {
@@ -119,9 +125,7 @@ export function AppSidebar() {
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">{activeBusiness?.name || "UGCOMPTA"}</span>
                       <span className="truncate text-xs text-muted-foreground">
-                        {activeBusiness?.plan 
-                          ? (activeBusiness.plan === "free" ? "Auto-Entrepreneur" : activeBusiness.plan === "pro" ? "Small Business" : "Enterprise") 
-                          : "Business"}
+                        {planName || "Business"}
                       </span>
                     </div>
                     <ChevronUp className="ml-auto size-4" />
