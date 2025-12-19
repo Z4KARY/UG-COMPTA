@@ -51,4 +51,40 @@ const emailOtp = Email({
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [emailOtp, Anonymous()],
+  callbacks: {
+    async createOrUpdateUser(ctx, args) {
+      if (args.existingUserId) {
+        return args.existingUserId;
+      }
+
+      const email = args.profile.email;
+      if (email) {
+        // Check for existing user by email (e.g. created by Admin)
+        // Check for existing user by email (e.g. created by Admin)
+        // Note: Using filter instead of withIndex due to type inference issues with authTables
+        const existingUser = await ctx.db
+          .query("users")
+          .filter((q) => q.eq(q.field("email"), email))
+          .first();
+
+        if (existingUser) {
+          // Link to existing user instead of creating a new one
+          // Update verification time if provided and not set
+          if (args.profile.emailVerificationTime && !existingUser.emailVerificationTime) {
+             await ctx.db.patch(existingUser._id, {
+               emailVerificationTime: args.profile.emailVerificationTime
+             });
+          }
+          return existingUser._id;
+        }
+      }
+
+      // Create new user
+      return await ctx.db.insert("users", {
+        ...args.profile,
+        role: "user",
+        roleGlobal: "NORMAL",
+      });
+    },
+  },
 });
