@@ -279,6 +279,12 @@ export const create = mutation({
       joinedAt: Date.now(),
     });
 
+    // Update user global role to owner if they are currently staff/normal
+    const user = await ctx.db.get(userId);
+    if (user && (user.roleGlobal === "NORMAL" || user.roleGlobal === "staff" || !user.roleGlobal)) {
+        await ctx.db.patch(userId, { roleGlobal: "owner" });
+    }
+
     return businessId;
   },
 });

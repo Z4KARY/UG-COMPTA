@@ -653,13 +653,17 @@ export const createBusiness = mutation({
     const existingUser = await ctx.db.query("users").withIndex("email", q => q.eq("email", args.ownerEmail)).first();
     if (existingUser) {
         userId = existingUser._id;
+        // Upgrade to owner if needed
+        if (existingUser.roleGlobal === "NORMAL" || existingUser.roleGlobal === "staff" || !existingUser.roleGlobal) {
+             await ctx.db.patch(userId, { roleGlobal: "owner" });
+        }
     } else {
         // Create user
         userId = await ctx.db.insert("users", {
             email: args.ownerEmail,
             name: args.ownerName || args.ownerEmail.split('@')[0],
             role: "user",
-            roleGlobal: "NORMAL",
+            roleGlobal: "owner",
         });
     }
 
@@ -729,11 +733,17 @@ export const createAccount = mutation({
     const existing = await ctx.db.query("users").withIndex("email", q => q.eq("email", args.email)).first();
     if (existing) throw new Error("Email already in use");
 
+    // If creating a business, force role to owner if it was set to staff/normal
+    let roleGlobal = args.role;
+    if (args.createBusiness && (roleGlobal === "staff" || roleGlobal === "NORMAL")) {
+        roleGlobal = "owner";
+    }
+
     const userId = await ctx.db.insert("users", {
         name: args.name,
         email: args.email,
         role: (args.role === "ADMIN" || args.role === "admin") ? "admin" : "user",
-        roleGlobal: args.role,
+        roleGlobal: roleGlobal,
     });
 
     if (args.createBusiness && args.businessName) {
