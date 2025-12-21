@@ -39,6 +39,14 @@ import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 
+const PLAN_NAMES: Record<string, string> = {
+  free: "Auto-Entrepreneur",
+  startup: "Startup",
+  pro: "Small Business",
+  premium: "Premium",
+  enterprise: "Enterprise",
+};
+
 export function AdminSubscriptions() {
   const subscriptions = useQuery(api.admin.listAllSubscriptions);
   const cancelSubscription = useMutation(api.admin.cancelSubscription);
@@ -121,7 +129,7 @@ export function AdminSubscriptions() {
                 openEditDialog(sub);
               }}>
                 <TableCell className="font-medium">{sub.businessName}</TableCell>
-                <TableCell className="capitalize">{sub.planId}</TableCell>
+                <TableCell className="capitalize">{PLAN_NAMES[sub.planId] || sub.planId}</TableCell>
                 <TableCell>{sub.amount.toLocaleString()} {sub.currency}</TableCell>
                 <TableCell className="capitalize">{sub.interval}</TableCell>
                 <TableCell>
@@ -185,9 +193,9 @@ export function AdminSubscriptions() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="free">Auto-Entrepreneur</SelectItem>
                     <SelectItem value="startup">Startup</SelectItem>
-                    <SelectItem value="pro">Pro</SelectItem>
+                    <SelectItem value="pro">Small Business</SelectItem>
                     <SelectItem value="premium">Premium</SelectItem>
                     <SelectItem value="enterprise">Enterprise</SelectItem>
                   </SelectContent>

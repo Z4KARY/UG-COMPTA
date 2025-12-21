@@ -42,6 +42,14 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 
+const PLAN_NAMES: Record<string, string> = {
+  free: "Auto-Entrepreneur",
+  startup: "Startup",
+  pro: "Small Business",
+  premium: "Premium",
+  enterprise: "Enterprise",
+};
+
 export function AdminUsers() {
   const { t } = useLanguage();
   const users = useQuery(api.admin.listUsers);
@@ -219,9 +227,9 @@ export function AdminUsers() {
                             <SelectValue placeholder="Select Plan" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="free">Free</SelectItem>
+                            <SelectItem value="free">Auto-Entrepreneur</SelectItem>
                             <SelectItem value="startup">Startup</SelectItem>
-                            <SelectItem value="pro">Pro</SelectItem>
+                            <SelectItem value="pro">Small Business</SelectItem>
                             <SelectItem value="premium">Premium</SelectItem>
                             <SelectItem value="enterprise">Enterprise</SelectItem>
                           </SelectContent>
@@ -379,7 +387,7 @@ export function AdminUsers() {
                                     {userDetails.businesses?.map((b) => (
                                         <TableRow key={b._id}>
                                             <TableCell className="font-medium">{b.name}</TableCell>
-                                            <TableCell className="capitalize">{b.plan || "-"}</TableCell>
+                                            <TableCell className="capitalize">{PLAN_NAMES[b.plan || ""] || b.plan || "-"}</TableCell>
                                             <TableCell>
                                                 {b.isSuspended ? (
                                                     <Badge variant="destructive">Suspended</Badge>

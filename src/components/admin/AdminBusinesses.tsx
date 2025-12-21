@@ -42,6 +42,14 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 
+const PLAN_NAMES: Record<string, string> = {
+  free: "Auto-Entrepreneur",
+  startup: "Startup",
+  pro: "Small Business",
+  premium: "Premium",
+  enterprise: "Enterprise",
+};
+
 export function AdminBusinesses() {
   const { t } = useLanguage();
   const businesses = useQuery(api.admin.listBusinesses);
@@ -238,9 +246,9 @@ export function AdminBusinesses() {
                         <SelectValue placeholder="Select Plan" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="free">Free</SelectItem>
+                        <SelectItem value="free">Auto-Entrepreneur</SelectItem>
                         <SelectItem value="startup">Startup</SelectItem>
-                        <SelectItem value="pro">Pro</SelectItem>
+                        <SelectItem value="pro">Small Business</SelectItem>
                         <SelectItem value="premium">Premium</SelectItem>
                         <SelectItem value="enterprise">Enterprise</SelectItem>
                       </SelectContent>
@@ -405,7 +413,7 @@ export function AdminBusinesses() {
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div className="space-y-1">
                                     <Label className="text-muted-foreground">Current Plan</Label>
-                                    <p className="font-medium capitalize">{businessDetails.plan || "None"}</p>
+                                    <p className="font-medium capitalize">{PLAN_NAMES[businessDetails.plan || ""] || businessDetails.plan || "None"}</p>
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-muted-foreground">Status</Label>
@@ -434,7 +442,7 @@ export function AdminBusinesses() {
                                 <TableBody>
                                     {businessDetails.subscriptions?.map((sub) => (
                                         <TableRow key={sub._id}>
-                                            <TableCell className="capitalize">{sub.planId}</TableCell>
+                                            <TableCell className="capitalize">{PLAN_NAMES[sub.planId] || sub.planId}</TableCell>
                                             <TableCell className="capitalize">{sub.status}</TableCell>
                                             <TableCell>{new Date(sub.startDate).toLocaleDateString()}</TableCell>
                                             <TableCell>{sub.endDate ? new Date(sub.endDate).toLocaleDateString() : "-"}</TableCell>
@@ -470,9 +478,9 @@ export function AdminBusinesses() {
                                 <SelectValue placeholder="Select Plan" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="free">Free</SelectItem>
+                                <SelectItem value="free">Auto-Entrepreneur</SelectItem>
                                 <SelectItem value="startup">Startup</SelectItem>
-                                <SelectItem value="pro">Pro</SelectItem>
+                                <SelectItem value="pro">Small Business</SelectItem>
                                 <SelectItem value="premium">Premium</SelectItem>
                                 <SelectItem value="enterprise">Enterprise</SelectItem>
                             </SelectContent>
