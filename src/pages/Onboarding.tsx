@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { useMutation, useAction, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2, CheckCircle2, Building2, User, CreditCard } from "lucide-react";
+import { Loader2, Building2, User } from "lucide-react";
 import { toast } from "sonner";
 import { PlanId } from "@/lib/pricing";
 
@@ -19,7 +19,6 @@ export default function Onboarding() {
   const updateUser = useMutation(api.users.update);
   const createBusiness = useMutation(api.businesses.create);
   const updateBusiness = useMutation(api.businesses.update);
-  const createCheckout = useAction(api.chargilyActions.createCheckoutSession);
   const myBusiness = useQuery(api.businesses.getMyBusiness, {});
 
   const [step, setStep] = useState(1);
@@ -81,8 +80,6 @@ export default function Onboarding() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      let businessId;
-
       if (myBusiness) {
         // Update existing business
         await updateBusiness({
@@ -90,8 +87,8 @@ export default function Onboarding() {
           name: businessName,
           type: businessType,
           phone: phoneNumber,
+          plan: planId, // Update plan if changed
         });
-        businessId = myBusiness._id;
 
         // If subscription is already active (e.g. assigned by Admin), skip payment
         if (myBusiness.subscriptionStatus === "active") {
@@ -101,40 +98,21 @@ export default function Onboarding() {
         }
       } else {
         // Create Business
-        businessId = await createBusiness({
+        await createBusiness({
           name: businessName,
           type: businessType,
           address: "To be updated", // Default placeholder
           currency: "DZD",
           tvaDefault: businessType === "societe" ? 19 : 0,
           phone: phoneNumber,
+          plan: planId, // Pass selected plan to initiate trial
         });
       }
 
-      // If plan is free, we are done. If paid, go to payment step
-      if (planId === "free") {
-        toast.success("Setup complete!");
-        navigate("/dashboard");
-      } else {
-        // Initiate Chargily Checkout
-        try {
-            const result = await createCheckout({
-                businessId,
-                planId: planId,
-                interval: "year",
-            });
-            
-            if (result.checkoutUrl) {
-                window.location.href = result.checkoutUrl;
-            } else {
-                toast.error("Failed to start payment");
-                // Optionally stay on this step or show error
-            }
-        } catch (err) {
-            console.error(err);
-            toast.error("Payment initiation failed");
-        }
-      }
+      // Direct access with Trial - Skip Payment Step
+      toast.success(`Welcome! Your ${planId === "free" ? "3-month" : "1-month"} free trial has started.`);
+      navigate("/dashboard");
+      
     } catch (error) {
       console.error(error);
       toast.error("Failed to save business details");
@@ -163,14 +141,10 @@ export default function Onboarding() {
           <div className={`flex flex-col items-center gap-2 bg-background p-2 rounded-full border-2 ${step >= 2 ? "border-primary text-primary" : "border-muted text-muted-foreground"}`}>
             <Building2 className="h-6 w-6" />
           </div>
-          <div className={`flex flex-col items-center gap-2 bg-background p-2 rounded-full border-2 ${step >= 3 ? "border-primary text-primary" : "border-muted text-muted-foreground"}`}>
-            <CreditCard className="h-6 w-6" />
-          </div>
         </div>
         <div className="flex justify-between mt-2 text-sm font-medium text-muted-foreground px-2">
           <span>Personal Info</span>
           <span>Business Details</span>
-          <span>Payment & Review</span>
         </div>
       </div>
 
@@ -247,50 +221,10 @@ export default function Onboarding() {
             </CardContent>
             <CardFooter>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (planId === "free" || myBusiness?.subscriptionStatus === "active" ? "Complete Setup" : "Continue to Payment")}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Start Free Trial"}
               </Button>
             </CardFooter>
           </form>
-        )}
-
-        {step === 3 && (
-          <div>
-            <CardHeader>
-              <div className="mx-auto bg-green-100 p-3 rounded-full w-fit mb-4">
-                <CheckCircle2 className="h-8 w-8 text-green-600" />
-              </div>
-              <CardTitle className="text-center">Payment Successful!</CardTitle>
-              <CardDescription className="text-center">
-                Your subscription to the <strong>{planId}</strong> plan is active.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted p-4 rounded-lg text-sm space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Plan</span>
-                  <span className="font-medium capitalize">{planId}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Amount Paid</span>
-                  <span className="font-medium">
-                    {planId === "free" ? "0 DZD" : 
-                     planId === "startup" ? "39,000 DZD" :
-                     planId === "pro" ? "49,000 DZD" :
-                     planId === "premium" ? "69,000 DZD" : "Custom"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Billing Cycle</span>
-                  <span className="font-medium">Yearly</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full" onClick={() => navigate("/dashboard")}>
-                Go to Dashboard
-              </Button>
-            </CardFooter>
-          </div>
         )}
       </Card>
     </div>
