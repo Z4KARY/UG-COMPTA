@@ -130,6 +130,7 @@ export const updateSubscription = mutation({
     endDate: v.number(),
     status: v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial")),
     amount: v.optional(v.number()),
+    interval: v.optional(v.union(v.literal("month"), v.literal("year"))),
   },
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
@@ -144,6 +145,10 @@ export const updateSubscription = mutation({
 
     if (args.amount !== undefined) {
         updates.amount = args.amount;
+    }
+
+    if (args.interval) {
+        updates.interval = args.interval;
     }
 
     await ctx.db.patch(args.id, updates);
@@ -165,6 +170,7 @@ export const createSubscription = mutation({
     plan: v.union(v.literal("free"), v.literal("startup"), v.literal("pro"), v.literal("premium"), v.literal("enterprise")),
     durationMonths: v.number(),
     amount: v.optional(v.number()),
+    interval: v.optional(v.union(v.literal("month"), v.literal("year"))),
   },
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
@@ -201,7 +207,7 @@ export const createSubscription = mutation({
         status: "active",
         amount: args.amount ?? 0, // Manual admin assignment
         currency: "DZD",
-        interval: args.durationMonths >= 12 ? "year" : "month",
+        interval: args.interval || (args.durationMonths >= 12 ? "year" : "month"),
         startDate: Date.now(),
         endDate: subscriptionEndsAt,
         paymentMethod: "manual_admin",

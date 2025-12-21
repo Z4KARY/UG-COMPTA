@@ -56,6 +56,7 @@ export function AdminSubscriptions() {
   const [editStatus, setEditStatus] = useState<string>("");
   const [editEndDate, setEditEndDate] = useState<string>("");
   const [editAmount, setEditAmount] = useState<string>("");
+  const [editInterval, setEditInterval] = useState<"month" | "year">("month");
   const [initialPlan, setInitialPlan] = useState<string>("");
 
   const handleCancel = async (id: Id<"subscriptions">) => {
@@ -84,6 +85,7 @@ export function AdminSubscriptions() {
     setInitialPlan(sub.planId);
     setEditStatus(sub.status);
     setEditAmount(sub.amount?.toString() || "0");
+    setEditInterval(sub.interval || "month");
     // Format date for input type="date" (YYYY-MM-DD)
     const date = new Date(sub.endDate || Date.now());
     setEditEndDate(date.toISOString().split('T')[0]);
@@ -115,6 +117,7 @@ export function AdminSubscriptions() {
         status: editStatus as any,
         endDate: new Date(editEndDate).getTime(),
         amount: parseFloat(editAmount) || 0,
+        interval: editInterval,
       });
       toast.success("Subscription updated");
       setEditingSub(null);
@@ -229,6 +232,18 @@ export function AdminSubscriptions() {
                   value={editAmount} 
                   onChange={(e) => setEditAmount(e.target.value)} 
                 />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="interval">Interval</Label>
+                <Select value={editInterval} onValueChange={(v: "month" | "year") => setEditInterval(v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="month">Monthly</SelectItem>
+                    <SelectItem value="year">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="status">Status</Label>

@@ -67,6 +67,7 @@ export function AdminBusinesses() {
   const [subPlan, setSubPlan] = useState<string>("");
   const [subDuration, setSubDuration] = useState<string>("");
   const [subAmount, setSubAmount] = useState<string>("");
+  const [subInterval, setSubInterval] = useState<"month" | "year">("month");
 
   // Create Form State
   const [businessName, setBusinessName] = useState("");
@@ -156,12 +157,14 @@ export function AdminBusinesses() {
         plan: subPlan as any,
         durationMonths: parseInt(subDuration),
         amount: subAmount ? parseFloat(subAmount) : 0,
+        interval: subInterval,
       });
       toast.success("Subscription added successfully");
       setIsAddSubOpen(false);
       setSubPlan("");
       setSubDuration("");
       setSubAmount("");
+      setSubInterval("month");
     } catch (e) {
       toast.error("Failed to add subscription");
     }
@@ -191,6 +194,12 @@ export function AdminBusinesses() {
            if (!isNaN(priceNum)) {
              setSubAmount(priceNum.toString());
            }
+        }
+        // Auto-set interval based on plan period if available, default to year if not specified or year
+        if (plan.period === "/year") {
+            setSubInterval("year");
+        } else {
+            setSubInterval("month");
         }
       }
     }
@@ -513,6 +522,18 @@ export function AdminBusinesses() {
                             onChange={(e) => setSubAmount(e.target.value)} 
                             placeholder="0"
                         />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="subInterval">Interval</Label>
+                        <Select value={subInterval} onValueChange={(v: "month" | "year") => setSubInterval(v)}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Interval" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="month">Monthly</SelectItem>
+                                <SelectItem value="year">Yearly</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="subDuration">Duration</Label>
