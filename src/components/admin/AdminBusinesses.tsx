@@ -42,6 +42,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useEffect } from "react";
 import { PRICING_PLANS } from "@/lib/pricing";
+import { AdminTableFilters } from "./AdminTableFilters";
 
 const PLAN_NAMES = PRICING_PLANS.en.reduce((acc, plan) => ({
   ...acc,
@@ -50,7 +51,13 @@ const PLAN_NAMES = PRICING_PLANS.en.reduce((acc, plan) => ({
 
 export function AdminBusinesses() {
   const { t } = useLanguage();
-  const businesses = useQuery(api.admin.listBusinesses);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const businesses = useQuery(api.admin.listBusinesses, {
+    search: search || undefined,
+    status: statusFilter === "all" ? undefined : statusFilter,
+  });
   const toggleBusiness = useMutation(api.admin.toggleBusinessSuspension);
   const deleteBusinesses = useMutation(api.admin.deleteBusinesses);
   const createBusiness = useMutation(api.admin.createBusiness);
@@ -305,6 +312,28 @@ export function AdminBusinesses() {
         </div>
       </CardHeader>
       <CardContent>
+        <AdminTableFilters 
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search business, NIF, or owner..."
+          filters={[
+            {
+              key: "status",
+              label: "Status",
+              value: statusFilter,
+              onChange: setStatusFilter,
+              options: [
+                { label: "Active", value: "active" },
+                { label: "Suspended", value: "suspended" },
+              ]
+            }
+          ]}
+          onReset={() => {
+            setSearch("");
+            setStatusFilter("all");
+          }}
+        />
+
         <Table>
           <TableHeader>
             <TableRow>

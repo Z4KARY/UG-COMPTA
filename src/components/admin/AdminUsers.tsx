@@ -42,6 +42,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 import { PRICING_PLANS } from "@/lib/pricing";
+import { AdminTableFilters } from "./AdminTableFilters";
 
 const PLAN_NAMES = PRICING_PLANS.en.reduce((acc, plan) => ({
   ...acc,
@@ -50,7 +51,13 @@ const PLAN_NAMES = PRICING_PLANS.en.reduce((acc, plan) => ({
 
 export function AdminUsers() {
   const { t } = useLanguage();
-  const users = useQuery(api.admin.listUsers);
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+
+  const users = useQuery(api.admin.listUsers, {
+    search: search || undefined,
+    role: roleFilter === "all" ? undefined : roleFilter,
+  });
   const currentUser = useQuery(api.users.currentUser);
   const toggleUser = useMutation(api.admin.toggleUserSuspension);
   const updateUserRole = useMutation(api.admin.updateUserRole);
@@ -262,6 +269,29 @@ export function AdminUsers() {
         </div>
       </CardHeader>
       <CardContent>
+        <AdminTableFilters 
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search name or email..."
+          filters={[
+            {
+              key: "role",
+              label: "Role",
+              value: roleFilter,
+              onChange: setRoleFilter,
+              options: [
+                { label: "Normal User", value: "NORMAL" },
+                { label: "Accountant", value: "ACCOUNTANT" },
+                { label: "Admin", value: "ADMIN" },
+              ]
+            }
+          ]}
+          onReset={() => {
+            setSearch("");
+            setRoleFilter("all");
+          }}
+        />
+
         <Table>
           <TableHeader>
             <TableRow>

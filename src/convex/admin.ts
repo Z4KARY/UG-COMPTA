@@ -344,13 +344,32 @@ export const getUserDetails = query({
 });
 
 export const listBusinesses = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    search: v.optional(v.string()),
+    status: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
     await checkAdmin(ctx);
-    const businesses = await ctx.db.query("businesses").order("desc").take(100);
+    
+    let businesses;
+    if (args.status && args.status !== "all") {
+        // We don't have a direct index for isSuspended usually, but let's check schema
+        // Schema has isSuspended: v.optional(v.boolean()) but no index.
+        // So we'll fetch all and filter, or use the subscriptionStatus if that's what is meant.
+        // The UI usually shows "Active" or "Suspended" based on isSuspended flag.
+        // For efficiency we'll fetch recent and filter in memory for now as per pattern.
+        businesses = await ctx.db.query("businesses").order("desc").take(500);
+        if (args.status === "suspended") {
+            businesses = businesses.filter(b => b.isSuspended);
+        } else if (args.status === "active") {
+            businesses = businesses.filter(b => !b.isSuspended);
+        }
+    } else {
+        businesses = await ctx.db.query("businesses").order("desc").take(500);
+    }
     
     // Enrich with owner info
-    const enriched = await Promise.all(businesses.map(async (b) => {
+    let enriched = await Promise.all(businesses.map(async (b) => {
         const owner = await ctx.db.get(b.userId);
         return {
             ...b,
@@ -358,16 +377,52 @@ export const listBusinesses = query({
             ownerEmail: owner?.email,
         };
     }));
+
+    // Filter by search
+    if (args.search) {
+        const query = args.search.toLowerCase();
+        enriched = enriched.filter(b => 
+            b.name.toLowerCase().includes(query) ||
+            (b.nif && b.nif.includes(query)) ||
+            (b.ownerName && b.ownerName.toLowerCase().includes(query)) ||
+            (b.ownerEmail && b.ownerEmail.toLowerCase().includes(query))
+        );
+    }
     
     return enriched;
   },
 });
 
 export const listUsers = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    search: v.optional(v.string()),
+    role: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
     await checkAdmin(ctx);
-    return await ctx.db.query("users").order("desc").take(100);
+    
+    let users = await ctx.db.query("users").order("desc").take(500);
+
+    // Filter by role
+    if (args.role && args.role !== "all") {
+        users = users.filter(u => {
+            if (args.role === "ADMIN") return u.role === "admin" || u.roleGlobal === "ADMIN";
+            if (args.role === "ACCOUNTANT") return u.roleGlobal === "ACCOUNTANT";
+            if (args.role === "NORMAL") return (!u.roleGlobal || u.roleGlobal === "NORMAL") && u.role !== "admin";
+            return true;
+        });
+    }
+
+    // Filter by search
+    if (args.search) {
+        const query = args.search.toLowerCase();
+        users = users.filter(u => 
+            (u.name && u.name.toLowerCase().includes(query)) ||
+            (u.email && u.email.toLowerCase().includes(query))
+        );
+    }
+
+    return users;
   },
 });
 
