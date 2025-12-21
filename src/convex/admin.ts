@@ -62,19 +62,52 @@ export const listAuditLogs = query({
 });
 
 export const listAllSubscriptions = query({
-    args: {},
-    handler: async (ctx) => {
+    args: {
+        search: v.optional(v.string()),
+        status: v.optional(v.string()),
+        interval: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
         await checkAdmin(ctx);
-        const subs = await ctx.db.query("subscriptions").order("desc").take(100);
         
-        return await Promise.all(subs.map(async (sub) => {
+        let subs;
+        if (args.status && args.status !== "all") {
+            subs = await ctx.db.query("subscriptions")
+                .withIndex("by_status", (q) => q.eq("status", args.status as any))
+                .take(500);
+        } else {
+            subs = await ctx.db.query("subscriptions")
+                .order("desc")
+                .take(500);
+        }
+        
+        let enriched = await Promise.all(subs.map(async (sub) => {
             const business = await ctx.db.get(sub.businessId);
+            const user = business ? await ctx.db.get(business.userId) : null;
             return {
                 ...sub,
                 businessName: business?.name || "Unknown Business",
-                businessOwnerId: business?.userId
+                businessOwnerId: business?.userId,
+                ownerEmail: user?.email || "",
             };
         }));
+
+        // Filter by interval
+        if (args.interval && args.interval !== "all") {
+            enriched = enriched.filter(sub => sub.interval === args.interval);
+        }
+
+        // Filter by search query
+        if (args.search) {
+            const query = args.search.toLowerCase();
+            enriched = enriched.filter(sub => 
+                sub.businessName.toLowerCase().includes(query) ||
+                sub.planId.toLowerCase().includes(query) ||
+                sub.ownerEmail.toLowerCase().includes(query)
+            );
+        }
+
+        return enriched;
     }
 });
 

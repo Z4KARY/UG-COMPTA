@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useState, useEffect } from "react";
 import { PRICING_PLANS } from "@/lib/pricing";
+import { AdminTableFilters } from "./AdminTableFilters";
 
 const PLAN_NAMES = PRICING_PLANS.en.reduce((acc, plan) => ({
   ...acc,
@@ -46,7 +47,15 @@ const PLAN_NAMES = PRICING_PLANS.en.reduce((acc, plan) => ({
 }), {} as Record<string, string>);
 
 export function AdminSubscriptions() {
-  const subscriptions = useQuery(api.admin.listAllSubscriptions);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [intervalFilter, setIntervalFilter] = useState("all");
+
+  const subscriptions = useQuery(api.admin.listAllSubscriptions, {
+    search: search || undefined,
+    status: statusFilter === "all" ? undefined : statusFilter,
+    interval: intervalFilter === "all" ? undefined : intervalFilter,
+  });
   const cancelSubscription = useMutation(api.admin.cancelSubscription);
   const deleteSubscription = useMutation(api.admin.deleteSubscription);
   const updateSubscription = useMutation(api.admin.updateSubscription);
@@ -144,6 +153,44 @@ export function AdminSubscriptions() {
         <CardDescription>Manage all business subscriptions</CardDescription>
       </CardHeader>
       <CardContent>
+        <AdminTableFilters 
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search business, plan, or email..."
+          filters={[
+            {
+              key: "status",
+              label: "Status",
+              value: statusFilter,
+              onChange: setStatusFilter,
+              options: [
+                { label: "Active", value: "active" },
+                { label: "Past Due", value: "past_due" },
+                { label: "Canceled", value: "canceled" },
+                { label: "Trial", value: "trial" },
+              ]
+            },
+            {
+              key: "interval",
+              label: "Interval",
+              value: intervalFilter,
+              onChange: setIntervalFilter,
+              options: [
+                { label: "Monthly", value: "month" },
+                { label: "Yearly", value: "year" },
+                { label: "2 Years", value: "2_years" },
+                { label: "3 Years", value: "3_years" },
+                { label: "Lifetime", value: "lifetime" },
+              ]
+            }
+          ]}
+          onReset={() => {
+            setSearch("");
+            setStatusFilter("all");
+            setIntervalFilter("all");
+          }}
+        />
+
         <Table>
           <TableHeader>
             <TableRow>
@@ -162,7 +209,10 @@ export function AdminSubscriptions() {
                 if ((e.target as HTMLElement).closest("button")) return;
                 openEditDialog(sub);
               }}>
-                <TableCell className="font-medium">{sub.businessName}</TableCell>
+                <TableCell className="font-medium">
+                  <div>{sub.businessName}</div>
+                  <div className="text-xs text-muted-foreground">{sub.ownerEmail}</div>
+                </TableCell>
                 <TableCell className="capitalize">{PLAN_NAMES[sub.planId] || sub.planId}</TableCell>
                 <TableCell>{sub.amount.toLocaleString()} {sub.currency}</TableCell>
                 <TableCell className="capitalize">{sub.interval}</TableCell>
@@ -171,7 +221,7 @@ export function AdminSubscriptions() {
                     {sub.status}
                   </Badge>
                 </TableCell>
-                <TableCell>{sub.endDate ? new Date(sub.endDate).toLocaleDateString() : "-"}</TableCell>
+                <TableCell>{sub.endDate ? new Date(sub.endDate).toLocaleDateString() : (sub.interval === "lifetime" ? "Lifetime" : "-")}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button
@@ -204,7 +254,7 @@ export function AdminSubscriptions() {
             {subscriptions?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                  No subscriptions found
+                  No subscriptions found matching your filters
                 </TableCell>
               </TableRow>
             )}
