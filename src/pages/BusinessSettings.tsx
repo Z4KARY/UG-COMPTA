@@ -120,7 +120,7 @@ export default function BusinessSettings() {
             {business ? (
               <SubscriptionSettings 
                 businessId={business._id} 
-                currentPlan={business.plan as any}
+                currentPlan={business.plan as "free" | "pro" | "enterprise" | undefined}
                 subscriptionEndsAt={business.subscriptionEndsAt}
               />
             ) : (

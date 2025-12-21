@@ -112,13 +112,6 @@ export function AdminSubscriptions() {
     }
   }, [editPlan, initialPlan]);
 
-  // Auto-clear end date if lifetime is selected
-  useEffect(() => {
-    if (editInterval === "lifetime") {
-      setEditEndDate("");
-    }
-  }, [editInterval]);
-
   const handleUpdate = async () => {
     if (!editingSub) return;
     try {
@@ -126,7 +119,7 @@ export function AdminSubscriptions() {
         id: editingSub._id,
         planId: editPlan as any,
         status: editStatus as any,
-        endDate: editEndDate ? new Date(editEndDate).getTime() : (editInterval === "lifetime" ? null : undefined),
+        endDate: editEndDate ? new Date(editEndDate).getTime() : undefined,
         amount: parseFloat(editAmount) || 0,
         interval: editInterval,
       });
@@ -279,13 +272,7 @@ export function AdminSubscriptions() {
                   type="date" 
                   value={editEndDate} 
                   onChange={(e) => setEditEndDate(e.target.value)} 
-                  disabled={editInterval === "lifetime"}
                 />
-                {editInterval === "lifetime" && (
-                  <p className="text-xs text-muted-foreground">
-                    Lifetime subscriptions do not have an end date.
-                  </p>
-                )}
               </div>
             </div>
             <DialogFooter>

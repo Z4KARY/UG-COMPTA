@@ -127,7 +127,7 @@ export const updateSubscription = mutation({
         v.literal("premium"), 
         v.literal("enterprise")
     ),
-    endDate: v.optional(v.union(v.number(), v.null())),
+    endDate: v.optional(v.number()),
     status: v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial")),
     amount: v.optional(v.number()),
     interval: v.optional(v.union(
@@ -155,10 +155,6 @@ export const updateSubscription = mutation({
 
     if (args.interval) {
         updates.interval = args.interval;
-        // Force endDate to null if lifetime
-        if (args.interval === "lifetime") {
-            updates.endDate = null;
-        }
     }
 
     await ctx.db.patch(args.id, updates);
@@ -167,7 +163,7 @@ export const updateSubscription = mutation({
     if (sub.businessId) {
         await ctx.db.patch(sub.businessId, {
             plan: args.planId,
-            subscriptionEndsAt: (args.interval === "lifetime") ? null : args.endDate,
+            subscriptionEndsAt: args.endDate,
             subscriptionStatus: args.status,
         });
     }

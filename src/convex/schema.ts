@@ -145,7 +145,7 @@ const schema = defineSchema(
         v.literal("enterprise")
       )),
       subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial"))),
-      subscriptionEndsAt: v.optional(v.union(v.number(), v.null())),
+      subscriptionEndsAt: v.optional(v.number()),
     }).index("by_user", ["userId"])
       .index("by_ae_card", ["autoEntrepreneurCardNumber"]),
 
@@ -566,7 +566,7 @@ const schema = defineSchema(
         v.literal("lifetime")
       ),
       startDate: v.number(),
-      endDate: v.optional(v.union(v.number(), v.null())),
+      endDate: v.optional(v.number()),
       paymentMethod: v.optional(v.string()), // e.g., "chargily", "bank_transfer"
       transactionId: v.optional(v.string()),
     }).index("by_business", ["businessId"])
