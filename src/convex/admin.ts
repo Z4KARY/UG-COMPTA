@@ -85,14 +85,14 @@ export const cancelSubscription = mutation({
         const sub = await ctx.db.get(args.id);
         if (!sub) throw new Error("Subscription not found");
         
-        await ctx.db.patch(args.id, { status: "canceled", endDate: Date.now() });
+        const now = Date.now();
+        await ctx.db.patch(args.id, { status: "canceled", endDate: now });
         
         // Also update business status
         if (sub.businessId) {
              await ctx.db.patch(sub.businessId, { 
                  subscriptionStatus: "canceled",
-                 // We don't change the plan immediately to free, we let them finish the period usually, 
-                 // but here we are cancelling immediately.
+                 subscriptionEndsAt: now, // Expire immediately
              });
         }
     }
@@ -102,7 +102,18 @@ export const deleteSubscription = mutation({
   args: { id: v.id("subscriptions") },
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
-    await ctx.db.delete(args.id);
+    const sub = await ctx.db.get(args.id);
+    if (sub) {
+        // Sync with business to remove subscription details completely
+        if (sub.businessId) {
+            await ctx.db.patch(sub.businessId, {
+                plan: "free",
+                subscriptionStatus: "canceled",
+                subscriptionEndsAt: undefined,
+            });
+        }
+        await ctx.db.delete(args.id);
+    }
   },
 });
 
@@ -151,6 +162,20 @@ export const createSubscription = mutation({
     await checkAdmin(ctx);
     const business = await ctx.db.get(args.businessId);
     if (!business) throw new Error("Business not found");
+
+    // Cancel any existing active subscriptions for this business to prevent duplicates
+    const existingActive = await ctx.db
+        .query("subscriptions")
+        .withIndex("by_business", q => q.eq("businessId", args.businessId))
+        .filter(q => q.eq(q.field("status"), "active"))
+        .collect();
+        
+    for (const sub of existingActive) {
+        await ctx.db.patch(sub._id, { 
+            status: "canceled", 
+            endDate: Date.now() 
+        });
+    }
 
     const subscriptionEndsAt = Date.now() + (args.durationMonths * 30 * 24 * 60 * 60 * 1000);
 
