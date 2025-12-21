@@ -129,17 +129,24 @@ export const updateSubscription = mutation({
     ),
     endDate: v.number(),
     status: v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial")),
+    amount: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
     const sub = await ctx.db.get(args.id);
     if (!sub) throw new Error("Subscription not found");
 
-    await ctx.db.patch(args.id, {
+    const updates: any = {
         planId: args.planId,
         endDate: args.endDate,
         status: args.status,
-    });
+    };
+
+    if (args.amount !== undefined) {
+        updates.amount = args.amount;
+    }
+
+    await ctx.db.patch(args.id, updates);
 
     // Sync with business
     if (sub.businessId) {

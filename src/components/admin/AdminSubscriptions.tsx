@@ -57,6 +57,7 @@ export function AdminSubscriptions() {
   const [editPlan, setEditPlan] = useState<string>("");
   const [editStatus, setEditStatus] = useState<string>("");
   const [editEndDate, setEditEndDate] = useState<string>("");
+  const [editAmount, setEditAmount] = useState<string>("");
 
   const handleCancel = async (id: Id<"subscriptions">) => {
     if (!confirm("Are you sure you want to cancel this subscription?")) return;
@@ -82,6 +83,7 @@ export function AdminSubscriptions() {
     setEditingSub(sub);
     setEditPlan(sub.planId);
     setEditStatus(sub.status);
+    setEditAmount(sub.amount?.toString() || "0");
     // Format date for input type="date" (YYYY-MM-DD)
     const date = new Date(sub.endDate || Date.now());
     setEditEndDate(date.toISOString().split('T')[0]);
@@ -95,6 +97,7 @@ export function AdminSubscriptions() {
         planId: editPlan as any,
         status: editStatus as any,
         endDate: new Date(editEndDate).getTime(),
+        amount: parseFloat(editAmount) || 0,
       });
       toast.success("Subscription updated");
       setEditingSub(null);
@@ -200,6 +203,15 @@ export function AdminSubscriptions() {
                     <SelectItem value="enterprise">Enterprise</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="amount">Amount (DZD)</Label>
+                <Input 
+                  id="amount" 
+                  type="number" 
+                  value={editAmount} 
+                  onChange={(e) => setEditAmount(e.target.value)} 
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="status">Status</Label>
