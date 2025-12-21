@@ -74,7 +74,7 @@ export function AdminUsers() {
   // Create Form State
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
-  const [newRole, setNewRole] = useState<"NORMAL" | "ACCOUNTANT" | "ADMIN">("NORMAL");
+  const [newRole, setNewRole] = useState<"admin" | "owner" | "accountant" | "staff">("staff");
   const [createBusiness, setCreateBusiness] = useState(false);
   const [businessName, setBusinessName] = useState("");
   const [plan, setPlan] = useState<string>("");
@@ -89,7 +89,7 @@ export function AdminUsers() {
     }
   };
 
-  const handleRoleChange = async (id: Id<"users">, newRole: "NORMAL" | "ACCOUNTANT" | "ADMIN") => {
+  const handleRoleChange = async (id: Id<"users">, newRole: "admin" | "owner" | "accountant" | "staff") => {
     try {
       await updateUserRole({ id, role: newRole });
       toast.success("User role updated");
@@ -153,7 +153,7 @@ export function AdminUsers() {
       // Reset form
       setNewName("");
       setNewEmail("");
-      setNewRole("NORMAL");
+      setNewRole("staff");
       setCreateBusiness(false);
       setBusinessName("");
       setPlan("");
@@ -207,9 +207,10 @@ export function AdminUsers() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="NORMAL">Normal User</SelectItem>
-                      <SelectItem value="ACCOUNTANT">Accountant</SelectItem>
-                      <SelectItem value="ADMIN">Admin</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="owner">Owner</SelectItem>
+                      <SelectItem value="accountant">Accountant</SelectItem>
+                      <SelectItem value="staff">Staff</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -280,9 +281,10 @@ export function AdminUsers() {
               value: roleFilter,
               onChange: setRoleFilter,
               options: [
-                { label: "Normal User", value: "NORMAL" },
-                { label: "Accountant", value: "ACCOUNTANT" },
-                { label: "Admin", value: "ADMIN" },
+                { label: "Admin", value: "admin" },
+                { label: "Owner", value: "owner" },
+                { label: "Accountant", value: "accountant" },
+                { label: "Staff", value: "staff" },
               ]
             }
           ]}
@@ -324,17 +326,24 @@ export function AdminUsers() {
                 <TableCell>{u.email}</TableCell>
                 <TableCell>
                   <Select
-                    defaultValue={u.roleGlobal || (u.role === "admin" ? "ADMIN" : "NORMAL")}
-                    onValueChange={(value: "NORMAL" | "ACCOUNTANT" | "ADMIN") => handleRoleChange(u._id, value)}
+                    defaultValue={
+                        // Map legacy values to new ones for display
+                        u.roleGlobal === "ADMIN" ? "admin" :
+                        u.roleGlobal === "ACCOUNTANT" ? "accountant" :
+                        u.roleGlobal === "NORMAL" ? "staff" :
+                        (u.roleGlobal as any) || (u.role === "admin" ? "admin" : "staff")
+                    }
+                    onValueChange={(value: "admin" | "owner" | "accountant" | "staff") => handleRoleChange(u._id, value)}
                     disabled={u._id === currentUser?._id}
                   >
                     <SelectTrigger className="w-[130px] h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="NORMAL">NORMAL</SelectItem>
-                      <SelectItem value="ACCOUNTANT">ACCOUNTANT</SelectItem>
-                      <SelectItem value="ADMIN">ADMIN</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="owner">Owner</SelectItem>
+                      <SelectItem value="accountant">Accountant</SelectItem>
+                      <SelectItem value="staff">Staff</SelectItem>
                     </SelectContent>
                   </Select>
                 </TableCell>

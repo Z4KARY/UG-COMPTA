@@ -406,10 +406,17 @@ export const listUsers = query({
     // Filter by role
     if (args.role && args.role !== "all") {
         users = users.filter(u => {
+            if (args.role === "admin") return u.role === "admin" || u.roleGlobal === "ADMIN" || u.roleGlobal === "admin";
+            if (args.role === "accountant") return u.roleGlobal === "ACCOUNTANT" || u.roleGlobal === "accountant";
+            if (args.role === "owner") return u.roleGlobal === "owner";
+            if (args.role === "staff") return u.roleGlobal === "staff" || u.roleGlobal === "NORMAL";
+            
+            // Legacy fallback
             if (args.role === "ADMIN") return u.role === "admin" || u.roleGlobal === "ADMIN";
             if (args.role === "ACCOUNTANT") return u.roleGlobal === "ACCOUNTANT";
             if (args.role === "NORMAL") return (!u.roleGlobal || u.roleGlobal === "NORMAL") && u.role !== "admin";
-            return true;
+            
+            return u.roleGlobal === args.role;
         });
     }
 
@@ -456,7 +463,15 @@ export const toggleUserSuspension = mutation({
 export const updateUserRole = mutation({
   args: { 
     id: v.id("users"), 
-    role: v.union(v.literal("NORMAL"), v.literal("ACCOUNTANT"), v.literal("ADMIN")) 
+    role: v.union(
+      v.literal("NORMAL"), 
+      v.literal("ACCOUNTANT"), 
+      v.literal("ADMIN"),
+      v.literal("admin"),
+      v.literal("owner"),
+      v.literal("accountant"),
+      v.literal("staff")
+    ) 
   },
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
@@ -464,7 +479,7 @@ export const updateUserRole = mutation({
     const updates: any = { roleGlobal: args.role };
     
     // Sync legacy/auth role field for compatibility
-    if (args.role === "ADMIN") {
+    if (args.role === "ADMIN" || args.role === "admin") {
       updates.role = "admin";
     } else {
       updates.role = "user";
@@ -694,7 +709,15 @@ export const createAccount = mutation({
   args: {
     name: v.string(),
     email: v.string(),
-    role: v.union(v.literal("NORMAL"), v.literal("ACCOUNTANT"), v.literal("ADMIN")),
+    role: v.union(
+      v.literal("NORMAL"), 
+      v.literal("ACCOUNTANT"), 
+      v.literal("ADMIN"),
+      v.literal("admin"),
+      v.literal("owner"),
+      v.literal("accountant"),
+      v.literal("staff")
+    ),
     createBusiness: v.boolean(),
     businessName: v.optional(v.string()),
     plan: v.optional(v.union(v.literal("free"), v.literal("startup"), v.literal("pro"), v.literal("premium"), v.literal("enterprise"))),
@@ -709,7 +732,7 @@ export const createAccount = mutation({
     const userId = await ctx.db.insert("users", {
         name: args.name,
         email: args.email,
-        role: args.role === "ADMIN" ? "admin" : "user",
+        role: (args.role === "ADMIN" || args.role === "admin") ? "admin" : "user",
         roleGlobal: args.role,
     });
 

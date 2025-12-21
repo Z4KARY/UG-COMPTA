@@ -30,7 +30,15 @@ const schema = defineSchema(
       isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
 
       role: v.optional(roleValidator), // role of the user. do not remove
-      roleGlobal: v.optional(v.union(v.literal("NORMAL"), v.literal("ACCOUNTANT"), v.literal("ADMIN"))), // Added for accountant mode
+      roleGlobal: v.optional(v.union(
+        v.literal("NORMAL"), 
+        v.literal("ACCOUNTANT"), 
+        v.literal("ADMIN"),
+        v.literal("admin"),
+        v.literal("owner"),
+        v.literal("accountant"),
+        v.literal("staff")
+      )), // Added for accountant mode
       isSuspended: v.optional(v.boolean()), // Added for admin suspension
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
