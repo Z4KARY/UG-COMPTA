@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import { Lock, Unlock, Trash2, Plus, Building2, CreditCard, Eye } from "lucide-react";
+import { Lock, Unlock, Trash2, Plus, Building2, CreditCard, Eye, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -49,6 +49,7 @@ export function AdminBusinesses() {
   const deleteBusinesses = useMutation(api.admin.deleteBusinesses);
   const createBusiness = useMutation(api.admin.createBusiness);
   const createSubscription = useMutation(api.admin.createSubscription);
+  const resetSubscription = useMutation(api.admin.resetBusinessSubscription);
 
   const [selectedBusinesses, setSelectedBusinesses] = useState<Id<"businesses">[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -154,6 +155,18 @@ export function AdminBusinesses() {
       setSubDuration("");
     } catch (e) {
       toast.error("Failed to add subscription");
+    }
+  };
+
+  const handleResetSubscription = async () => {
+    if (!viewBusinessId) return;
+    if (!confirm("Are you sure you want to reset this business to the Free plan? This will cancel any active subscriptions.")) return;
+    
+    try {
+      await resetSubscription({ businessId: viewBusinessId });
+      toast.success("Business subscription reset to Free");
+    } catch (e) {
+      toast.error("Failed to reset subscription");
     }
   };
 
@@ -377,10 +390,16 @@ export function AdminBusinesses() {
                         <div className="border-t pt-4">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-semibold">Subscription</h3>
-                                <Button size="sm" variant="outline" onClick={() => setIsAddSubOpen(true)}>
-                                    <CreditCard className="h-4 w-4 mr-2" />
-                                    Add/Update Subscription
-                                </Button>
+                                <div className="flex gap-2">
+                                    <Button size="sm" variant="outline" onClick={handleResetSubscription} className="text-destructive hover:text-destructive">
+                                        <RefreshCw className="h-4 w-4 mr-2" />
+                                        Reset to Free
+                                    </Button>
+                                    <Button size="sm" variant="outline" onClick={() => setIsAddSubOpen(true)}>
+                                        <CreditCard className="h-4 w-4 mr-2" />
+                                        Add/Update Subscription
+                                    </Button>
+                                </div>
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4 mb-4">

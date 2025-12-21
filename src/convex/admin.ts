@@ -201,6 +201,33 @@ export const createSubscription = mutation({
   }
 });
 
+export const resetBusinessSubscription = mutation({
+  args: { businessId: v.id("businesses") },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    
+    // 1. Reset Business to Free
+    await ctx.db.patch(args.businessId, {
+        plan: "free",
+        subscriptionStatus: "active",
+        subscriptionEndsAt: undefined,
+    });
+
+    // 2. Cancel any active subscriptions for this business
+    const activeSubs = await ctx.db.query("subscriptions")
+        .withIndex("by_business", q => q.eq("businessId", args.businessId))
+        .filter(q => q.eq(q.field("status"), "active"))
+        .collect();
+        
+    for (const sub of activeSubs) {
+        await ctx.db.patch(sub._id, {
+            status: "canceled",
+            endDate: Date.now(),
+        });
+    }
+  }
+});
+
 export const getBusinessDetails = query({
   args: { id: v.id("businesses") },
   handler: async (ctx, args) => {
