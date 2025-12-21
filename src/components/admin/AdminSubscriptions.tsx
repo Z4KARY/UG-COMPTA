@@ -37,15 +37,13 @@ import { useMutation, useQuery } from "convex/react";
 import { Ban, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { PRICING_PLANS } from "@/lib/pricing";
 
-const PLAN_NAMES: Record<string, string> = {
-  free: "Auto-Entrepreneur",
-  startup: "Startup",
-  pro: "Small Business",
-  premium: "Premium",
-  enterprise: "Enterprise",
-};
+const PLAN_NAMES = PRICING_PLANS.en.reduce((acc, plan) => ({
+  ...acc,
+  [plan.id]: plan.name
+}), {} as Record<string, string>);
 
 export function AdminSubscriptions() {
   const subscriptions = useQuery(api.admin.listAllSubscriptions);
@@ -58,6 +56,7 @@ export function AdminSubscriptions() {
   const [editStatus, setEditStatus] = useState<string>("");
   const [editEndDate, setEditEndDate] = useState<string>("");
   const [editAmount, setEditAmount] = useState<string>("");
+  const [initialPlan, setInitialPlan] = useState<string>("");
 
   const handleCancel = async (id: Id<"subscriptions">) => {
     if (!confirm("Are you sure you want to cancel this subscription?")) return;
@@ -82,12 +81,30 @@ export function AdminSubscriptions() {
   const openEditDialog = (sub: any) => {
     setEditingSub(sub);
     setEditPlan(sub.planId);
+    setInitialPlan(sub.planId);
     setEditStatus(sub.status);
     setEditAmount(sub.amount?.toString() || "0");
     // Format date for input type="date" (YYYY-MM-DD)
     const date = new Date(sub.endDate || Date.now());
     setEditEndDate(date.toISOString().split('T')[0]);
   };
+
+  // Auto-update amount when plan changes (only if plan is different from initial)
+  useEffect(() => {
+    if (editPlan && editPlan !== initialPlan) {
+      const plan = PRICING_PLANS.en.find(p => p.id === editPlan);
+      if (plan) {
+        if (plan.price === "Custom") {
+           // Keep existing
+        } else if (plan.price) {
+           const priceNum = parseInt(plan.price.replace(/[^0-9]/g, ''));
+           if (!isNaN(priceNum)) {
+             setEditAmount(priceNum.toString());
+           }
+        }
+      }
+    }
+  }, [editPlan, initialPlan]);
 
   const handleUpdate = async () => {
     if (!editingSub) return;

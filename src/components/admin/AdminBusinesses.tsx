@@ -43,13 +43,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useEffect } from "react";
 import { PRICING_PLANS } from "@/lib/pricing";
 
-const PLAN_NAMES: Record<string, string> = {
-  free: "Auto-Entrepreneur",
-  startup: "Startup",
-  pro: "Small Business",
-  premium: "Premium",
-  enterprise: "Enterprise",
-};
+const PLAN_NAMES = PRICING_PLANS.en.reduce((acc, plan) => ({
+  ...acc,
+  [plan.id]: plan.name
+}), {} as Record<string, string>);
 
 export function AdminBusinesses() {
   const { t } = useLanguage();
