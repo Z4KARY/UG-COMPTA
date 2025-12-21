@@ -122,6 +122,7 @@ export default function BusinessSettings() {
                 businessId={business._id} 
                 currentPlan={business.plan as "free" | "pro" | "enterprise" | undefined}
                 subscriptionEndsAt={business.subscriptionEndsAt}
+                subscriptionStatus={business.subscriptionStatus}
               />
             ) : (
               <SetupRequired />

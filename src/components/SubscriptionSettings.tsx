@@ -17,6 +17,7 @@ interface SubscriptionSettingsProps {
   businessId: Id<"businesses">;
   currentPlan?: PlanId;
   subscriptionEndsAt?: number;
+  subscriptionStatus?: string;
 }
 
 // Helper to map plan IDs to icons
@@ -31,7 +32,7 @@ const getPlanIcon = (id: string): LucideIcon => {
   }
 };
 
-export function SubscriptionSettings({ businessId, currentPlan = "free", subscriptionEndsAt }: SubscriptionSettingsProps) {
+export function SubscriptionSettings({ businessId, currentPlan = "free", subscriptionEndsAt, subscriptionStatus }: SubscriptionSettingsProps) {
   const { t, language } = useLanguage();
   const createCheckout = useAction(api.chargilyActions.createCheckoutSession);
   const history = useQuery(api.subscriptions.getSubscriptionHistory, { businessId });
@@ -79,6 +80,8 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
   };
 
   const pricing = PRICING_PLANS[language as keyof typeof PRICING_PLANS] ?? PRICING_PLANS.en;
+
+  const isLifetime = !subscriptionEndsAt && currentPlan !== "free" && subscriptionStatus === "active";
 
   return (
     <div className="space-y-8">
@@ -178,7 +181,7 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {subscriptionEndsAt && (
+        {(subscriptionEndsAt || isLifetime) && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -190,9 +193,16 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
               <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
                 <div className="space-y-1">
                   <p className="font-medium">{t("settings.subscription.billingCycle")}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("settings.subscription.renewsOn")} {new Date(subscriptionEndsAt).toLocaleDateString(undefined, { dateStyle: 'long' })}
-                  </p>
+                  {isLifetime ? (
+                    <p className="text-sm font-medium text-primary flex items-center gap-1">
+                      <Crown className="h-3 w-3" />
+                      Lifetime Access
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {t("settings.subscription.renewsOn")} {new Date(subscriptionEndsAt!).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                    </p>
+                  )}
                 </div>
                 <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">{t("settings.subscription.active")}</Badge>
               </div>
@@ -201,7 +211,7 @@ export function SubscriptionSettings({ businessId, currentPlan = "free", subscri
         )}
 
         {history && history.length > 0 && (
-          <Card className={subscriptionEndsAt ? "" : "md:col-span-2"}>
+          <Card className={subscriptionEndsAt || isLifetime ? "" : "md:col-span-2"}>
             <CardHeader>
               <CardTitle className="text-lg">{t("settings.subscription.historyTitle")}</CardTitle>
               <CardDescription>{t("settings.subscription.historyDesc")}</CardDescription>
