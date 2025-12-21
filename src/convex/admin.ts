@@ -127,10 +127,16 @@ export const updateSubscription = mutation({
         v.literal("premium"), 
         v.literal("enterprise")
     ),
-    endDate: v.number(),
+    endDate: v.optional(v.number()),
     status: v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial")),
     amount: v.optional(v.number()),
-    interval: v.optional(v.union(v.literal("month"), v.literal("year"))),
+    interval: v.optional(v.union(
+        v.literal("month"), 
+        v.literal("year"),
+        v.literal("2_years"),
+        v.literal("3_years"),
+        v.literal("lifetime")
+    )),
   },
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
@@ -168,9 +174,15 @@ export const createSubscription = mutation({
   args: {
     businessId: v.id("businesses"),
     plan: v.union(v.literal("free"), v.literal("startup"), v.literal("pro"), v.literal("premium"), v.literal("enterprise")),
-    durationMonths: v.number(),
+    durationMonths: v.optional(v.number()), // Made optional to support lifetime/years selection
     amount: v.optional(v.number()),
-    interval: v.optional(v.union(v.literal("month"), v.literal("year"))),
+    interval: v.optional(v.union(
+        v.literal("month"), 
+        v.literal("year"),
+        v.literal("2_years"),
+        v.literal("3_years"),
+        v.literal("lifetime")
+    )),
   },
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
@@ -191,7 +203,22 @@ export const createSubscription = mutation({
         });
     }
 
-    const subscriptionEndsAt = Date.now() + (args.durationMonths * 30 * 24 * 60 * 60 * 1000);
+    let subscriptionEndsAt: number | undefined;
+    
+    if (args.interval === "lifetime") {
+        subscriptionEndsAt = undefined; // No end date for lifetime
+    } else if (args.durationMonths) {
+        subscriptionEndsAt = Date.now() + (args.durationMonths * 30 * 24 * 60 * 60 * 1000);
+    } else if (args.interval === "year") {
+        subscriptionEndsAt = Date.now() + (365 * 24 * 60 * 60 * 1000);
+    } else if (args.interval === "2_years") {
+        subscriptionEndsAt = Date.now() + (2 * 365 * 24 * 60 * 60 * 1000);
+    } else if (args.interval === "3_years") {
+        subscriptionEndsAt = Date.now() + (3 * 365 * 24 * 60 * 60 * 1000);
+    } else {
+        // Default fallback
+        subscriptionEndsAt = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    }
 
     // Update business
     await ctx.db.patch(args.businessId, {
@@ -207,7 +234,7 @@ export const createSubscription = mutation({
         status: "active",
         amount: args.amount ?? 0, // Manual admin assignment
         currency: "DZD",
-        interval: args.interval || (args.durationMonths >= 12 ? "year" : "month"),
+        interval: args.interval || "month", // Default to month if not specified, though UI should provide it
         startDate: Date.now(),
         endDate: subscriptionEndsAt,
         paymentMethod: "manual_admin",
@@ -546,6 +573,12 @@ export const createBusiness = mutation({
         subscriptionEndsAt,
     });
 
+    // Determine interval based on duration
+    let interval: "year" | "2_years" | "3_years" | "month" = "year";
+    if (args.durationMonths === 24) interval = "2_years";
+    if (args.durationMonths === 36) interval = "3_years";
+    if (args.durationMonths < 12) interval = "month";
+
     // 3. Create Subscription Record
     await ctx.db.insert("subscriptions", {
         businessId,
@@ -553,7 +586,7 @@ export const createBusiness = mutation({
         status: "active",
         amount: 0, // Free/Manual
         currency: "DZD",
-        interval: args.durationMonths >= 12 ? "year" : "month",
+        interval: interval,
         startDate: Date.now(),
         endDate: subscriptionEndsAt,
         paymentMethod: "manual_admin",
@@ -611,6 +644,12 @@ export const createAccount = mutation({
             subscriptionEndsAt,
         });
 
+        // Determine interval based on duration
+        let interval: "year" | "2_years" | "3_years" | "month" = "year";
+        if (durationMonths === 24) interval = "2_years";
+        if (durationMonths === 36) interval = "3_years";
+        if (durationMonths < 12) interval = "month";
+
         // Create Subscription Record
         await ctx.db.insert("subscriptions", {
             businessId,
@@ -618,7 +657,7 @@ export const createAccount = mutation({
             status: "active",
             amount: 0,
             currency: "DZD",
-            interval: durationMonths >= 12 ? "year" : "month",
+            interval: interval,
             startDate: Date.now(),
             endDate: subscriptionEndsAt,
             paymentMethod: "manual_admin",

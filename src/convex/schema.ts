@@ -558,7 +558,13 @@ const schema = defineSchema(
       status: v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial")),
       amount: v.number(),
       currency: v.string(),
-      interval: v.union(v.literal("month"), v.literal("year")),
+      interval: v.union(
+        v.literal("month"), 
+        v.literal("year"),
+        v.literal("2_years"),
+        v.literal("3_years"),
+        v.literal("lifetime")
+      ),
       startDate: v.number(),
       endDate: v.optional(v.number()),
       paymentMethod: v.optional(v.string()), // e.g., "chargily", "bank_transfer"

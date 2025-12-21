@@ -56,7 +56,7 @@ export function AdminSubscriptions() {
   const [editStatus, setEditStatus] = useState<string>("");
   const [editEndDate, setEditEndDate] = useState<string>("");
   const [editAmount, setEditAmount] = useState<string>("");
-  const [editInterval, setEditInterval] = useState<"month" | "year">("month");
+  const [editInterval, setEditInterval] = useState<"month" | "year" | "2_years" | "3_years" | "lifetime">("year");
   const [initialPlan, setInitialPlan] = useState<string>("");
 
   const handleCancel = async (id: Id<"subscriptions">) => {
@@ -85,10 +85,14 @@ export function AdminSubscriptions() {
     setInitialPlan(sub.planId);
     setEditStatus(sub.status);
     setEditAmount(sub.amount?.toString() || "0");
-    setEditInterval(sub.interval || "month");
+    setEditInterval(sub.interval || "year");
     // Format date for input type="date" (YYYY-MM-DD)
-    const date = new Date(sub.endDate || Date.now());
-    setEditEndDate(date.toISOString().split('T')[0]);
+    if (sub.endDate) {
+        const date = new Date(sub.endDate);
+        setEditEndDate(date.toISOString().split('T')[0]);
+    } else {
+        setEditEndDate("");
+    }
   };
 
   // Auto-update amount when plan changes (only if plan is different from initial)
@@ -115,7 +119,7 @@ export function AdminSubscriptions() {
         id: editingSub._id,
         planId: editPlan as any,
         status: editStatus as any,
-        endDate: new Date(editEndDate).getTime(),
+        endDate: editEndDate ? new Date(editEndDate).getTime() : undefined,
         amount: parseFloat(editAmount) || 0,
         interval: editInterval,
       });
@@ -235,13 +239,15 @@ export function AdminSubscriptions() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="interval">Interval</Label>
-                <Select value={editInterval} onValueChange={(v: "month" | "year") => setEditInterval(v)}>
+                <Select value={editInterval} onValueChange={(v: any) => setEditInterval(v)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="month">Monthly</SelectItem>
                     <SelectItem value="year">Yearly</SelectItem>
+                    <SelectItem value="2_years">2 Years</SelectItem>
+                    <SelectItem value="3_years">3 Years</SelectItem>
+                    <SelectItem value="lifetime">Lifetime</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

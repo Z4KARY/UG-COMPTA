@@ -67,7 +67,7 @@ export function AdminBusinesses() {
   const [subPlan, setSubPlan] = useState<string>("");
   const [subDuration, setSubDuration] = useState<string>("");
   const [subAmount, setSubAmount] = useState<string>("");
-  const [subInterval, setSubInterval] = useState<"month" | "year">("month");
+  const [subInterval, setSubInterval] = useState<"month" | "year" | "2_years" | "3_years" | "lifetime">("year");
 
   // Create Form State
   const [businessName, setBusinessName] = useState("");
@@ -150,12 +150,12 @@ export function AdminBusinesses() {
   };
 
   const handleAddSubscription = async () => {
-    if (!viewBusinessId || !subPlan || !subDuration) return;
+    if (!viewBusinessId || !subPlan) return;
     try {
       await createSubscription({
         businessId: viewBusinessId,
         plan: subPlan as any,
-        durationMonths: parseInt(subDuration),
+        durationMonths: subDuration ? parseInt(subDuration) : undefined,
         amount: subAmount ? parseFloat(subAmount) : 0,
         interval: subInterval,
       });
@@ -164,7 +164,7 @@ export function AdminBusinesses() {
       setSubPlan("");
       setSubDuration("");
       setSubAmount("");
-      setSubInterval("month");
+      setSubInterval("year");
     } catch (e) {
       toast.error("Failed to add subscription");
     }
@@ -199,7 +199,7 @@ export function AdminBusinesses() {
         if (plan.period === "/year") {
             setSubInterval("year");
         } else {
-            setSubInterval("month");
+            setSubInterval("year");
         }
       }
     }
@@ -288,9 +288,6 @@ export function AdminBusinesses() {
                         <SelectValue placeholder="Select Duration" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">1 Month</SelectItem>
-                        <SelectItem value="3">3 Months</SelectItem>
-                        <SelectItem value="6">6 Months</SelectItem>
                         <SelectItem value="12">1 Year</SelectItem>
                         <SelectItem value="24">2 Years</SelectItem>
                         <SelectItem value="36">3 Years</SelectItem>
@@ -525,29 +522,15 @@ export function AdminBusinesses() {
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="subInterval">Interval</Label>
-                        <Select value={subInterval} onValueChange={(v: "month" | "year") => setSubInterval(v)}>
+                        <Select value={subInterval} onValueChange={(v: any) => setSubInterval(v)}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select Interval" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="month">Monthly</SelectItem>
                                 <SelectItem value="year">Yearly</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="subDuration">Duration</Label>
-                        <Select value={subDuration} onValueChange={setSubDuration}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select Duration" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="1">1 Month</SelectItem>
-                                <SelectItem value="3">3 Months</SelectItem>
-                                <SelectItem value="6">6 Months</SelectItem>
-                                <SelectItem value="12">1 Year</SelectItem>
-                                <SelectItem value="24">2 Years</SelectItem>
-                                <SelectItem value="36">3 Years</SelectItem>
+                                <SelectItem value="2_years">2 Years</SelectItem>
+                                <SelectItem value="3_years">3 Years</SelectItem>
+                                <SelectItem value="lifetime">Lifetime</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
