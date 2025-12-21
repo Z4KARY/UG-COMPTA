@@ -157,6 +157,7 @@ export const createSubscription = mutation({
     businessId: v.id("businesses"),
     plan: v.union(v.literal("free"), v.literal("startup"), v.literal("pro"), v.literal("premium"), v.literal("enterprise")),
     durationMonths: v.number(),
+    amount: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await checkAdmin(ctx);
@@ -191,7 +192,7 @@ export const createSubscription = mutation({
         businessId: args.businessId,
         planId: args.plan,
         status: "active",
-        amount: 0, // Manual admin assignment
+        amount: args.amount ?? 0, // Manual admin assignment
         currency: "DZD",
         interval: args.durationMonths >= 12 ? "year" : "month",
         startDate: Date.now(),

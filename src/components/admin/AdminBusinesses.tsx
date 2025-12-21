@@ -40,7 +40,8 @@ import { Lock, Unlock, Trash2, Plus, Building2, CreditCard, Eye, RefreshCw } fro
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { PRICING_PLANS } from "@/lib/pricing";
 
 const PLAN_NAMES: Record<string, string> = {
   free: "Auto-Entrepreneur",
@@ -68,6 +69,7 @@ export function AdminBusinesses() {
   const [isAddSubOpen, setIsAddSubOpen] = useState(false);
   const [subPlan, setSubPlan] = useState<string>("");
   const [subDuration, setSubDuration] = useState<string>("");
+  const [subAmount, setSubAmount] = useState<string>("");
 
   // Create Form State
   const [businessName, setBusinessName] = useState("");
@@ -156,11 +158,13 @@ export function AdminBusinesses() {
         businessId: viewBusinessId,
         plan: subPlan as any,
         durationMonths: parseInt(subDuration),
+        amount: subAmount ? parseFloat(subAmount) : 0,
       });
       toast.success("Subscription added successfully");
       setIsAddSubOpen(false);
       setSubPlan("");
       setSubDuration("");
+      setSubAmount("");
     } catch (e) {
       toast.error("Failed to add subscription");
     }
@@ -177,6 +181,23 @@ export function AdminBusinesses() {
       toast.error("Failed to reset subscription");
     }
   };
+
+  // Auto-fill price when plan changes
+  useEffect(() => {
+    if (subPlan) {
+      const plan = PRICING_PLANS.en.find(p => p.id === subPlan);
+      if (plan) {
+        if (plan.price === "Custom") {
+           // Keep existing or set to 0
+        } else if (plan.price) {
+           const priceNum = parseInt(plan.price.replace(/[^0-9]/g, ''));
+           if (!isNaN(priceNum)) {
+             setSubAmount(priceNum.toString());
+           }
+        }
+      }
+    }
+  }, [subPlan]);
 
   return (
     <Card>
@@ -485,6 +506,16 @@ export function AdminBusinesses() {
                                 <SelectItem value="enterprise">Enterprise</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="subAmount">Amount (DZD)</Label>
+                        <Input 
+                            id="subAmount" 
+                            type="number" 
+                            value={subAmount} 
+                            onChange={(e) => setSubAmount(e.target.value)} 
+                            placeholder="0"
+                        />
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="subDuration">Duration</Label>
