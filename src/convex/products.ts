@@ -73,7 +73,14 @@ export const create = mutation({
     const business = await ctx.db.get(args.businessId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
-    const productId = await ctx.db.insert("products", { ...args, isActive: args.isActive ?? true });
+    const productData: any = { ...args, isActive: args.isActive ?? true };
+    Object.keys(productData).forEach(key => {
+        if (productData[key] === undefined) {
+            delete productData[key];
+        }
+    });
+
+    const productId = await ctx.db.insert("products", productData);
 
     await ctx.scheduler.runAfter(0, internal.audit.log, {
         businessId: args.businessId,
@@ -111,7 +118,14 @@ export const update = mutation({
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
     const { id, ...updates } = args;
-    await ctx.db.patch(id, updates);
+    const updateData: any = { ...updates };
+    Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+            delete updateData[key];
+        }
+    });
+
+    await ctx.db.patch(id, updateData);
 
     await ctx.scheduler.runAfter(0, internal.audit.log, {
         businessId: product.businessId,

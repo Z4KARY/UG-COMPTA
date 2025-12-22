@@ -106,7 +106,14 @@ export const create = mutation({
         if (!member) throw new Error("Unauthorized");
     }
 
-    const supplierId = await ctx.db.insert("suppliers", args);
+    const supplierData: any = { ...args };
+    Object.keys(supplierData).forEach(key => {
+        if (supplierData[key] === undefined) {
+            delete supplierData[key];
+        }
+    });
+
+    const supplierId = await ctx.db.insert("suppliers", supplierData);
     return supplierId;
   },
 });
@@ -141,7 +148,14 @@ export const update = mutation({
     }
 
     const { id, ...updates } = args;
-    await ctx.db.patch(id, updates);
+    const updateData: any = { ...updates };
+    Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+            delete updateData[key];
+        }
+    });
+
+    await ctx.db.patch(id, updateData);
   },
 });
 

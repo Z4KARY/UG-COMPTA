@@ -284,7 +284,7 @@ export const create = mutation({
         amountPaid = totalTtc;
     }
 
-    const purchaseInvoiceId = await ctx.db.insert("purchaseInvoices", {
+    const purchaseInvoiceData: any = {
         businessId: args.businessId,
         supplierId: args.supplierId,
         invoiceNumber: finalInvoiceNumber,
@@ -299,13 +299,29 @@ export const create = mutation({
         totalTtc,
         vatDeductible,
         amountPaid,
+    };
+
+    // Sanitize purchaseInvoiceData
+    Object.keys(purchaseInvoiceData).forEach(key => {
+        if (purchaseInvoiceData[key] === undefined) {
+            delete purchaseInvoiceData[key];
+        }
     });
 
+    const purchaseInvoiceId = await ctx.db.insert("purchaseInvoices", purchaseInvoiceData);
+
     for (const item of calculatedItems) {
-        await ctx.db.insert("purchaseInvoiceItems", {
+        const itemData: any = {
             purchaseInvoiceId,
             ...item
+        };
+        // Sanitize itemData
+        Object.keys(itemData).forEach(key => {
+            if (itemData[key] === undefined) {
+                delete itemData[key];
+            }
         });
+        await ctx.db.insert("purchaseInvoiceItems", itemData);
     }
 
     // Trigger Webhook
@@ -427,13 +443,22 @@ export const update = mutation({
             vatDeductible = vatTotal;
         }
 
-        await ctx.db.patch(id, {
+        const updateData: any = {
             ...fields,
             subtotalHt,
             vatTotal,
             totalTtc,
             vatDeductible,
+        };
+
+        // Sanitize updateData
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] === undefined) {
+                delete updateData[key];
+            }
         });
+
+        await ctx.db.patch(id, updateData);
 
         const existingItems = await ctx.db
             .query("purchaseInvoiceItems")
@@ -445,13 +470,27 @@ export const update = mutation({
         }
 
         for (const item of calculatedItems) {
-            await ctx.db.insert("purchaseInvoiceItems", {
+            const itemData: any = {
                 purchaseInvoiceId: id,
                 ...item
+            };
+            // Sanitize itemData
+            Object.keys(itemData).forEach(key => {
+                if (itemData[key] === undefined) {
+                    delete itemData[key];
+                }
             });
+            await ctx.db.insert("purchaseInvoiceItems", itemData);
         }
     } else {
-        await ctx.db.patch(id, fields);
+        const updateData: any = { ...fields };
+        // Sanitize updateData
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] === undefined) {
+                delete updateData[key];
+            }
+        });
+        await ctx.db.patch(id, updateData);
     }
   }
 });
