@@ -190,6 +190,11 @@ export const updateSubscription = mutation({
         updates.interval = args.interval;
     }
 
+    // Sanitize updates
+    Object.keys(updates).forEach(key => {
+        if (updates[key] === undefined) delete updates[key];
+    });
+
     await ctx.db.patch(args.id, updates);
 
     // Sync with business
@@ -529,11 +534,19 @@ export const createAnnouncement = mutation({
   },
   handler: async (ctx, args) => {
     const user = await checkAdmin(ctx);
-    await ctx.db.insert("announcements", {
+    
+    const announcementData: any = {
       ...args,
       isActive: true,
       createdBy: user._id,
+    };
+
+    // Sanitize
+    Object.keys(announcementData).forEach(key => {
+        if (announcementData[key] === undefined) delete announcementData[key];
     });
+
+    await ctx.db.insert("announcements", announcementData);
   },
 });
 

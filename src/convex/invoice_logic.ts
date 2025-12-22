@@ -27,7 +27,7 @@ export async function updateInvoiceStatusLogic(ctx: MutationCtx, args: { id: Id<
     });
 }
 
-export async function issueInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices">, pdfHash?: string }, userId: Id<"users">) {
+export const issueInvoiceLogic = async (ctx: MutationCtx, args: { id: Id<"invoices">, pdfHash?: string }, userId: Id<"users">) => {
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
@@ -55,10 +55,15 @@ export async function issueInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoic
         throw new Error("Cannot issue invoice in a closed period");
     }
 
-    await ctx.db.patch(args.id, { 
+    const patchData: any = { 
         status: "issued",
         pdfHash: args.pdfHash,
-    });
+    };
+
+    // Sanitize
+    if (patchData.pdfHash === undefined) delete patchData.pdfHash;
+
+    await ctx.db.patch(args.id, patchData);
 
     // Schedule creation of default reminders
     await ctx.scheduler.runAfter(0, internal.reminders.createDefaults, {
@@ -88,7 +93,7 @@ export async function issueInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoic
     });
 }
 
-export async function markInvoiceAsPaidLogic(ctx: MutationCtx, args: any, userId: Id<"users">) {
+export const markInvoiceAsPaidLogic = async (ctx: MutationCtx, args: any, userId: Id<"users">) => {
     const invoice = await ctx.db.get(args.id as Id<"invoices">);
     if (!invoice) throw new Error("Not found");
 
@@ -111,14 +116,21 @@ export async function markInvoiceAsPaidLogic(ctx: MutationCtx, args: any, userId
         throw new Error("Cannot record payment in a closed period");
     }
 
-    await ctx.db.insert("payments", {
+    const paymentData: any = {
         invoiceId: args.id,
         amount: args.amount,
         paymentMethod: args.paymentMethod,
         paymentDate: args.paymentDate,
         reference: args.reference,
         notes: args.notes,
+    };
+
+    // Sanitize
+    Object.keys(paymentData).forEach(key => {
+        if (paymentData[key] === undefined) delete paymentData[key];
     });
+
+    await ctx.db.insert("payments", paymentData);
 
     const newAmountPaid = (invoice.amountPaid || 0) + args.amount;
 
@@ -209,7 +221,7 @@ export async function markInvoiceAsUnpaidLogic(ctx: MutationCtx, args: { id: Id<
     });
 }
 
-export async function addInvoicePaymentLogic(ctx: MutationCtx, args: any, userId: Id<"users">) {
+export const addInvoicePaymentLogic = async (ctx: MutationCtx, args: any, userId: Id<"users">) => {
     const invoice = await ctx.db.get(args.id as Id<"invoices">);
     if (!invoice) throw new Error("Not found");
 
@@ -232,14 +244,21 @@ export async function addInvoicePaymentLogic(ctx: MutationCtx, args: any, userId
         throw new Error("Cannot record payment in a closed period");
     }
 
-    await ctx.db.insert("payments", {
+    const paymentData: any = {
         invoiceId: args.id,
         amount: args.amount,
         paymentMethod: args.paymentMethod,
         paymentDate: args.paymentDate,
         reference: args.reference,
         notes: args.notes,
+    };
+
+    // Sanitize
+    Object.keys(paymentData).forEach(key => {
+        if (paymentData[key] === undefined) delete paymentData[key];
     });
+
+    await ctx.db.insert("payments", paymentData);
 
     // Update Invoice Status and Amount Paid
     const currentPaid = invoice.amountPaid || 0;
