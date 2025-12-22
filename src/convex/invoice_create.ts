@@ -114,7 +114,7 @@ export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
 
     const finalTotalTtc = totalBeforeStamp + stampDutyAmount;
 
-    const invoiceData = {
+    const invoiceData: any = {
       businessId: args.businessId,
       customerId: args.customerId,
       invoiceNumber: finalInvoiceNumber!,
@@ -139,14 +139,30 @@ export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
       timbre: stampDutyAmount > 0,
     };
 
+    // Sanitize invoiceData to remove undefined values
+    Object.keys(invoiceData).forEach(key => {
+        if (invoiceData[key] === undefined) {
+            delete invoiceData[key];
+        }
+    });
+
     const invoiceId = await ctx.db.insert("invoices", invoiceData);
 
     for (const item of processedItems) {
-      await ctx.db.insert("invoiceItems", {
+      const itemData: any = {
         invoiceId,
         ...item,
         productType: item.productType || "service",
+      };
+
+      // Sanitize itemData
+      Object.keys(itemData).forEach(key => {
+        if (itemData[key] === undefined) {
+            delete itemData[key];
+        }
       });
+
+      await ctx.db.insert("invoiceItems", itemData);
     }
 
     await ctx.scheduler.runAfter(0, internal.audit.log, {

@@ -74,7 +74,7 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
             item.tvaRate
         );
 
-        await ctx.db.insert("invoiceItems", {
+        const itemData: any = {
           invoiceId: id,
           ...item,
           discountAmount,
@@ -83,7 +83,16 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
           lineTotalHt,
           lineTotalTtc,
           productType: item.productType || "service",
+        };
+
+        // Sanitize itemData
+        Object.keys(itemData).forEach(key => {
+            if (itemData[key] === undefined) {
+                delete itemData[key];
+            }
         });
+
+        await ctx.db.insert("invoiceItems", itemData);
       }
     }
 
