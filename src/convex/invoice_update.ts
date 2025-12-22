@@ -79,6 +79,9 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
       }
     }
 
+    // Sanitize args to remove undefined values which cause Convex errors
+    const payloadAfter = JSON.parse(JSON.stringify(args));
+
     await ctx.scheduler.runAfter(0, internal.audit.log, {
         businessId: invoice.businessId,
         userId,
@@ -86,7 +89,7 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
         entityId: id,
         action: "UPDATE",
         payloadBefore: invoice,
-        payloadAfter: args,
+        payloadAfter: payloadAfter,
     });
 }
 

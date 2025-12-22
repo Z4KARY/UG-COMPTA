@@ -399,6 +399,13 @@ export const update = mutation({
     
     const patchData: any = { ...updates };
 
+    // Clean undefined values from patchData to prevent Convex errors
+    Object.keys(patchData).forEach(key => {
+        if (patchData[key] === undefined) {
+            delete patchData[key];
+        }
+    });
+
     // If plan is being updated and current status is not active/valid, set up trial
     // This handles cases where user might restart onboarding or update plan before paying
     if (plan && business.subscriptionStatus !== "active") {
