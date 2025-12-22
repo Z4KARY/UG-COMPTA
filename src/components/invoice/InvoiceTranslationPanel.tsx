@@ -53,7 +53,7 @@ export function InvoiceTranslationPanel({
       if (translateItems) {
         const result = await translateContent({
           items: items.map(i => ({ description: i.description })),
-          notes: notes,
+          notes: notes === null ? undefined : notes,
           targetLanguage,
         });
         
@@ -66,17 +66,18 @@ export function InvoiceTranslationPanel({
       }
 
       // Sanitize items to match mutation validator (remove system fields like _id, _creationTime)
+      // Also handle null values which are not accepted by v.optional()
       const sanitizedItems = (updatedItems || items).map(item => ({
-        productId: item.productId,
+        productId: item.productId === null ? undefined : item.productId,
         description: item.description,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        discountRate: item.discountRate,
-        tvaRate: item.tvaRate,
-        lineTotal: item.lineTotal,
-        lineTotalHt: item.lineTotalHt,
-        lineTotalTtc: item.lineTotalTtc,
-        productType: item.productType,
+        discountRate: item.discountRate === null ? undefined : item.discountRate,
+        tvaRate: item.tvaRate ?? 0,
+        lineTotal: item.lineTotal ?? 0,
+        lineTotalHt: item.lineTotalHt === null ? undefined : item.lineTotalHt,
+        lineTotalTtc: item.lineTotalTtc === null ? undefined : item.lineTotalTtc,
+        productType: item.productType === null ? undefined : item.productType,
       }));
 
       await updateInvoice({

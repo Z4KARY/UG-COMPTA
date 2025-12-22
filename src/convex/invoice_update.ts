@@ -67,12 +67,18 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
 
       // Insert new items
       for (const item of items) {
-        const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculateLineItem(
-            item.quantity,
-            item.unitPrice,
-            item.discountRate || 0,
-            item.tvaRate
-        );
+        let calculation;
+        try {
+            calculation = calculateLineItem(
+                item.quantity,
+                item.unitPrice,
+                item.discountRate || 0,
+                item.tvaRate
+            );
+        } catch (e: any) {
+            throw new Error(`Error calculating item "${item.description}": ${e.message}`);
+        }
+        const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculation;
 
         const itemData: any = {
           invoiceId: id,
