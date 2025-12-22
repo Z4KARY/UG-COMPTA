@@ -257,7 +257,7 @@ export const create = mutation({
 
     const subscriptionEndsAt = Date.now() + trialDuration;
 
-    const businessId = await ctx.db.insert("businesses", {
+    const businessData: any = {
       userId,
       ...args,
       rc: finalRc,
@@ -269,7 +269,16 @@ export const create = mutation({
       plan: selectedPlan,
       subscriptionStatus: "trial",
       subscriptionEndsAt,
+    };
+
+    // Sanitize businessData to remove undefined values
+    Object.keys(businessData).forEach(key => {
+        if (businessData[key] === undefined) {
+            delete businessData[key];
+        }
     });
+
+    const businessId = await ctx.db.insert("businesses", businessData);
 
     // Add creator as owner
     await ctx.db.insert("businessMembers", {

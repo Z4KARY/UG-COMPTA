@@ -42,8 +42,16 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
 
     const { id, items, ...fields } = args;
 
+    // Sanitize fields to remove undefined values
+    const cleanFields: any = { ...fields };
+    Object.keys(cleanFields).forEach(key => {
+        if (cleanFields[key] === undefined) {
+            delete cleanFields[key];
+        }
+    });
+
     // Update invoice fields
-    await ctx.db.patch(id, fields);
+    await ctx.db.patch(id, cleanFields);
 
     // If items are provided, replace them
     if (items) {

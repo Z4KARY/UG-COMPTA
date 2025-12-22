@@ -23,7 +23,8 @@ export const translateInvoice = action({
       return { translation: res.text };
     } catch (error: any) {
       console.error("Translation Action Error:", error);
-      throw new Error(error.message || "Unknown translation error");
+      // Fallback to original text to prevent crash
+      return { translation: args.invoiceText };
     }
   },
 });
@@ -41,16 +42,26 @@ export const translateInvoiceContent = action({
       // Translate items
       const translatedItems = await Promise.all(
         args.items.map(async (item) => {
-          const res = await translate(item.description, { to: args.targetLanguage });
-          return { ...item, description: res.text };
+          try {
+            const res = await translate(item.description, { to: args.targetLanguage });
+            return { ...item, description: res.text };
+          } catch (e) {
+            console.error("Item translation error:", e);
+            return item; // Return original item on error
+          }
         })
       );
 
       // Translate notes if present
       let translatedNotes = args.notes;
       if (args.notes) {
-        const res = await translate(args.notes, { to: args.targetLanguage });
-        translatedNotes = res.text;
+        try {
+            const res = await translate(args.notes, { to: args.targetLanguage });
+            translatedNotes = res.text;
+        } catch (e) {
+            console.error("Notes translation error:", e);
+            // Keep original notes
+        }
       }
 
       return {
@@ -59,7 +70,11 @@ export const translateInvoiceContent = action({
       };
     } catch (error: any) {
       console.error("Content Translation Error:", error);
-      throw new Error(error.message || "Failed to translate content");
+      // Fallback to original content
+      return {
+        items: args.items,
+        notes: args.notes,
+      };
     }
   },
 });
