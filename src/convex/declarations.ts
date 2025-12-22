@@ -55,14 +55,20 @@ export const addImportEntry = mutation({
         const business = await ctx.db.get(args.businessId);
         if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
-        await ctx.db.insert("g50Imports", {
+        const entryData: any = {
             businessId: args.businessId,
             month: args.month,
             year: args.year,
             customsValue: args.customsValue,
             vatPaid: args.vatPaid,
             description: args.description,
+        };
+
+        Object.keys(entryData).forEach(key => {
+            if (entryData[key] === undefined) delete entryData[key];
         });
+
+        await ctx.db.insert("g50Imports", entryData);
     }
 });
 

@@ -30,7 +30,12 @@ export const update = mutation({
     const user = await getCurrentUser(ctx);
     if (!user) throw new Error("Unauthenticated");
     
-    await ctx.db.patch(user._id, args);
+    const updates: any = { ...args };
+    Object.keys(updates).forEach(key => {
+        if (updates[key] === undefined) delete updates[key];
+    });
+    
+    await ctx.db.patch(user._id, updates);
   },
 });
 

@@ -93,21 +93,7 @@ export const save = mutation({
       .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
       .first();
 
-    if (existing) {
-      await ctx.db.patch(existing._id, {
-        content: args.content,
-        title: args.title,
-        titleSize: args.titleSize,
-        titleWeight: args.titleWeight,
-        displayRegistrationInHeader: args.displayRegistrationInHeader,
-        clientSignatureImageUrl: args.clientSignatureImageUrl,
-        requiresClientSignature: args.requiresClientSignature,
-        displayWatermark: args.displayWatermark,
-        watermarkOpacity: args.watermarkOpacity,
-        updatedAt: Date.now(),
-      });
-    } else {
-      await ctx.db.insert("legalDocuments", {
+    const docData: any = {
         businessId: args.businessId,
         content: args.content,
         title: args.title,
@@ -119,7 +105,17 @@ export const save = mutation({
         displayWatermark: args.displayWatermark,
         watermarkOpacity: args.watermarkOpacity,
         updatedAt: Date.now(),
-      });
+    };
+
+    // Sanitize
+    Object.keys(docData).forEach(key => {
+        if (docData[key] === undefined) delete docData[key];
+    });
+
+    if (existing) {
+      await ctx.db.patch(existing._id, docData);
+    } else {
+      await ctx.db.insert("legalDocuments", docData);
     }
   },
 });

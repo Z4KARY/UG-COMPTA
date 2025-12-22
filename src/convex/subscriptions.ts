@@ -173,8 +173,7 @@ export const processPaymentWebhook = internalMutation({
         const duration = args.interval === "year" ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
         const endDate = now + duration;
 
-        // Create subscription record
-        await ctx.db.insert("subscriptions", {
+        const subData: any = {
             businessId: args.businessId,
             planId: args.planId as any,
             status: "active",
@@ -185,7 +184,14 @@ export const processPaymentWebhook = internalMutation({
             endDate: endDate,
             paymentMethod: "chargily",
             transactionId: args.transactionId,
+        };
+
+        Object.keys(subData).forEach(key => {
+            if (subData[key] === undefined) delete subData[key];
         });
+
+        // Create subscription record
+        await ctx.db.insert("subscriptions", subData);
 
         // Update business status
         await ctx.db.patch(args.businessId, {
