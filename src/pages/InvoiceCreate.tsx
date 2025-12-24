@@ -97,6 +97,14 @@ export default function InvoiceCreate() {
   const updateInvoice = useMutation(api.invoices.update);
 
   const [submitStatus, setSubmitStatus] = useState<"draft" | "issued">("draft");
+  const [ipAddress, setIpAddress] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    fetch("https://api.ipify.org?format=json")
+      .then(response => response.json())
+      .then(data => setIpAddress(data.ip))
+      .catch(error => console.error("Failed to fetch IP:", error));
+  }, []);
 
   const [formData, setFormData] = useState({
     customerId: "",
@@ -315,7 +323,7 @@ export default function InvoiceCreate() {
         dueDate: formData.dueDate.getTime(),
         currency: formData.currency,
         status: submitStatus === "draft" ? "draft" : "issued",
-        notes: values.notes || "",
+        notes: values.notes ? values.notes : null,
         paymentMethod: values.paymentMethod,
         subtotalHt,
         totalHt: subtotalHt, // Legacy support
@@ -329,6 +337,7 @@ export default function InvoiceCreate() {
             lineTotalTtc: item.lineTotal * (1 + item.tvaRate/100)
         })),
         userAgent: navigator.userAgent,
+        ipAddress: ipAddress,
       };
 
       if (isEditMode && id) {
