@@ -178,6 +178,8 @@ export const create = mutation({
         productType: v.optional(v.union(v.literal("goods"), v.literal("service"))),
       })
     ),
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
