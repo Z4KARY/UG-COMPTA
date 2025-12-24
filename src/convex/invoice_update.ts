@@ -45,7 +45,7 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     // Sanitize fields to remove undefined values
     const cleanFields: any = { ...fields };
     Object.keys(cleanFields).forEach(key => {
-        if (cleanFields[key] === undefined) {
+        if (cleanFields[key] === undefined || cleanFields[key] === null) {
             delete cleanFields[key];
         }
     });

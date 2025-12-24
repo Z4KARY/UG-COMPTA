@@ -211,7 +211,7 @@ export const update = mutation({
       v.literal("overdue"),
       v.literal("cancelled")
     )),
-    notes: v.optional(v.string()),
+    notes: v.optional(v.union(v.string(), v.null())),
     paymentMethod: v.optional(v.union(
       v.literal("CASH"),
       v.literal("BANK_TRANSFER"),
@@ -246,7 +246,12 @@ export const update = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
 
-    await updateInvoiceLogic(ctx, args, userId);
+    try {
+      await updateInvoiceLogic(ctx, args, userId);
+    } catch (error: any) {
+      console.error("Failed to update invoice:", error);
+      throw new Error(`Failed to update invoice: ${error.message}`);
+    }
   },
 });
 
