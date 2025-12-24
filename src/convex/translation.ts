@@ -2,7 +2,6 @@
 
 import { action } from "./_generated/server";
 import { v } from "convex/values";
-import { translate } from "google-translate-api-x";
 
 export const translateInvoice = action({
   args: {
@@ -18,14 +17,9 @@ export const translateInvoice = action({
 
     console.log(`Translating ${args.documentType} "${args.documentTitle}" to ${args.targetLanguage}`);
 
-    try {
-      const res = await translate(args.invoiceText, { to: args.targetLanguage });
-      return { translation: res.text };
-    } catch (error: any) {
-      console.error("Translation Action Error:", error);
-      // Fallback to original text to prevent crash
-      return { translation: args.invoiceText };
-    }
+    // For now, we just return the original text if no robust translation service is available
+    // This prevents server errors in production due to scraper blocking
+    return { translation: args.invoiceText };
   },
 });
 
@@ -54,7 +48,7 @@ export const translateInvoiceContent = action({
             "Authorization": `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini", // Updated to gpt-4o-mini
+            model: "gpt-4o-mini",
             messages: [
               { 
                 role: "system", 
@@ -96,56 +90,19 @@ export const translateInvoiceContent = action({
         };
 
       } catch (error) {
-        console.error("OpenAI Translation failed, falling back to Google:", error);
-        // Fallback to Google below
+        console.error("OpenAI Translation failed:", error);
+        // Fallback to original content on error
       }
+    } else {
+        console.log("OPENAI_API_KEY not set. Skipping translation.");
     }
 
-    // 2. Fallback to Google Translate (Scraper)
-    // We batch requests to avoid rate limits if possible, but this lib is tricky.
-    // We'll use a small concurrency limit.
-    try {
-      const translatedItems = [];
-      // Process in chunks of 5 to avoid rate limiting
-      const chunkSize = 5;
-      for (let i = 0; i < args.items.length; i += chunkSize) {
-        const chunk = args.items.slice(i, i + chunkSize);
-        const chunkPromises = chunk.map(async (item) => {
-          try {
-            const res = await translate(item.description, { to: args.targetLanguage });
-            return { ...item, description: res.text };
-          } catch (e) {
-            console.error("Item translation error:", e);
-            return item; // Return original item on error
-          }
-        });
-        const chunkResults = await Promise.all(chunkPromises);
-        translatedItems.push(...chunkResults);
-      }
-
-      // Translate notes if present
-      let translatedNotes = args.notes;
-      if (args.notes) {
-        try {
-            const res = await translate(args.notes, { to: args.targetLanguage });
-            translatedNotes = res.text;
-        } catch (e) {
-            console.error("Notes translation error:", e);
-            // Keep original notes
-        }
-      }
-
-      return {
-        items: translatedItems,
-        notes: translatedNotes,
-      };
-    } catch (error: any) {
-      console.error("Content Translation Error:", error);
-      // Fallback to original content
-      return {
-        items: args.items,
-        notes: args.notes,
-      };
-    }
+    // 2. Fallback: Return original content
+    // We removed the Google Translate scraper because it is unreliable in production environments
+    // and can cause server errors due to IP blocking or rate limiting.
+    return {
+      items: args.items,
+      notes: args.notes,
+    };
   },
 });

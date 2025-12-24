@@ -82,15 +82,24 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
         }
         const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculation;
 
+        // Explicitly construct itemData to ensure no extra fields are passed
+        // and to ensure type safety against the schema
         const itemData: any = {
           invoiceId: id,
-          ...item,
+          productId: item.productId,
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          discountRate: item.discountRate,
+          tvaRate: item.tvaRate,
+          productType: item.productType || "service",
+          
+          // Calculated fields
           discountAmount,
           tvaAmount,
-          lineTotal: lineTotalHt,
+          lineTotal: lineTotalHt, // Using HT as lineTotal
           lineTotalHt,
           lineTotalTtc,
-          productType: item.productType || "service",
         };
 
         // Sanitize itemData
