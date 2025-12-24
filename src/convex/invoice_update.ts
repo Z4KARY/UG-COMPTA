@@ -44,6 +44,7 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
 
     // Sanitize fields to remove undefined values
     // We allow null values to pass through to clear fields (if schema allows)
+    // This ensures that if the user explicitly sends null (e.g. to clear notes), it is preserved
     const cleanFields: any = { ...fields };
     Object.keys(cleanFields).forEach(key => {
         if (cleanFields[key] === undefined) {

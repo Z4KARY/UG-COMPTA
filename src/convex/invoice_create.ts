@@ -125,8 +125,8 @@ export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
       dueDate: args.dueDate,
       currency: args.currency,
       status: args.status,
-      notes: args.notes,
-      paymentMethod: args.paymentMethod,
+      notes: args.notes, // Can be null
+      paymentMethod: args.paymentMethod, // Can be null
       
       subtotalHt: calculatedSubtotalHt,
       totalHt: calculatedSubtotalHt, // Legacy alias
@@ -140,6 +140,8 @@ export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     };
 
     // Sanitize invoiceData to remove undefined values
+    // IMPORTANT: We must preserve null values as they are valid in the schema (e.g. notes: null)
+    // undefined values indicate the field was not provided and should be omitted
     Object.keys(invoiceData).forEach(key => {
         if (invoiceData[key] === undefined) {
             delete invoiceData[key];

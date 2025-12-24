@@ -53,4 +53,10 @@ export const invoiceForm = {
   "invoiceCreate.title.deliveryNote": "Nouveau Bon de Livraison",
   "invoiceCreate.title.saleOrder": "Nouveau Bon de Commande",
   "invoiceCreate.businessInfo": "Informations de l'entreprise",
+  "validation.invoiceNumber.exists": "Le numéro de facture existe déjà",
+  "validation.period.closed": "Impossible d'effectuer cette action dans une période clôturée",
+  "validation.customer.invalid": "Client invalide",
+  "validation.items.empty": "La facture doit contenir au moins un article",
+  "validation.items.invalid": "Données des articles invalides",
+  "validation.payment.invalid": "Détails de paiement invalides",
 };

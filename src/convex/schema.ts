@@ -513,6 +513,8 @@ const schema = defineSchema(
       payloadBefore: v.optional(v.any()),
       payloadAfter: v.optional(v.any()),
       timestamp: v.optional(v.number()),
+      ipAddress: v.optional(v.string()),
+      userAgent: v.optional(v.string()),
     }).index("by_business", ["businessId"]),
 
     invoiceReminders: defineTable({

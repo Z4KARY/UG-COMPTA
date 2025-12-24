@@ -55,4 +55,10 @@ export const invoiceForm = {
     "invoiceCreate.success.draft": "Draft created successfully",
     "invoiceCreate.success.issued": "Invoice issued successfully",
     "invoiceCreate.error.create": "Error creating invoice",
+    "validation.invoiceNumber.exists": "Invoice number already exists",
+    "validation.period.closed": "Cannot perform action in a closed period",
+    "validation.customer.invalid": "Invalid customer",
+    "validation.items.empty": "Invoice must have at least one item",
+    "validation.items.invalid": "Invalid items data",
+    "validation.payment.invalid": "Invalid payment details",
 };

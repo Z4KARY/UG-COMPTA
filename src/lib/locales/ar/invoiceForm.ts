@@ -40,4 +40,10 @@ export const invoiceForm = {
     "invoiceCreate.success.draft": "تم حفظ الفاتورة كمسودة بنجاح",
     "invoiceCreate.success.issued": "تم إصدار الفاتورة بنجاح",
     "invoiceCreate.error.create": "فشل إنشاء الفاتورة",
+    "validation.invoiceNumber.exists": "رقم الفاتورة موجود بالفعل",
+    "validation.period.closed": "لا يمكن إجراء هذا الإجراء في فترة مغلقة",
+    "validation.customer.invalid": "عميل غير صالح",
+    "validation.items.empty": "يجب أن تحتوي الفاتورة على عنصر واحد على الأقل",
+    "validation.items.invalid": "بيانات العناصر غير صالحة",
+    "validation.payment.invalid": "تفاصيل الدفع غير صالحة",
 };
