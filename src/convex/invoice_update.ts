@@ -12,39 +12,54 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
     if (!business || business.userId !== userId) throw new Error("Unauthorized");
 
-    // Prevent editing if paid or cancelled
-    if (invoice.status === "paid" || invoice.status === "cancelled") {
-        throw new Error("Cannot edit finalized invoice");
-    }
+    // Separate special fields that shouldn't be patched to the invoice
+    const { id, items, ipAddress, userAgent, ...fields } = args;
 
-    // Check if existing invoice date is in closed period
-    const existingClosure = await ctx.db.query("periodClosures")
-        .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
-        .filter(q => q.and(q.lte(q.field("startDate"), invoice.issueDate), q.gte(q.field("endDate"), invoice.issueDate)))
-        .first();
+    // Identify what is actually being updated (ignoring undefined values)
+    const updates = Object.keys(fields).filter(key => fields[key] !== undefined);
+    const hasItemUpdates = items !== undefined;
     
-    if (existingClosure) {
-        throw new Error("Cannot edit invoice in a closed period");
-    }
+    // Define what fields are allowed to be changed on a finalized (Paid/Cancelled) invoice
+    // We only allow cosmetic changes that don't affect fiscal data
+    const ALLOWED_FINALIZED_UPDATES = ["language"];
+    
+    const isRestrictedUpdate = hasItemUpdates || updates.some(key => !ALLOWED_FINALIZED_UPDATES.includes(key));
 
-    // Check if new date is in closed period (if changing date)
-    if (args.issueDate !== undefined) {
-        const newIssueDate = args.issueDate;
-        const newClosure = await ctx.db.query("periodClosures")
-            .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
-            .filter(q => q.and(q.lte(q.field("startDate"), newIssueDate), q.gte(q.field("endDate"), newIssueDate)))
-            .first();
-        
-        if (newClosure) {
-            throw new Error("Cannot move invoice to a closed period");
+    // Prevent editing restricted fields if paid or cancelled
+    if (invoice.status === "paid" || invoice.status === "cancelled") {
+        if (isRestrictedUpdate) {
+            throw new Error("Cannot edit finalized invoice");
         }
     }
 
-    const { id, items, ...fields } = args;
+    // Check if existing invoice date is in closed period
+    // We only enforce this for restricted updates (fiscal changes)
+    if (isRestrictedUpdate) {
+        const existingClosure = await ctx.db.query("periodClosures")
+            .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+            .filter(q => q.and(q.lte(q.field("startDate"), invoice.issueDate), q.gte(q.field("endDate"), invoice.issueDate)))
+            .first();
+        
+        if (existingClosure) {
+            throw new Error("Cannot edit invoice in a closed period");
+        }
+
+        // Check if new date is in closed period (if changing date)
+        if (args.issueDate !== undefined) {
+            const newIssueDate = args.issueDate;
+            const newClosure = await ctx.db.query("periodClosures")
+                .withIndex("by_business", q => q.eq("businessId", invoice.businessId))
+                .filter(q => q.and(q.lte(q.field("startDate"), newIssueDate), q.gte(q.field("endDate"), newIssueDate)))
+                .first();
+            
+            if (newClosure) {
+                throw new Error("Cannot move invoice to a closed period");
+            }
+        }
+    }
 
     // Sanitize fields to remove undefined values
     // We allow null values to pass through to clear fields (if schema allows)
-    // This ensures that if the user explicitly sends null (e.g. to clear notes), it is preserved
     const cleanFields: any = { ...fields };
     Object.keys(cleanFields).forEach(key => {
         if (cleanFields[key] === undefined) {
@@ -53,7 +68,10 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     });
 
     // Update invoice fields
-    await ctx.db.patch(id, cleanFields);
+    // Note: cleanFields does NOT contain ipAddress or userAgent due to destructuring above
+    if (Object.keys(cleanFields).length > 0) {
+        await ctx.db.patch(id, cleanFields);
+    }
 
     // If items are provided, replace them
     if (items) {
@@ -131,8 +149,8 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
         action: "UPDATE",
         payloadBefore: invoice,
         payloadAfter: payloadAfter,
-        ipAddress: args.ipAddress,
-        userAgent: args.userAgent,
+        ipAddress: ipAddress, // Use the extracted variable
+        userAgent: userAgent, // Use the extracted variable
     });
 }
 
