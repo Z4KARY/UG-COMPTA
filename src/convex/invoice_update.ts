@@ -119,10 +119,12 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
         action: "UPDATE",
         payloadBefore: invoice,
         payloadAfter: payloadAfter,
+        ipAddress: args.ipAddress,
+        userAgent: args.userAgent,
     });
 }
 
-export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices"> }, userId: Id<"users">) {
+export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices">, ipAddress?: string, userAgent?: string }, userId: Id<"users">) {
     const invoice = await ctx.db.get(args.id);
     if (!invoice) throw new Error("Not found");
 
@@ -182,5 +184,7 @@ export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoi
         entityId: args.id,
         action: "DELETE",
         payloadBefore: invoice,
+        ipAddress: args.ipAddress,
+        userAgent: args.userAgent,
     });
 }

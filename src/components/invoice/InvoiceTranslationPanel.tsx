@@ -85,6 +85,7 @@ export function InvoiceTranslationPanel({
         language: targetLanguage,
         items: sanitizedItems,
         notes: updatedNotes === null ? undefined : updatedNotes,
+        userAgent: navigator.userAgent,
       });
 
       toast.success(`Invoice translated to ${LANGUAGE_OPTIONS.find(l => l.value === targetLanguage)?.label}`);

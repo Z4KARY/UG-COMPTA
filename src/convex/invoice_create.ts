@@ -174,6 +174,8 @@ export async function createInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
         entityId: invoiceId,
         action: "CREATE",
         payloadAfter: invoiceData,
+        ipAddress: args.ipAddress,
+        userAgent: args.userAgent,
     });
 
     await ctx.scheduler.runAfter(0, internal.webhookActions.trigger, {

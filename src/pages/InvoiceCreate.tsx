@@ -29,35 +29,50 @@ const DEFAULT_FISCAL_CONSTANTS = {
   }
 };
 
-const formSchema = z.object({
-  invoiceNumber: z.string().optional(),
-  issueDate: z.date(),
-  dueDate: z.date(),
-  items: z.array(z.object({
-    productId: z.string().optional(),
-    description: z.string(),
-    quantity: z.number(),
-    unitPrice: z.number(),
-    discountRate: z.number().min(0).max(100).optional(),
-    tvaRate: z.number(),
-    lineTotal: z.number(),
-    productType: z.enum(["goods", "service"]).optional(),
-  })),
-  notes: z.string().optional(),
-  currency: z.string().optional(),
-  type: z.enum(["invoice", "quote", "credit_note", "pro_forma", "delivery_note", "sale_order"]),
-  fiscalType: z.enum(["LOCAL", "EXPORT", "EXEMPT"]).optional(),
-  paymentMethod: z.enum(["CASH", "BANK_TRANSFER", "CHEQUE", "CARD", "OTHER"]),
-  customerId: z.string().min(1, "Customer is required"),
-});
+// Moved schema inside component to use translations or defined with custom error map if needed.
+// For now, we will define it here but use the t function in the component to get messages.
+// Actually, to use t() in z.object, we need to create the schema inside the component or pass t to a schema creator.
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = {
+  invoiceNumber?: string;
+  issueDate: Date;
+  dueDate: Date;
+  items: any[];
+  notes?: string;
+  currency?: string;
+  type: "invoice" | "quote" | "credit_note" | "pro_forma" | "delivery_note" | "sale_order";
+  fiscalType?: "LOCAL" | "EXPORT" | "EXEMPT";
+  paymentMethod: "CASH" | "BANK_TRANSFER" | "CHEQUE" | "CARD" | "OTHER";
+  customerId: string;
+};
 
 export default function InvoiceCreate() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
+
+  const formSchema = z.object({
+    invoiceNumber: z.string().optional(),
+    issueDate: z.date(),
+    dueDate: z.date(),
+    items: z.array(z.object({
+      productId: z.string().optional(),
+      description: z.string(),
+      quantity: z.number(),
+      unitPrice: z.number(),
+      discountRate: z.number().min(0).max(100).optional(),
+      tvaRate: z.number(),
+      lineTotal: z.number(),
+      productType: z.enum(["goods", "service"]).optional(),
+    })).min(1, t("validation.items.empty") || "Invoice must have at least one item"),
+    notes: z.string().optional(),
+    currency: z.string().optional(),
+    type: z.enum(["invoice", "quote", "credit_note", "pro_forma", "delivery_note", "sale_order"]),
+    fiscalType: z.enum(["LOCAL", "EXPORT", "EXEMPT"]).optional(),
+    paymentMethod: z.enum(["CASH", "BANK_TRANSFER", "CHEQUE", "CARD", "OTHER"]),
+    customerId: z.string().min(1, t("validation.customer.invalid") || "Customer is required"),
+  });
 
   const business = useQuery(api.businesses.getMyBusiness, {});
   
@@ -313,6 +328,7 @@ export default function InvoiceCreate() {
             lineTotalHt: item.lineTotal,
             lineTotalTtc: item.lineTotal * (1 + item.tvaRate/100)
         })),
+        userAgent: navigator.userAgent,
       };
 
       if (isEditMode && id) {

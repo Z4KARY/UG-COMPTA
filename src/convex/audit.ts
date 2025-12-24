@@ -10,7 +10,8 @@ export const log = internalMutation({
         v.literal("CUSTOMER"),
         v.literal("PRODUCT"),
         v.literal("FISCAL_CONFIG"),
-        v.literal("BUSINESS")
+        v.literal("BUSINESS"),
+        v.literal("IMPORT_JOB")
     ),
     entityId: v.string(),
     action: v.union(
@@ -19,10 +20,13 @@ export const log = internalMutation({
         v.literal("DELETE"),
         v.literal("ISSUE"),
         v.literal("MARK_PAID"),
-        v.literal("CONFIG_CHANGE")
+        v.literal("CONFIG_CHANGE"),
+        v.literal("IMPORT")
     ),
     payloadBefore: v.optional(v.any()),
     payloadAfter: v.optional(v.any()),
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("auditLogs", {
@@ -34,6 +38,8 @@ export const log = internalMutation({
         payloadBefore: args.payloadBefore,
         payloadAfter: args.payloadAfter,
         timestamp: Date.now(),
+        ipAddress: args.ipAddress,
+        userAgent: args.userAgent,
     });
   },
 });
