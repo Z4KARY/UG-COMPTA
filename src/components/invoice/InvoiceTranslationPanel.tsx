@@ -27,7 +27,7 @@ interface InvoiceTranslationPanelProps {
   invoiceId: Id<"invoices">;
   currentLanguage: string;
   items: any[];
-  notes?: string;
+  notes?: string | null;
 }
 
 export function InvoiceTranslationPanel({

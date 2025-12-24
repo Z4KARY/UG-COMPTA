@@ -43,9 +43,10 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     const { id, items, ...fields } = args;
 
     // Sanitize fields to remove undefined values
+    // We allow null values to pass through to clear fields (if schema allows)
     const cleanFields: any = { ...fields };
     Object.keys(cleanFields).forEach(key => {
-        if (cleanFields[key] === undefined || cleanFields[key] === null) {
+        if (cleanFields[key] === undefined) {
             delete cleanFields[key];
         }
     });
@@ -102,8 +103,12 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
       }
     }
 
-    // Sanitize args to remove undefined values which cause Convex errors
-    const payloadAfter = JSON.parse(JSON.stringify(args));
+    // Construct payloadAfter for audit log
+    const payloadAfter = {
+        ...invoice,
+        ...cleanFields,
+        items: items || undefined // Include items if they were updated
+    };
 
     await ctx.scheduler.runAfter(0, internal.audit.log, {
         businessId: invoice.businessId,

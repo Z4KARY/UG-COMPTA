@@ -141,21 +141,22 @@ export const create = mutation({
       v.literal("overdue"),
       v.literal("cancelled")
     ),
-    notes: v.optional(v.string()),
+    notes: v.optional(v.union(v.string(), v.null())),
     
     paymentMethod: v.optional(v.union(
       v.literal("CASH"),
       v.literal("BANK_TRANSFER"),
       v.literal("CHEQUE"),
       v.literal("CARD"),
-      v.literal("OTHER")
+      v.literal("OTHER"),
+      v.null()
     )),
     
     // We accept these but will recalculate them server-side for security
     subtotalHt: v.number(),
-    discountTotal: v.optional(v.number()),
+    discountTotal: v.optional(v.union(v.number(), v.null())),
     totalTva: v.number(),
-    stampDutyAmount: v.optional(v.number()),
+    stampDutyAmount: v.optional(v.union(v.number(), v.null())),
     totalTtc: v.number(),
     
     // Legacy/Optional
@@ -217,12 +218,13 @@ export const update = mutation({
       v.literal("BANK_TRANSFER"),
       v.literal("CHEQUE"),
       v.literal("CARD"),
-      v.literal("OTHER")
+      v.literal("OTHER"),
+      v.null()
     )),
     subtotalHt: v.optional(v.number()),
-    discountTotal: v.optional(v.number()),
+    discountTotal: v.optional(v.union(v.number(), v.null())),
     totalTva: v.optional(v.number()),
-    stampDutyAmount: v.optional(v.number()),
+    stampDutyAmount: v.optional(v.union(v.number(), v.null())),
     totalTtc: v.optional(v.number()),
     items: v.optional(v.array(
       v.object({

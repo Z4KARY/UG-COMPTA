@@ -271,7 +271,7 @@ const schema = defineSchema(
         v.literal("cancelled")
       ),
       amountPaid: v.optional(v.number()),
-      notes: v.optional(v.string()),
+      notes: v.optional(v.union(v.string(), v.null())),
       
       // Payment & Fiscal
       paymentMethod: v.optional(v.union(
@@ -279,14 +279,15 @@ const schema = defineSchema(
         v.literal("BANK_TRANSFER"),
         v.literal("CHEQUE"),
         v.literal("CARD"),
-        v.literal("OTHER")
+        v.literal("OTHER"),
+        v.null()
       )),
       
       // Totals
       subtotalHt: v.number(), // Sum of line HT
-      discountTotal: v.optional(v.number()), // global discount if applied
+      discountTotal: v.optional(v.union(v.number(), v.null())), // global discount if applied
       totalTva: v.number(),
-      stampDutyAmount: v.optional(v.number()), // Droit de timbre
+      stampDutyAmount: v.optional(v.union(v.number(), v.null())), // Droit de timbre
       totalTtc: v.number(),
       
       // Deprecated/Legacy fields (keeping for compatibility if needed, but logic moves to stampDutyAmount)
