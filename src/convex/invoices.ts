@@ -256,6 +256,8 @@ export const update = mutation({
       console.log(`[invoices:update] Successfully updated invoice ${args.id}`);
     } catch (error: any) {
       console.error("Failed to update invoice:", error);
+      // Log the full error object for debugging
+      console.error(JSON.stringify(error, Object.getOwnPropertyNames(error)));
       throw new Error(`Failed to update invoice: ${error.message}`);
     }
   },

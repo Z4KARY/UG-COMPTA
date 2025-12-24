@@ -80,6 +80,18 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
         }
     });
 
+    // BACKFILL: Check for missing required fields in the existing invoice that might cause validation errors
+    // This handles legacy data migration on the fly for documents created before schema updates
+    if (!invoice.type && !cleanFields.type) {
+        console.log(`[updateInvoiceLogic] Backfilling missing type for invoice ${id}`);
+        cleanFields.type = "invoice";
+    }
+    // Ensure status is present (it should be, but just in case)
+    if (!invoice.status && !cleanFields.status) {
+         console.log(`[updateInvoiceLogic] Backfilling missing status for invoice ${id}`);
+         cleanFields.status = "draft";
+    }
+
     // Update invoice fields
     // Note: cleanFields does NOT contain ipAddress or userAgent due to destructuring above
     if (Object.keys(cleanFields).length > 0) {
