@@ -63,11 +63,11 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
         .withIndex("by_invoice", (q) => q.eq("invoiceId", id))
         .collect();
       
-      for (const item of existingItems) {
-        await ctx.db.delete(item._id);
-      }
+      // Parallel delete for performance
+      await Promise.all(existingItems.map(item => ctx.db.delete(item._id)));
 
-      // Insert new items
+      // Prepare new items
+      const newItemsData = [];
       for (const item of items) {
         let calculation;
         try {
@@ -99,9 +99,12 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
                 delete itemData[key];
             }
         });
-
-        await ctx.db.insert("invoiceItems", itemData);
+        
+        newItemsData.push(itemData);
       }
+
+      // Parallel insert for performance
+      await Promise.all(newItemsData.map(data => ctx.db.insert("invoiceItems", data)));
     }
 
     // Construct payloadAfter for audit log
@@ -161,9 +164,8 @@ export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoi
       .withIndex("by_invoice", (q) => q.eq("invoiceId", args.id))
       .collect();
 
-    for (const item of items) {
-      await ctx.db.delete(item._id);
-    }
+    // Parallel delete
+    await Promise.all(items.map(item => ctx.db.delete(item._id)));
 
     // Delete invoice
     await ctx.db.delete(args.id);
