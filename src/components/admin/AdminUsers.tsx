@@ -54,22 +54,22 @@ export function AdminUsers() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
 
-  const users = useQuery(api.admin.listUsers, {
+  const users = useQuery(api.admin.users.listUsers, {
     search: search || undefined,
     role: roleFilter === "all" ? undefined : roleFilter,
   });
   const currentUser = useQuery(api.users.currentUser);
-  const toggleUser = useMutation(api.admin.toggleUserSuspension);
-  const updateUserRole = useMutation(api.admin.updateUserRole);
-  const deleteUsers = useMutation(api.admin.deleteUsers);
-  const createAccount = useMutation(api.admin.createAccount);
+  const toggleUser = useMutation(api.admin.users.toggleUserSuspension);
+  const updateUserRole = useMutation(api.admin.users.updateUserRole);
+  const deleteUsers = useMutation(api.admin.users.deleteUsers);
+  const createAccount = useMutation(api.admin.users.createAccount);
 
   const [selectedUsers, setSelectedUsers] = useState<Id<"users">[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   
   // Details State
   const [viewUserId, setViewUserId] = useState<Id<"users"> | null>(null);
-  const userDetails = useQuery(api.admin.getUserDetails, viewUserId ? { id: viewUserId } : "skip");
+  const userDetails = useQuery(api.admin.users.getUserDetails, viewUserId ? { id: viewUserId } : "skip");
   
   // Create Form State
   const [newName, setNewName] = useState("");
@@ -100,7 +100,7 @@ export function AdminUsers() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked && users) {
-      setSelectedUsers(users.map(u => u._id));
+      setSelectedUsers(users.map((u: any) => u._id));
     } else {
       setSelectedUsers([]);
     }
@@ -311,7 +311,7 @@ export function AdminUsers() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users?.map((u) => (
+            {users?.map((u: any) => (
               <TableRow key={u._id} className="cursor-pointer hover:bg-muted/50" onClick={(e) => {
                 if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("[role='checkbox']") || (e.target as HTMLElement).closest("[role='combobox']")) return;
                 setViewUserId(u._id);
@@ -421,7 +421,7 @@ export function AdminUsers() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {userDetails.businesses?.map((b) => (
+                                    {userDetails.businesses?.map((b: any) => (
                                         <TableRow key={b._id}>
                                             <TableCell className="font-medium">{b.name}</TableCell>
                                             <TableCell className="capitalize">{PLAN_NAMES[b.plan || ""] || b.plan || "-"}</TableCell>

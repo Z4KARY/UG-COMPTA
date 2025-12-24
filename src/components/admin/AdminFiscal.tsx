@@ -19,7 +19,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 export function AdminFiscal() {
   const { t } = useLanguage();
-  const globalParams = useQuery(api.admin.getGlobalFiscalParameters);
+  const globalParams = useQuery(api.admin.system.getGlobalFiscalParameters);
 
   return (
     <Card>
@@ -39,7 +39,7 @@ export function AdminFiscal() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {globalParams?.map((p) => (
+            {globalParams?.map((p: any) => (
               <TableRow key={p._id}>
                 <TableCell className="font-mono">{p.code}</TableCell>
                 <TableCell>{p.effectiveFrom ? new Date(p.effectiveFrom).toLocaleDateString() : "-"}</TableCell>

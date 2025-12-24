@@ -54,22 +54,22 @@ export function AdminBusinesses() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const businesses = useQuery(api.admin.listBusinesses, {
+  const businesses = useQuery(api.admin.businesses.listBusinesses, {
     search: search || undefined,
     status: statusFilter === "all" ? undefined : statusFilter,
   });
-  const toggleBusiness = useMutation(api.admin.toggleBusinessSuspension);
-  const deleteBusinesses = useMutation(api.admin.deleteBusinesses);
-  const createBusiness = useMutation(api.admin.createBusiness);
-  const createSubscription = useMutation(api.admin.createSubscription);
-  const resetSubscription = useMutation(api.admin.resetBusinessSubscription);
+  const toggleBusiness = useMutation(api.admin.businesses.toggleBusinessSuspension);
+  const deleteBusinesses = useMutation(api.admin.businesses.deleteBusinesses);
+  const createBusiness = useMutation(api.admin.businesses.createBusiness);
+  const createSubscription = useMutation(api.admin.subscriptions.createSubscription);
+  const resetSubscription = useMutation(api.admin.businesses.resetBusinessSubscription);
 
   const [selectedBusinesses, setSelectedBusinesses] = useState<Id<"businesses">[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   
   // Details & Subscription State
   const [viewBusinessId, setViewBusinessId] = useState<Id<"businesses"> | null>(null);
-  const businessDetails = useQuery(api.admin.getBusinessDetails, viewBusinessId ? { id: viewBusinessId } : "skip");
+  const businessDetails = useQuery(api.admin.businesses.getBusinessDetails, viewBusinessId ? { id: viewBusinessId } : "skip");
   const [isAddSubOpen, setIsAddSubOpen] = useState(false);
   const [subPlan, setSubPlan] = useState<string>("");
   const [subDuration, setSubDuration] = useState<string>("");
@@ -94,7 +94,7 @@ export function AdminBusinesses() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked && businesses) {
-      setSelectedBusinesses(businesses.map(b => b._id));
+      setSelectedBusinesses(businesses.map((b: any) => b._id));
     } else {
       setSelectedBusinesses([]);
     }
@@ -351,7 +351,7 @@ export function AdminBusinesses() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {businesses?.map((b) => (
+            {businesses?.map((b: any) => (
               <TableRow key={b._id} className="cursor-pointer hover:bg-muted/50" onClick={(e) => {
                 // Prevent click when clicking checkbox or actions
                 if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("[role='checkbox']")) return;
@@ -493,7 +493,7 @@ export function AdminBusinesses() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {businessDetails.subscriptions?.map((sub) => (
+                                    {businessDetails.subscriptions?.map((sub: any) => (
                                         <TableRow key={sub._id}>
                                             <TableCell className="capitalize">{PLAN_NAMES[sub.planId] || sub.planId}</TableCell>
                                             <TableCell className="capitalize">{sub.status}</TableCell>

@@ -169,3 +169,28 @@ export const createBusiness = mutation({
     });
   }
 });
+
+export const resetBusinessSubscription = mutation({
+  args: { businessId: v.id("businesses") },
+  handler: async (ctx, args) => {
+    await checkAdmin(ctx);
+    
+    // Cancel all active subscriptions
+    const activeSubscriptions = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_business", (q) => q.eq("businessId", args.businessId))
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .collect();
+    
+    for (const sub of activeSubscriptions) {
+      await ctx.db.patch(sub._id, { status: "canceled" });
+    }
+    
+    // Reset business to free plan
+    await ctx.db.patch(args.businessId, {
+      plan: "free",
+      subscriptionStatus: "active",
+      subscriptionEndsAt: undefined,
+    });
+  },
+});
