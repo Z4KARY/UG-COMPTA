@@ -236,6 +236,9 @@ export const update = mutation({
         lineTotalHt: v.optional(v.number()),
         lineTotalTtc: v.optional(v.number()),
         productType: v.optional(v.union(v.literal("goods"), v.literal("service"))),
+        // Allow _id and other system fields to be passed but ignored, or we should strip them in frontend
+        // But since we can't easily change all frontend calls, let's see if we can make validator more flexible or fix frontend.
+        // Actually, strict validation is good. I should check frontend.
       })
     )),
   },
