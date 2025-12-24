@@ -2,8 +2,9 @@ import { Hono } from "hono";
 import { serveStatic } from "hono/deno";
 
 const app = new Hono();
-const distRoot = new URL("./dist/", import.meta.url).pathname;
-const assetsRoot = new URL("./dist/assets/", import.meta.url).pathname;
+
+const distRoot = new URL("./dist", import.meta.url).pathname;
+const assetsRoot = `${distRoot}/assets`;
 
 // 1) Serve anything in /assets/**
 app.use("/assets/*", serveStatic({ root: assetsRoot }));
