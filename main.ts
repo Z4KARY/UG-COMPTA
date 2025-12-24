@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { serveStatic } from "hono/deno";
 
 const app = new Hono();
+
 const distRoot = new URL("./dist", import.meta.url).pathname;
 const assetsRoot = `${distRoot}/assets`;
 
