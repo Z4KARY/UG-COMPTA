@@ -56,7 +56,13 @@ export function InvoiceTranslationPanel({
       console.error("Language update error:", error);
       // Ensure we show the backend error message if available
       const errorMessage = error.message || error.toString();
-      toast.error(errorMessage.includes("Failed to update invoice") ? errorMessage : "Failed to update invoice language");
+      
+      // Log full error details for debugging
+      if (error.data) {
+          console.error("Error data:", error.data);
+      }
+      
+      toast.error(errorMessage.includes("Failed to update invoice") ? errorMessage : `Failed to update invoice language: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }

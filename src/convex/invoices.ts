@@ -249,7 +249,7 @@ export const update = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
 
-    console.log(`[invoices:update] Called for invoice ${args.id}`);
+    console.log(`[invoices:update] Called for invoice ${args.id} with args:`, JSON.stringify(args));
 
     try {
       await updateInvoiceLogic(ctx, args, userId);

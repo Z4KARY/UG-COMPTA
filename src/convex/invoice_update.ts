@@ -82,6 +82,8 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
 
     // BACKFILL: Check for missing required fields in the existing invoice that might cause validation errors
     // This handles legacy data migration on the fly for documents created before schema updates
+    const invoiceAny = invoice as any;
+
     if (!invoice.type && !cleanFields.type) {
         console.log(`[updateInvoiceLogic] Backfilling missing type for invoice ${id}`);
         cleanFields.type = "invoice";
@@ -90,6 +92,41 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     if (!invoice.status && !cleanFields.status) {
          console.log(`[updateInvoiceLogic] Backfilling missing status for invoice ${id}`);
          cleanFields.status = "draft";
+    }
+
+    // Backfill other required fields to satisfy schema validation
+    // We use invoiceAny because TypeScript expects these fields to exist on the Doc type, 
+    // but they might be missing in the actual DB document for legacy data.
+    if (invoiceAny.subtotalHt === undefined && cleanFields.subtotalHt === undefined) {
+        console.log(`[updateInvoiceLogic] Backfilling missing subtotalHt for invoice ${id}`);
+        cleanFields.subtotalHt = invoiceAny.totalHt || 0;
+    }
+    if (invoiceAny.totalTva === undefined && cleanFields.totalTva === undefined) {
+        console.log(`[updateInvoiceLogic] Backfilling missing totalTva for invoice ${id}`);
+        cleanFields.totalTva = 0;
+    }
+    if (invoiceAny.totalTtc === undefined && cleanFields.totalTtc === undefined) {
+        console.log(`[updateInvoiceLogic] Backfilling missing totalTtc for invoice ${id}`);
+        // If we have subtotal and tva (even if backfilled), use them, otherwise 0
+        const ht = cleanFields.subtotalHt ?? invoiceAny.subtotalHt ?? invoiceAny.totalHt ?? 0;
+        const tva = cleanFields.totalTva ?? invoiceAny.totalTva ?? 0;
+        cleanFields.totalTtc = ht + tva;
+    }
+    if (!invoice.currency && !cleanFields.currency) {
+        console.log(`[updateInvoiceLogic] Backfilling missing currency for invoice ${id}`);
+        cleanFields.currency = "DZD";
+    }
+    if (invoice.issueDate === undefined && cleanFields.issueDate === undefined) {
+        console.log(`[updateInvoiceLogic] Backfilling missing issueDate for invoice ${id}`);
+        cleanFields.issueDate = invoice._creationTime;
+    }
+    if (invoice.dueDate === undefined && cleanFields.dueDate === undefined) {
+        console.log(`[updateInvoiceLogic] Backfilling missing dueDate for invoice ${id}`);
+        cleanFields.dueDate = invoice._creationTime;
+    }
+    if (!invoice.invoiceNumber && !cleanFields.invoiceNumber) {
+         console.log(`[updateInvoiceLogic] Backfilling missing invoiceNumber for invoice ${id}`);
+         cleanFields.invoiceNumber = "DRAFT-" + Date.now();
     }
 
     // Update invoice fields
