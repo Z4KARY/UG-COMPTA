@@ -108,7 +108,7 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     const payloadAfter = {
         ...invoice,
         ...cleanFields,
-        items: items || undefined // Include items if they were updated
+        ...(items !== undefined ? { items } : {})
     };
 
     await ctx.scheduler.runAfter(0, internal.audit.log, {

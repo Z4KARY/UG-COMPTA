@@ -42,7 +42,7 @@ export function AdminFiscal() {
             {globalParams?.map((p) => (
               <TableRow key={p._id}>
                 <TableCell className="font-mono">{p.code}</TableCell>
-                <TableCell>{new Date(p.effectiveFrom).toLocaleDateString()}</TableCell>
+                <TableCell>{p.effectiveFrom ? new Date(p.effectiveFrom).toLocaleDateString() : "-"}</TableCell>
                 <TableCell>
                   <pre className="text-xs bg-muted p-2 rounded overflow-auto max-w-[300px] max-h-[100px]">
                     {JSON.stringify(p.value, null, 2)}

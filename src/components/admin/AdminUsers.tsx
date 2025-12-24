@@ -331,7 +331,7 @@ export function AdminUsers() {
                         u.roleGlobal === "ADMIN" ? "admin" :
                         u.roleGlobal === "ACCOUNTANT" ? "accountant" :
                         u.roleGlobal === "NORMAL" ? "staff" :
-                        (u.roleGlobal as any) || (u.role === "admin" ? "admin" : "staff")
+                        (u.roleGlobal as any) || ((u as any).role === "admin" ? "admin" : "staff")
                     }
                     onValueChange={(value: "admin" | "owner" | "accountant" | "staff") => handleRoleChange(u._id, value)}
                     disabled={u._id === currentUser?._id}
@@ -359,7 +359,7 @@ export function AdminUsers() {
                     <Button variant="ghost" size="sm" onClick={() => setViewUserId(u._id)}>
                         <Eye className="h-4 w-4" />
                     </Button>
-                    {u.role !== "admin" && (
+                    {(u as any).role !== "admin" && (
                         <Button
                         variant={u.isSuspended ? "outline" : "destructive"}
                         size="sm"
@@ -396,7 +396,7 @@ export function AdminUsers() {
                             </div>
                             <div className="space-y-1">
                                 <Label className="text-muted-foreground">Role</Label>
-                                <Badge variant="secondary">{userDetails.roleGlobal || userDetails.role}</Badge>
+                                <Badge variant="secondary">{userDetails.roleGlobal || (userDetails as any).role}</Badge>
                             </div>
                             <div className="space-y-1">
                                 <Label className="text-muted-foreground">Status</Label>

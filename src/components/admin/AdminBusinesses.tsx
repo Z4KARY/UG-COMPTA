@@ -194,16 +194,16 @@ export function AdminBusinesses() {
     if (subPlan) {
       const plan = PRICING_PLANS.en.find(p => p.id === subPlan);
       if (plan) {
-        if (plan.price === "Custom") {
+        if ((plan as any).price === "Custom") {
            // Keep existing or set to 0
-        } else if (plan.price) {
-           const priceNum = parseInt(plan.price.replace(/[^0-9]/g, ''));
+        } else if ((plan as any).price) {
+           const priceNum = parseInt((plan as any).price.replace(/[^0-9]/g, ''));
            if (!isNaN(priceNum)) {
              setSubAmount(priceNum.toString());
            }
         }
         // Auto-set interval based on plan period if available, default to year if not specified or year
-        if (plan.period === "/year") {
+        if ((plan as any).period === "/year") {
             setSubInterval("year");
         } else {
             setSubInterval("year");
