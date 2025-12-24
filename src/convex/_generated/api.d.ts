@@ -9,6 +9,12 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as admin_businesses from "../admin/businesses.js";
+import type * as admin_stats from "../admin/stats.js";
+import type * as admin_subscriptions from "../admin/subscriptions.js";
+import type * as admin_system from "../admin/system.js";
+import type * as admin_users from "../admin/users.js";
+import type * as admin_utils from "../admin/utils.js";
 import type * as adminActions from "../adminActions.js";
 import type * as adminAuth from "../adminAuth.js";
 import type * as audit from "../audit.js";
@@ -74,6 +80,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  "admin/businesses": typeof admin_businesses;
+  "admin/stats": typeof admin_stats;
+  "admin/subscriptions": typeof admin_subscriptions;
+  "admin/system": typeof admin_system;
+  "admin/users": typeof admin_users;
+  "admin/utils": typeof admin_utils;
   adminActions: typeof adminActions;
   adminAuth: typeof adminAuth;
   audit: typeof audit;

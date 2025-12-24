@@ -13,8 +13,8 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 export function AdminSettings() {
-  const settings = useQuery(api.admin.getPlatformSettings);
-  const updateSetting = useMutation(api.admin.updatePlatformSetting);
+  const settings = useQuery(api.admin.system.getPlatformSettings);
+  const updateSetting = useMutation(api.admin.system.updatePlatformSetting);
 
   const getSettingValue = (key: string, defaultValue: any) => {
     const setting = settings?.find((s) => s.key === key);

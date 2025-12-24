@@ -18,7 +18,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 
 export function AdminAuditLogs() {
-  const logs = useQuery(api.admin.listAuditLogs);
+  const logs = useQuery(api.admin.system.listAuditLogs);
 
   return (
     <Card>

@@ -43,10 +43,10 @@ import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 
 export function AdminAnnouncements() {
-  const announcements = useQuery(api.admin.listAnnouncements);
-  const createAnnouncement = useMutation(api.admin.createAnnouncement);
-  const toggleAnnouncement = useMutation(api.admin.toggleAnnouncement);
-  const deleteAnnouncement = useMutation(api.admin.deleteAnnouncement);
+  const announcements = useQuery(api.admin.system.listAnnouncements);
+  const createAnnouncement = useMutation(api.admin.system.createAnnouncement);
+  const toggleAnnouncement = useMutation(api.admin.system.toggleAnnouncement);
+  const deleteAnnouncement = useMutation(api.admin.system.deleteAnnouncement);
 
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({

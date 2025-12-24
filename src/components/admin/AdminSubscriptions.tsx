@@ -51,14 +51,14 @@ export function AdminSubscriptions() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [intervalFilter, setIntervalFilter] = useState("all");
 
-  const subscriptions = useQuery(api.admin.listAllSubscriptions, {
+  const subscriptions = useQuery(api.admin.subscriptions.listAllSubscriptions, {
     search: search || undefined,
     status: statusFilter === "all" ? undefined : statusFilter,
     interval: intervalFilter === "all" ? undefined : intervalFilter,
   });
-  const cancelSubscription = useMutation(api.admin.cancelSubscription);
-  const deleteSubscription = useMutation(api.admin.deleteSubscription);
-  const updateSubscription = useMutation(api.admin.updateSubscription);
+  const cancelSubscription = useMutation(api.admin.subscriptions.cancelSubscription);
+  const deleteSubscription = useMutation(api.admin.subscriptions.deleteSubscription);
+  const updateSubscription = useMutation(api.admin.subscriptions.updateSubscription);
 
   const [editingSub, setEditingSub] = useState<any>(null);
   const [editPlan, setEditPlan] = useState<string>("");

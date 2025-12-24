@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { Users, Building2, CreditCard, DollarSign } from "lucide-react";
 
 export function AdminOverview() {
-  const stats = useQuery(api.admin.getDashboardStats);
+  const stats = useQuery(api.admin.stats.getDashboardStats);
 
   if (!stats) {
     return <div className="p-4">Loading stats...</div>;

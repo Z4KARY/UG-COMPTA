@@ -40,7 +40,9 @@ const schema = defineSchema(
         v.literal("staff")
       )), // Added for accountant mode
       isSuspended: v.optional(v.boolean()), // Added for admin suspension
-    }).index("email", ["email"]), // index for the email. do not remove or modify
+    }).index("email", ["email"])
+      .index("by_role_global", ["roleGlobal"])
+      .index("by_is_suspended", ["isSuspended"]), // Added indexes for admin filtering
 
     businesses: defineTable({
       userId: v.id("users"),
@@ -155,7 +157,9 @@ const schema = defineSchema(
       subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("past_due"), v.literal("canceled"), v.literal("trial"))),
       subscriptionEndsAt: v.optional(v.number()),
     }).index("by_user", ["userId"])
-      .index("by_ae_card", ["autoEntrepreneurCardNumber"]),
+      .index("by_ae_card", ["autoEntrepreneurCardNumber"])
+      .index("by_is_suspended", ["isSuspended"]) // Added index for admin filtering
+      .index("by_subscription_status", ["subscriptionStatus"]), // Added index for admin filtering
 
     // New table for Legal Documents
     legalDocuments: defineTable({

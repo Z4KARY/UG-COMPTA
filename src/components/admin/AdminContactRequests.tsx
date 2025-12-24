@@ -22,8 +22,8 @@ import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 
 export function AdminContactRequests() {
-  const contactRequests = useQuery(api.admin.listContactRequests);
-  const updateContactStatus = useMutation(api.admin.updateContactRequestStatus);
+  const contactRequests = useQuery(api.admin.system.listContactRequests);
+  const updateContactStatus = useMutation(api.admin.system.updateContactRequestStatus);
 
   const handleUpdateContactStatus = async (id: Id<"contactRequests">, newStatus: "new" | "contacted" | "closed") => {
     try {
