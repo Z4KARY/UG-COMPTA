@@ -84,7 +84,7 @@ export function InvoiceTranslationPanel({
         id: invoiceId,
         language: targetLanguage,
         items: sanitizedItems,
-        notes: updatedNotes === null ? undefined : updatedNotes,
+        notes: updatedNotes, // Pass updatedNotes directly (can be null, string, or undefined)
         userAgent: navigator.userAgent,
       });
 
