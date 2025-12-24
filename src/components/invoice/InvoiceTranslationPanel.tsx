@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAction, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { Languages, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const LANGUAGE_OPTIONS = [
   { value: "fr", label: "French" },
@@ -33,65 +32,29 @@ interface InvoiceTranslationPanelProps {
 export function InvoiceTranslationPanel({
   invoiceId,
   currentLanguage,
-  items,
-  notes,
 }: InvoiceTranslationPanelProps) {
-  const translateContent = useAction(api.translation.translateInvoiceContent);
   const updateInvoice = useMutation(api.invoices.update);
   
   const [targetLanguage, setTargetLanguage] = useState(currentLanguage);
-  const [translateItems, setTranslateItems] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleTranslate = async () => {
+  const handleUpdateLanguage = async () => {
     try {
       setIsLoading(true);
       
-      let updatedItems = undefined;
-      let updatedNotes = undefined;
-
-      if (translateItems) {
-        const result = await translateContent({
-          items: items.map(i => ({ description: i.description })),
-          notes: notes === null ? undefined : notes,
-          targetLanguage,
-        });
-        
-        // Merge translated descriptions back into items
-        updatedItems = items.map((item, index) => ({
-          ...item,
-          description: result.items[index].description,
-        }));
-        updatedNotes = result.notes;
-      }
-
-      // Sanitize items to match mutation validator (remove system fields like _id, _creationTime)
-      // Also handle null values which are not accepted by v.optional()
-      const sanitizedItems = (updatedItems || items).map(item => ({
-        productId: item.productId === null ? undefined : item.productId,
-        description: item.description,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        discountRate: item.discountRate === null ? undefined : item.discountRate,
-        tvaRate: item.tvaRate ?? 0,
-        lineTotal: item.lineTotal ?? 0,
-        lineTotalHt: item.lineTotalHt === null ? undefined : item.lineTotalHt,
-        lineTotalTtc: item.lineTotalTtc === null ? undefined : item.lineTotalTtc,
-        productType: item.productType === null ? undefined : item.productType,
-      }));
-
+      // Only update the language field. 
+      // We do not send items or notes to avoid unnecessary processing/validation on the backend
+      // since we are not translating the content anymore (No API Key mode).
       await updateInvoice({
         id: invoiceId,
         language: targetLanguage,
-        items: sanitizedItems,
-        notes: updatedNotes, // Pass updatedNotes directly (can be null, string, or undefined)
         userAgent: navigator.userAgent,
       });
 
-      toast.success(`Invoice translated to ${LANGUAGE_OPTIONS.find(l => l.value === targetLanguage)?.label}`);
+      toast.success(`Invoice language changed to ${LANGUAGE_OPTIONS.find(l => l.value === targetLanguage)?.label}`);
     } catch (error: any) {
-      console.error("Translation error:", error);
-      toast.error(error.message || "Failed to translate invoice");
+      console.error("Language update error:", error);
+      toast.error(error.message || "Failed to update invoice language");
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +65,7 @@ export function InvoiceTranslationPanel({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-800">
           <Languages className="h-4 w-4 text-slate-500" />
-          Invoice Language & Translation
+          Invoice Language
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -123,25 +86,14 @@ export function InvoiceTranslationPanel({
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex items-center space-x-2 pb-2.5">
-            <Checkbox 
-              id="translate-content" 
-              checked={translateItems}
-              onCheckedChange={(c) => setTranslateItems(!!c)}
-            />
-            <label
-              htmlFor="translate-content"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Translate descriptions & notes
-            </label>
+            <p className="text-xs text-slate-500 pt-1">
+              This will update the invoice labels (headers, totals, etc.) to the selected language.
+            </p>
           </div>
 
           <Button
-            onClick={handleTranslate}
-            disabled={isLoading || (targetLanguage === currentLanguage && !translateItems)}
+            onClick={handleUpdateLanguage}
+            disabled={isLoading || targetLanguage === currentLanguage}
             className="min-w-[120px]"
           >
             {isLoading ? (
