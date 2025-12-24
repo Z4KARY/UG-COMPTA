@@ -6,11 +6,19 @@ import { requireBusinessAccess } from "./permissions";
 import { decrementInvoiceCounterIfLast } from "./invoice_utils";
 
 export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id<"users">) {
+    console.log(`[updateInvoiceLogic] Starting update for invoice ${args.id} by user ${userId}`);
     const invoice = await ctx.db.get(args.id as Id<"invoices">);
-    if (!invoice) throw new Error("Not found");
+    if (!invoice) {
+        console.error(`[updateInvoiceLogic] Invoice ${args.id} not found`);
+        throw new Error("Not found");
+    }
+    console.log(`[updateInvoiceLogic] Invoice found. Status: ${invoice.status}, BusinessId: ${invoice.businessId}`);
 
     const business = await requireBusinessAccess(ctx, invoice.businessId, userId);
-    if (!business || business.userId !== userId) throw new Error("Unauthorized");
+    if (!business || business.userId !== userId) {
+        console.error(`[updateInvoiceLogic] Unauthorized access to business ${invoice.businessId}`);
+        throw new Error("Unauthorized");
+    }
 
     // Separate special fields that shouldn't be patched to the invoice
     const { id, items, ipAddress, userAgent, ...fields } = args;
@@ -19,15 +27,20 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     const updates = Object.keys(fields).filter(key => fields[key] !== undefined);
     const hasItemUpdates = items !== undefined;
     
+    console.log(`[updateInvoiceLogic] Updates requested: ${JSON.stringify(updates)}`);
+    console.log(`[updateInvoiceLogic] Has item updates: ${hasItemUpdates}`);
+    
     // Define what fields are allowed to be changed on a finalized (Paid/Cancelled) invoice
     // We only allow cosmetic changes that don't affect fiscal data
     const ALLOWED_FINALIZED_UPDATES = ["language"];
     
     const isRestrictedUpdate = hasItemUpdates || updates.some(key => !ALLOWED_FINALIZED_UPDATES.includes(key));
+    console.log(`[updateInvoiceLogic] Is restricted update: ${isRestrictedUpdate}`);
 
     // Prevent editing restricted fields if paid or cancelled
     if (invoice.status === "paid" || invoice.status === "cancelled") {
         if (isRestrictedUpdate) {
+            console.error(`[updateInvoiceLogic] Attempted restricted update on finalized invoice ${invoice.status}`);
             throw new Error("Cannot edit finalized invoice");
         }
     }
@@ -70,7 +83,10 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     // Update invoice fields
     // Note: cleanFields does NOT contain ipAddress or userAgent due to destructuring above
     if (Object.keys(cleanFields).length > 0) {
+        console.log(`[updateInvoiceLogic] Patching invoice ${id} with fields:`, cleanFields);
         await ctx.db.patch(id, cleanFields);
+    } else {
+        console.log(`[updateInvoiceLogic] No fields to patch for invoice ${id}`);
     }
 
     // If items are provided, replace them
@@ -141,6 +157,7 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
         ...(items !== undefined ? { items } : {})
     };
 
+    console.log(`[updateInvoiceLogic] Creating audit log for invoice ${id}`);
     await ctx.scheduler.runAfter(0, internal.audit.log, {
         businessId: invoice.businessId,
         userId,
@@ -152,6 +169,7 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
         ipAddress: ipAddress, // Use the extracted variable
         userAgent: userAgent, // Use the extracted variable
     });
+    console.log(`[updateInvoiceLogic] Update complete for invoice ${id}`);
 }
 
 export async function deleteInvoiceLogic(ctx: MutationCtx, args: { id: Id<"invoices">, ipAddress?: string, userAgent?: string }, userId: Id<"users">) {
