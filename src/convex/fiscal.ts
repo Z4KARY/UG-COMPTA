@@ -16,11 +16,13 @@ export type StampDutyConfig = {
 
 export const FISCAL_CONSTANTS = {
   STAMP_DUTY: {
-    MIN_AMOUNT_SUBJECT: 0,
+    MIN_AMOUNT_SUBJECT: 300,
     MIN_DUTY: 5,
     MAX_DUTY: 10000,
     BRACKETS: [
-      { up_to: null, rate_per_100da: 1.0 } // Default linear 1%
+      { up_to: 30000, rate_per_100da: 1.0 },
+      { up_to: 100000, rate_per_100da: 1.5 },
+      { up_to: null, rate_per_100da: 2.0 }
     ]
   } as StampDutyConfig,
   VAT_RATES: [0, 9, 19],
