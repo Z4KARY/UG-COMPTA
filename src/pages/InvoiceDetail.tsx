@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { ArrowLeft, Printer, CheckCircle, Send, XCircle, Pencil } from "lucide-react";
-import { Link, useParams } from "react-router";
+import { ArrowLeft, Printer, CheckCircle, Send, XCircle, Pencil, Trash2 } from "lucide-react";
+import { Link, useParams, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { InvoiceTranslationPanel } from "@/components/invoice/InvoiceTranslationPanel";
@@ -12,10 +12,12 @@ import { InvoiceDocument } from "@/components/invoice/InvoiceDocument";
 
 export default function InvoiceDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const invoice = useQuery(api.invoices.get, {
     id: id as Id<"invoices">,
   });
   const updateStatus = useMutation(api.invoices.updateStatus);
+  const deleteInvoice = useMutation(api.invoices.remove);
 
   useEffect(() => {
     if (invoice) {
@@ -42,6 +44,20 @@ export default function InvoiceDetail() {
     } catch (error) {
       toast.error("Failed to update status");
       console.error(error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!invoice) return;
+    if (confirm("Are you sure you want to delete this invoice? This action cannot be undone.")) {
+      try {
+        await deleteInvoice({ id: invoice._id });
+        toast.success("Invoice deleted successfully");
+        navigate("/invoices");
+      } catch (error) {
+        toast.error("Failed to delete invoice");
+        console.error(error);
+      }
     }
   };
 
@@ -134,6 +150,11 @@ export default function InvoiceDetail() {
           {(invoice.status === "draft" || invoice.status === "issued") && (
             <Button onClick={() => handleStatusChange("cancelled")} variant="outline" className="flex-1 md:flex-none text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
               <XCircle className="mr-2 h-4 w-4" /> Cancel
+            </Button>
+          )}
+          {(invoice.status === "draft" || invoice.status === "cancelled") && (
+            <Button onClick={handleDelete} variant="outline" className="flex-1 md:flex-none text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
+              <Trash2 className="mr-2 h-4 w-4" /> Delete
             </Button>
           )}
           <Button onClick={handlePrint} variant="secondary" className="flex-1 md:flex-none">
