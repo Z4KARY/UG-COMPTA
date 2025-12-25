@@ -475,6 +475,8 @@ export default function InvoiceCreate() {
             onAction={handleSubmit}
             language={formData.language}
             setLanguage={(lang) => setFormData({ ...formData, language: lang })}
+            items={items}
+            setItems={setItems}
           />
         </div>
       </div>

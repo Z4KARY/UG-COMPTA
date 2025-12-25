@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Info } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Info, Calculator } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 import {
   Select,
@@ -12,6 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { calculateReverseStampDuty } from "@/convex/fiscal";
+import { InvoiceItem } from "@/types/invoice";
+import { useState, useEffect } from "react";
 
 interface InvoiceFormSummaryProps {
   business: any;
@@ -26,6 +30,8 @@ interface InvoiceFormSummaryProps {
   onAction: (status: "draft" | "issued") => void;
   language: string;
   setLanguage: (lang: string) => void;
+  items: InvoiceItem[];
+  setItems: (items: InvoiceItem[]) => void;
 }
 
 export function InvoiceFormSummary({
@@ -40,9 +46,101 @@ export function InvoiceFormSummary({
   setNotes,
   onAction,
   language,
-  setLanguage
+  setLanguage,
+  items,
+  setItems
 }: InvoiceFormSummaryProps) {
   const form = useFormContext();
+  const [targetTotal, setTargetTotal] = useState<string>("");
+
+  // Sync target total input with actual total when it changes externally
+  useEffect(() => {
+    if (document.activeElement !== document.getElementById("target-total-input")) {
+        setTargetTotal(totalTtc.toFixed(2));
+    }
+  }, [totalTtc]);
+
+  const handleTargetTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTargetTotal(e.target.value);
+  };
+
+  const applyTargetTotal = () => {
+    const target = parseFloat(targetTotal);
+    if (isNaN(target) || target < 0) return;
+
+    // 1. Calculate required Total TTC (before stamp)
+    let requiredTtcBeforeStamp = target;
+    if (paymentMethod === "CASH") {
+        requiredTtcBeforeStamp = calculateReverseStampDuty(target, stampDutyConfig);
+    }
+
+    // 2. Calculate current Total TTC (before stamp)
+    // We sum up the TTC of all items
+    let currentTtcBeforeStamp = 0;
+    items.forEach(item => {
+        const basePrice = item.unitPrice * item.quantity;
+        const discountAmount = basePrice * ((item.discountRate || 0) / 100);
+        const ht = basePrice - discountAmount;
+        const tva = ht * (item.tvaRate / 100);
+        currentTtcBeforeStamp += (ht + tva);
+    });
+
+    // 3. Find difference
+    const diff = requiredTtcBeforeStamp - currentTtcBeforeStamp;
+
+    if (Math.abs(diff) < 0.01) return; // No change needed
+
+    // 4. Adjust the first item (or create a new one if needed, but adjusting first is standard)
+    if (items.length === 0) return;
+
+    const newItems = [...items];
+    const itemToAdjust = { ...newItems[0] };
+
+    // Calculate current item TTC
+    const itemBasePrice = itemToAdjust.unitPrice * itemToAdjust.quantity;
+    const itemDiscount = itemBasePrice * ((itemToAdjust.discountRate || 0) / 100);
+    const itemHt = itemBasePrice - itemDiscount;
+    const itemTva = itemHt * (itemToAdjust.tvaRate / 100);
+    const itemTtc = itemHt + itemTva;
+
+    // New Item TTC
+    const newItemTtc = itemTtc + diff;
+
+    if (newItemTtc < 0) {
+        // Cannot achieve target with this item (negative price)
+        return;
+    }
+
+    // Reverse calculate Unit Price from New Item TTC
+    // TTC = (UnitPrice * Qty * (1 - Disc)) * (1 + TVA)
+    // UnitPrice = TTC / (Qty * (1 - Disc) * (1 + TVA))
+    
+    const tvaMultiplier = 1 + (itemToAdjust.tvaRate / 100);
+    const discountMultiplier = 1 - ((itemToAdjust.discountRate || 0) / 100);
+    const quantity = itemToAdjust.quantity || 1;
+
+    if (quantity === 0) return;
+
+    const newUnitPrice = newItemTtc / (quantity * discountMultiplier * tvaMultiplier);
+
+    // Update item
+    itemToAdjust.unitPrice = Math.round((newUnitPrice + Number.EPSILON) * 100) / 100;
+    
+    // Update line total for display (HT)
+    const newBase = itemToAdjust.unitPrice * quantity;
+    const newDisc = newBase * ((itemToAdjust.discountRate || 0) / 100);
+    itemToAdjust.lineTotal = newBase - newDisc;
+
+    newItems[0] = itemToAdjust;
+    setItems(newItems);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        applyTargetTotal();
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -78,11 +176,35 @@ export function InvoiceFormSummary({
             </div>
           )}
 
-          <div className="border-t pt-4 flex justify-between font-bold text-lg">
-            <span>Total TTC</span>
-            <span>
-              {totalTtc.toFixed(2)} {business.currency}
-            </span>
+          <div className="border-t pt-4">
+            <div className="flex justify-between font-bold text-lg items-center mb-2">
+                <span>Total TTC</span>
+                <span>
+                {totalTtc.toFixed(2)} {business.currency}
+                </span>
+            </div>
+            
+            {/* Target Total Input */}
+            <div className="flex items-center gap-2 mt-2">
+                <div className="relative w-full">
+                    <Calculator className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                        id="target-total-input"
+                        value={targetTotal}
+                        onChange={handleTargetTotalChange}
+                        onBlur={applyTargetTotal}
+                        onKeyDown={handleKeyDown}
+                        className="pl-8"
+                        placeholder="Set target total..."
+                    />
+                </div>
+                <Button variant="outline" size="icon" onClick={applyTargetTotal} title="Calculate reverse">
+                    <Calculator className="h-4 w-4" />
+                </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+                Enter a target amount to reverse-calculate the unit price.
+            </p>
           </div>
         </CardContent>
       </Card>

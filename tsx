@@ -1,17 +1,14 @@
-                    <div className="grid gap-2">
-                        <Label htmlFor="duration">Duration *</Label>
-                        <Select value={durationMonths} onValueChange={setDurationMonths}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select Duration" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="12">1 Year</SelectItem>
-                                <SelectItem value="24">2 Years</SelectItem>
-                                <SelectItem value="36">3 Years</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-                <DialogFooter>
-    
-</DialogFooter>
+            business={business}
+            subtotalHt={subtotalHt}
+            totalTva={totalTva}
+            totalTtc={totalTtc}
+            stampDutyAmount={stampDutyAmount}
+            paymentMethod={paymentMethod}
+            stampDutyConfig={stampDutyConfig}
+            notes={notes}
+            setNotes={setNotes}
+            onAction={handleSubmit}
+            language={formData.language}
+            setLanguage={(lang) => setFormData({ ...formData, language: lang })}
+            items={items}
+            setItems={setItems}

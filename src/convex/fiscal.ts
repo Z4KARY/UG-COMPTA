@@ -49,6 +49,86 @@ export function roundCurrency(amount: number): number {
   return Math.round((amount + Number.EPSILON) * 100) / 100;
 }
 
+/**
+ * Calculates the base amount (TTC before stamp) from a target total (TTC + Stamp).
+ * Used for reverse-calculating the invoice amount to hit a specific target.
+ */
+export function calculateReverseStampDuty(
+  targetTotalWithStamp: number,
+  config: StampDutyConfig = FISCAL_CONSTANTS.STAMP_DUTY
+): number {
+  if (targetTotalWithStamp < 0) return 0;
+  
+  const { MIN_AMOUNT_SUBJECT, MIN_DUTY, MAX_DUTY, BRACKETS } = config;
+
+  // If below subject amount, no stamp duty
+  if (targetTotalWithStamp < MIN_AMOUNT_SUBJECT) {
+    return targetTotalWithStamp;
+  }
+
+  // Try to solve for X where X + Stamp(X) = Target
+  // We check each bracket assumption
+
+  // 1. Check Max Duty Case
+  // If Stamp is capped at MAX_DUTY
+  if (MAX_DUTY !== null) {
+    const xMax = targetTotalWithStamp - MAX_DUTY;
+    // Check if this X would actually generate >= MAX_DUTY
+    // We need to know the rate for this X. Usually it's the highest bracket.
+    // But simpler: calculate stamp for xMax. If it hits cap, then this is the solution.
+    const stampForXMax = calculateStampDuty(xMax, "CASH", config);
+    if (stampForXMax === MAX_DUTY) {
+        return xMax;
+    }
+  }
+
+  // 2. Check Min Duty Case
+  const xMin = targetTotalWithStamp - MIN_DUTY;
+  const stampForXMin = calculateStampDuty(xMin, "CASH", config);
+  if (stampForXMin === MIN_DUTY) {
+      // This might overlap with bracket logic, but if it matches, it's a valid candidate.
+      // However, we prefer the bracket logic if it gives a more precise match (e.g. if min duty applies to a range)
+      // But usually Min Duty applies when calculated duty is low.
+  }
+
+  // 3. Check Brackets
+  // We iterate brackets to find a consistent solution
+  for (const bracket of BRACKETS) {
+    const rate = bracket.rate_per_100da / 100; // e.g. 1.0 per 100 => 0.01
+    // Assumption: Stamp = X * rate
+    // Target = X + X * rate = X * (1 + rate)
+    // X = Target / (1 + rate)
+    
+    const xCandidate = targetTotalWithStamp / (1 + rate);
+    
+    // Check if this candidate falls within this bracket's range
+    // Note: The bracket definition in calculateStampDuty uses "up_to" for the amount.
+    // We need to check if xCandidate is <= up_to (and > previous bracket's up_to)
+    
+    const prevBracketIndex = BRACKETS.indexOf(bracket) - 1;
+    const lowerBound = prevBracketIndex >= 0 ? BRACKETS[prevBracketIndex].up_to! : 0;
+    const upperBound = bracket.up_to === null ? Infinity : bracket.up_to;
+
+    if (xCandidate > lowerBound && xCandidate <= upperBound) {
+        // Verify with actual calculation (handling rounding/ceil logic in stamp duty)
+        const actualStamp = calculateStampDuty(xCandidate, "CASH", config);
+        const calculatedTotal = xCandidate + actualStamp;
+        
+        // Allow small floating point error
+        if (Math.abs(calculatedTotal - targetTotalWithStamp) < 1.0) {
+            return xCandidate;
+        }
+    }
+  }
+
+  // Fallback: If no exact match found (due to step function of stamp duty),
+  // return Target - Estimated Stamp.
+  // This is an approximation.
+  // Let's try to just subtract the stamp duty of the target itself as a starting point
+  const approxStamp = calculateStampDuty(targetTotalWithStamp, "CASH", config);
+  return targetTotalWithStamp - approxStamp;
+}
+
 export function calculateLineItem(
   quantity: number, 
   unitPrice: number, 

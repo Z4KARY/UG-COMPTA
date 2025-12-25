@@ -20,7 +20,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
   
   const handleItemChange = (
     index: number,
-    field: keyof InvoiceItem,
+    field: keyof InvoiceItem | "lineTotalTtc",
     value: string | number
   ) => {
     const newItems = [...items];
@@ -29,6 +29,17 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
     if (field === "description" || field === "productType") {
       // @ts-ignore
       item[field] = value;
+    } else if (field === "lineTotalTtc") {
+        // Reverse calculate from TTC
+        const ttc = parseFloat(value as string) || 0;
+        const tvaMultiplier = 1 + (item.tvaRate / 100);
+        const discountMultiplier = 1 - ((item.discountRate || 0) / 100);
+        const quantity = item.quantity || 1;
+        
+        if (quantity > 0) {
+            const newUnitPrice = ttc / (quantity * discountMultiplier * tvaMultiplier);
+            item.unitPrice = Math.round((newUnitPrice + Number.EPSILON) * 100) / 100;
+        }
     } else {
       item[field as "quantity" | "unitPrice" | "discountRate" | "tvaRate"] =
         parseFloat(value as string) || 0;
@@ -95,15 +106,23 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
       <CardContent className="space-y-4">
         {/* Desktop Header - Hidden on Mobile */}
         <div className="hidden md:grid grid-cols-12 gap-2 font-medium text-sm text-muted-foreground mb-2 px-2">
-            <div className="col-span-4">{t("invoiceForm.items.description")}</div>
+            <div className="col-span-3">{t("invoiceForm.items.description")}</div>
             <div className="col-span-2">{t("invoiceForm.items.type")}</div>
             <div className="col-span-1">{t("invoiceForm.items.quantity")}</div>
             <div className="col-span-2">{t("invoiceForm.items.price")}</div>
             <div className="col-span-1">{t("invoiceForm.items.tva")}</div>
-            <div className="col-span-2 text-right">{t("invoiceForm.items.total")}</div>
+            <div className="col-span-3 text-right">Total TTC</div>
         </div>
 
-        {items.map((item, index) => (
+        {items.map((item, index) => {
+            // Calculate TTC for display
+            const basePrice = item.unitPrice * item.quantity;
+            const discountAmount = basePrice * ((item.discountRate || 0) / 100);
+            const ht = basePrice - discountAmount;
+            const tva = ht * (item.tvaRate / 100);
+            const ttc = ht + tva;
+
+            return (
           <div
             key={index}
             className={cn(
@@ -115,7 +134,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
             )}
           >
             {/* Description */}
-            <div className="md:col-span-4 space-y-1.5 md:space-y-0">
+            <div className="md:col-span-3 space-y-1.5 md:space-y-0">
               <Label className="md:hidden text-xs text-muted-foreground">{t("invoiceForm.items.description")}</Label>
               <div className="flex gap-2">
                 <Select onValueChange={(val) => handleProductSelect(index, val)}>
@@ -203,13 +222,19 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
             </div>
 
             {/* Total & Delete */}
-            <div className="md:col-span-2 flex items-center justify-between md:justify-end gap-2 pt-2 md:pt-0 border-t md:border-t-0 mt-2 md:mt-0">
+            <div className="md:col-span-3 flex items-center justify-between md:justify-end gap-2 pt-2 md:pt-0 border-t md:border-t-0 mt-2 md:mt-0">
                 <div className="md:hidden">
-                    <span className="text-xs text-muted-foreground mr-2">{t("invoiceForm.items.total")}:</span>
-                    <span className="font-medium">{item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="text-xs text-muted-foreground mr-2">Total TTC:</span>
+                    <span className="font-medium">{ttc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
-                <div className="hidden md:block text-sm font-medium text-right w-full pr-2">
-                    {item.lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <div className="hidden md:block w-full pr-2">
+                    <Input
+                        type="number"
+                        step="0.01"
+                        value={ttc.toFixed(2)}
+                        onChange={(e) => handleItemChange(index, "lineTotalTtc", e.target.value)}
+                        className="text-right"
+                    />
                 </div>
                 <Button
                     variant="ghost"
@@ -223,7 +248,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
                 </Button>
             </div>
           </div>
-        ))}
+        )})}
         <Button variant="outline" onClick={addItem} className="w-full border-dashed" type="button">
           <Plus className="mr-2 h-4 w-4" /> Add Item
         </Button>
