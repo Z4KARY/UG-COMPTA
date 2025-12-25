@@ -142,12 +142,12 @@ export default function InvoiceDetail() {
               </Link>
             </Button>
           )}
-          {invoice.status === "issued" && (
+          {(invoice.status === "issued" || invoice.status === "overdue") && (
             <Button onClick={() => handleStatusChange("paid")} className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700">
               <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
             </Button>
           )}
-          {(invoice.status === "draft" || invoice.status === "issued") && (
+          {(invoice.status === "draft" || invoice.status === "issued" || invoice.status === "overdue") && (
             <Button onClick={() => handleStatusChange("cancelled")} variant="outline" className="flex-1 md:flex-none text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
               <XCircle className="mr-2 h-4 w-4" /> Cancel
             </Button>
