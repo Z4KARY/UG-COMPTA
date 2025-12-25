@@ -1,10 +1,10 @@
 export interface InvoiceItem {
   productId?: string;
   description: string;
-  quantity: number;
-  unitPrice: number;
-  discountRate: number;
-  tvaRate: number;
+  quantity: number | string;
+  unitPrice: number | string;
+  discountRate: number | string;
+  tvaRate: number | string;
   lineTotal: number;
   productType?: "goods" | "service";
 }

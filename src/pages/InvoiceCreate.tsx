@@ -143,7 +143,7 @@ export default function InvoiceCreate() {
     {
       description: "",
       quantity: 1,
-      unitPrice: 0,
+      unitPrice: "", // Start empty
       discountRate: 0,
       tvaRate: business?.fiscalRegime === "IFU" || business?.type === "auto_entrepreneur" ? 0 : 19,
       lineTotal: 0,
@@ -219,10 +219,10 @@ export default function InvoiceCreate() {
     form.setValue("items", items.map(i => ({
       productId: i.productId,
       description: i.description,
-      quantity: i.quantity,
-      unitPrice: i.unitPrice,
-      discountRate: i.discountRate,
-      tvaRate: i.tvaRate,
+      quantity: parseFloat(i.quantity as string) || 0,
+      unitPrice: parseFloat(i.unitPrice as string) || 0,
+      discountRate: parseFloat(i.discountRate as string) || 0,
+      tvaRate: parseFloat(i.tvaRate as string) || 0,
       lineTotal: i.lineTotal,
       productType: i.productType
     })));
@@ -230,7 +230,7 @@ export default function InvoiceCreate() {
 
   // Update default TVA when business loads (only for new invoices)
   useEffect(() => {
-    if (!isEditMode && business && items.length === 1 && items[0].description === "" && items[0].unitPrice === 0) {
+    if (!isEditMode && business && items.length === 1 && items[0].description === "" && (items[0].unitPrice === 0 || items[0].unitPrice === "")) {
         const defaultTva = (business.fiscalRegime === "IFU" || business.type === "auto_entrepreneur") ? 0 : (business.tvaDefault || 19);
         setItems([{ ...items[0], tvaRate: defaultTva }]);
     }
@@ -243,11 +243,11 @@ export default function InvoiceCreate() {
 
     items.forEach((item) => {
       // Replicate backend logic for preview
-      const quantity = item.quantity;
-      const unitPrice = item.unitPrice;
-      const discountRate = item.discountRate || 0;
+      const quantity = parseFloat(item.quantity as string) || 0;
+      const unitPrice = parseFloat(item.unitPrice as string) || 0;
+      const discountRate = parseFloat(item.discountRate as string) || 0;
       // Force 0 TVA for AE in preview
-      const tvaRate = business?.type === "auto_entrepreneur" ? 0 : item.tvaRate;
+      const tvaRate = business?.type === "auto_entrepreneur" ? 0 : (parseFloat(item.tvaRate as string) || 0);
 
       const basePrice = unitPrice * quantity;
       const discountAmount = Math.round((basePrice * (discountRate / 100) + Number.EPSILON) * 100) / 100;
@@ -330,12 +330,23 @@ export default function InvoiceCreate() {
         totalTva,
         stampDutyAmount,
         totalTtc,
-        items: items.map(item => ({
-            ...item,
-            productId: (item.productId && item.productId !== "") ? item.productId as Id<"products"> : undefined,
-            lineTotalHt: item.lineTotal,
-            lineTotalTtc: item.lineTotal * (1 + item.tvaRate/100)
-        })),
+        items: items.map(item => {
+            const quantity = parseFloat(item.quantity as string) || 0;
+            const unitPrice = parseFloat(item.unitPrice as string) || 0;
+            const discountRate = parseFloat(item.discountRate as string) || 0;
+            const tvaRate = parseFloat(item.tvaRate as string) || 0;
+            
+            return {
+                ...item,
+                quantity,
+                unitPrice,
+                discountRate,
+                tvaRate,
+                productId: (item.productId && item.productId !== "") ? item.productId as Id<"products"> : undefined,
+                lineTotalHt: item.lineTotal,
+                lineTotalTtc: item.lineTotal * (1 + tvaRate/100)
+            };
+        }),
         userAgent: navigator.userAgent,
         ipAddress: ipAddress,
       };

@@ -1,5 +1,13 @@
-    const payloadAfter = {
-        ...invoice,
-        ...cleanFields,
-        ...(items !== undefined ? { items } : {})
-    };
+useEffect(() => {
+  form.setValue("items", items.map(i => ({
+    // ...
+    unitPrice: parseFloat(i.unitPrice as string) || 0,
+    // ...
+  })));
+}, [items, form]);
+
+items: z.array(z.object({
+  // ...
+  unitPrice: z.number(),
+  // ...
+})),

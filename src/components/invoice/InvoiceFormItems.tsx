@@ -31,23 +31,35 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
       item[field] = value;
     } else if (field === "lineTotalTtc") {
         // Reverse calculate from TTC
-        const ttc = parseFloat(value as string) || 0;
-        const tvaMultiplier = 1 + (item.tvaRate / 100);
-        const discountMultiplier = 1 - ((item.discountRate || 0) / 100);
-        const quantity = item.quantity || 1;
-        
-        if (quantity > 0) {
-            const newUnitPrice = ttc / (quantity * discountMultiplier * tvaMultiplier);
-            item.unitPrice = Math.round((newUnitPrice + Number.EPSILON) * 100) / 100;
+        if (value === "") {
+            // If cleared, clear unit price
+            item.unitPrice = "";
+        } else {
+            const ttc = parseFloat(value as string) || 0;
+            const tvaRate = parseFloat(item.tvaRate as string) || 0;
+            const discountRate = parseFloat(item.discountRate as string) || 0;
+            const quantity = parseFloat(item.quantity as string) || 0;
+            
+            const tvaMultiplier = 1 + (tvaRate / 100);
+            const discountMultiplier = 1 - (discountRate / 100);
+            
+            if (quantity > 0) {
+                const newUnitPrice = ttc / (quantity * discountMultiplier * tvaMultiplier);
+                item.unitPrice = Math.round((newUnitPrice + Number.EPSILON) * 100) / 100;
+            }
         }
     } else {
-      item[field as "quantity" | "unitPrice" | "discountRate" | "tvaRate"] =
-        parseFloat(value as string) || 0;
+      // Allow string values for inputs to support empty state
+      item[field as "quantity" | "unitPrice" | "discountRate" | "tvaRate"] = value as string | number;
     }
 
     // Recalculate line total for display (HT)
-    const basePrice = item.unitPrice * item.quantity;
-    const discountAmount = basePrice * ((item.discountRate || 0) / 100);
+    const q = parseFloat(item.quantity as string) || 0;
+    const p = parseFloat(item.unitPrice as string) || 0;
+    const d = parseFloat(item.discountRate as string) || 0;
+
+    const basePrice = p * q;
+    const discountAmount = basePrice * (d / 100);
     item.lineTotal = basePrice - discountAmount; // Raw calculation for immediate feedback, rounded in totals
 
     newItems[index] = item;
@@ -60,7 +72,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
       {
         description: "",
         quantity: 1,
-        unitPrice: 0,
+        unitPrice: "", // Start empty
         discountRate: 0,
         tvaRate: business?.fiscalRegime === "IFU" || business?.type === "auto_entrepreneur" ? 0 : (business?.tvaDefault || 19),
         lineTotal: 0,
@@ -93,7 +105,9 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
       // Recalculate line total
       const priceAfterDiscount =
         product.unitPrice * (1 - (product.defaultDiscount || 0) / 100);
-      newItems[index].lineTotal = priceAfterDiscount * newItems[index].quantity;
+      
+      const q = parseFloat(newItems[index].quantity as string) || 0;
+      newItems[index].lineTotal = priceAfterDiscount * q;
       setItems(newItems);
     }
   };
@@ -116,10 +130,15 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
 
         {items.map((item, index) => {
             // Calculate TTC for display
-            const basePrice = item.unitPrice * item.quantity;
-            const discountAmount = basePrice * ((item.discountRate || 0) / 100);
+            const q = parseFloat(item.quantity as string) || 0;
+            const p = parseFloat(item.unitPrice as string) || 0;
+            const d = parseFloat(item.discountRate as string) || 0;
+            const tvaRateVal = parseFloat(item.tvaRate as string) || 0;
+
+            const basePrice = p * q;
+            const discountAmount = basePrice * (d / 100);
             const ht = basePrice - discountAmount;
-            const tva = ht * (item.tvaRate / 100);
+            const tva = ht * (tvaRateVal / 100);
             const ttc = ht + tva;
 
             return (
@@ -202,6 +221,7 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
                     onChange={(e) =>
                     handleItemChange(index, "unitPrice", e.target.value)
                     }
+                    placeholder="0.00"
                 />
             </div>
 
@@ -231,9 +251,10 @@ export function InvoiceFormItems({ items, setItems, products, business }: Invoic
                     <Input
                         type="number"
                         step="0.01"
-                        value={ttc.toFixed(2)}
+                        value={ttc === 0 && (item.unitPrice === "" || item.unitPrice === 0) ? "" : ttc.toFixed(2)}
                         onChange={(e) => handleItemChange(index, "lineTotalTtc", e.target.value)}
                         className="text-right"
+                        placeholder="0.00"
                     />
                 </div>
                 <Button

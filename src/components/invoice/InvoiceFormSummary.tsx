@@ -56,7 +56,12 @@ export function InvoiceFormSummary({
   // Sync target total input with actual total when it changes externally
   useEffect(() => {
     if (document.activeElement !== document.getElementById("target-total-input")) {
-        setTargetTotal(totalTtc.toFixed(2));
+        // Only set if totalTtc is greater than 0, otherwise keep empty to avoid "0.00"
+        if (totalTtc > 0) {
+            setTargetTotal(totalTtc.toFixed(2));
+        } else {
+            setTargetTotal("");
+        }
     }
   }, [totalTtc]);
 
@@ -78,10 +83,15 @@ export function InvoiceFormSummary({
     // We sum up the TTC of all items
     let currentTtcBeforeStamp = 0;
     items.forEach(item => {
-        const basePrice = item.unitPrice * item.quantity;
-        const discountAmount = basePrice * ((item.discountRate || 0) / 100);
+        const q = parseFloat(item.quantity as string) || 0;
+        const p = parseFloat(item.unitPrice as string) || 0;
+        const d = parseFloat(item.discountRate as string) || 0;
+        const t = parseFloat(item.tvaRate as string) || 0;
+
+        const basePrice = p * q;
+        const discountAmount = basePrice * (d / 100);
         const ht = basePrice - discountAmount;
-        const tva = ht * (item.tvaRate / 100);
+        const tva = ht * (t / 100);
         currentTtcBeforeStamp += (ht + tva);
     });
 
@@ -97,10 +107,15 @@ export function InvoiceFormSummary({
     const itemToAdjust = { ...newItems[0] };
 
     // Calculate current item TTC
-    const itemBasePrice = itemToAdjust.unitPrice * itemToAdjust.quantity;
-    const itemDiscount = itemBasePrice * ((itemToAdjust.discountRate || 0) / 100);
+    const q = parseFloat(itemToAdjust.quantity as string) || 0;
+    const p = parseFloat(itemToAdjust.unitPrice as string) || 0;
+    const d = parseFloat(itemToAdjust.discountRate as string) || 0;
+    const t = parseFloat(itemToAdjust.tvaRate as string) || 0;
+
+    const itemBasePrice = p * q;
+    const itemDiscount = itemBasePrice * (d / 100);
     const itemHt = itemBasePrice - itemDiscount;
-    const itemTva = itemHt * (itemToAdjust.tvaRate / 100);
+    const itemTva = itemHt * (t / 100);
     const itemTtc = itemHt + itemTva;
 
     // New Item TTC
@@ -115,9 +130,9 @@ export function InvoiceFormSummary({
     // TTC = (UnitPrice * Qty * (1 - Disc)) * (1 + TVA)
     // UnitPrice = TTC / (Qty * (1 - Disc) * (1 + TVA))
     
-    const tvaMultiplier = 1 + (itemToAdjust.tvaRate / 100);
-    const discountMultiplier = 1 - ((itemToAdjust.discountRate || 0) / 100);
-    const quantity = itemToAdjust.quantity || 1;
+    const tvaMultiplier = 1 + (t / 100);
+    const discountMultiplier = 1 - (d / 100);
+    const quantity = q || 1;
 
     if (quantity === 0) return;
 
@@ -128,7 +143,7 @@ export function InvoiceFormSummary({
     
     // Update line total for display (HT)
     const newBase = itemToAdjust.unitPrice * quantity;
-    const newDisc = newBase * ((itemToAdjust.discountRate || 0) / 100);
+    const newDisc = newBase * (d / 100);
     itemToAdjust.lineTotal = newBase - newDisc;
 
     newItems[0] = itemToAdjust;
