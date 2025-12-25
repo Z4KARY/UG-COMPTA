@@ -275,25 +275,23 @@ export default function InvoiceCreate() {
       
       if (baseTtc >= MIN_AMOUNT_SUBJECT) {
           let duty = 0;
-          let remaining = baseTtc;
-          let previousLimit = 0;
 
           if (!BRACKETS || BRACKETS.length === 0) {
              duty = Math.ceil(baseTtc / 100) * 1.0;
           } else {
-            for (const bracket of BRACKETS) {
-                let bracketCap = bracket.up_to === null ? Infinity : bracket.up_to;
-                let bracketSize = bracketCap - previousLimit;
-                let applicableAmount = Math.min(remaining, bracketSize);
-                
-                if (applicableAmount > 0) {
-                    let units_100da = Math.ceil(applicableAmount / 100);
-                    duty += units_100da * bracket.rate_per_100da;
-                    remaining -= applicableAmount;
-                    previousLimit = bracketCap;
-                }
-                if (remaining <= 0) break;
+            // Find the applicable rate based on the total amount (Tiered System)
+            let applicableRate = 0;
+            const bracket = BRACKETS.find((b: any) => b.up_to === null || baseTtc <= b.up_to);
+            
+            if (bracket) {
+                applicableRate = bracket.rate_per_100da;
+            } else {
+                applicableRate = BRACKETS[BRACKETS.length - 1].rate_per_100da;
             }
+
+            // Calculate duty: 1 DA per 100 DA or fraction thereof
+            const units_100da = Math.ceil(baseTtc / 100);
+            duty = units_100da * applicableRate;
           }
 
           if (duty < MIN_DUTY) duty = MIN_DUTY;

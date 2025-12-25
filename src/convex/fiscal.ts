@@ -141,59 +141,29 @@ export function calculateStampDuty(
   }
 
   let duty = 0;
-  let remaining = amountTtcBeforeStamp;
-  let previousLimit = 0;
 
   // If no brackets defined, fallback to simple 1% (should not happen if config is valid)
   if (!BRACKETS || BRACKETS.length === 0) {
      duty = Math.ceil(amountTtcBeforeStamp / 100) * 1.0;
   } else {
-    for (const bracket of BRACKETS) {
-        // Validate bracket structure
-        if (typeof bracket.rate_per_100da !== 'number') {
-            throw new Error("Invalid stamp duty bracket: missing rate");
-        }
-
-        // Determine the amount applicable in this bracket
-        // The bracket.up_to is the cumulative upper limit.
-        // The amount in this bracket is min(remaining, (bracket.up_to - previousLimit))
-        // But simpler: we just take the chunk that fits in this bracket.
-        
-        let bracketCap = bracket.up_to === null ? Infinity : bracket.up_to;
-        // let amountInBracket = 0;
-        
-        // If we are past this bracket (shouldn't happen if we iterate correctly and subtract)
-        // Actually, let's use the logic:
-        // We need to slice the total amount into chunks defined by brackets.
-        // Example: Brackets [30k, 100k, null]
-        // Amount 150k.
-        // Chunk 1: 0 to 30k -> 30k. Rate 1.
-        // Chunk 2: 30k to 100k -> 70k. Rate 1.5.
-        // Chunk 3: 100k to 150k -> 50k. Rate 2.
-        
-        // However, the prompt algorithm says:
-        // applicable_amount = min(remaining, bracket.up_to or remaining) -- wait, bracket.up_to is usually cumulative total?
-        // "up_to": 30000.0 usually means "for the portion of amount <= 30000".
-        // If the prompt implies `up_to` is the *size* of the bracket, that's one thing.
-        // But usually tax brackets are defined by cumulative thresholds.
-        // Let's assume `up_to` is the cumulative threshold (e.g. 0-30000, 30001-100000).
-        
-        // Let's calculate the size of this bracket relative to the previous one.
-        let bracketSize = bracketCap - previousLimit;
-        
-        let applicableAmount = Math.min(remaining, bracketSize);
-        
-        // let amountInBracket = 0; // Unused
-
-        if (applicableAmount > 0) {
-            let units_100da = Math.ceil(applicableAmount / 100);
-            duty += units_100da * bracket.rate_per_100da;
-            remaining -= applicableAmount;
-            previousLimit = bracketCap;
-        }
-        
-        if (remaining <= 0) break;
+    // Find the applicable rate based on the total amount (Tiered System)
+    // The rate applies to the ENTIRE amount, not just the portion in the bracket.
+    let applicableRate = 0;
+    
+    // Find the first bracket that covers the amount
+    const bracket = BRACKETS.find(b => b.up_to === null || amountTtcBeforeStamp <= b.up_to);
+    
+    if (bracket) {
+        applicableRate = bracket.rate_per_100da;
+    } else {
+        // Fallback if no bracket matches (e.g. if last bracket is not null/infinity)
+        // Should use the rate of the last bracket
+        applicableRate = BRACKETS[BRACKETS.length - 1].rate_per_100da;
     }
+
+    // Calculate duty: 1 DA per 100 DA or fraction thereof
+    const units_100da = Math.ceil(amountTtcBeforeStamp / 100);
+    duty = units_100da * applicableRate;
   }
 
   if (duty < MIN_DUTY) duty = MIN_DUTY;
