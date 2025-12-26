@@ -61,8 +61,8 @@ export default function InvoiceCreate() {
     items: z.array(z.object({
       productId: z.string().optional(),
       description: z.string(),
-      quantity: z.number(),
-      unitPrice: z.number(),
+      quantity: z.number().min(0),
+      unitPrice: z.number().min(0),
       discountRate: z.number().min(0).max(100).optional(),
       tvaRate: z.number(),
       lineTotal: z.number(),
@@ -219,10 +219,10 @@ export default function InvoiceCreate() {
     form.setValue("items", items.map(i => ({
       productId: i.productId,
       description: i.description,
-      quantity: parseFloat(i.quantity as string) || 0,
-      unitPrice: parseFloat(i.unitPrice as string) || 0,
-      discountRate: parseFloat(i.discountRate as string) || 0,
-      tvaRate: parseFloat(i.tvaRate as string) || 0,
+      quantity: Number(i.quantity) || 0,
+      unitPrice: Number(i.unitPrice) || 0,
+      discountRate: Number(i.discountRate) || 0,
+      tvaRate: Number(i.tvaRate) || 0,
       lineTotal: i.lineTotal,
       productType: i.productType
     })));
@@ -243,11 +243,11 @@ export default function InvoiceCreate() {
 
     items.forEach((item) => {
       // Replicate backend logic for preview
-      const quantity = parseFloat(item.quantity as string) || 0;
-      const unitPrice = parseFloat(item.unitPrice as string) || 0;
-      const discountRate = parseFloat(item.discountRate as string) || 0;
+      const quantity = Number(item.quantity) || 0;
+      const unitPrice = Number(item.unitPrice) || 0;
+      const discountRate = Number(item.discountRate) || 0;
       // Force 0 TVA for AE in preview
-      const tvaRate = business?.type === "auto_entrepreneur" ? 0 : (parseFloat(item.tvaRate as string) || 0);
+      const tvaRate = business?.type === "auto_entrepreneur" ? 0 : (Number(item.tvaRate) || 0);
 
       const basePrice = unitPrice * quantity;
       const discountAmount = Math.round((basePrice * (discountRate / 100) + Number.EPSILON) * 100) / 100;
@@ -331,20 +331,23 @@ export default function InvoiceCreate() {
         stampDutyAmount,
         totalTtc,
         items: items.map(item => {
-            const quantity = parseFloat(item.quantity as string) || 0;
-            const unitPrice = parseFloat(item.unitPrice as string) || 0;
-            const discountRate = parseFloat(item.discountRate as string) || 0;
-            const tvaRate = parseFloat(item.tvaRate as string) || 0;
+            const quantity = Number(item.quantity) || 0;
+            const unitPrice = Number(item.unitPrice) || 0;
+            const discountRate = Number(item.discountRate) || 0;
+            const tvaRate = Number(item.tvaRate) || 0;
+            const lineTotal = Number(item.lineTotal) || 0;
             
             return {
-                ...item,
+                productId: (item.productId && item.productId !== "") ? item.productId as Id<"products"> : undefined,
+                description: item.description || "",
                 quantity,
                 unitPrice,
                 discountRate,
                 tvaRate,
-                productId: (item.productId && item.productId !== "") ? item.productId as Id<"products"> : undefined,
-                lineTotalHt: item.lineTotal,
-                lineTotalTtc: item.lineTotal * (1 + tvaRate/100)
+                lineTotal,
+                lineTotalHt: lineTotal,
+                lineTotalTtc: lineTotal * (1 + tvaRate/100),
+                productType: item.productType || "service",
             };
         }),
         userAgent: navigator.userAgent,

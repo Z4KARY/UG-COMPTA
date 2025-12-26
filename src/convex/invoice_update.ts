@@ -97,75 +97,11 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
     // Prepare new items data if items are provided
     let newItemsData: any[] = [];
     
-    if (items) {
-        // Server-side calculation to ensure fiscal compliance
-        let calculatedSubtotalHt = 0;
-        let calculatedTotalTva = 0;
-        let calculatedDiscountTotal = 0;
+    // Check if payment method is changing
+    const paymentMethodChanged = cleanFields.paymentMethod !== undefined && cleanFields.paymentMethod !== invoice.paymentMethod;
 
-        // Auto-Entrepreneur Logic Enforcement: NO VAT
-        const isAE = business.type === "auto_entrepreneur";
-
-        for (const item of items) {
-            // Force TVA to 0 for Auto-Entrepreneur
-            const effectiveTvaRate = isAE ? 0 : item.tvaRate;
-
-            let calculation;
-            try {
-                calculation = calculateLineItem(
-                    item.quantity,
-                    item.unitPrice,
-                    item.discountRate || 0,
-                    effectiveTvaRate
-                );
-            } catch (e: any) {
-                throw new Error(`Error calculating item "${item.description}": ${e.message}`);
-            }
-            const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculation;
-
-            calculatedSubtotalHt += lineTotalHt;
-            calculatedTotalTva += tvaAmount;
-            calculatedDiscountTotal += discountAmount;
-
-            // Explicitly construct itemData to ensure no extra fields are passed
-            // and to ensure type safety against the schema
-            const itemData: any = {
-                invoiceId: id,
-                productId: item.productId,
-                description: item.description,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                discountRate: item.discountRate,
-                tvaRate: effectiveTvaRate,
-                productType: item.productType || "service",
-                
-                // Calculated fields
-                discountAmount,
-                tvaAmount,
-                lineTotal: lineTotalHt, // Using HT as lineTotal
-                lineTotalHt,
-                lineTotalTtc,
-            };
-
-            // Sanitize itemData
-            Object.keys(itemData).forEach(key => {
-                if (itemData[key] === undefined) {
-                    delete itemData[key];
-                }
-            });
-            
-            newItemsData.push(itemData);
-        }
-
-        // Round totals
-        calculatedSubtotalHt = Math.round((calculatedSubtotalHt + Number.EPSILON) * 100) / 100;
-        calculatedTotalTva = Math.round((calculatedTotalTva + Number.EPSILON) * 100) / 100;
-        calculatedDiscountTotal = Math.round((calculatedDiscountTotal + Number.EPSILON) * 100) / 100;
-
-        const totalBeforeStamp = calculatedSubtotalHt + calculatedTotalTva;
-
-        // Fetch Fiscal Parameters (Stamp Duty) if needed
-        // We need this to recalculate stamp duty if items changed
+    if (items || paymentMethodChanged) {
+        // Fetch Fiscal Parameters (Stamp Duty)
         let stampDutyConfig: StampDutyConfig = FISCAL_CONSTANTS.STAMP_DUTY;
         
         const businessParam = await ctx.db
@@ -189,24 +125,108 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
             }
         }
 
-        const paymentMethod = cleanFields.paymentMethod !== undefined ? cleanFields.paymentMethod : invoice.paymentMethod;
-        
-        const stampDutyAmount = calculateStampDuty(
-            totalBeforeStamp, 
-            paymentMethod || "OTHER",
-            stampDutyConfig
-        );
-
-        const finalTotalTtc = totalBeforeStamp + stampDutyAmount;
-
-        // Update cleanFields with calculated totals
-        cleanFields.subtotalHt = calculatedSubtotalHt;
-        cleanFields.totalHt = calculatedSubtotalHt; // Legacy alias
-        cleanFields.discountTotal = calculatedDiscountTotal;
-        cleanFields.totalTva = calculatedTotalTva;
-        cleanFields.stampDutyAmount = stampDutyAmount;
-        cleanFields.totalTtc = finalTotalTtc;
-        cleanFields.timbre = stampDutyAmount > 0;
+        if (items) {
+            // Server-side calculation to ensure fiscal compliance
+            let calculatedSubtotalHt = 0;
+            let calculatedTotalTva = 0;
+            let calculatedDiscountTotal = 0;
+    
+            // Auto-Entrepreneur Logic Enforcement: NO VAT
+            const isAE = business.type === "auto_entrepreneur";
+    
+            for (const item of items) {
+                // Force TVA to 0 for Auto-Entrepreneur
+                const effectiveTvaRate = isAE ? 0 : item.tvaRate;
+    
+                let calculation;
+                try {
+                    calculation = calculateLineItem(
+                        item.quantity,
+                        item.unitPrice,
+                        item.discountRate || 0,
+                        effectiveTvaRate
+                    );
+                } catch (e: any) {
+                    throw new Error(`Error calculating item "${item.description}": ${e.message}`);
+                }
+                const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculation;
+    
+                calculatedSubtotalHt += lineTotalHt;
+                calculatedTotalTva += tvaAmount;
+                calculatedDiscountTotal += discountAmount;
+    
+                // Explicitly construct itemData to ensure no extra fields are passed
+                // and to ensure type safety against the schema
+                const itemData: any = {
+                    invoiceId: id,
+                    productId: item.productId,
+                    description: item.description,
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice,
+                    discountRate: item.discountRate,
+                    tvaRate: effectiveTvaRate,
+                    productType: item.productType || "service",
+                    
+                    // Calculated fields
+                    discountAmount,
+                    tvaAmount,
+                    lineTotal: lineTotalHt, // Using HT as lineTotal
+                    lineTotalHt,
+                    lineTotalTtc,
+                };
+    
+                // Sanitize itemData
+                Object.keys(itemData).forEach(key => {
+                    if (itemData[key] === undefined) {
+                        delete itemData[key];
+                    }
+                });
+                
+                newItemsData.push(itemData);
+            }
+    
+            // Round totals
+            calculatedSubtotalHt = Math.round((calculatedSubtotalHt + Number.EPSILON) * 100) / 100;
+            calculatedTotalTva = Math.round((calculatedTotalTva + Number.EPSILON) * 100) / 100;
+            calculatedDiscountTotal = Math.round((calculatedDiscountTotal + Number.EPSILON) * 100) / 100;
+    
+            const totalBeforeStamp = calculatedSubtotalHt + calculatedTotalTva;
+    
+            const paymentMethod = cleanFields.paymentMethod !== undefined ? cleanFields.paymentMethod : invoice.paymentMethod;
+            
+            const stampDutyAmount = calculateStampDuty(
+                totalBeforeStamp, 
+                paymentMethod || "OTHER",
+                stampDutyConfig
+            );
+    
+            const finalTotalTtc = totalBeforeStamp + stampDutyAmount;
+    
+            // Update cleanFields with calculated totals
+            cleanFields.subtotalHt = calculatedSubtotalHt;
+            cleanFields.totalHt = calculatedSubtotalHt; // Legacy alias
+            cleanFields.discountTotal = calculatedDiscountTotal;
+            cleanFields.totalTva = calculatedTotalTva;
+            cleanFields.stampDutyAmount = stampDutyAmount;
+            cleanFields.totalTtc = finalTotalTtc;
+            cleanFields.timbre = stampDutyAmount > 0;
+        } else if (paymentMethodChanged) {
+            // Recalculate stamp duty only (items not changed)
+            const subtotalHt = invoice.subtotalHt;
+            const totalTva = invoice.totalTva;
+            const totalBeforeStamp = subtotalHt + totalTva;
+            
+            const newPaymentMethod = cleanFields.paymentMethod;
+            const stampDutyAmount = calculateStampDuty(
+                totalBeforeStamp, 
+                newPaymentMethod || "OTHER",
+                stampDutyConfig
+            );
+            
+            cleanFields.stampDutyAmount = stampDutyAmount;
+            cleanFields.totalTtc = totalBeforeStamp + stampDutyAmount;
+            cleanFields.timbre = stampDutyAmount > 0;
+        }
     }
 
     // Backfill other required fields to satisfy schema validation
