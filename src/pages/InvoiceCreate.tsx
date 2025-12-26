@@ -355,9 +355,12 @@ export default function InvoiceCreate() {
       };
 
       if (isEditMode && id) {
+        // Remove fields not allowed in update mutation
+        const { businessId, totalHt, ...updateData } = invoiceData;
+
         await updateInvoice({
           id: id as Id<"invoices">,
-          ...invoiceData,
+          ...updateData,
           status: submitStatus === "draft" ? "draft" : "issued", // Ensure status is passed correctly
         });
         toast.success(t("invoiceCreate.success.updated") || "Invoice updated successfully");
