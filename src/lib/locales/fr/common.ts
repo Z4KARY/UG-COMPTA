@@ -53,6 +53,8 @@ export const common = {
     "auth.or": "Ou",
     "auth.error.incorrectCode": "Le code de vérification entré est incorrect.",
     "auth.error.failedToSend": "Échec de l'envoi du code de vérification. Veuillez réessayer.",
+    "common.cancel": "Annuler",
+    "common.delete": "Supprimer",
     
     // Invoices
     "invoices.title": "Factures & Devis",

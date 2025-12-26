@@ -19,6 +19,7 @@ export const documents = {
     "invoices.empty": "No invoices found.",
     "invoices.view": "View",
     "invoices.deleteConfirm": "Are you sure you want to delete this invoice? This action cannot be undone.",
+    "invoices.deleteConfirmTitle": "Delete Invoice?",
     "invoices.deleteSuccess": "Invoice deleted",
     "invoices.deleteError": "Failed to delete invoice",
     "invoices.status.paid_label": "Paid",

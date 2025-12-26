@@ -33,6 +33,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Invoices() {
   const { t } = useLanguage();
@@ -49,14 +59,24 @@ export default function Invoices() {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
 
-  const handleDelete = async (id: Id<"invoices">) => {
-    if (confirm(t("invoices.deleteConfirm"))) {
-      try {
-        await deleteInvoice({ id });
-        toast.success(t("invoices.deleteSuccess"));
-      } catch (error) {
-        toast.error(t("invoices.deleteError"));
-      }
+  // Delete Dialog State
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Id<"invoices"> | null>(null);
+
+  const confirmDelete = (id: Id<"invoices">) => {
+    console.log("Confirm delete for invoice:", id);
+    setInvoiceToDelete(id);
+  };
+
+  const handleDelete = async () => {
+    if (!invoiceToDelete) return;
+    console.log("Deleting invoice:", invoiceToDelete);
+    try {
+      await deleteInvoice({ id: invoiceToDelete });
+      toast.success(t("invoices.deleteSuccess") === "invoices.deleteSuccess" ? "Invoice deleted successfully" : t("invoices.deleteSuccess"));
+    } catch (error) {
+      toast.error(t("invoices.deleteError") === "invoices.deleteError" ? "Failed to delete invoice" : t("invoices.deleteError"));
+    } finally {
+      setInvoiceToDelete(null);
     }
   };
 
@@ -220,7 +240,11 @@ export default function Invoices() {
                   <TableRow key={invoice._id}>
                     <TableCell className="hidden md:table-cell">
                       <Badge variant="outline" className={`capitalize whitespace-nowrap ${getTypeColor(invoice.type || 'invoice')}`}>
-                        {t(`invoiceForm.type.${invoice.type || 'invoice'}` as any)}
+                        {(() => {
+                            const key = `invoiceForm.type.${invoice.type || 'invoice'}`;
+                            const label = t(key as any);
+                            return label === key ? (invoice.type || 'invoice').replace('_', ' ').toUpperCase() : label;
+                        })()}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-medium whitespace-nowrap text-xs sm:text-sm">
@@ -240,7 +264,11 @@ export default function Invoices() {
                         variant="outline"
                         className={`${getStatusColor(invoice.status)} text-[10px] sm:text-xs px-1 sm:px-2`}
                       >
-                        {t(`invoices.status.${invoice.status}` as any) || invoice.status.toUpperCase()}
+                        {(() => {
+                            const key = `invoices.status.${invoice.status}`;
+                            const label = t(key as any);
+                            return label === key ? invoice.status.toUpperCase() : label;
+                        })()}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -252,7 +280,10 @@ export default function Invoices() {
                               variant="ghost" 
                               size="icon" 
                               className="h-8 w-8 text-destructive hover:text-destructive hidden sm:inline-flex"
-                              onClick={() => handleDelete(invoice._id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                confirmDelete(invoice._id);
+                              }}
                           >
                               <Trash2 className="h-4 w-4" />
                           </Button>
@@ -299,6 +330,23 @@ export default function Invoices() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!invoiceToDelete} onOpenChange={(open) => !open && setInvoiceToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("invoices.deleteConfirmTitle") === "invoices.deleteConfirmTitle" ? "Are you sure?" : t("invoices.deleteConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("invoices.deleteConfirm") === "invoices.deleteConfirm" ? "This action cannot be undone. This will permanently delete the invoice." : t("invoices.deleteConfirm")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel") || "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t("common.delete") || "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }

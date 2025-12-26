@@ -53,4 +53,6 @@ export const common = {
     "auth.or": "Or",
     "auth.error.incorrectCode": "The verification code you entered is incorrect.",
     "auth.error.failedToSend": "Failed to send verification code. Please try again.",
+    "common.cancel": "Cancel",
+    "common.delete": "Delete",
 };

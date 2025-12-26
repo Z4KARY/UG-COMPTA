@@ -16,6 +16,7 @@ export const documents = {
     "invoices.empty": "Aucune facture trouvée.",
     "invoices.view": "Voir",
     "invoices.deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette facture ? Cette action est irréversible.",
+    "invoices.deleteConfirmTitle": "Supprimer la facture ?",
     "invoices.deleteSuccess": "Facture supprimée",
     "invoices.deleteError": "Échec de la suppression",
     "invoices.status.paid_label": "Payée",

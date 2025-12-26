@@ -1,10 +1,12 @@
-<Input
-    type="number"
-    min="0"
-    step="0.01"
-    value={item.unitPrice}
-    onChange={(e) =>
-    handleItemChange(index, "unitPrice", e.target.value)
-    }
-    placeholder="0.00"
-/>
+function AlertDialogPortal({
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
+  return (
+    <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
+  )
+}
+
+const confirmDelete = (id: Id<"invoices">) => {
+  console.log("Confirm delete for invoice:", id);
+  setInvoiceToDelete(id);
+};
