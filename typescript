@@ -1,13 +1,29 @@
-useEffect(() => {
-  form.setValue("items", items.map(i => ({
-    // ...
-    unitPrice: parseFloat(i.unitPrice as string) || 0,
-    // ...
-  })));
-}, [items, form]);
+import { requireBusinessAccess } from "./permissions";
 
-items: z.array(z.object({
-  // ...
-  unitPrice: z.number(),
-  // ...
-})),
+export type StampDutyBracket = { ... };
+export type StampDutyConfig = { ... };
+export const FISCAL_CONSTANTS = { ... };
+export function calculateStampDuty(...) { ... }
+
+// Fetch Fiscal Parameters (Stamp Duty) if needed
+// We need this to recalculate stamp duty if items changed
+let stampDutyConfig: StampDutyConfig = FISCAL_CONSTANTS.STAMP_DUTY;
+        
+const businessParam = await ctx.db
+    .query("fiscalParameters")
+    .withIndex("by_business_and_code", (q) => 
+    q.eq("businessId", invoice.businessId).eq("code", "STAMP_DUTY")
+    )
+    .first();
+
+const cleanFields: any = { ...fields };
+Object.keys(cleanFields).forEach(key => {
+    if (cleanFields[key] === undefined) {
+        delete cleanFields[key];
+    }
+});
+
+const itemData: any = {
+    invoiceId: id,
+    // ...
+};

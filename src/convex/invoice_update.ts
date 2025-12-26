@@ -1,6 +1,6 @@
 import { MutationCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import { calculateLineItem } from "./fiscal";
+import { calculateLineItem, calculateStampDuty, FISCAL_CONSTANTS, StampDutyConfig } from "./fiscal";
 import { internal } from "./_generated/api";
 import { requireBusinessAccess } from "./permissions";
 import { decrementInvoiceCounterIfLast } from "./invoice_utils";
@@ -94,6 +94,121 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
          cleanFields.status = "draft";
     }
 
+    // Prepare new items data if items are provided
+    let newItemsData: any[] = [];
+    
+    if (items) {
+        // Server-side calculation to ensure fiscal compliance
+        let calculatedSubtotalHt = 0;
+        let calculatedTotalTva = 0;
+        let calculatedDiscountTotal = 0;
+
+        // Auto-Entrepreneur Logic Enforcement: NO VAT
+        const isAE = business.type === "auto_entrepreneur";
+
+        for (const item of items) {
+            // Force TVA to 0 for Auto-Entrepreneur
+            const effectiveTvaRate = isAE ? 0 : item.tvaRate;
+
+            let calculation;
+            try {
+                calculation = calculateLineItem(
+                    item.quantity,
+                    item.unitPrice,
+                    item.discountRate || 0,
+                    effectiveTvaRate
+                );
+            } catch (e: any) {
+                throw new Error(`Error calculating item "${item.description}": ${e.message}`);
+            }
+            const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculation;
+
+            calculatedSubtotalHt += lineTotalHt;
+            calculatedTotalTva += tvaAmount;
+            calculatedDiscountTotal += discountAmount;
+
+            // Explicitly construct itemData to ensure no extra fields are passed
+            // and to ensure type safety against the schema
+            const itemData: any = {
+                invoiceId: id,
+                productId: item.productId,
+                description: item.description,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                discountRate: item.discountRate,
+                tvaRate: effectiveTvaRate,
+                productType: item.productType || "service",
+                
+                // Calculated fields
+                discountAmount,
+                tvaAmount,
+                lineTotal: lineTotalHt, // Using HT as lineTotal
+                lineTotalHt,
+                lineTotalTtc,
+            };
+
+            // Sanitize itemData
+            Object.keys(itemData).forEach(key => {
+                if (itemData[key] === undefined) {
+                    delete itemData[key];
+                }
+            });
+            
+            newItemsData.push(itemData);
+        }
+
+        // Round totals
+        calculatedSubtotalHt = Math.round((calculatedSubtotalHt + Number.EPSILON) * 100) / 100;
+        calculatedTotalTva = Math.round((calculatedTotalTva + Number.EPSILON) * 100) / 100;
+        calculatedDiscountTotal = Math.round((calculatedDiscountTotal + Number.EPSILON) * 100) / 100;
+
+        const totalBeforeStamp = calculatedSubtotalHt + calculatedTotalTva;
+
+        // Fetch Fiscal Parameters (Stamp Duty) if needed
+        // We need this to recalculate stamp duty if items changed
+        let stampDutyConfig: StampDutyConfig = FISCAL_CONSTANTS.STAMP_DUTY;
+        
+        const businessParam = await ctx.db
+            .query("fiscalParameters")
+            .withIndex("by_business_and_code", (q) => 
+            q.eq("businessId", invoice.businessId).eq("code", "STAMP_DUTY")
+            )
+            .first();
+        
+        if (businessParam) {
+            stampDutyConfig = businessParam.value as StampDutyConfig;
+        } else {
+            const globalParam = await ctx.db
+                .query("fiscalParameters")
+                .withIndex("by_business_and_code", (q) => 
+                q.eq("businessId", undefined).eq("code", "STAMP_DUTY")
+                )
+                .first();
+            if (globalParam) {
+                stampDutyConfig = globalParam.value as StampDutyConfig;
+            }
+        }
+
+        const paymentMethod = cleanFields.paymentMethod !== undefined ? cleanFields.paymentMethod : invoice.paymentMethod;
+        
+        const stampDutyAmount = calculateStampDuty(
+            totalBeforeStamp, 
+            paymentMethod || "OTHER",
+            stampDutyConfig
+        );
+
+        const finalTotalTtc = totalBeforeStamp + stampDutyAmount;
+
+        // Update cleanFields with calculated totals
+        cleanFields.subtotalHt = calculatedSubtotalHt;
+        cleanFields.totalHt = calculatedSubtotalHt; // Legacy alias
+        cleanFields.discountTotal = calculatedDiscountTotal;
+        cleanFields.totalTva = calculatedTotalTva;
+        cleanFields.stampDutyAmount = stampDutyAmount;
+        cleanFields.totalTtc = finalTotalTtc;
+        cleanFields.timbre = stampDutyAmount > 0;
+    }
+
     // Backfill other required fields to satisfy schema validation
     // We use invoiceAny because TypeScript expects these fields to exist on the Doc type, 
     // but they might be missing in the actual DB document for legacy data.
@@ -149,53 +264,8 @@ export async function updateInvoiceLogic(ctx: MutationCtx, args: any, userId: Id
       // Parallel delete for performance
       await Promise.all(existingItems.map(item => ctx.db.delete(item._id)));
 
-      // Prepare new items
-      const newItemsData = [];
-      for (const item of items) {
-        let calculation;
-        try {
-            calculation = calculateLineItem(
-                item.quantity,
-                item.unitPrice,
-                item.discountRate || 0,
-                item.tvaRate
-            );
-        } catch (e: any) {
-            throw new Error(`Error calculating item "${item.description}": ${e.message}`);
-        }
-        const { discountAmount, lineTotalHt, tvaAmount, lineTotalTtc } = calculation;
-
-        // Explicitly construct itemData to ensure no extra fields are passed
-        // and to ensure type safety against the schema
-        const itemData: any = {
-          invoiceId: id,
-          productId: item.productId,
-          description: item.description,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          discountRate: item.discountRate,
-          tvaRate: item.tvaRate,
-          productType: item.productType || "service",
-          
-          // Calculated fields
-          discountAmount,
-          tvaAmount,
-          lineTotal: lineTotalHt, // Using HT as lineTotal
-          lineTotalHt,
-          lineTotalTtc,
-        };
-
-        // Sanitize itemData
-        Object.keys(itemData).forEach(key => {
-            if (itemData[key] === undefined) {
-                delete itemData[key];
-            }
-        });
-        
-        newItemsData.push(itemData);
-      }
-
       // Parallel insert for performance
+      // newItemsData was prepared above
       await Promise.all(newItemsData.map(data => ctx.db.insert("invoiceItems", data)));
     }
 
