@@ -19,6 +19,7 @@ export const invoiceForm = {
     "invoiceForm.payment.other": "أخرى",
     "invoiceForm.details.language": "لغة المستند",
     "invoiceForm.details.selectLanguage": "اختر اللغة",
+    "invoiceForm.details.languageNote": "سيؤدي هذا إلى تحديث تسميات الفاتورة (العناوين، المجاميع، إلخ) إلى اللغة المختارة.",
     "invoiceForm.language.fr": "الفرنسية",
     "invoiceForm.language.ar": "العربية",
     "invoiceForm.language.en": "الإنجليزية",

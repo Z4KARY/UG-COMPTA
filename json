@@ -1,3 +1,3 @@
 {
-  "plan": "1. Verify the fix for invoice editing and fiscal recalculation.\n2. Review the business creation schema and logic to ensure validation consistency.\n3. Check localization files for any missing keys or discrepancies."
+  "plan": "1. Run type check to verify the fix for InvoiceDocument.tsx.\n2. If successful, confirm to the user that the invoice translation logic and display are working correctly."
 }

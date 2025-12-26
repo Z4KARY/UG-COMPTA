@@ -9,10 +9,10 @@
  * -----------------------------------------------------------------------------
  */
 
-import { INVOICE_LABELS, InvoiceLanguage } from "@/lib/invoice-templates";
 import { numberToWords } from "@/lib/numberToWords";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { translations } from "@/lib/translations";
 
 interface InvoiceDocumentProps {
   invoice: any;
@@ -22,8 +22,13 @@ interface InvoiceDocumentProps {
 }
 
 export function InvoiceDocument({ invoice, business, items, language = "fr" }: InvoiceDocumentProps) {
-  const lang = (language in INVOICE_LABELS ? language : "fr") as InvoiceLanguage;
-  const labels = INVOICE_LABELS[lang];
+  const lang = (language === "fr" || language === "en" || language === "ar") ? language : "fr";
+  // Use the central translations object
+  const t = (key: string) => {
+    const currentTranslations = translations[lang] as Record<string, string>;
+    return currentTranslations[key] || key;
+  };
+  
   const isRTL = lang === "ar";
 
   const primaryColor = business?.primaryColor || "#0f172a";
@@ -109,8 +114,8 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                 {business?.tradeName && <p>{business.tradeName}</p>}
                 <p className="whitespace-pre-line">{business?.address}</p>
                 <p>{business?.city}, Algeria</p>
-                {business?.phone && <p>{labels.tel}: {business.phone}</p>}
-                {business?.email && <p>{labels.email}: {business.email}</p>}
+                {business?.phone && <p>{t("invoiceDocument.tel")}: {business.phone}</p>}
+                {business?.email && <p>{t("invoiceDocument.email")}: {business.email}</p>}
 
                 <div className={cn(
                   "mt-4 pt-2 text-xs text-gray-500 space-y-0.5 border-t border-gray-100 print:mt-1 print:pt-1 print:border-gray-200",
@@ -120,16 +125,16 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                   {isAE ? (
                     <>
                       <p>Auto-Entrepreneur: {business?.autoEntrepreneurCardNumber || "N/A"}</p>
-                      <p>{labels.sellerNif}: {business?.nif || "N/A"} | {labels.sellerNis}: {business?.nis || "N/A"}</p>
+                      <p>{t("invoiceDocument.sellerNif")}: {business?.nif || "N/A"} | {t("invoiceDocument.sellerNis")}: {business?.nis || "N/A"}</p>
                       <p>CASNOS: {business?.ssNumber || "N/A"}</p>
                     </>
                   ) : (
                     <>
-                      <p>{labels.sellerRc}: {business?.rc || "N/A"}</p>
-                      <p>{labels.sellerNif}: {business?.nif || "N/A"} | {labels.sellerNis}: {business?.nis || "N/A"}</p>
-                      <p>{labels.sellerAi}: {business?.ai || "N/A"}</p>
+                      <p>{t("invoiceDocument.sellerRc")}: {business?.rc || "N/A"}</p>
+                      <p>{t("invoiceDocument.sellerNif")}: {business?.nif || "N/A"} | {t("invoiceDocument.sellerNis")}: {business?.nis || "N/A"}</p>
+                      <p>{t("invoiceDocument.sellerAi")}: {business?.ai || "N/A"}</p>
                       {business?.capital && (
-                        <p>{labels.sellerCapital}: {business.capital.toLocaleString()} {business.currency}</p>
+                        <p>{t("invoiceDocument.sellerCapital")}: {business.capital.toLocaleString()} {business.currency}</p>
                       )}
                     </>
                   )}
@@ -148,7 +153,12 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                   isBold ? "font-black text-5xl" : "",
                   isElegant ? "font-serif font-normal italic text-3xl" : ""
                 )}>
-                  {invoice.type === "quote" ? labels.quote : invoice.type === "credit_note" ? labels.credit_note : labels.invoice}
+                  {invoice.type === "quote" ? t("invoiceDocument.quote") : 
+                   invoice.type === "credit_note" ? t("invoiceDocument.credit_note") : 
+                   invoice.type === "pro_forma" ? t("invoiceDocument.pro_forma") :
+                   invoice.type === "delivery_note" ? t("invoiceDocument.delivery_note") :
+                   invoice.type === "sale_order" ? t("invoiceDocument.sale_order") :
+                   t("invoiceDocument.invoice")}
                 </h1>
                 <p className={cn(
                   "text-lg font-medium text-gray-500 mb-4 print:mb-1 print:text-sm",
@@ -157,19 +167,19 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                 )}>#{invoice.invoiceNumber}</p>
 
                 <div className={`grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600 print:text-[10px] print:leading-tight ${isRTL ? "text-right" : "text-right"}`}>
-                  <div className="text-gray-400">{labels.issueDate}</div>
+                  <div className="text-gray-400">{t("invoiceDocument.issueDate")}</div>
                   <div className="font-medium text-gray-900">
                     {new Date(invoice.issueDate).toLocaleDateString("en-GB")}
                   </div>
 
-                  <div className="text-gray-400">{labels.dueDate}</div>
+                  <div className="text-gray-400">{t("invoiceDocument.dueDate")}</div>
                   <div className="font-medium text-gray-900">
                     {new Date(invoice.dueDate).toLocaleDateString("en-GB")}
                   </div>
 
                   {invoice.paymentMethod && (
                     <>
-                      <div className="text-gray-400">{labels.paymentMethod}</div>
+                      <div className="text-gray-400">{t("invoiceDocument.paymentMethod")}</div>
                       <div className="font-medium text-gray-900 capitalize">
                         {invoice.paymentMethod.replace("_", " ").toLowerCase()}
                       </div>
@@ -187,14 +197,14 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                 isClassic ? "bg-white border-2 border-gray-100 rounded-none" :
                 isBold ? "bg-gray-900 text-white rounded-none border-none" :
                 isElegant ? "bg-gray-50 border border-gray-200 rounded-sm" :
-                "bg-gray-50/50 rounded-lg border border-gray-100", // Modern (default)
+                "bg-gray-50/50 rounded-lg border border-gray-100", // Modern
                 "print:p-1 print:bg-transparent print:border-gray-200"
               )}>
                 <h3 className={cn(
                   "text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 print:mb-0.5",
                   isBold && "text-gray-400",
                   isElegant && "font-serif italic text-gray-500"
-                )}>{labels.billTo}</h3>
+                )}>{t("invoiceDocument.billTo")}</h3>
                 <h2 className={cn(
                   "font-bold text-lg text-gray-900 mb-1 print:text-sm print:mb-0",
                   isBold && "text-white text-xl",
@@ -218,10 +228,10 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                     isBold && "border-gray-700 text-gray-400",
                     isElegant && "border-gray-300"
                   )}>
-                    {invoice.customer?.taxId && <span>{labels.sellerNif}: {invoice.customer.taxId}</span>}
-                    {invoice.customer?.rc && <span>{labels.sellerRc}: {invoice.customer.rc}</span>}
-                    {invoice.customer?.ai && <span>{labels.sellerAi}: {invoice.customer.ai}</span>}
-                    {invoice.customer?.nis && <span>{labels.sellerNis}: {invoice.customer.nis}</span>}
+                    {invoice.customer?.taxId && <span>{t("invoiceDocument.sellerNif")}: {invoice.customer.taxId}</span>}
+                    {invoice.customer?.rc && <span>{t("invoiceDocument.sellerRc")}: {invoice.customer.rc}</span>}
+                    {invoice.customer?.ai && <span>{t("invoiceDocument.sellerAi")}: {invoice.customer.ai}</span>}
+                    {invoice.customer?.nis && <span>{t("invoiceDocument.sellerNis")}: {invoice.customer.nis}</span>}
                   </div>
                 </div>
               </div>
@@ -250,7 +260,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                     "bg-gray-50/50", // Modern
                     "print:bg-gray-50"
                   )} style={isBold ? { backgroundColor: primaryColor } : {}}>
-                    {labels.description}
+                    {t("invoiceDocument.description")}
                   </th>
                   <th className={cn(
                     "text-right py-3 print:py-1 font-semibold text-gray-900 w-16",
@@ -261,7 +271,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                     isElegant ? "bg-gray-50 font-serif italic font-normal" :
                     "bg-gray-50/50", // Modern
                     "print:bg-gray-50"
-                  )} style={isBold ? { backgroundColor: primaryColor } : {}}>{labels.qty}</th>
+                  )} style={isBold ? { backgroundColor: primaryColor } : {}}>{t("invoiceDocument.qty")}</th>
                   <th className={cn(
                     "text-right py-3 print:py-1 font-semibold text-gray-900 w-24",
                     // Template styles
@@ -271,7 +281,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                     isElegant ? "bg-gray-50 font-serif italic font-normal" :
                     "bg-gray-50/50", // Modern
                     "print:bg-gray-50"
-                  )} style={isBold ? { backgroundColor: primaryColor } : {}}>{labels.price}</th>
+                  )} style={isBold ? { backgroundColor: primaryColor } : {}}>{t("invoiceDocument.price")}</th>
                   {!isAE && <th className={cn(
                     "text-right py-3 print:py-1 font-semibold text-gray-900 w-16",
                     // Template styles
@@ -281,7 +291,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                     isElegant ? "bg-gray-50 font-serif italic font-normal" :
                     "bg-gray-50/50", // Modern
                     "print:bg-gray-50"
-                  )} style={isBold ? { backgroundColor: primaryColor } : {}}>{labels.vat}</th>}
+                  )} style={isBold ? { backgroundColor: primaryColor } : {}}>{t("invoiceDocument.vat")}</th>}
                   <th className={cn(
                     "text-right py-3 print:py-1 font-semibold text-gray-900 w-24",
                     isRTL ? "pl-2" : "pr-2",
@@ -293,7 +303,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                     "bg-gray-50/50", // Modern
                     "print:bg-gray-50"
                   )} style={isBold ? { backgroundColor: primaryColor } : {}}>
-                    {labels.total}
+                    {t("invoiceDocument.total")}
                   </th>
                 </tr>
               </thead>
@@ -340,7 +350,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                     isElegant ? "font-serif text-gray-800" :
                     "text-yellow-900",
                     "print:text-gray-900"
-                  )}>{labels.notes}</p>
+                  )}>{t("invoiceDocument.notes")}</p>
                   <p>{invoice.notes}</p>
                 </div>
               )}
@@ -349,14 +359,14 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
             <div className="w-full md:w-72 print:w-64 print:ml-auto">
               <div className="space-y-2 print:space-y-0.5">
                 <div className="flex justify-between text-sm text-gray-600 print:text-[10px]">
-                  <span>{labels.subtotal}</span>
+                  <span>{t("invoiceDocument.subtotal")}</span>
                   <span className="font-medium text-gray-900">
                     {subtotalHt.toLocaleString("en-US", { minimumFractionDigits: 2 })} {invoice.currency}
                   </span>
                 </div>
                 {!isAE && (
                   <div className="flex justify-between text-sm text-gray-600 print:text-[10px]">
-                    <span>{labels.vatTotal}</span>
+                    <span>{t("invoiceDocument.vatTotal")}</span>
                     <span className="font-medium text-gray-900">
                       {invoice.totalTva.toLocaleString("en-US", { minimumFractionDigits: 2 })} {invoice.currency}
                     </span>
@@ -364,7 +374,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                 )}
                 {stampDuty > 0 && (
                   <div className="flex justify-between text-sm text-gray-600 print:text-[10px]">
-                    <span>{labels.stampDuty}</span>
+                    <span>{t("invoiceDocument.stampDuty")}</span>
                     <span className="font-medium text-gray-900">
                       {stampDuty.toLocaleString("en-US", { minimumFractionDigits: 2 })} {invoice.currency}
                     </span>
@@ -382,7 +392,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
                     "font-bold text-lg text-gray-900 print:text-sm",
                     isBold && "text-white",
                     isElegant && "font-serif"
-                  )}>{labels.grandTotal}</span>
+                  )}>{t("invoiceDocument.grandTotal")}</span>
                   <div className="text-right">
                     <span className={cn(
                       "block font-bold text-xl text-gray-900 print:text-lg",
@@ -402,7 +412,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
           {/* Amount in Words */}
           <div className={`mb-8 print:mb-2 print:break-inside-avoid flex flex-col ${isRTL ? "items-end text-right" : "items-start text-left"}`}>
-            <p className="text-sm text-gray-500 mb-1 print:text-[10px]">{labels.amountInWords}:</p>
+            <p className="text-sm text-gray-500 mb-1 print:text-[10px]">{t("invoiceDocument.amountInWords")}:</p>
             <p className={cn(
               `text-gray-900 font-medium italic ${isRTL ? "border-r-4 pr-4" : "border-l-4 pl-4"} py-1 print:text-xs`,
               isBold && "font-bold not-italic text-lg",
@@ -415,7 +425,7 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
           {/* Signature & Stamp Section */}
           <div className="flex justify-end mb-8 print:mb-0 print:break-inside-avoid">
             <div className="w-[400px] print:w-[600px] text-center relative">
-              <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-1 print:text-xs">{labels.signature}</p>
+              <p className="text-sm font-semibold text-gray-900 mb-4 print:mb-1 print:text-xs">{t("invoiceDocument.signature")}</p>
               
               {/* Increased height for print as requested (2x scaling) */}
               <div className="h-48 print:h-80 w-full flex items-center justify-center relative">
@@ -449,13 +459,13 @@ export function InvoiceDocument({ invoice, business, items, language = "fr" }: I
 
           {/* Footer */}
           <div className="mt-auto print:mt-1 pt-6 print:pt-1 border-t border-gray-100 text-center text-xs text-gray-400 print:text-[9px] print:break-inside-avoid">
-            <p className="mb-1 print:mb-0">{labels.legalFooter}</p>
+            <p className="mb-1 print:mb-0">{t("invoiceDocument.legalFooter")}</p>
             {isAE ? (
-              <p>{labels.autoEntrepreneur}</p>
+              <p>{t("invoiceDocument.autoEntrepreneur")}</p>
             ) : business?.fiscalRegime === "IFU" || business?.fiscalRegime === "forfaitaire" ? (
-              <p>{labels.flatRate}</p>
+              <p>{t("invoiceDocument.flatRate")}</p>
             ) : null}
-            <p className="mt-2 print:mt-0.5">{labels.thankYou}</p>
+            <p className="mt-2 print:mt-0.5">{t("invoiceDocument.thankYou")}</p>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { Languages, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -17,9 +18,9 @@ import {
 } from "@/components/ui/select";
 
 const LANGUAGE_OPTIONS = [
-  { value: "fr", label: "French" },
+  { value: "fr", label: "Français" },
   { value: "en", label: "English" },
-  { value: "ar", label: "Arabic" },
+  { value: "ar", label: "العربية" },
 ] as const;
 
 interface InvoiceTranslationPanelProps {
@@ -33,6 +34,7 @@ export function InvoiceTranslationPanel({
   invoiceId,
   currentLanguage,
 }: InvoiceTranslationPanelProps) {
+  const { t } = useLanguage();
   const updateInvoice = useMutation(api.invoices.update);
   
   const [targetLanguage, setTargetLanguage] = useState(currentLanguage);
@@ -51,7 +53,7 @@ export function InvoiceTranslationPanel({
         userAgent: navigator.userAgent,
       });
 
-      toast.success(`Invoice language changed to ${LANGUAGE_OPTIONS.find(l => l.value === targetLanguage)?.label}`);
+      toast.success(t("invoiceForm.details.language") + " updated");
     } catch (error: any) {
       console.error("Language update error:", error);
       // Ensure we show the backend error message if available
@@ -73,18 +75,18 @@ export function InvoiceTranslationPanel({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-800">
           <Languages className="h-4 w-4 text-slate-500" />
-          Invoice Language
+          {t("invoiceForm.details.language")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="space-y-2 flex-1">
             <Label className="text-xs uppercase tracking-wider text-slate-500">
-              Display Language
+              {t("invoiceForm.details.selectLanguage")}
             </Label>
             <Select value={targetLanguage} onValueChange={setTargetLanguage}>
               <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Select language" />
+                <SelectValue placeholder={t("invoiceForm.details.selectLanguage")} />
               </SelectTrigger>
               <SelectContent>
                 {LANGUAGE_OPTIONS.map((lang) => (
@@ -95,7 +97,7 @@ export function InvoiceTranslationPanel({
               </SelectContent>
             </Select>
             <p className="text-xs text-slate-500 pt-1">
-              This will update the invoice labels (headers, totals, etc.) to the selected language.
+              {t("invoiceForm.details.languageNote") || "This will update the invoice labels (headers, totals, etc.) to the selected language."}
             </p>
           </div>
 
@@ -109,7 +111,7 @@ export function InvoiceTranslationPanel({
             ) : (
               <Check className="mr-2 h-4 w-4" />
             )}
-            Apply
+            {t("common.actions") || "Apply"}
           </Button>
         </div>
       </CardContent>

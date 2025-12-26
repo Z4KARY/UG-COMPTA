@@ -19,6 +19,7 @@ export const invoiceForm = {
     "invoiceForm.payment.other": "Other",
     "invoiceForm.details.language": "Document Language",
     "invoiceForm.details.selectLanguage": "Select language",
+    "invoiceForm.details.languageNote": "This will update the invoice labels (headers, totals, etc.) to the selected language.",
     "invoiceForm.language.fr": "French",
     "invoiceForm.language.ar": "Arabic",
     "invoiceForm.language.en": "English",

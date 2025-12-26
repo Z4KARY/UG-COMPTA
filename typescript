@@ -1,29 +1,35 @@
-import { requireBusinessAccess } from "./permissions";
-
-export type StampDutyBracket = { ... };
-export type StampDutyConfig = { ... };
-export const FISCAL_CONSTANTS = { ... };
-export function calculateStampDuty(...) { ... }
-
-// Fetch Fiscal Parameters (Stamp Duty) if needed
-// We need this to recalculate stamp duty if items changed
-let stampDutyConfig: StampDutyConfig = FISCAL_CONSTANTS.STAMP_DUTY;
-        
-const businessParam = await ctx.db
-    .query("fiscalParameters")
-    .withIndex("by_business_and_code", (q) => 
-    q.eq("businessId", invoice.businessId).eq("code", "STAMP_DUTY")
-    )
-    .first();
-
-const cleanFields: any = { ...fields };
-Object.keys(cleanFields).forEach(key => {
-    if (cleanFields[key] === undefined) {
-        delete cleanFields[key];
-    }
-});
-
-const itemData: any = {
-    invoiceId: id,
-    // ...
-};
+  ar: {
+    invoice: "فاتورة",
+    quote: "عرض سعر",
+    credit_note: "إشعار دائن",
+    pro_forma: "فاتورة أولية",
+    delivery_note: "وصل تسليم",
+    sale_order: "طلب بيع",
+    issueDate: "تاريخ الإصدار",
+    dueDate: "تاريخ الاستحقاق",
+    paymentMethod: "طريقة الدفع",
+    billTo: "العميل",
+    description: "البيان",
+    qty: "الكمية",
+    price: "السعر",
+    vat: "ر.ق.م",
+    total: "المجموع",
+    subtotal: "المجموع الفرعي",
+    stampDuty: "حق الطابع",
+    vatTotal: "مجموع الرسم",
+    grandTotal: "المجموع الكلي",
+    notes: "ملاحظات",
+    amountInWords: "توقف هذا السند عند مبلغ",
+    legalFooter: "فاتورة محررة طبقا للقانون 04-02 والمرسوم التنفيذي 05-468 المتعلق بالممارسات التجارية في الجزائر.",
+    thankYou: "شكرا لتعاملكم معنا.",
+    autoEntrepreneur: "إعفاء من الرسم على القيمة المضافة - مقاول ذاتي.",
+    flatRate: "إعفاء من الرسم على القيمة المضافة - نظام جزافي.",
+    sellerNif: "ر.ت.ج",
+    sellerRc: "س.ت",
+    sellerAi: "م.ض",
+    sellerNis: "ر.ت.إ",
+    sellerCapital: "رأس المال",
+    tel: "هاتف",
+    email: "بريد إلكتروني",
+    signature: "التوقيع",
+  }
